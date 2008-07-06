@@ -1,20 +1,24 @@
-/**
+/*
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
- *
- *	@version	0.18, 05-Sep-07
+ */
+ 
+/**
+ *	@author	Hanns Holger Rutz
+ *	@version	0.19, 06-Jul-08
  */
 BosqueTimelinePanel {
 	var <view;
 	var <doc;
 	var <jTrailView;
 	var mapUpdTrack;
+	var envTool;
 	
 	// dnd
 	var dragStartX, dragStartY, dragConstrainH, dragConstrainV, dragStartPos, dragStartStake, dragStartTrack, dragValid = false, dragStarted = false;
 	var dragResizeEdge;
 	var ggTrackHeader, ggVolEnv;
 
-  	var trackVScale = 1;
+  	var <trackVScale = 1;
   	
   	var <tool = \move;
   	
@@ -30,8 +34,9 @@ BosqueTimelinePanel {
 		var updTimeline, updSelection, updTransport, updTracks, fntSmall, forest, jPanel, ggScrollPane, view;
 		var updTrackSel, ggVolLab;
 		
-		doc	= argDoc;
-		forest = doc.forest;
+		doc		= argDoc;
+		forest	= doc.forest;
+		envTool	= BosqueEnvTool( doc, this );
 
 		fntSmall = JFont( "Helvetica", 10 );
 //		ggScrollPane = JSCScrollPane( parent, bounds ).resize_( 5 )
@@ -207,21 +212,24 @@ BosqueTimelinePanel {
 	mousePressed { arg e;
 		switch( tool,
 		\move,   { this.prMousePressedMoveResize( e )},
-		\resize, { this.prMousePressedMoveResize( e )}
+		\resize, { this.prMousePressedMoveResize( e )},
+		\env, { envTool.mousePressed( e )}
 		);
 	}
 
 	mouseDragged { arg e;
 		switch( tool,
 		\move,   { this.prMouseDraggedMove( e )},
-		\resize, { this.prMouseDraggedResize( e )}
+		\resize, { this.prMouseDraggedResize( e )},
+		\env, { envTool.mouseDragged( e )}
 		);
 	}
 	
 	mouseReleased { arg e;
 		switch( tool,
 		\move,   { this.prMouseReleasedMove( e )},
-		\resize, { this.prMouseReleasedResize( e )}
+		\resize, { this.prMouseReleasedResize( e )},
+		\env, { envTool.mouseReleased( e )}
 		);
 	}
 	
