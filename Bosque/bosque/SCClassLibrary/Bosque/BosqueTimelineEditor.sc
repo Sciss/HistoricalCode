@@ -6,7 +6,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.27, 22-Jul-08
+ *	@version	0.27, 06-Jul-08
  */
 BosqueTimelineEditor : Object {
 	var <forest;
