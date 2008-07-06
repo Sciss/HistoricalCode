@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #bf0000}
+span.s1 {color: #0000bf}
+span.s2 {color: #bf0000}
+span.s3 {color: #000000}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">---&gt; <span class="s1">KDTree</span> quark by <span class="s1">Dan</span> <span class="s1">Stowell</span></p>
+<p class="p2"><br></p>
+<p class="p1">n = 100000;</p>
+<p class="p1">~data = <span class="s1">Array</span>.fill( n, { <span class="s1">var</span> start = rrand( 0, 2646000 ), stop = start + exprand( 10, 4410000 ).asInteger; [ start, stop ]});</p>
+<p class="p2"><br></p>
+<p class="p1">{ ~tree = <span class="s1">KDTree</span>( ~data )}.bench;<span class="Apple-tab-span">	</span><span class="s2">// 4.713 sec</span></p>
+<p class="p1">{ x = ~tree.rectSearch([44100,44100], [441000,441000]).collect(<span class="s1">_</span>.location) }.bench <span class="s2">// hmmm, not too fast?? 0.412 sec</span></p>
+<p class="p3"><span class="s3">x.size<span class="Apple-tab-span">	</span></span>// 11027</p>
+<p class="p2"><br></p>
+<p class="p1">{ ~trail = <span class="s1">Trail</span>.new; ~trail.addAll( <span class="s1">nil</span>, <span class="s1">Array</span>.fill( n, { <span class="s1">var</span> start = rrand( 0, 2646000 ), stop = start + exprand( 10, 4410000 ).asInteger; <span class="s1">Stake</span>( <span class="s1">Span</span>( start, stop ))}))}.bench; <span class="s2">// 273.854 sec</span></p>
+<p class="p1">{ x = ~trail.getRange( <span class="s1">Span</span>( 44100, 441000 ))}.bench;<span class="Apple-tab-span">	</span><span class="s2">// 84.670 sec</span></p>
+<p class="p1">x.size;<span class="Apple-tab-span">	</span><span class="s2">// 15689</span></p>
+<p class="p2"><br></p>
+<p class="p3">// for n = 100000</p>
+<p class="p1">4.713 / 273.854 * 100<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s2">// 1.7 %</span></p>
+<p class="p1">0.412 / 84.670 * 100<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s2">// 0.5 %</span></p>
+<p class="p2"><br></p>
+<p class="p3">// for n = 10000</p>
+<p class="p1">0.3752987639964 / 1.2267950429959 * 100<span class="Apple-tab-span">	</span><span class="s2">// 30.6 %</span></p>
+<p class="p1">0.043556194003031 / 0.90844967400335 * 100<span class="Apple-tab-span">	</span><span class="s2">// 4.8 %</span></p>
+<p class="p2"><br></p>
+<p class="p3">// for n = 1000</p>
+<p class="p1">0.034367095002381 / 0.075595179994707 * 100<span class="Apple-tab-span">	</span><span class="s2">// 45.5 %</span></p>
+<p class="p1">0.0050090770018869 / 0.0095483069962938 * 100<span class="Apple-tab-span">	</span><span class="s2">// 52.5 %</span></p>
+<p class="p2"><br></p>
+<p class="p3">// for n = 100</p>
+<p class="p1">0.002847757001291 / 0.0052473910036497 * 100<span class="Apple-tab-span">	</span><span class="s2">// 54.3 %</span></p>
+<p class="p1">0.00050337799621047 / 0.00026730399986263 * 100<span class="Apple-tab-span">	</span><span class="s2">// 188.3 %<span class="Apple-converted-space">  </span>***</span></p>
+<p class="p2"><br></p>
+<p class="p3">// for n = 10</p>
+<p class="p1">0.00024873199436115 / 0.00034314399817958 * 100<span class="Apple-tab-span">	</span><span class="s2">// 72.5 %</span></p>
+<p class="p1">0.00010962900705636 / 8.2838996604551e-05 * 100<span class="Apple-tab-span">	</span><span class="s2">// 132.3 %<span class="Apple-converted-space">  </span>***</span></p>
+<p class="p2"><br></p>
+<p class="p1">*** : <span class="s1">Trail</span> is faster</p>
+<p class="p1">--&gt; <span class="s1">this</span> only occurs for range-search when n is in the order of 200-300 or smaller</p>
+<p class="p2"><br></p>
+<p class="p3">////////////// but what if the tree is unbalanced?</p>
+<p class="p2"><br></p>
+<p class="p3"><span class="s3">n = 10000;<span class="Apple-tab-span">	</span></span>// bigger will crash SC!!</p>
+<p class="p1">{ ~tree = <span class="s1">KDTree</span>([]); n.do({ <span class="s1">var</span> start = rrand( 0, 2646000 ), stop = start + exprand( 10, 4410000 ).asInteger; ~tree.add([ start, stop ])})}.bench; <span class="s2">//</span></p>
+<p class="p1">{ x = ~tree.rectSearch([44100,44100], [441000,441000]).collect(<span class="s1">_</span>.location) }.bench <span class="s2">// hmmm, not too fast?? 0.412 sec</span></p>
+<p class="p3"><span class="s3">x.size<span class="Apple-tab-span">	</span></span>// 11027</p>
+</body>
+</html>

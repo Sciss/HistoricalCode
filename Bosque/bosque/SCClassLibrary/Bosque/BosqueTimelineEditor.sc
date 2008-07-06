@@ -1,0 +1,1319 @@
+/*
+ *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
+ *
+ *	Class dependancies: ScissUtil, ScissPlus, BosqueBoxGrid
+ */
+
+/**
+ *	@author	Hanns Holger Rutz
+ *	@version	0.27, 22-Jul-08
+ */
+BosqueTimelineEditor : Object {
+	var <forest;
+	var <winTimeline;
+	var <winMenu;
+	var <winCollections;
+	var <winTransport;
+	var <observer;
+
+	*new {
+		^super.new.prInit;
+	}
+	
+	prInit {
+		forest	= Bosque.default;
+		forest.doWhenSwingBooted({ this.prMakeGUI });
+	}
+	
+	prMakeGUI {
+		var view, view2, updAudioFiles, updTimeline, ggFileList, ggBusList;
+		var fntSmall, fntBig, doc, flow;
+		var ggPlay, ggStop, updTransport, updDirty, updSelectedTracks, updTracks, ggTimelinePanel;
+		var vx, vw, clpseYZoom, ggTabColl, updBusConfigs, ggBusMatrix, ggBusGain, ggBusApply, busSelCol, busSelRow, busConn;
+		var ggPlayPos, taskPlayPos, fTaskPlayPos, fPlayPosStr, ggTrackList, ggVolume, updVolume, clpseVolume;
+		var scrB = JSCWindow.screenBounds;
+		
+		winTimeline = JSCWindow( "Timeline", Rect( 410, 134, scrB.width - 580, scrB.height - 180 )).userCanClose_( false );
+//		ScissUtil.positionOnScreen( winTimeline, 0.333, 0.333 );
+		winCollections = JSCWindow( "Collections", Rect( winTimeline.bounds.right + 10, winTimeline.bounds.bottom - 100, 240, 390 )).userCanClose_( false );
+		winMenu = JSCWindow( "Menu", Rect( winTimeline.bounds.right + 4, winTimeline.bounds.top + winTimeline.bounds.height - 200, 128, 200 ), resizable: false ).userCanClose_( false );
+		winTransport = JSCWindow( "Transport", Rect( winTimeline.bounds.left, winTimeline.bounds.top - 106, 344, 80 ), resizable: false ).userCanClose_( false ); // .alwaysOnTop_( true );
+		observer = BosqueObserver.new;
+//		view = JSCVLayoutView( winCollections, winCollections.view.bounds ).resize_( 5 );
+
+		fntSmall	= JFont( "Lucida Grande", 10 );
+		fntBig	= JFont( "Helvetica", 24 );
+		
+		doc = forest.session;
+		
+		// ----------------------------- Collections Window -----------------------------
+
+		ggTabColl = JSCTabbedPane( winCollections, winCollections.view.bounds ).resize_( 5 );
+		////// Audio File Tab //////
+		view = JSCCompositeView( ggTabColl, ggTabColl.bounds ).resize_( 5 );
+//		JSCStaticText( view, Rect( 2, 2, 80, 20 )).string_( "Files" );
+		JSCButton( view, Rect( 160, 2, 36, 20 )).resize_( 3 )
+			.canFocus_( false )
+			.states_([[ "+" ]])
+			.action_({ arg b;
+				SwingDialog.getPaths({ arg paths;
+					paths.do({ arg path; var ce;
+						ce = JSyncCompoundEdit( "Add Audio File" );
+						this.prAudioFileAdd( doc, path, ce, { arg af; doc.undoManager.addEdit( ce.performAndEnd )});
+					});
+				});
+			});
+		JSCButton( view, Rect( 200, 2, 36, 20 )).resize_( 3 )
+			.canFocus_( false )
+			.states_([[ "-" ]])
+			.action_({ arg b; var af = doc.audioFiles[ ggFileList.value ? -1 ], stakes;
+				if( af.notNil, {
+					stakes = doc.trail.getAllAudioStakes( af );
+					if( stakes.isEmpty, {
+						this.prAudioFileRemove( af, doc );
+					}, {
+						this.showConfirmDialog( "Remove Audio File", "The Audio File is in use (" ++ stakes.size ++
+							" regions).\nRemove anyway?", \yesno, \question, { arg result; if( result === \yes, {
+								this.prAudioFileRemove( af, doc )})});
+					});
+				});
+			});
+		ggFileList = JSCListView( view, Rect( 0, 24, 240, 340 )).resize_( 5 )
+			.allowsDeselection_( true )
+			.action_({ arg b;
+//				("Hoscho " ++ b.items[ b.value ]).postln;
+			});
+		updAudioFiles = UpdateListener.newFor( doc.audioFiles, { arg upd, obj, what ... params;
+			if( (what === \add) or: { what === \remove }, {
+				ggFileList.items = obj.getAll.collect(_.name);
+			});
+		});
+		ggFileList.onClose = { updAudioFiles.remove };
+
+		JSCPopUpMenu( view, Rect( 160, 368, 76, 24 )).canFocus_( false ).font_( fntSmall ).resize_( 9 )
+			.items_([ "Action", "--------", "Drop Region", "File Replace File", "Regions Replace File", "Consolidate" ])
+			.action_({ arg b; var value = b.value, af, track;
+				b.value = 0;
+				af 		= doc.audioFiles[ ggFileList.value ? -1 ];
+				track	= doc.selectedTracks[ 0 ];
+				switch( value - 2,
+				0, { this.prAudioFileAddRegion( af, doc, doc.timeline.position, track )},
+				1, { this.prAudioFileReplaceFile( af, doc )},
+				2, { this.prAudioFileReplaceRegions( af, doc )},
+				3, { this.prAudioFileConsolidate( doc )}
+				);
+			});
+	
+//		JSCButton( view, Rect( 160, 268, 36, 20 ))
+//			.canFocus_( false )
+//			.states_([[ "-" ]])
+//			.action_({ arg b;
+//			
+//			});
+
+		////// Busses Tab //////
+		view = JSCCompositeView( ggTabColl, ggTabColl.bounds ).resize_( 5 );
+
+		JSCButton( view, Rect( 160, 2, 36, 20 )).resize_( 3 )
+			.canFocus_( false )
+			.states_([[ "+" ]])
+			.action_({ arg b;
+				this.prBusAddDlg( doc );
+			});
+		JSCButton( view, Rect( 200, 2, 36, 20 )).resize_( 3 )
+			.canFocus_( false )
+			.states_([[ "-" ]])
+			.action_({ arg b; var cfg = doc.busConfigs[ ggBusList.value ? -1 ], tracks;
+				if( cfg.notNil, {
+					tracks = doc.tracks.select({ arg t; t.busConfig == cfg });
+					if( tracks.isEmpty, {
+						this.prBusConfigRemove( cfg, doc );
+					}, {
+						this.showConfirmDialog( "Remove Bus Config", "The Bus Config is in use (" ++ tracks.size ++
+							" tracks).\nRemove anyway?", \yesno, \question, { arg result; if( result === \yes, {
+								this.prBusConfigRemove( cfg, doc )})});
+					});
+				});
+			});
+//		JSCStaticText( view, Rect( 2, 2, 80, 20 )).string_( "Busses" );
+		ggBusList = JSCListView( view, Rect( 0, 24, 240, 140 )).resize_( 5 )
+			.allowsDeselection_( true )
+//			.value_( nil )
+			.beginDragAction_({ arg b;
+				doc.busConfigs[ b.value ? -1 ];
+			})
+			.action_({ arg b; var cfg, bounds, fNode;
+				cfg = doc.busConfigs[ b.value ? -1 ];
+				busSelCol		= nil;
+				busSelRow		= nil;
+				busConn		= nil;
+				if( ggBusMatrix.notNil, {
+					ggBusMatrix.asView.remove;
+					ggBusMatrix = nil;
+				});
+				ggBusGain.enabled = false;
+				ggBusApply.enabled = false;
+				if( cfg.notNil, {
+					GUI.useID( \swing, {
+						bounds = b.bounds;
+						bounds = Rect( bounds.left + 34, bounds.bottom + 36 /* XXX ??? */, bounds.width - 30, 220 );
+						ggBusMatrix = BosqueBoxGrid( b.parent, bounds, columns: cfg.numOutputs, rows: cfg.numInputs );
+						ggBusMatrix.setFillColor_( observer.colors[0] );
+						ggBusMatrix.setTrailDrag_( true, false );
+						ggBusMatrix.asView.resize_( 8 );
+						busConn	= cfg.connections ?? { 0 ! cfg.numOutputs ! cfg.numInputs };
+						cfg.numOutputs.do({ arg col;
+							cfg.numInputs.do({ arg row;
+								if( busConn[row][col] > 0, {
+									ggBusMatrix.setBoxColor_( col, row, observer.colors[ busConn[row][col].ampdb.linlin( -10, 0, 18, 0 ).asInteger ]);
+									ggBusMatrix.setState_( col, row, true );
+								}, {
+									ggBusMatrix.setState_( col, row, false );
+								});
+							});
+						});
+						fNode	= { arg nodeLoc, state;
+							state 	= ggBusMatrix.getState( nodeLoc[0], nodeLoc[1] );
+							ggBusGain.enabled = state;
+							busSelCol = nodeLoc[0];
+							busSelRow = nodeLoc[1];
+							if( state, {
+								busConn[ busSelRow ][ busSelCol ] = 1.0;
+								ggBusGain.valueAction = 1.0;
+							}, {
+								busConn[ busSelRow ][ busSelCol ] = 0.0;
+							});
+							ggBusApply.enabled = true;
+						};
+						ggBusMatrix.nodeDownAction_( fNode );
+						ggBusMatrix.nodeTrackAction_( fNode );
+					});
+				});
+			});
+		ggBusGain = JSCSlider( view, Rect( 0, 170, 26, 192 )).resize_( 7 )
+			.step_( 0.1 )
+			.enabled_( false )
+			.action_({ arg b; var db;
+				if( busSelCol.notNil && busSelRow.notNil && busConn.notNil, {
+					db = b.value.linlin( 0, 1, -10, 0 );
+					db.postln;
+					busConn[ busSelRow ][ busSelCol ] = db.dbamp;
+					ggBusMatrix.setBoxColor_( busSelCol, busSelRow, observer.colors[ b.value.linlin( 0, 1, 18, 0 ).asInteger ]);
+				});
+			});
+		ggBusApply = JSCButton( view, Rect( 0, 366, 30, 20 )).resize_( 7 )
+			.font_( fntSmall )
+			.enabled_( false )
+			.states_([[ "Apply" ]])
+			.action_({ arg b; var cfg, ce;
+				cfg = doc.busConfigs[ ggBusList.value ? -1 ];
+				if( cfg.notNil and: { busConn.notNil }, {
+					ce = JSyncCompoundEdit( "Change Bus Connections" );
+					cfg.editConnections( this, busConn, ce );
+					doc.undoManager.addEdit( ce.performEdit.end );
+					ggBusApply.enabled = false;
+				});
+			});
+
+		updBusConfigs = UpdateListener.newFor( doc.busConfigs, { arg upd, obj, what ... coll;
+			if( (what === \add) or: { what === \remove }, {
+				ggBusList.items = obj.getAll.collect(_.name);
+				ggBusList.valueAction = obj.size - 1;
+			});
+		});
+//		updSelectedTracks = UpdateListener.newFor( doc.selectedTracks, { arg upd, sc, what ... coll;
+//			if( (what === \add) or: { what === \remove }, {
+//				ggBusList.value = if( doc.selectedTracks.notNil, { doc.tracks.indexOf( doc.selectedTracks[ 0 ])});
+//			});
+//		});
+		ggBusList.onClose = { updBusConfigs.remove; /* updSelectedTracks.remove */};
+
+		////// Tracks Tab //////
+		view = JSCCompositeView( ggTabColl, ggTabColl.bounds ).resize_( 5 );
+
+		JSCButton( view, Rect( 160, 2, 36, 20 )).resize_( 3 )
+			.canFocus_( false )
+			.states_([[ "+" ]])
+			.action_({ arg b;
+				this.prTrackAdd( doc );
+			});
+		JSCButton( view, Rect( 200, 2, 36, 20 )).resize_( 3 )
+			.canFocus_( false )
+			.states_([[ "-" ]])
+			.action_({ arg b;
+				this.prTrackRemove( doc );
+			});
+//		JSCStaticText( view, Rect( 2, 2, 80, 20 )).string_( "Tracks" );
+		ggTrackList = JSCListView( view, Rect( 0, 24, 240, 340 )).resize_( 5 )
+			.allowsDeselection_( true )
+//			.value_( nil )
+			.beginDragAction_({ arg b;
+				doc.tracks[ b.value ? -1 ];
+			})
+			.action_({ arg b; var t, ce;
+				t = doc.tracks[ b.value ? -1 ];
+				ce = JSyncCompoundEdit.new;
+				ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedTracks, doc.selectedTracks.getAll, false ));
+				ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedTracks, [ t ], false));
+				doc.undoManager.addEdit( ce.performEdit.end );
+			});
+			
+		updTracks = UpdateListener.newFor( doc.tracks, { arg upd, obj, what ... coll;
+			if( (what === \add) or: { what === \remove }, {
+				ggTrackList.items = obj.getAll.collect(_.name);
+//				ggBusList.valueAction = obj.size - 1;
+			});
+		});
+		updSelectedTracks = UpdateListener.newFor( doc.selectedTracks, { arg upd, sc, what ... coll;
+			if( (what === \add) or: { what === \remove }, {
+				ggTrackList.value = if( doc.selectedTracks.notNil, { doc.tracks.indexOf( doc.selectedTracks[ 0 ])});
+			});
+		});
+		ggTrackList.onClose = { updTracks.remove; updSelectedTracks.remove };
+
+		ggTabColl.setTitleAt( 0, "Audio Files" );
+		ggTabColl.setTitleAt( 1, "Busses" );
+		ggTabColl.setTitleAt( 2, "Tracks" );
+
+		// ----------------------------- Timeline Window -----------------------------
+		
+		view = winTimeline.view;
+
+		BosqueTimelineAxis( doc, view, Rect( 60, 20, view.bounds.width - 60, 15 ));
+		ggTimelinePanel = BosqueTimelinePanel( doc, view, Rect( 0, 35, view.bounds.width, view.bounds.height - 51 ));
+		BosqueTimelineScroll( doc, view, Rect( 0, view.bounds.height - 16, view.bounds.width - 16, 16 ));
+
+		vx = 1; vw = 80;
+		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
+			.items_([ "File", "--------", "New", "Open...", "Append...", "--------", "Save", "Save As..." ])
+			.action_({ arg b; var value = b.value;
+				b.value = 0;
+				switch( value - 2,
+				0, { this.prFileNew( doc )},
+				1, { this.prFileOpen( doc )},
+				2, { this.prFileAppend( doc )},
+				4, { if( doc.isDirty, {
+					if( doc.path.notNil, {
+						this.prFileSave( doc, doc.path );
+					}, {
+						this.prFileSaveAs( doc );
+					});
+				})},
+				5, { this.prFileSaveAs( doc )}
+				);
+			});
+
+//		vx = vx + vw + 4; vw = 80;
+//		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
+//			.items_([ "Track", "--------", "Insert", "Remove" ])
+//			.action_({ arg b; var value = b.value;
+//				b.value = 0;
+//				switch( value - 2,
+//				0, { this.prTrackAdd( doc )},
+//				1, { this.prTrackRemove( doc )}
+//				);
+//			});
+
+		vx = vx + vw + 4; vw = 80;
+		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
+			.items_([ "Timeline", "--------", "Insert Span...", "Clear Span", "Remove Span", "--------", "Split Objects", "Insert Env", "Insert Func", "Change Gain" ])
+			.action_({ arg b; var value = b.value;
+				b.value = 0;
+				switch( value - 2,
+				0, { this.prTimelineInsertSpan( doc )},
+				1, { this.prTimelineClearSpan( doc )},
+				2, { this.prTimelineRemoveSpan( doc )},
+				4, { this.prTimelineSplitObjects( doc )},
+				5, { this.prTimelineInsertEnv( doc )},
+				6, { this.prTimelineInsertFunc( doc )},
+				7, { this.prTimelineChangeGain( doc )}
+				);
+			});
+		
+		vx = vx + vw + 4; vw = 80;
+		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
+			.items_([ "Edit", "--------", "Undo", "Redo", "--------", "Cut", "Copy", "Paste", "Delete" ])
+			.action_({ arg b; var value = b.value;
+				b.value = 0;
+				switch( value - 2,
+				0, { this.prEditUndo( doc )},
+				1, { this.prEditRedo( doc )},
+				3, { this.prEditCut( doc )},
+				4, { this.prEditCopy( doc )},
+				5, { this.prEditPaste( doc )},
+				6, { this.prEditDelete( doc )}
+				);
+			});
+			
+		vx = vx + vw + 4; vw = 80;
+		JSCDragSink( view, Rect( vx, 1, vw, 16 ))
+			.canReceiveDragHandler_({ arg b; b.class.currentDrag.isString })
+			.interpretDroppedStrings_( false )
+			.action_({ arg b; var split, path, ce, start, stop;
+				split = b.object.split( $: );
+				b.object = "";
+				if( split.size == 3, {
+					path		= split[0];
+					start	= split[1].asInteger;
+					stop		= split[2].asInteger;
+					ce		= JSyncCompoundEdit( "Drag Audio Region" );
+					if( (start >= 0) && (start + 1000 < stop), {
+						this.prAudioFileAdd( doc, path, ce, { arg af;
+							if( stop <= af.numFrames, {
+								doc.undoManager.addEdit( ce.performAndEnd );
+								this.prCreateClipBoardStake( doc, af, Span( start, stop ));
+								b.object = af.name;
+							});
+						});
+					});
+				});
+			});
+			
+		updDirty = UpdateListener.newFor( doc, { arg upd, doc, what, param1;
+			if( (what === \dirty) or: { what === \path }, {
+				winTimeline.name = if( doc.isDirty, { "" ++ 0xE2.asAscii ++ 0x97.asAscii ++ 0x8F.asAscii }, "" )
+					++ "Timeline - " ++ doc.name;
+			});
+		});
+		winTimeline.onClose = { updDirty.remove };
+
+		clpseYZoom = Collapse({ arg yZoom;
+			ggTimelinePanel.jTrailView.server.sendBundle( nil,
+				[ '/methodr', '[', '/method', ggTimelinePanel.jTrailView.id, \getStakeRenderer, ']',
+					\setYZoom, yZoom ],
+			[ '/method', ggTimelinePanel.jTrailView.id, \triggerRedisplay ]);
+		}, 0.2 );
+		vx = vx + vw + 4; vw = 80;
+		JSCSlider( view, Rect( vx, 1, vw, 20 )).canFocus_( false ).value_( 0 ).action_({ arg b;
+			clpseYZoom.instantaneous( b.value.linexp( 0, 1, 1, 16 ));
+		});
+
+		vx = vx + vw + 4; vw = 40;
+		JSCStaticText( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).align_( \right ).string_( "Tool:" );
+		vx = vx + vw + 4; vw = 80;
+		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
+			.items_([ "Move", "Resize" ])
+			.action_({ arg b;
+				ggTimelinePanel.tool = [ \move, \resize ][ b.value ];
+			});
+		
+//~ggScroll = ggScrollPane;
+//~ggCompo = view2;
+//~ggTrail = ggTrailView;
+
+		view.keyDownAction = { arg view, char, modifiers, lala, key;
+			var timeline, length, pos;
+//			[ "key", key ].postln;
+			if( (modifiers & 0x00040000) != 0, {	// ctrl down
+				switch( key,
+				37, {				// csr left
+					timeline = doc.timeline;
+					length = timeline.visibleSpan.getLength;
+					if( length > 0 and: { length < timeline.length }, {
+						pos = timeline.position.clip( timeline.visibleSpan.start, timeline.visibleSpan.stop ) - timeline.visibleSpan.start;
+						length = (length << 1).min( timeline.length );
+						pos = (timeline.visibleSpan.start - pos).clip( 0, timeline.length - length );
+//						timeline.visibleSpan = Span( pos, pos + length );
+						timeline.editScroll( this, Span( pos, pos + length ));
+					});
+				},
+				39, {				// csr right
+					timeline = doc.timeline;
+					length = timeline.visibleSpan.getLength;
+					if( length > 256, {
+						pos = timeline.position.clip( timeline.visibleSpan.start, timeline.visibleSpan.stop ) - timeline.visibleSpan.start;
+						length = length >> 1;
+//						pos = ((timeline.visibleSpan.start + pos) >> 1).clip( 0, timeline.length - length );
+						pos = (timeline.visibleSpan.start + (pos >> 1)).clip( 0, timeline.length - length );
+//						timeline.visibleSpan = Span( pos, pos + length );
+						timeline.editScroll( this, Span( pos, pos + length ));
+					});
+				});
+			}, { if( (modifiers & 0x00100000) != 0, {	// meta down
+				switch( key,
+				37, {				// csr left
+					timeline = doc.timeline;
+					timeline.editScroll( this, Span( 0, timeline.length ));
+				});
+			})});
+		};
+
+		// ----------------------------- Transport Window -----------------------------
+		
+		view = winTransport.view;
+		view.decorator = flow = FlowLayout( view.bounds );
+		ggPlay = JSCButton( view, Rect( 0, 0, 40, 40 )).canFocus_( false )
+			.font_( fntBig )
+			.states_([[ "" ++ 0xE2.asAscii ++ 0x96.asAscii ++ 0xB6.asAscii ]]) // Triangle pointing to the right
+			.action_({ arg b;
+				doc.transport.play;
+			});
+		
+		ggStop = JSCButton( view, Rect( 0, 0, 40, 40 )).canFocus_( false )
+			.font_( fntBig )
+			.states_([[ "" ++ 0xE2.asAscii ++ 0x97.asAscii ++ 0xBC.asAscii ]])  // Solid square
+			.action_({ arg b;
+				doc.transport.stop;
+			});
+		
+		JSCButton( view, Rect( 0, 0, 40, 40 )).canFocus_( false )
+			.font_( fntBig )
+			.states_(([ "" ++ 0xE2.asAscii ++ 0x99.asAscii ++ 0xBB.asAscii ] ! 2).collect({ arg x, i; if( i == 0, x, {[ x.first, Color.white, Color.blue ]})}))  // Recycling
+			.action_({ arg b;
+				if( b.value == 0, {
+					doc.transport.loop = nil;
+				}, { if( doc.timeline.selectionSpan.length >= doc.timeline.rate, {
+					doc.transport.loop = doc.timeline.selectionSpan;
+				}, {
+					b.value = 0;
+				})});
+			});
+		
+		ggPlayPos = JSCStaticText( view, Rect( 0, 0, 160, 40 )).background_( Color.black )
+			.stringColor_( Color.yellow ).align_( \center ).font_( JFont( "Eurostile", 24, 1 )); // .string_( "00:00:00.000" );
+		fPlayPosStr = { arg frame; ScissUtil.toTimeString( frame / doc.timeline.rate )};
+		updTimeline = UpdateListener.newFor( doc.timeline, { arg upd, timeline, what;
+			if( taskPlayPos.isPlaying.not and: { (what === \position) or: { what === \rate }}, {
+				ggPlayPos.string_( fPlayPosStr.value( timeline.position ));
+			});
+		});
+		fTaskPlayPos = { inf.do({ ggPlayPos.string_( fPlayPosStr.value( doc.transport.currentFrame )); 0.05.wait })};
+		
+		updTransport = UpdateListener.newFor( doc.transport, { arg upd, transport, what;
+			switch( what,
+			\play, {
+				ggPlay.states = [[ ggPlay.states.first.first, Color.white, Color.black ]];
+				taskPlayPos.stop; taskPlayPos = fTaskPlayPos.fork( AppClock );
+			},
+			\stop, {
+				taskPlayPos.stop;
+				ggPlay.states = [[ ggPlay.states.first.first ]];
+			},
+			\pause, {
+				taskPlayPos.stop;
+			},
+			\resume, {
+				taskPlayPos.stop; taskPlayPos = fTaskPlayPos.fork( AppClock );
+			});
+		});
+		
+		ggPlay.onClose = { updTransport.remove; updTimeline.remove };		
+		JSCButton( view, Rect( 0, 0, 40, 40 )).canFocus_( false )
+			.font_( fntBig )
+			.states_([[ "" ++ 0xE2.asAscii ++ 0x9C.asAscii ++ 0xB6.asAscii ]])  // Solid star
+			.action_({ arg b;
+				forest.trackBang.changed;
+			});
+			
+		flow.nextLine;
+		
+//		ggVolume = JEZSlider( view, 250 @ 20, "Master Gain", ControlSpec( 0.ampdb, 4.ampdb, \db, units: " dB"), { arg ez;
+//			forest.masterVolume = ez.value.dbamp;
+//		}, forest.masterVolume.ampdb, false, 70, 50 );
+		GUI.useID( \swing, { ggVolume = EZSlider( view, 250 @ 20, "Master Gain", ControlSpec( 0.ampdb, 4.ampdb, \db, units: " dB"), { arg ez;
+			forest.masterVolume = ez.value.dbamp;
+		}, forest.masterVolume.ampdb, false, 70, 50 ); });
+		ggVolume.numberView.maxDecimals_( 1 );
+		
+		clpseVolume = Collapse({ arg value; ggVolume.valueNoAction = value.ampdb; }, 0.15, AppClock );
+		updVolume = UpdateListener.newFor( forest, { arg upd, obj, what, param1;
+			if( what === \masterVolume, { clpseVolume.instantaneous( param1 )});
+		});
+		ggVolume.numberView.onClose = { updVolume.remove };
+		
+		// ----------------------------- Menu Window -----------------------------
+
+		view = JSCVLayoutView( winMenu, winMenu.view.bounds );
+		JSCButton( view, Rect( 0, 0, 40, 20 ))
+			.states_([[ "Timeline" ], [ "Timeline", Color.white, Color.blue ]])
+			.canFocus_( false )
+			.action_({ arg b;
+				winTimeline.visible = b.value == 1;
+				winTimeline.view.focus;
+			})
+			.valueAction_( 1 );
+		JSCButton( view, Rect( 0, 0, 40, 20 ))
+			.states_([[ "Collections" ], [ "Collections", Color.white, Color.blue ]])
+			.canFocus_( false )
+			.action_({ arg b;
+				winCollections.visible = b.value == 1;
+				winCollections.view.focus;
+			});
+		JSCButton( view, Rect( 0, 0, 40, 20 ))
+			.states_([[ "Transport" ], [ "Transport", Color.white, Color.blue ]])
+			.canFocus_( false )
+			.action_({ arg b;
+				winTransport.visible = b.value == 1;
+				winTransport.view.focus;
+			})
+			.valueAction_( 1 );
+		JSCButton( view, Rect( 0, 0, 40, 20 ))
+			.states_([[ "Observer" ], [ "Observer", Color.white, Color.blue ]])
+			.canFocus_( false )
+			.action_({ arg b;
+				observer.window.visible = b.value == 1;
+				observer.window.view.focus;
+			});
+			
+		JSCPopUpMenu( view, Rect( 0, 0, 40, 20 ))
+			.items_([ "Action", "--------", "All GUI", "Audio Rec.", "OSC Mem Play", "OSC Rec" ])
+			.canFocus_( false )
+			.action_({ arg b; var value = b.value;
+				b.value = 0;
+				switch( value - 2,
+				0, { Bosque.allGUI },
+				1, { Bosque.recorderGUI },
+				2, { BosqueOSCMemory.new.synced_( true ).makeGUI },
+				3, { this.prOSCRec }
+				);
+			});
+			
+		winMenu.front;
+	}
+	
+	prFileNew { arg doc, okFunc, cancelFunc, ignoreDirty = false;
+		if( ignoreDirty.not and: { doc.isDirty }, {
+			this.prConfirmUnsaved( doc, { this.prFileNew( doc, okFunc, cancelFunc, true )});
+		}, {
+			doc.clear;
+			okFunc.value;
+		});
+	}
+	
+	prCreateClipBoardStake { arg doc, af, afSpan;
+		var transferable, owner;
+		
+		transferable = ();
+//		transferable.object = copy;
+		transferable.transferDataFlavors = [ \stakeList ];
+		transferable.isDataFlavorSupported = { arg thisF, flavor; thisF.transferDataFlavors.includes( flavor )};
+		transferable.getTransferData = { arg thisF, flavor, track;
+			if( flavor === \stakeList, {
+				track = doc.tracks[0];
+				if( track.notNil, {
+					[ BosqueAudioRegionStake( Span( 0, afSpan.length ), af.name.asString, track, fileStartFrame: afSpan.start, faf: af )];
+				}, {
+					[];
+				});
+			}, { Error( "Unsupported Flavor " ++ flavor ).throw });
+		};
+		owner = ();
+		owner.lostOwnership = { arg thisF, clipBoard, contents; };
+		doc.forest.clipBoard.setContents( transferable, owner );
+	}
+	
+	prFileOpen { arg doc, ignoreDirty = false;
+		var f, text;
+		doc.transport.stop;
+		if( ignoreDirty.not and: { doc.isDirty }, {
+			this.prConfirmUnsaved( doc, { this.prFileOpen( doc, true )});
+		}, {
+			SwingDialog.getPaths({ arg result; var path = result.first, fPath;
+				this.prFileNew( doc, ignoreDirty: true );
+				try {
+					f = File( path, "r" );
+					text = "{ arg doc; doc" ++ f.readAllString ++ "}";
+					f.close;
+//					text.postln;
+					text.interpret.value( doc );
+					doc.path = path;
+					fPath = path.splitext.first ++ "Func.rtf";
+					if( File.exists( fPath ), {
+						("Opening func file '" ++fPath++"'...").postln;
+						{ Document.open( fPath ).text.interpret }.defer;
+					});
+				} { arg error;
+					error.reportError;
+					this.showMessageDialog( "File Open", "Failed to load file\n" ++ path ++ "\n" ++ error.errorString,\error );
+				};
+			}, nil, 1 );
+		});
+	}
+
+	prFileAppend { arg doc, ignoreDirty = false;
+		var f, text, oldStakes, oldTracks, oldBusConfigs, oldTimelineLen, ce, ids, id, names, name;
+		doc.transport.stop;
+		if( ignoreDirty.not and: { doc.isDirty }, {
+			this.prConfirmUnsaved( doc, { this.prFileOpen( doc, true )});
+		}, {
+			SwingDialog.getPaths({ arg result; var path = result.first;
+				try {
+					f = File( path, "r" );
+					text = "{ arg doc; doc" ++ f.readAllString ++ "}";
+					f.close;
+					
+					// temporary clear stuff
+					doc.forest.clipBoard.clear;
+					doc.undoManager.discardAllEdits;
+					doc.selectedRegions.clear( this );
+					doc.selectedTracks.clear( this );
+					oldStakes = doc.trail.getAll;
+					doc.trail.clear( this );
+					oldTimelineLen = doc.timeline.length;
+					doc.timeline.clear;
+					oldTracks = doc.tracks.getAll;
+					doc.tracks.clear( this );
+					oldBusConfigs = doc.busConfigs.getAll;
+					doc.busConfigs.clear(  this );
+					
+					// now "load" the appended doc
+					text.interpret.value( doc );
+					
+					// now shift all dem stuff
+					ce = JSyncCompoundEdit( "Insert Time Span" );
+					doc.editInsertTimeSpan( this, Span( 0, oldTimelineLen ), ce );
+					doc.undoManager.addEdit( ce.performAndEnd );
+					doc.undoManager.discardAllEdits;
+					
+					// now unificate our old tracks and busconfigs
+					oldBusConfigs.do({ arg b;
+						if( doc.busConfigs.detect({ arg b2; b2.busCfgID == b.busCfgID }).notNil, {
+							ids		= doc.busConfigs.collect({ arg cfg; cfg.busCfgID });
+							id		= 0;
+							while({ ids.indexOf( id ).notNil }, { id = id + 1 });
+							b.busCfgID = id;
+						});
+						if( doc.busConfigs.detect({ arg b2; b2.name == b.name }).notNil, {
+							names	= doc.busConfigs.collect({ arg cfg; cfg.name });
+							id		= 1;
+							name		= b.name ++ "." ++ id;
+							while({ names.detect({ arg n2; n2 == name }).notNil }, {
+								id	 = id + 1;
+								name	= b.name ++ "." ++ id;
+							});
+							b.name	= name;
+						});
+						doc.busConfigs.add( this, b );
+					});
+					oldTracks.do({ arg t;
+						if( doc.tracks.detect({ arg t2; t2.trackID == t.trackID }).notNil, {
+							ids		= doc.tracks.collect({ arg track; track.trackID });
+							id		= 0;
+							while({ ids.indexOf( id ).notNil }, { id = id + 1 });
+							t.trackID	= id;
+							t.name	= "Track " ++ (id + 1);
+						});
+						doc.tracks.add( this, t );
+					});
+					doc.trail.addAll( this, oldStakes );
+
+				} { arg error;
+					this.showMessageDialog( "File Append", "Failed to load file\n" ++ path ++ "\n" ++ error.errorString,\error );
+				};
+			}, nil, 1 );
+		});
+	}
+	
+	prConfirmUnsaved { arg doc, okFunc, cancelFunc;
+		this.showConfirmDialog( "Open", "Current document contains\nunsaved edits.\nSave document first?",
+		  \yesnocancel, \warn, { arg result;
+			if( result === \yes, {
+				if( doc.path.isNil, {
+					this.prFileSaveAs( doc, { arg result; if( result, okFunc, cancelFunc )});
+				}, {
+					if( this.prFileSave( doc, doc.path ), okFunc, cancelFunc );
+				});
+			}, { if( result === \no, okFunc, cancelFunc )});
+		});
+	}
+	
+	prFileSave { arg doc, path;
+		var existed, savePath, f;
+		try {
+			existed	= File.exists( path );
+			savePath	= if( existed, { path ++ ".tmp" }, path );
+			f		= File( savePath, "w" );
+			doc.storeModifiersOn( f );
+			f.close;
+			if( existed, {
+				if( ("rm \"" ++ path ++ "\"").systemCmd != 0, {
+					this.showMessageDialog( "File Save As", "Failed to delete previous version of file\n" ++ path ++ "\n\nNew version remains at\n" ++ savePath, \error );
+					^false;
+				});
+				if( ("mv \"" ++ savePath ++ "\" \"" ++ path ++ "\"").systemCmd != 0, {
+					this.showMessageDialog( "File Save As", "Failed to rename file to\n" ++ path ++ "\n\nNew version remains at\n" ++ savePath, \error );
+					^false;
+				});
+			});
+			doc.path = path;
+			doc.undoManager.discardAllEdits;
+			^true;
+		} { arg error;
+			error.reportError;
+			this.showMessageDialog( "File Save", "Failed to save file to\n" ++ path ++ "\n" ++ error.errorString,\error );
+			^false;
+		};
+	}
+	
+	prFileSaveAs { arg doc, onComplete;
+		SwingDialog.savePanel({ arg path; onComplete.value( this.prFileSave( doc, path ))});
+	}
+	
+//	prBusAdd { arg doc, numInputs, numOutputs;
+//		var ce, busConfig, id, ids;
+//		
+//		ce		= JSyncCompoundEdit( "Add Bus" );
+//		ids		= doc.busConfigs.collect({ arg busConfig; busConfig.busConfigID });
+//		id		= 0;
+//		while({ ids.indexOf( id ).notNil }, { id = id + 1 });
+//		busConfig	= BosqueTrack( id, numInputs, numOutputs ).name_( "Bus " ++ (id + 1) );
+////		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedTracks, doc.selectedTracks.getAll, false ));
+//		ce.addPerform( BosqueEditAddSessionObjects( this, doc.busConfigs, [ busConfig ], true )); // ( .onDeath_({ arg edit; track.dispose }););
+////		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedTracks, [ track ], false ));
+//		doc.undoManager.addEdit( ce.performAndEnd );
+//	}
+
+	prTrackAdd { arg doc;
+		var ce, track, id, ids;
+		
+		ce		= JSyncCompoundEdit( "Insert Track" );
+		ids		= doc.tracks.collect({ arg track; track.trackID });
+		id		= 0;
+		while({ ids.indexOf( id ).notNil }, { id = id + 1 });
+		track	= BosqueTrack( id ).name_( "Track " ++ (id + 1) );
+		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedTracks, doc.selectedTracks.getAll, false ));
+//		doc.trackMap[ id ] = track;
+		ce.addPerform( BosqueEditAddSessionObjects( this, doc.tracks, [ track ], true )); // ( .onDeath_({ arg edit; track.dispose }););
+		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedTracks, [ track ], false ));
+		doc.undoManager.addEdit( ce.performAndEnd );
+	}
+
+	prTrackRemove { arg doc;
+		var ce, tracks, trackIndices, stakes;
+		
+		if( doc.selectedTracks.isEmpty, { ^this });
+		
+		tracks		= doc.selectedTracks.getAll;
+		ce			= JSyncCompoundEdit( "Remove Tracks" );
+		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedTracks, tracks, false ));
+//		trackIndices	= tracks.collect(track{ arg track; doc.tracks.indexOf( track )});
+		stakes		= doc.trail.getAll.select({ arg stake; tracks.includes( stake.track )});
+		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, stakes, false ));
+		doc.trail.editBegin( ce );
+		doc.trail.editRemoveAll( this, stakes, ce );
+		doc.trail.editEnd( ce );
+		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.tracks, tracks, true ).onDeath_({ arg edit; tracks.do( _.dispose )}));
+//		tracks.do({ arg track; doc.trackMap.removeAt( track.id )});
+		doc.undoManager.addEdit( ce.performAndEnd );
+	}
+	
+	prTimelineInsertSpan { arg doc;
+		this.queryStringDialog( "Insert Time", "Amount of seconds", "60.0", { arg result;
+			var timeline, span, ce;
+			timeline	= doc.timeline;
+			result	= (result.asFloat * timeline.rate).asInteger;
+			if( (result > 0) and: { result < 1e9 }, {  // filter out +-inf!
+				ce = JSyncCompoundEdit( "Insert Time Span" );
+				span = Span( timeline.position, timeline.position + result );
+				doc.editInsertTimeSpan( this, span, ce );
+				ce.addPerform( BosqueTimelineVisualEdit.select( this, doc, span ));
+				doc.undoManager.addEdit( ce.performAndEnd );
+			});
+		});
+	}
+
+	prTimelineClearSpan { arg doc;
+		var timeline, ce;
+		timeline	= doc.timeline;
+		if( timeline.selectionSpan.length > 0, {
+			ce = JSyncCompoundEdit( "Clear Time Span" );
+			doc.editClearTimeSpan( this, timeline.selectionSpan, ce );
+			doc.undoManager.addEdit( ce.performAndEnd );
+		});
+	}
+
+	prTimelineRemoveSpan { arg doc;
+		var timeline, ce;
+		timeline	= doc.timeline;
+		if( timeline.selectionSpan.length > 0, {
+			ce = JSyncCompoundEdit( "Remove Time Span" );
+			doc.editRemoveTimeSpan( this, timeline.selectionSpan, ce );
+			ce.addPerform( BosqueTimelineVisualEdit.select( this, doc, Span.new ));
+			doc.undoManager.addEdit( ce.performAndEnd );
+		});
+	}
+
+	prTimelineSplitObjects { arg doc;
+		var pos, ce;
+		pos	= doc.timeline.position;
+		ce = JSyncCompoundEdit( "Split Objects" );
+		doc.editClearTimeSpan( this, Span( pos, pos ), ce, { arg stake; doc.selectedRegions.includes( stake )});
+		doc.undoManager.addEdit( ce.performAndEnd );
+	}
+	
+	prTimelineInsertFunc { arg doc;
+		var span, track, ce, name, stake, clearSpan, trail;
+		
+		span 	= doc.timeline.selectionSpan;
+		track	= doc.selectedTracks[0];
+		if( span.isEmpty or: { track.isNil }, { ^this });
+
+//"\n N O T   Y E T   I M P L E M E N T E D\n".error;
+		ce		= JSyncCompoundEdit( "Add Func Region" );
+		name		= "Func";
+		// WARNING: Symbol -> asCompileString is broken, doesn't escape apostroph!!!!
+		// therefore we force the name to be a String here !!!
+		stake = BosqueFuncRegionStake( span, name.asString, track );
+		clearSpan = Span( span.start, min( span.stop, doc.timeline.length ));
+		if( clearSpan.isEmpty.not, {
+			doc.editClearTimeSpan( this, clearSpan, ce, { arg stake; stake.track == track });
+		});
+// N.A.!
+//		if( span.stop > doc.timeline.length, {
+//			insertSpan = Span( doc.timeline.length, span.stop );
+//			doc.editInsertTimeSpan( this, insertSpan, ce );
+//		});
+		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, [ stake ], false ));
+		trail = doc.trail;
+		trail.editBegin( ce );
+		trail.editAdd( this, stake, ce );
+		trail.editEnd( ce );
+		doc.undoManager.addEdit( ce.performAndEnd );
+	}
+	
+	prTimelineInsertEnv { arg doc;
+		var span, track, ce, name, stake, clearSpan, trail;
+		
+		span 	= doc.timeline.selectionSpan;
+		track	= doc.selectedTracks[0];
+		if( span.isEmpty or: { track.isNil }, { ^this });
+
+		ce		= JSyncCompoundEdit( "Add Env Region" );
+		name		= "Env";
+		// WARNING: Symbol -> asCompileString is broken, doesn't escape apostroph!!!!
+		// therefore we force the name to be a String here !!!
+		stake = BosqueEnvRegionStake( span, name.asString, track );
+		clearSpan = Span( span.start, min( span.stop, doc.timeline.length ));
+		if( clearSpan.isEmpty.not, {
+			doc.editClearTimeSpan( this, clearSpan, ce, { arg stake; stake.track == track });
+		});
+		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, [ stake ], false ));
+		trail = doc.trail;
+		trail.editBegin( ce );
+		trail.editAdd( this, stake, ce );
+		trail.editEnd( ce );
+		doc.undoManager.addEdit( ce.performAndEnd );
+	}
+	
+	prTimelineChangeGain { arg doc;
+		var ce, stakes, trail;
+		this.queryStringDialog( "Change Gain", "Boost/Cut in Decibels", "0.0", { arg result;
+			var timeline, span, ce;
+			timeline	= doc.timeline;
+			result	= result.asFloat;
+			if( result != 0.0, {
+				ce	= JSyncCompoundEdit( "Change Gain" );
+				trail = doc.volEnv;
+				trail.editBegin( ce );
+				stakes = trail.editGetRange( doc.timeline.selectionSpan, true, ce );
+				trail.editClearSpan( this, doc.timeline.selectionSpan, nil, ce );
+				stakes = stakes.collect({ arg stake; stake.replaceLevel( stake.level + result )});
+				stakes = trail.editAddAll( this, stakes, ce );
+				trail.editEnd( ce );
+				doc.undoManager.addEdit( ce.performAndEnd );
+			});
+		});
+	}
+
+	prAudioFileAdd { arg doc, path, ce, onComplete, onFailure;
+		var af;
+		try {
+			af = BosqueAudioFile( path );  // may return existing object!!!
+			if( doc.audioFiles.includes( af ).not, {
+				ce.addPerform( BosqueEditAddSessionObjects( this, doc.audioFiles, [ af ]));
+			});
+			onComplete.value( af );
+		} { arg error;
+			this.showMessageDialog( "Add Audio File", "Error while opening\n" ++ path ++ "\n: " ++ error.what, \error );
+			onFailure.value;
+		};
+	}
+
+	prAudioFileAddRegion { arg af, doc, pos, track;
+		var stake, trail, ce, names, name, idx, clearSpan, insertSpan, span;
+		
+		if( af.notNil and: { track.notNil }, {
+			ce = JSyncCompoundEdit( "Add Audio Region" );
+// af.regions NOT MAINTAINED AT THE MOMENT XXX
+//			names = af.regions.collect({ arg stake; stake.name.asSymbol }); // .asSet;
+//			idx = 1;
+//			name = (af.name ++ "." ++ idx).asSymbol; // for indexOf asSymbol is crucial !!!
+//			while({ names.indexOf( name ).notNil }, { idx = idx + 1; name = (af.name ++ "." ++ idx).asSymbol });
+name = af.name.asSymbol;
+			span = Span( pos, pos + af.numFrames );
+			// WARNING: Symbol -> asCompileString is broken, doesn't escape apostroph!!!!
+			// therefore we force the name to be a String here !!!
+			stake = BosqueAudioRegionStake( span, name.asString, track, faf: af );
+			clearSpan = Span( span.start, min( span.stop, doc.timeline.length ));
+			if( clearSpan.isEmpty.not, {
+				doc.editClearTimeSpan( this, clearSpan, ce, { arg stake; stake.track == track });
+			});
+			if( span.stop > doc.timeline.length, {
+				insertSpan = Span( doc.timeline.length, span.stop );
+				doc.editInsertTimeSpan( this, insertSpan, ce );
+			});
+//			ce.addPerform( BosqueEditAddSessionObjects( this, af.regions, [ stake ]));
+			ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, [ stake ], false ));
+			trail = doc.trail;
+			trail.editBegin( ce );
+			trail.editAdd( this, stake, ce );
+			trail.editEnd( ce );
+			doc.undoManager.addEdit( ce.performAndEnd );
+		});
+	}
+	
+	prAudioFileReplaceFile { arg af, doc;
+		SwingDialog.getPaths({ arg paths;
+			paths.do({ arg path; var sf, af2, ce, stakes, selectedStakes, isNew;
+				try {
+					sf = SoundFile.openRead( path );
+					sf.close;
+					if( sf.numFrames < af.numFrames, {
+						this.showMessageDialog( "Replace Audio File", "Replacement file must have\nat least as many frames as original file", \error );
+					}, {
+						af2 = BosqueAudioFile( path );  // may return existing object!!!
+						isNew = doc.audioFiles.includes( af2 ).not;
+						ce = JSyncCompoundEdit( "Replace Audio File" );
+						if( isNew, { ce.addPerform( BosqueEditAddSessionObjects( this, doc.audioFiles, [ af2 ]))});
+//						stakes = af.regions.getAll;
+						stakes = doc.trail.getAllAudioStakes( af );
+						selectedStakes = doc.selectedRegions.getAll;
+//						stakes.postcs;
+						ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, selectedStakes, false ));
+						doc.trail.editBegin( ce );
+						doc.trail.editRemoveAll( this, stakes, ce );
+						stakes = stakes.collect({ arg stake; stake.replaceFile( af2 )});
+						doc.trail.editAddAll( this, stakes, ce );
+						doc.trail.editEnd( ce );
+						ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.audioFiles, [ af ]).onDeath_({ arg edit; af.dispose }));
+						ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, stakes, false ));
+						doc.undoManager.addEdit( ce.performAndEnd );
+					});
+				} { arg error;
+					error.reportError;
+					this.showMessageDialog( "Replace Audio File", "Error while opening\n" ++ path ++ "\n: " ++ error.what, \error );
+				};
+			});
+		});
+	}
+	
+	prAudioFileReplaceRegions { arg af, doc;
+		var ce, stakes, isAudio;
+		
+		ce = JSyncCompoundEdit( "Replace Regions File" );
+		stakes = doc.selectedRegions.getAll.select({ arg stake;
+			isAudio = stake.isKindOf( BosqueAudioRegionStake );
+			if( isAudio, {
+				if( (stake.fileStartFrame + stake.span.length) > af.numFrames, {
+					("Omitting stake '" ++ stake.name ++ "' - exceeds new file's numFrames").warn;
+					false;
+				}, true );
+			}, isAudio );
+		});
+		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, stakes, false ));
+		doc.trail.editBegin( ce );
+		doc.trail.editRemoveAll( this, stakes, ce );
+		stakes = stakes.collect({ arg stake; stake.replaceFile( af )});
+		doc.trail.editAddAll( this, stakes, ce );
+		doc.trail.editEnd( ce );
+		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, stakes, false ));
+		doc.undoManager.addEdit( ce.performAndEnd );
+	}
+	
+	prAudioFileConsolidate { arg doc;
+		var ce, stakes, path, split, version, chunkLen, buf, offset, stop, toDispose, lastT, stakesNew, af2, sf1, sf2, af, ext;
+		
+	  fork {
+		ce = JSyncCompoundEdit( "Consolidate" );
+		stakes = doc.selectedRegions.getAll.select(_.isKindOf( BosqueAudioRegionStake ));
+		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, stakes, false ));
+		doc.trail.editBegin( ce );
+		doc.trail.editRemoveAll( this, stakes, ce );
+		stakes = stakes.collect({ arg stake, i;
+			("Processing '" ++ stake.name ++ "' ("++(i+1)++"/"++stakes.size++")...").postln;
+			af 		= stake.faf;
+			version	= 1;
+			split	= af.path.splitext;
+			ext		= if( split[1].notNil, { "." ++ split[1] }, "" );
+			split	= split[0];
+			path		= split ++ "Ct" ++ version ++ ext;
+			while({ File.exists( path )}, {
+				version	= version + 1;
+				path		= split ++ "Ct" ++ version ++ ext;
+			});
+			sf1				= SoundFile.openRead( af.path );
+			sf2				= SoundFile.new;
+			sf2.headerFormat	= sf1.headerFormat;
+			sf2.sampleFormat	= sf1.sampleFormat;
+			sf2.numChannels	= sf1.numChannels;
+			sf2.sampleRate	= sf1.sampleRate;
+			sf2.path			= path;
+			sf2.openWrite;
+			
+			offset			= stake.fileStartFrame; // * sf1.numChannels;
+			stop				= offset + stake.span.length; // (stake.span.length * sf1.numChannels);
+			lastT			= thisThread.seconds;
+			while({ offset < stop }, {
+				chunkLen		= min( 8192, stop - offset );
+				buf			= FloatArray.newClear( chunkLen * sf1.numChannels );
+				sf1.seek( offset, 0 );  // frames not samples!!
+				sf1.readData( buf );
+				sf2.writeData( buf );
+				offset		= offset + chunkLen;
+				if( (thisThread.seconds - lastT) > 1, {
+					("  " ++ (((offset - stake.fileStartFrame) / stake.span.length) * 100).round( 0.1 ) ++ "%").postln;
+					0.02.wait;
+					lastT = thisThread.seconds;
+				});
+			});
+		
+			sf2.close;
+			sf1.close;
+			
+			af2		= BosqueAudioFile( path );
+			ce.addPerform( BosqueEditAddSessionObjects( this, doc.audioFiles, [ af2 ]));
+			
+			stake	= stake.rename( path.basename.splitext.first );
+			toDispose	= stake;
+			stake	= stake.replaceFileStartFrame( 0 );
+			toDispose.dispose;
+			toDispose	= stake;
+			stake	= stake.replaceFile( af2 );
+			toDispose.dispose;
+			
+			stake;
+		});
+		
+		doc.trail.editAddAll( this, stakes, ce );
+		doc.trail.editEnd( ce );
+		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, stakes, false ));
+		doc.undoManager.addEdit( ce.performAndEnd );
+		
+		"Done.".postln;
+	  }
+	}
+	
+	prAudioFileRemove { arg af, doc;
+		var ce, stakes;
+		ce = JSyncCompoundEdit( "Remove Audio File" );
+		stakes = doc.trail.getAllAudioStakes( af );
+		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, stakes, false ));
+		doc.trail.editBegin( ce );
+		doc.trail.editRemoveAll( this, stakes, ce );
+		doc.trail.editEnd( ce );
+		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.audioFiles, [ af ]).onDeath_({ arg edit; af.dispose }));
+		doc.undoManager.addEdit( ce.performAndEnd );
+	}
+
+	prBusConfigRemove { arg cfg, doc;
+		var ce, tracks;
+		ce = JSyncCompoundEdit( "Remove Bus Config" );
+		tracks = doc.tracks.select({ arg t; t.busConfig == cfg });
+		tracks.do({ arg t; t.editBusConfig( this, nil, ce )});
+//		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedBusConfigs, [ cfg ], false ));
+		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.busConfigs, [ cfg ]).onDeath_({ arg edit; cfg.dispose }));
+		doc.undoManager.addEdit( ce.performAndEnd );
+	}
+
+	prEditUndo { arg doc;
+		if( doc.undoManager.canUndo, { doc.undoManager.undo });
+	}
+
+	prEditRedo { arg doc;
+		if( doc.undoManager.canRedo, { doc.undoManager.redo });
+	}
+	
+	prEditCut { arg doc;
+		this.prEditCopy( doc );
+		this.prEditDelete( doc );
+	}
+
+	prEditCopy { arg doc;
+		var sel, copy, ce, owner, transferable;
+		sel = doc.selectedRegions.getAll;
+		if( sel.isEmpty, { ^this });
+		
+		copy = sel.collect({ arg stake; stake.duplicate });
+		transferable = ();
+		transferable.object = copy;
+		transferable.transferDataFlavors = [ \stakeList ];
+		transferable.isDataFlavorSupported = { arg thisF, flavor; thisF.transferDataFlavors.includes( flavor )};
+		transferable.getTransferData = { arg  thisF, flavor;
+			if( flavor === \stakeList, {
+				thisF.object.collect({ arg stake; stake.duplicate });
+			}, { Error( "Unsupported Flavor " ++ flavor ).throw });
+		};
+		owner = ();
+		owner.lostOwnership = { arg thisF, clipBoard, contents;
+//			"Edit Copy: lost ownership".inform;
+			contents.object.do( _.dispose )};
+//		[ transferable, owner ].postcs;
+		doc.forest.clipBoard.setContents( transferable, owner );
+	}
+
+	prEditPaste { arg doc;
+		var ce, stakes, stake, origStart, origStop, delta, newStart, newStop;
+	
+		if( doc.forest.clipBoard.isDataFlavorAvailable( \stakeList ).not, { ^this });
+		stakes = doc.forest.clipBoard.getData( \stakeList );
+		origStart	= stakes.minItem({ arg stake; stake.span.start }).span.start;
+		origStop	= stakes.maxItem({ arg stake; stake.span.stop }).span.stop;
+		newStart	= doc.timeline.position;
+		delta	= newStart - origStart;
+		newStop	= origStop + delta;
+		ce		= JSyncCompoundEdit.new;
+		if( newStop > doc.timeline.length, {
+			doc.editInsertTimeSpan( this, Span( doc.timeline.length, newStop ), ce );
+		});
+		if( delta != 0, {
+			stakes = stakes.collect({ arg oldStake; stake = oldStake.shiftVirtual( delta ); oldStake.dispose; stake });
+		});
+		doc.trail.editBegin( ce );
+		stakes.do({ arg stake; doc.trail.editClearSpan( this, stake.span, nil, ce,
+			{ arg stake2; stake.track == stake2.track })});
+		doc.trail.editAddAll( this,stakes, ce );
+		doc.trail.editEnd( ce );
+		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, stakes, false ));
+		doc.undoManager.addEdit( ce.performAndEnd );
+	}
+
+	prEditDelete { arg doc;
+		var sel, ce;
+		sel = doc.selectedRegions.getAll;
+		if( sel.isEmpty, { ^this });
+		
+		ce = JSyncCompoundEdit( "Delete Objects" );
+		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, sel, false ));
+		doc.trail.editBegin( ce );
+		doc.trail.editRemoveAll( this, sel, ce );
+		doc.trail.editEnd( ce );
+		doc.undoManager.addEdit( ce.performAndEnd );
+	}
+
+	prBusAddDlg { arg doc;
+		{
+			var result, jOptionPane, jName, jNumInputs, jNumOutputs, numInputs, numOutputs, jLayout, jPanel, jLab3, jLab1, jLab2;
+			var id, ids, cfg, ce, name;
+			
+			ids			= doc.busConfigs.collect({ arg b; b.busCfgID });
+			id			= 0;
+			while({ ids.indexOf( id ).notNil }, { id = id + 1 });
+			jOptionPane	= JavaObject.getClass( "javax.swing.JOptionPane", forest.swing );
+			jName		= JavaObject( "javax.swing.JTextField", forest.swing, "Bus "++(id+1), 10 );
+			jNumInputs	= JavaObject( "javax.swing.JTextField", forest.swing, Bosque.masterBusNumChannels.asString, 3 );
+			jNumOutputs	= JavaObject( "javax.swing.JTextField", forest.swing, Bosque.masterBusNumChannels.asString, 3 );
+			jLab1		= JavaObject( "javax.swing.JLabel", forest.swing, "Name" );
+			jLab2		= JavaObject( "javax.swing.JLabel", forest.swing, "Input Channels" );
+			jLab3		= JavaObject( "javax.swing.JLabel", forest.swing, "Output Channels" );
+			jLayout		= JavaObject( "java.awt.GridLayout", forest.swing, 3, 2 );
+			jPanel		= JavaObject( "javax.swing.JPanel", forest.swing, jLayout );
+			jPanel.add( jLab1 );
+			jPanel.add( jName );
+			jPanel.add( jLab2 );
+			jPanel.add( jNumInputs );
+			jPanel.add( jLab3 );
+			jPanel.add( jNumOutputs );
+//			result = JavaObject.withTimeOut( 60.0, { jOptionPane.showOptionDialog_( nil, "Enter # of Inputs and Outputs", "Add Bus", 2, 3, nil, [ jNumInputs, jNumOutputs ], nil ); });
+			result = JavaObject.withTimeOut( 60.0, { jOptionPane.showConfirmDialog_( nil, jPanel, "Add Bus", 2, 3, nil ); });
+			jOptionPane.destroy;
+			if( result == 0, {
+				name			= jName.getText_;
+				numInputs		= jNumInputs.getText_.asInteger;
+				numOutputs	= jNumOutputs.getText_.asInteger;
+				ids			= doc.busConfigs.collect({ arg b; b.busCfgID });
+				id			= 0;
+				while({ ids.indexOf( id ).notNil }, { id = id + 1 });
+				ce			= JSyncCompoundEdit( "Add Bus" );
+				cfg			= BosqueBusConfig( id, numInputs, numOutputs ).name_( name );
+//				ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedTracks, doc.selectedTracks.getAll, false ));
+				ce.addPerform( BosqueEditAddSessionObjects( this, doc.busConfigs, [ cfg ], true ));
+//				ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedTracks, [ track ], false ));
+				doc.undoManager.addEdit( ce.performAndEnd );
+			});
+			jNumInputs.destroy; jNumOutputs.destroy; jLab1.destroy; jLab2.destroy; jPanel.destroy; jLayout.destroy;
+		}.fork( SwingOSC.clock );
+	}
+	
+	prOSCRec {
+		if( ~updTransp.notNil, {
+			"WARNING: OSC-Rec already running. killing previous one!".warn;
+			~updTransp.remove;
+			if( ~oscRec.notNil, {
+				try {
+					~oscRec.closeFile;
+				} { arg error;
+					error.reportError;
+				};
+				~oscRec = nil;
+			});
+		});
+	
+		~oscName = "Durchlauf"; // "Magma";
+		~oscRecOffset = nil;
+		~updTransp = UpdateListener.newFor( Bosque.default.session.transport, { arg upd, transport, what, param1;
+try {
+			switch( what,
+			\play, {
+				~oscRec = FileNetAddr.openWrite( "/Users/rutz/Desktop/Bosque2/osc/"++~oscName++Date.getDate.stamp++".osc" );
+				~oscRecOffset = (param1 / Bosque.default.session.timeline.rate) - thisThread.seconds;
+					("--- OSC REC START (" ++ ~oscRecOffset ++ ")").postln;
+			},
+			\stop, {
+				if( ~oscRec.notNil, {
+					~oscRecOffset = nil;
+					"--- OSC REC DONE".postln;
+					~oscRec.closeFile;
+					~oscRec = nil;
+				});
+			},
+			\resume, {
+				try {
+					upd.update( transport, \stop );
+					upd.update( transport, \play, param1 );
+				} { arg error;
+					error.reportError;
+				};
+			});
+} { arg error;
+	error.reportError;
+};
+		});
+		~updOSC = UpdateListener.newFor( Main, { arg upd, obj, what, time, replyAddr, msg;
+try {
+			if( ~oscRecOffset.notNil and: { msg[0] === '/dancer' or: { (msg[0] === '/field') or: { msg[0] === '/track' }}}, {
+	//			~oscRec.sendMsg( *msg );
+	//			~oscRec.sendBundle( time, msg );
+				~oscRec.sendBundle( thisThread.seconds + ~oscRecOffset, msg );
+			});
+} { arg error;
+	error.reportError;
+};
+		});
+		
+		"\n---- OSC Recorder ready.".postln;
+	}
+
+	showMessageDialog { arg title, text, type = \info;
+		forest.swing.sendMsg( '/method', "javax.swing.JOptionPane", \showMessageDialog, '[', '/ref', \null, ']', text, title, [ \error, \info, \warn, \question ].indexOf( type ) ? -1 );
+	}
+	
+	queryStringDialog { arg title, text, value, onComplete, parent;
+		{
+			var result, jOptionPane;
+			jOptionPane = JavaObject.getClass( "javax.swing.JOptionPane", forest.swing );
+			result = JavaObject.withTimeOut( 60.0, { jOptionPane.showInputDialog_( parent, text, title, 3, nil, nil, value ); });
+			jOptionPane.destroy;
+			if( result.notNil, { onComplete.value( result )});
+		}.fork( SwingOSC.clock );
+	}
+
+	showConfirmDialog { arg title, text, options = \yesno, type = \question, onComplete, parent;
+		{
+			var result, jOptionPane;
+			jOptionPane = JavaObject.getClass( "javax.swing.JOptionPane", forest.swing );
+			result = JavaObject.withTimeOut( 60.0, { jOptionPane.showConfirmDialog_( parent, text, title, [ \yesno, \yesnocancel, \okcancel ].indexOf( options ) ? -1, [ \error, \info, \warn, \question ].indexOf( type ) ? -1 ); });
+			jOptionPane.destroy;
+			if( result.notNil, { onComplete.value( [ \yes, \no, \cancel ][ result ])});
+		}.fork( SwingOSC.clock );
+	}
+}
