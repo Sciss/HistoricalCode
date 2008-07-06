@@ -1,0 +1,9 @@
+<?xml version="1.0" ?> 
+<!--                               -->
+<!-- ANT BUILD FILE FOR TIMEBASED  -->
+<!--                               -->
+<project default="jar"> 
+<target name="jar"> 
+ 	<jar jarfile="TimeBased.jar" basedir="bin"/>
+</target>
+</project>
