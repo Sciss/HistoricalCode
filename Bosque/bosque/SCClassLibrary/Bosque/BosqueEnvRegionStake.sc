@@ -65,17 +65,20 @@ BosqueEnvRegionStake : BosqueRegionStake {
 	}
 	
 	prCreateDefaultEnv {
-		var env, numSegm, segm, start, stop = 0, startLevel, stopLevel = 0.0;
-		numSegm = span.length.div( 4410 ) + 1;
-		segm = Array.fill( numSegm, { arg i;
-			start		= stop;
-			startLevel	= stopLevel;
-			stopLevel		= 1.0.rand;
-			stop			= (((i + 1) / numSegm) * span.length).asInteger;
-			BosqueEnvSegmentStake( Span( start, stop ), startLevel, stopLevel );
-		});
+		var env, segm;
+//		var numSegm, start, stop = 0, startLevel, stopLevel = 0.0;
+//		numSegm = span.length.div( 4410 ) + 1;
+//		segm = Array.fill( numSegm, { arg i;
+//			start		= stop;
+//			startLevel	= stopLevel;
+//			stopLevel		= 1.0.rand;
+//			stop			= (((i + 1) / numSegm) * span.length).asInteger;
+//			BosqueEnvSegmentStake( Span( start, stop ), startLevel, stopLevel );
+//		});
+		segm = BosqueEnvSegmentStake( Span( 0, span.length ), 0.0, 0.0 );
 		env = BosqueTrail.new;
-		env.addAll( nil, segm );
+//		env.addAll( nil, segm );
+		env.add( nil, segm );
 		^env;
 	}
 }

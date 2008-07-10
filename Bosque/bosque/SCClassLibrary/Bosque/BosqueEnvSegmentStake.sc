@@ -55,8 +55,22 @@ BosqueEnvSegmentStake : Stake {
 		^this.class.new( *args );
 	}
 
+	replaceStartWithLevel { arg newStart, newLevel;
+		var args = this.storeArgs;
+		args[ 0 ] = Span( newStart, span.stop );
+		args[ 1 ] = newLevel;
+		^this.class.new( *args );
+	}
+
 	replaceStopLevel { arg newLevel;
 		var args = this.storeArgs;
+		args[ 2 ] = newLevel;
+		^this.class.new( *args );
+	}
+	
+	replaceStopWithLevel {Êarg newStop, newLevel;
+		var args = this.storeArgs;
+		args[ 0 ] = Span( span.start, newStop );
 		args[ 2 ] = newLevel;
 		^this.class.new( *args );
 	}
@@ -82,5 +96,9 @@ BosqueEnvSegmentStake : Stake {
 	dispose {
 		java.dispose;
 		java.destroy;
+	}
+
+	protRemoved {
+		// XXX
 	}
 }

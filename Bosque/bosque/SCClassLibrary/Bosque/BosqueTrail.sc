@@ -92,6 +92,11 @@ BosqueTrail : Trail {
 		});
 		^super.editRemoveAll( source, stakes, ce );
 	}
+	
+	modified { arg source, span;
+		this.prDispatchModification( source, span );
+		java.modified( span );
+	}
 
 	prSortRemoveStake { arg stake, ce;
 		super.prSortRemoveStake( stake, ce );
