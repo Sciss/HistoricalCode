@@ -95,7 +95,7 @@ BosqueTrail : Trail {
 	
 	modified { arg source, span;
 		this.prDispatchModification( source, span );
-		java.modified( span );
+//		java.modified( span );
 	}
 
 	prSortRemoveStake { arg stake, ce;

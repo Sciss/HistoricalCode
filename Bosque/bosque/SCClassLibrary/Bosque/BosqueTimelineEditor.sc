@@ -392,9 +392,9 @@ BosqueTimelineEditor : Object {
 		JSCStaticText( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).align_( \right ).string_( "Tool:" );
 		vx = vx + vw + 4; vw = 80;
 		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
-			.items_([ "Move", "Resize" ])
+			.items_([ "Move", "Resize", "Env" ])
 			.action_({ arg b;
-				ggTimelinePanel.tool = [ \move, \resize ][ b.value ];
+				ggTimelinePanel.tool = [ \move, \resize, \env ][ b.value ];
 			});
 		
 //~ggScroll = ggScrollPane;
@@ -893,6 +893,7 @@ BosqueTimelineEditor : Object {
 		trail.editAdd( this, stake, ce );
 		trail.editEnd( ce );
 		doc.undoManager.addEdit( ce.performAndEnd );
+		stake.java.setRegionTrail( trail ); // XXX dirty dirty
 	}
 	
 	prTimelineChangeGain { arg doc;

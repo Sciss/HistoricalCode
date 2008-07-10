@@ -4,7 +4,7 @@
  *	@version	0.10, 06-Jul-08
  */
 BosqueEnvRegionStake : BosqueRegionStake {
-	var <java;
+//	var <java;
 //	var playing	= false;
 	var <env;		// a BosqueTrail whose stakes are instances of BosqueEnvSegmentStake
 	
