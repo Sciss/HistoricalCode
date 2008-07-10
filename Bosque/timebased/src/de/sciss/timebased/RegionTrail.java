@@ -30,9 +30,13 @@ package de.sciss.timebased;
 import java.io.IOException;
 import java.util.Arrays;
 
+import de.sciss.io.Span;
+
 public class RegionTrail
 extends BasicTrail
 {
+	private final Object oscSource = new Object();
+	
 	public int getDefaultTouchMode()
 	{
 		return TOUCH_SPLIT;
@@ -41,6 +45,11 @@ extends BasicTrail
 	public BasicTrail createEmptyCopy()
 	{
 		return new RegionTrail();
+	}
+	
+	public void modified( Span span )
+	{
+		dispatchModification( oscSource, span );
 	}
 
 	public void addAll( Object source, Object[] stakes )
