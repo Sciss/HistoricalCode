@@ -39,15 +39,38 @@ import de.sciss.io.Span;
  */
 public class ForestEnvRegionStake
 extends ForestRegionStake
+implements Trail.Listener
 {
 	private final BasicTrail env;  // actually BasicTrail<EnvSegmentStake>
+	private RegionTrail t;
 	
 	public ForestEnvRegionStake( Span span, String name, ForestTrack track, Color colr, Fade fadeIn, Fade fadeOut, float gain, BasicTrail env )
 	{
 		super( span, name, track, colr, fadeIn, fadeOut, gain );
 		this.env	= env;
+		
+		env.addListener( this );
+	}
+
+	public void trailModified( Trail.Event e )
+	{
+//		System.out.println( " YOOOO " + t + "; "+ e.getSource() + "; " + e.getAffectedSpan().shift( span.start ));
+		if( t != null ) t.modified( e.getSource(), e.getAffectedSpan().shift( span.start ));
 	}
 	
+	public void dispose()
+	{
+		env.removeListener( this );
+		t = null;
+		super.dispose();
+	}
+
+	public void setRegionTrail( RegionTrail t )
+	{
+		super.setTrail( t );
+		this.t = t;
+	}
+
 	public ForestEnvRegionStake( ForestEnvRegionStake orig )
 	{
 		this( orig.span, orig.name, orig.track, orig.colr, orig.fadeIn, orig.fadeOut, orig.gain, orig.getEnvCopy() );

@@ -35,7 +35,7 @@ import de.sciss.io.Span;
 public class RegionTrail
 extends BasicTrail
 {
-	private final Object oscSource = new Object();
+//	private final Object oscSource = new Object();
 	
 	public int getDefaultTouchMode()
 	{
@@ -47,10 +47,15 @@ extends BasicTrail
 		return new RegionTrail();
 	}
 	
-	public void modified( Span span )
+	public void modified( Object source, Span span )
 	{
-		dispatchModification( oscSource, span );
+		dispatchModification( source, span );
 	}
+
+//	public void modified( Span span )
+//	{
+//		dispatchModification( oscSource, span );
+//	}
 
 	public void addAll( Object source, Object[] stakes )
 	throws IOException
