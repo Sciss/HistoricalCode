@@ -1,6 +1,10 @@
 package de.sciss.timebased.timeline;
 
+import javax.swing.undo.UndoableEdit;
+
 import de.sciss.app.BasicEvent;
+import de.sciss.app.BasicUndoableEdit;
+import de.sciss.app.PerformableEdit;
 import de.sciss.io.Span;
 
 public interface TimelineView
@@ -140,6 +144,217 @@ public interface TimelineView
 				return true;
 
 			} else return false;
+		}
+	}
+	
+	// --------------------------------------------------
+	
+	public static class Edit
+	extends BasicUndoableEdit
+	{
+		private final TimelineView	view;
+		
+		private Object				source;
+		private long				oldPos, newPos;
+		private Span				oldVisi, newVisi, oldSel, newSel;
+
+		private int					actionMask;
+		
+		private static final int	ACTION_POSITION	= 0x01;
+		private static final int	ACTION_SCROLL	= 0x02;
+		private static final int	ACTION_SELECT	= 0x04;
+
+		/*
+		 *  Create and perform the edit. This method
+		 *  invokes the <code>Timeline.setSelectionSpan</code> method,
+		 *  thus dispatching a <code>TimelineEvent</code>.
+		 *
+		 *  @param  source		who originated the edit. the source is
+		 *						passed to the <code>Timeline.setSelectionSpan</code> method.
+		 *  @param  doc			session into whose <code>Timeline</code> is
+		 *						to be selected / deselected.
+		 *  @param  span		the new timeline selection span.
+		 *  @synchronization	waitExclusive on DOOR_TIME
+		 */
+		private Edit( Object source, TimelineView view )
+		{
+			super();
+			this.source		= source;
+			this.view		= view;
+			actionMask		= 0;
+		}
+		
+		public static Edit position( Object source, TimelineView view, long pos )
+		{
+			final Edit tve = new Edit( source, view );
+			tve.actionMask	= ACTION_POSITION;
+			
+			tve.oldPos		= view.getCursor().getPosition();
+			tve.newPos		= pos;
+			return tve;
+		}
+
+		public static Edit scroll( Object source, TimelineView view, Span newVisi )
+		{
+			final Edit tve = new Edit( source, view );
+			tve.actionMask	= ACTION_SCROLL;
+			
+			tve.oldVisi		= view.getSpan();
+			tve.newVisi		= newVisi;
+			return tve;
+		}
+
+		public static Edit select( Object source, TimelineView view, Span newSel )
+		{
+			final Edit tve = new Edit( source, view );
+			tve.actionMask	= ACTION_SELECT;
+			
+			tve.oldSel		= view.getSelection().getSpan();
+			tve.newSel		= newSel;
+			return tve;
+		}
+		
+		public PerformableEdit perform()
+		{
+			if( (actionMask & ACTION_POSITION) != 0 ) {
+				view.getCursor().setPosition( source, newPos );
+			}
+			if( (actionMask & ACTION_SCROLL) != 0 ) {
+				view.setSpan( source, newVisi );
+			}
+			if( (actionMask & ACTION_SELECT) != 0 ) {
+				view.getSelection().setSpan( source, newSel );
+			}
+			source	= this;
+			return this;
+		}
+
+		/**
+		 *  @return		false to tell the UndoManager it should not feature
+		 *				the edit as a single undoable step in the history.
+		 *				which is especially important since <code>TimelineAxis</code>
+		 *				will generate lots of edits when the user drags
+		 *				the timeline selection.
+		 */
+		public boolean isSignificant()
+		{
+			return false;
+		}
+
+		/**
+		 *  Undo the edit
+		 *  by calling the <code>Timeline.setSelectionSpan</code>,
+		 *  method, thus dispatching a <code>TimelineEvent</code>.
+		 *
+		 *  @synchronization	waitExlusive on DOOR_TIME.
+		 */
+		public void undo()
+		{
+			super.undo();
+			if( (actionMask & ACTION_POSITION) != 0 ) {
+				view.getCursor().setPosition( source, oldPos );
+			}
+			if( (actionMask & ACTION_SCROLL) != 0 ) {
+				view.setSpan( source, oldVisi );
+			}
+			if( (actionMask & ACTION_SELECT) != 0 ) {
+				view.getSelection().setSpan( source, oldSel );
+			}
+		}
+		
+		/**
+		 *  Redo the edit. The original source is discarded
+		 *  which means, that, since a new <code>TimelineEvent</code>
+		 *  is dispatched, even the original object
+		 *  causing the edit will not know the details
+		 *  of the action, hence thoroughly look
+		 *  and adapt itself to the new edit.
+		 *
+		 *  @synchronization	waitExlusive on DOOR_TIME.
+		 */
+		public void redo()
+		{
+			super.redo();
+			perform();
+		}
+		
+		/**
+		 *  Collapse multiple successive EditSetReceiverBounds edit
+		 *  into one single edit. The new edit is sucked off by
+		 *  the old one.
+		 */
+		public boolean addEdit( UndoableEdit anEdit )
+		{
+			if( anEdit instanceof Edit ) {
+				final Edit tve = (Edit) anEdit;
+				if( view != tve.view ) return false;
+
+				if( (tve.actionMask & ACTION_POSITION) != 0 ) {
+					newPos		= tve.newPos;
+					if( (actionMask & ACTION_POSITION) == 0 ) {
+						oldPos = tve.oldPos;
+					}
+				}
+				if( (tve.actionMask & ACTION_SCROLL) != 0 ) {
+					newVisi	= tve.newVisi;
+					if( (actionMask & ACTION_SCROLL) == 0 ) {
+						oldVisi = tve.oldVisi;
+					}
+				}
+				if( (tve.actionMask & ACTION_SELECT) != 0 ) {
+					newSel		= tve.newSel;
+					if( (actionMask & ACTION_SELECT) == 0 ) {
+						oldSel = tve.oldSel;
+					}
+				}
+				actionMask |= tve.actionMask;
+				anEdit.die();
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		/**
+		 *  Collapse multiple successive edits
+		 *  into one single edit. The old edit is sucked off by
+		 *  the new one.
+		 */
+		public boolean replaceEdit( UndoableEdit anEdit )
+		{
+			if( anEdit instanceof Edit ) {
+				final Edit tve = (Edit) anEdit;
+				if( view != tve.view ) return false;
+				
+				if( (tve.actionMask & ACTION_POSITION) != 0 ) {
+					oldPos		= tve.oldPos;
+					if( (actionMask & ACTION_POSITION) == 0 ) {
+						newPos	= tve.newPos;
+					}
+				}
+				if( (tve.actionMask & ACTION_SCROLL) != 0 ) {
+					oldVisi	= tve.oldVisi;
+					if( (actionMask & ACTION_SCROLL) == 0 ) {
+						newVisi = tve.newVisi;
+					}
+				}
+				if( (tve.actionMask & ACTION_SELECT) != 0 ) {
+					oldSel		= tve.oldSel;
+					if( (actionMask & ACTION_SELECT) == 0 ) {
+						newSel = tve.newSel;
+					}
+				}
+				actionMask |= tve.actionMask;
+				anEdit.die();
+				return true;
+			} else {
+				return false;
+			}
+		}
+
+		public String getPresentationName()
+		{
+			return getResourceString( "editSetTimelineView" );
 		}
 	}
 }

@@ -40,6 +40,10 @@ import javax.swing.Timer;
 import de.sciss.gui.ComponentHost;
 import de.sciss.gui.TopPainter;
 import de.sciss.io.Span;
+import de.sciss.timebased.timeline.BasicTimeline;
+import de.sciss.timebased.timeline.BasicTimelineView;
+import de.sciss.timebased.timeline.Timeline;
+import de.sciss.timebased.timeline.TimelineView;
 
 /**
  *  @author		Hanns Holger Rutz
@@ -79,10 +83,30 @@ implements TopPainter
 	protected long			playStartTime;
 	protected boolean		isPlaying				= false;
 
+	private final TimelineAxis	timeAxis;
+	private final MarkerAxis	markAxis;
+	
 	public TimelinePanel()
+	{
+		this( new BasicTimeline() );
+	}
+	
+	public TimelinePanel( Timeline tl )
+	{
+		this( new BasicTimelineView( tl ));
+	}
+
+	public TimelinePanel( TimelineView tlv )
 	{
 		addTopPainter( this );
 		setLayout( new BoxLayout( this, BoxLayout.Y_AXIS ));
+		
+		timeAxis			= new TimelineAxis( tlv, this );
+		markAxis			= new MarkerAxis( tlv, this );
+
+		add( timeAxis );
+		add( markAxis );
+//		wavePanel.add( waveView );
 
 		playTimer = new Timer( 33, new ActionListener() {
 			public void actionPerformed( ActionEvent e )
@@ -93,9 +117,7 @@ implements TopPainter
 				if( !isPlaying ) return;
 				
 				timelinePos = (long) ((System.currentTimeMillis() - playStartTime) * timelineRate * playRate / 1000 + playStartPos);
-//System.out.println( "playTimer : " + timelinePos );
 				updatePositionAndRepaint();
-//				scroll.setPosition( timelinePos, 50, TimelineScroll.TYPE_TRANSPORT );
 			}
 		});
 	}

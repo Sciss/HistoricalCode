@@ -159,7 +159,7 @@ implements Timeline, EventManager.Processor
 			if( source != null ) dispatchChange( source );
 		}
     }
-
+    
 	/**
 	 *  Register a <code>TimelineListener</code>
 	 *  which will be informed about changes of
