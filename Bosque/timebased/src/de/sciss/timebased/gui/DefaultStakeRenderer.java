@@ -172,21 +172,21 @@ implements StakeRenderer
 		yZoom = val;
 	}
 	
-	public Component getStakeRendererComponent( TrailView tv, Stake value, boolean selected, double hscale, float vscale )
+	public Component getStakeRendererComponent( TrailView tv, Stake value, boolean isSelected, double horizScale, float vscale )
 	{
 		stakeSpan		= value.getSpan();
 		viewSpan		= tv.getVisibleSpan();
 		sfv				= null;
 		env				= null;
-		this.selected	= selected;
-		this.hscale		= hscale;
+		this.selected	= isSelected;
+		this.hscale		= horizScale;
 //		this.vscale		= vscale;
 		
 		bounds.setBounds( 
-			(int) ((stakeSpan.start - viewSpan.start) * hscale + 0.5),
-			(int) 0, // (a.getY() * h + 0.5),
-			(int) (stakeSpan.getLength() * hscale + 0.5),
-			(int) tv.getHeight() ); // (a.getHeight() * h + 0.5) );
+			(int) ((stakeSpan.start - viewSpan.start) * horizScale + 0.5),
+			0, // (a.getY() * h + 0.5),
+			(int) (stakeSpan.getLength() * horizScale + 0.5),
+			tv.getHeight() ); // (a.getHeight() * h + 0.5) );
 		
 //		System.out.println( "Bounds = " + bounds );
 		
@@ -200,7 +200,7 @@ implements StakeRenderer
 			fadeIn = frs.fadeIn != null;
 			if( fadeIn ) {
 				shpFillFadeIn.reset();
-				final float px = (float) (frs.fadeIn.numFrames * hscale);
+				final float px = (float) (frs.fadeIn.numFrames * horizScale);
 				if( frs.fadeIn.type == Fade.TYPE_LINEAR ) {
 //					curveFadeIn.setCurve( 1, bounds.height - 1, 1, hndlExtent, 1, hndlExtent, px, hndlExtent ); // x1, y1, ctrlx, ctrly, x2, y2
 //					shpFadeIn.append( curveFadeIn, false );
@@ -213,7 +213,7 @@ implements StakeRenderer
 			fadeOut = frs.fadeOut != null;
 			if( fadeOut ) {
 				shpFillFadeOut.reset();
-				final float px = (float) (frs.fadeOut.numFrames * hscale);
+				final float px = (float) (frs.fadeOut.numFrames * horizScale);
 				if( frs.fadeOut.type == Fade.TYPE_LINEAR ) {
 //					curveFadeIn.setCurve( 1, bounds.height - 1, 1, hndlExtent, 1, hndlExtent, px, hndlExtent ); // x1, y1, ctrlx, ctrly, x2, y2
 //					shpFadeIn.append( curveFadeIn, false );
@@ -233,19 +233,19 @@ whichRegion:
 				final Span spanClip = stakeSpan.intersection( viewSpan );
 				final Span sfvSpanV = spanClip.shift( -viewSpan.start );
 				final Span sfvSpanF = spanClip.shift( fars.getFileStartFrame() - stakeSpan.start );
-				final int sfvw = (int) (sfvSpanV.getLength() * hscale + 0.5) ;
+				final int sfvw = (int) (sfvSpanV.getLength() * horizScale + 0.5) ;
 				final int sfvh = bounds.height - hndlExtent - 1;
 				if( (sfvw > 0) && (sfvh > 0) ) {	// currently error with 0 size in SoundFileView !
 					sfv = fars.getSoundFileView();
 					if( sfv == null ) break whichRegion;
 					final Insets in = sfv.getInsets();
-					sfv.setBounds( (int) (sfvSpanV.start * hscale + 0.5) - in.left - bounds.x,
+					sfv.setBounds( (int) (sfvSpanV.start * horizScale + 0.5) - in.left - bounds.x,
 								   hndlExtent - in.top,
 								   sfvw + (in.left + in.right),
 								   sfvh + (in.top + in.bottom ));
 					sfv.setViewSpan( sfvSpanF );
-					sfv.setBackground( selected ? colrAtomBgS : colrAtomBg );
-					sfv.setWaveColor( selected ? colrWaveS : colrWave );
+					sfv.setBackground( isSelected ? colrAtomBgS : colrAtomBg );
+					sfv.setWaveColor( isSelected ? colrWaveS : colrWave );
 					sfv.setYZoom( fars.gain * yZoom );
 //System.out.println( "sfvx " + sfvx + ", sfvw " + sfvw + ", viewSpan " + viewSpan + ", stakeSpan " + stakeSpan + ", sfvSpanV " + sfvSpanV + ", sfvSpanF " + sfvSpanF );
 				}

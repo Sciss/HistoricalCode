@@ -109,7 +109,7 @@ implements Trail.Listener
 		final Span			spanNew	= new Span( newStart, span.stop );
 		final BasicTrail	envNew	= env.createEmptyCopy();
 		try {
-			envNew.addAll( null, env.getCuttedRange( new Span( delta, env.getSpan().stop ), true, BasicTrail.TOUCH_SPLIT, -delta ));
+			envNew.addAll( null, env.getCuttedRange( new Span( delta, env.getSpan().stop ), true, Trail.TOUCH_SPLIT, -delta ));
 		}
 		catch( IOException e1 ) {	// never happens
 			e1.printStackTrace();
@@ -122,7 +122,7 @@ implements Trail.Listener
 		final Span			spanNew	= new Span( span.start, newStop );
 		final BasicTrail	envNew	= env.createEmptyCopy();
 		try {
-			envNew.addAll( null, env.getCuttedRange( new Span( 0, spanNew.getLength() ), true, BasicTrail.TOUCH_SPLIT, 0 ));
+			envNew.addAll( null, env.getCuttedRange( new Span( 0, spanNew.getLength() ), true, Trail.TOUCH_SPLIT, 0 ));
 		}
 		catch( IOException e1 ) {	// never happens
 			e1.printStackTrace();

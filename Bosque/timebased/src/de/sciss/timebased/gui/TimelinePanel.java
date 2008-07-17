@@ -66,18 +66,18 @@ implements TopPainter
 	
 	private Span		timelineVis				= new Span();
 	private Span		timelineSel				= new Span();
-	private long		timelinePos				= 0;
+	protected long		timelinePos				= 0;
 
 	private final Timer	playTimer;
 	
 	// !!! for some crazy reason, these need to be volatile because otherwise
 	// the playTimer's actionPerformed body might use a cached value !!!
 	// how can this happen when javax.swing.Timer is playing on the event thread?!
-	private double		timelineRate			= 44100.0;
-	private double		playRate				= 1.0;
-	private long		playStartPos			= 0;
-	private long		playStartTime;
-	private boolean		isPlaying				= false;
+	protected double		timelineRate			= 44100.0;
+	protected double		playRate				= 1.0;
+	protected long			playStartPos			= 0;
+	protected long			playStartTime;
+	protected boolean		isPlaying				= false;
 
 	public TimelinePanel()
 	{
@@ -230,7 +230,7 @@ implements TopPainter
 		}
 	}
 
-	private void updatePositionAndRepaint()
+	protected void updatePositionAndRepaint()
 	{
 		boolean pEmpty, cEmpty;
 		int		x, x2;

@@ -714,6 +714,11 @@ extends AbstractMultiSlider
 		}
 	}
 	
+	protected void fireActionPerformed()
+	{
+		super.fireActionPerformed();
+	}
+	
 // --------------- internal classes ---------------
 	
 	private class MouseAdapter

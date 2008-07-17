@@ -810,6 +810,17 @@ if( DEBUG ) {
 	
 	protected abstract BasicTrail createEmptyCopy();
 
+	/**
+	 *	@param stakes	sorted stakes to cut
+	 *	@param span
+	 *	@param byStart	whether stakes are sorted by start (true) or by stop (false)
+	 *	@param touchMode
+	 *	@param shiftVirtual
+	 *
+	 *	@return
+	 *
+	 *	@todo	byStart is not used right now, so there is room for optimization i guess
+	 */
 	public static List getCuttedRange( List stakes, Span span, boolean byStart,
 												 int touchMode, long shiftVirtual )
 	{
@@ -1127,6 +1138,11 @@ if( DEBUG ) {
 	
 	/**
 	 *	To be overwritten by dependants.
+	 *
+	 *	@param	source	the object responsible for the modfications
+	 *	@param	stakes	the stakes that have been added
+	 *	@param	ce		the edit to which the modifications have been appended
+	 *	@param	span	the span which covers the modification range
 	 */
 	protected void addAllDep( Object source, List stakes, AbstractCompoundEdit ce, Span span )
 	throws IOException
@@ -1204,6 +1220,11 @@ if( DEBUG ) {
 	
 	/**
 	 *	To be overwritten by dependants.
+	 *
+	 *	@param	source	the source triggering doing the modification
+	 *	@param	stakes	the stakes that were remove
+	 *	@param	ce		the edit to which the modification were appended
+	 *	@param	span	the span covering the modification range
 	 */
 	protected void removeAllDep( Object source, List stakes, AbstractCompoundEdit ce, Span span )
 	throws IOException

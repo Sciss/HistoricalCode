@@ -87,16 +87,16 @@ implements Trail.Listener
 		return stakeRenderer;
 	}
 	
-	public void addTrack( ForestTrack t )
+	public void addTrack( ForestTrack ft )
 	{
-		tracks.add( t );
+		tracks.add( ft );
 		recalcTrackBounds();
 		triggerRedisplay();
 	}
 	
-	public void removeTrack( ForestTrack t )
+	public void removeTrack( ForestTrack ft )
 	{
-		tracks.remove( t );
+		tracks.remove( ft );
 		recalcTrackBounds();
 		triggerRedisplay();
 	}
@@ -104,11 +104,11 @@ implements Trail.Listener
 	private void recalcTrackBounds()
 	{
 		float y = 0f;
-		ForestTrack t;
+		ForestTrack ft;
 		for( int i = 0; i < tracks.size(); i++ ) {
-			t = (ForestTrack) tracks.get( i );
-			t.y = y;
-			y += t.height;
+			ft = (ForestTrack) tracks.get( i );
+			ft.y = y;
+			y += ft.height;
 		}
 		trackVScale = y == 0f ? 1f : (1f / y);
 	}
@@ -227,9 +227,9 @@ implements Trail.Listener
 				if( selected ) {
 					g2.drawRect( 
 							(int) ((s.getSpan().start - timelineVis.start) * hscale + 0.5) + dragDeltaX,
-							(int) dragDeltaY,
+							dragDeltaY,
 							(int) (s.getSpan().getLength() * hscale + 0.5) + dragDeltaWidth,
-							(int) h + dragDeltaHeight );
+							h + dragDeltaHeight );
 				}
 			}
 		}
