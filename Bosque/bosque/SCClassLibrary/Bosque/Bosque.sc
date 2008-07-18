@@ -58,6 +58,8 @@ Bosque : Object {
 	var <subwChannel;
 	
 	var <midiOut;
+
+	var <master;
 	
 	*initClass {
 //		Class.initClassTree( SwingOSC );
@@ -71,6 +73,12 @@ Bosque : Object {
 	prInit {
 		if( default.isNil, { default = this });
 
+		swing		= SwingOSC.default;
+		scsynth		= Server.default; // Server( \forest, VerboseNetAddr( "127.0.0.1", 57001 )); // Server.default;
+	  swing.doWhenBooted({
+
+		master			= JavaObject( "de.sciss.timebased.net.Master" );
+
 //		soundCard				= [ "Fireface 800 (393)", "Fireface 800 (EB1)" ][ config ]; // "Mobile I/O 2882 [2600]"
 //		numInputBusChannels	= [ 10, 10 ][ config ];
 //		numOutputBusChannels	= [ 20, 20 ][ config ];
@@ -80,8 +88,6 @@ Bosque : Object {
 
 		// MIO:				   [ 0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15 ]
 	
-		swing		= SwingOSC.default;
-		scsynth		= Server.default; // Server( \forest, VerboseNetAddr( "127.0.0.1", 57001 )); // Server.default;
 		clipBoard		= JClipboard( "Bosque" );
 		chris		= NetAddr( "192.168.50.1", 7500 );
 		martin		= NetAddr( "192.168.50.2", 7700 );
@@ -141,21 +147,20 @@ Bosque : Object {
 		session		= BosqueSession.new;
 		UpdateListener.newFor( session.transport, { arg upd, transport, what; if( what === \play, {("% play ("++thisThread.seconds++")").postln; })});
 		
-		swing.doWhenBooted({
-//			swing.updateClasses( "file:///Users/rutz/Documents/workspace/TimeBased/TimeBased.jar" );
-			swing.addClasses( timeBasedJar );
-			cacheManager = JavaObject( "de.sciss.io.CacheManager", swing );
-			cacheManager.setFolderAndCapacity( workDir ++ "cache", 300 );
-			cacheManager.setActive( true );
-			onSwingBoot.do(_.value);
-			onSwingBoot = nil;
-		}, inf );
+//		swing.updateClasses( "file:///Users/rutz/Documents/workspace/TimeBased/TimeBased.jar" );
+		if( timeBasedJar.notNil, { swing.addClasses( timeBasedJar )});
+		cacheManager = JavaObject( "de.sciss.io.CacheManager", swing );
+		cacheManager.setFolderAndCapacity( workDir ++ "cache", 300 );
+		cacheManager.setActive( true );
+		onSwingBoot.do(_.value);
+		onSwingBoot = nil;
 		scsynth.doWhenBooted({
 			this.prAudioInit;
 			this.prMIDIInit;
 			onScSynthBoot.do(_.value);
 			onScSynthBoot = nil;
 		}, inf );
+	  }, inf ); // swing.doWhenBooted
 	}
 	
 	bootScSynth {

@@ -3,203 +3,6 @@
  *
  *	@version	0.12, 14-Aug-07
  */
-BosqueTimelineVisualEdit : JBasicUndoableEdit {
-	var	doc;
-	var	source;
-	var	<>oldPos, <>newPos;
-	var	<>oldVisi, <>newVisi, <>oldSel, <>newSel;
-
-	var	<>actionMask;
-		
-	classvar kActionPosition	= 0x01;
-	classvar kActionScroll		= 0x02;
-	classvar kActionSelect		= 0x04;
-
-	/*
-	 *  Create and perform the edit. This method
-	 *  invokes the <code>Timeline.setSelectionSpan</code> method,
-	 *  thus dispatching a <code>TimelineEvent</code>.
-	 *
-	 *  @param  source		who originated the edit. the source is
-	 *						passed to the <code>Timeline.setSelectionSpan</code> method.
-	 *  @param  doc			session into whose <code>Timeline</code> is
-	 *						to be selected / deselected.
-	 *  @param  span		the new timeline selection span.
-	 *  @synchronization	waitExclusive on DOOR_TIME
-	 */
-	*new { arg source, doc;
-		^super.new.prInitTimelineVisualEdit( source, doc );
-	}
-	
-	prInitTimelineVisualEdit { arg argSource, argDoc;
-		source		= argSource;
-		doc			= argDoc;
-		actionMask	= 0;
-	}
-	
-	*position { arg source, doc, pos;
-		var tve = this.new( source, doc );
-		tve.actionMask	= kActionPosition;
-		
-		tve.oldPos		= doc.timeline.position;
-		tve.newPos		= pos;
-		^tve;
-	}
-
-	*scroll { arg source, doc, newVisi;
-		var tve = this.new( source, doc );
-		tve.actionMask	= kActionScroll;
-		
-		tve.oldVisi		= doc.timeline.visibleSpan;
-		tve.newVisi		= newVisi;
-		^tve;
-	}
-
-	*select { arg source, doc, newSel;
-		var tve = this.new( source, doc );
-		tve.actionMask	= kActionSelect;
-		
-		tve.oldSel		= doc.timeline.selectionSpan;
-		tve.newSel		= newSel;
-		^tve;
-	}
-	
-	performEdit {
-		if( (actionMask & kActionPosition) != 0, {
-			doc.timeline.position = newPos; // setPosition( source, newPos );
-		});
-		if( (actionMask & kActionScroll) != 0, {
-			doc.timeline.visibleSpan = newVisi; // setVisibleSpan( source, newVisi );
-		});
-		if( (actionMask & kActionSelect) != 0, {
-			doc.timeline.selectionSpan = newSel; // setSelectionSpan( source, newSel );
-		});
-		source	= this;
-	}
-
-	/**
-	 *  @return		false to tell the UndoManager it should not feature
-	 *				the edit as a single undoable step in the history.
-	 *				which is especially important since <code>TimelineAxis</code>
-	 *				will generate lots of edits when the user drags
-	 *				the timeline selection.
-	 */
-	isSignificant { ^false }
-
-	/**
-	 *  Undo the edit
-	 *  by calling the <code>Timeline.setSelectionSpan</code>,
-	 *  method, thus dispatching a <code>TimelineEvent</code>.
-	 *
-	 *  @synchronization	waitExlusive on DOOR_TIME.
-	 */
-	undo	{
-		super.undo;
-		if( (actionMask & kActionPosition) != 0, {
-			doc.timeline.position = oldPos; // setPosition( source, oldPos );
-		});
-		if( (actionMask & kActionScroll) != 0, {
-			doc.timeline.visibleSpan = oldVisi; // setVisibleSpan( source, oldVisi );
-		});
-		if( (actionMask & kActionSelect) != 0, {
-			doc.timeline.selectionSpan = oldSel; // setSelectionSpan( source, oldSel );
-		});
-	}
-	
-	/**
-	 *  Redo the edit. The original source is discarded
-	 *  which means, that, since a new <code>TimelineEvent</code>
-	 *  is dispatched, even the original object
-	 *  causing the edit will not know the details
-	 *  of the action, hence thoroughly look
-	 *  and adapt itself to the new edit.
-	 *
-	 *  @synchronization	waitExlusive on DOOR_TIME.
-	 */
-	redo {
-		super.redo;
-		this.performEdit;
-	}
-	
-	/**
-	 *  Collapse multiple successive EditSetReceiverBounds edit
-	 *  into one single edit. The new edit is sucked off by
-	 *  the old one.
-	 */
-	addEdit { arg anEdit;
-		var tve;
-//		if( dontMerge ) return false;
-	
-		if( anEdit.isKindOf( this.class ), {
-			tve = anEdit;
-			if( (tve.actionMask & kActionPosition) != 0, {
-				newPos		= tve.newPos;
-				if( (actionMask & kActionPosition) == 0, {
-					oldPos = tve.oldPos;
-				});
-			});
-			if( (tve.actionMask & kActionScroll) != 0, {
-				newVisi	= tve.newVisi;
-				if( (actionMask & kActionScroll) == 0, {
-					oldVisi = tve.oldVisi;
-				});
-			});
-			if( (tve.actionMask & kActionSelect) != 0, {
-				newSel		= tve.newSel;
-				if( (actionMask & kActionSelect) == 0, {
-					oldSel = tve.oldSel;
-				});
-			});
-			actionMask = actionMask | tve.actionMask;
-			anEdit.die;
-			^true;
-		}, {
-			^false;
-		});
-	}
-
-	/**
-	 *  Collapse multiple successive edits
-	 *  into one single edit. The old edit is sucked off by
-	 *  the new one.
-	 */
-	replaceEdit { arg anEdit;
-		var tve;
-//		if( dontMerge ) return false;
-
-		if( anEdit.isKindOf( this.class ), {
-			tve = anEdit;
-			if( (tve.actionMask & kActionPosition) != 0, {
-				oldPos		= tve.oldPos;
-				if( (actionMask & kActionPosition) == 0, {
-					newPos	= tve.newPos;
-				});
-			});
-			if( (tve.actionMask & kActionScroll) != 0, {
-				oldVisi	= tve.oldVisi;
-				if( (actionMask & kActionScroll) == 0, {
-					newVisi = tve.newVisi;
-				});
-			});
-			if( (tve.actionMask & kActionSelect) != 0, {
-				oldSel		= tve.oldSel;
-				if( (actionMask & kActionSelect) == 0, {
-					newSel = tve.newSel;
-				});
-			});
-			actionMask = actionMask | tve.actionMask;
-			anEdit.die;
-			^true;
-		}, {
-			^false;
-		});
-	}
-
-	presentationName {
-		^"Set Timeline View"; // getResourceString( "editSetTimelineView" );
-	}
-}
-
 BosqueEditAddSessionObjects : JBasicUndoableEdit {
 	var	collSessionObjects;
 	var	source;
@@ -347,7 +150,7 @@ BosqueTimelineEdit : JBasicUndoableEdit {
 	var	source;
 	var	<>oldValue, <>newValue, <>setter, <>getter;
 
-	*new {�arg source, doc, value, setter, getter;
+	*new { arg source, doc, value, setter, getter;
 		^super.new.prInitTimelineEdit( source, doc, value, setter, getter );
 	}
 	
@@ -364,8 +167,8 @@ BosqueTimelineEdit : JBasicUndoableEdit {
 		^this.new( source, doc, newRate, 'rate_', 'rate' );
 	}
 
-	*length { arg source, doc, newLength;
-		^this.new( source, doc, newLength, 'length_', 'length' );
+	*span { arg source, doc, newSpan;
+		^this.new( source, doc, newSpan, 'span_', 'span' );
 	}
 	
 	performEdit {

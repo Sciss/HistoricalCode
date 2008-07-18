@@ -1,82 +1,79 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.12, 13-Aug-07
+ *	@version	0.12, 18-Jul-08
  */
 BosqueTimeline : Object {
-	var <doc;
-	var <position	= 0;
-	var <length	= 0;
-	var <rate		= 44100;
-	var <visibleSpan;
-	var <selectionSpan;
+	var <span;
+	var <rate;
+	var javaBackEnd, javaNet, javaResp;
 
-	*new { arg doc;
-		^super.new.prInit( doc );
+	*new { arg rate, span;
+		^super.new.prInit( rate, span );
 	}
 	
-	prInit { arg argDoc;
-		doc			= argDoc ?? { Bosque.default.session };
-		visibleSpan	= Span.new;
-		selectionSpan	= Span.new;
-	}
-	
-	storeModifiersOn { arg stream;
-		stream << ".rate_(";
-		rate.storeOn( stream );
-		stream << ")";
-		stream << ".length_(";
-		length.storeOn( stream );
-		stream << ")";
-		stream << ".position_(";
-		position.storeOn( stream );
-		stream << ")";
-		stream << ".visibleSpan_(";
-		visibleSpan.storeOn( stream );
-		stream << ")";
-		stream << ".selectionSpan_(";
-		selectionSpan.storeOn( stream );
-		stream << ")";
-	}
-	
-	clear {
-		this.position_( 0 ).selectionSpan_( Span.new ).visibleSpan_( Span.new ).length_( 0 );
-	}
-
-	position_ { arg val;
-		position = val;
-		this.changed( \position, position );
-	}
-	
-	length_ { arg val;
-		length = val;
-		this.changed( \length, length );
-	}
-
-	rate_ { arg val;
-		rate = val;
-		this.changed( \rate, rate );
-	}
+	prInit { arg argRate, argSpan;
+		var swing;
 		
-	visibleSpan_ { arg span;
-		visibleSpan = span;
-		this.changed( \visible, visibleSpan );
+		rate			= argRate ? 1000.0;
+		span			= argSpan ??  {ÊSpan.new };
+		swing		= Bosque.default.swing;
+		javaBackEnd	= JavaObject( "de.sciss.timebased.timeline.BasicTimeline", swing, rate, span );
+		javaNet		= JavaObject( "de.sciss.timebased.net.NetTimeline", swing, Bosque.default.master, javaBackEnd );
+		javaNet.setID( javaNet.id );
+		
+		javaResp = ScissOSCPathResponder( swing.addr, [ '/timeline', javaNet.id ], { arg time, resp, msg;
+			select( msg[ 2 ],
+			\rate, { this.rate = msg[ 3 ]},
+			\span, { this.span = Span( msg[ 3 ], msg[ 4 ])}
+			);
+		}).add;
+	}
+	
+//	storeModifiersOn { arg stream;
+//		stream << ".rate_(";
+//		rate.storeOn( stream );
+//		stream << ")";
+//		stream << ".length_(";
+//		length.storeOn( stream );
+//		stream << ")";
+//		stream << ".position_(";
+//		position.storeOn( stream );
+//		stream << ")";
+//		stream << ".visibleSpan_(";
+//		visibleSpan.storeOn( stream );
+//		stream << ")";
+//		stream << ".selectionSpan_(";
+//		selectionSpan.storeOn( stream );
+//		stream << ")";
+//	}
+	
+	span_ { arg newSpan;
+		if( newSpan.equals( span ).not, {
+			span = newSpan;
+			this.changed( \span, span );
+			javaBackEnd.setSpan( javaBackEnd, span );
+		});
 	}
 
-	selectionSpan_ { arg span;
-		selectionSpan = span;
-		this.changed( \selection, selectionSpan );
+	rate_ { arg newRate;
+		if( newRate != rate, {
+			rate = newRate;
+			this.changed( \rate, rate );
+			javaBackEnd.setRate( javaBackEnd, rate );
+		});
 	}
 
-	editPosition { arg source, pos;
-		doc.undoManager.addEdit( BosqueTimelineVisualEdit.position( source, doc, pos ).performEdit );	
+	dispose {
+		javaResp.remove; javaResp = nil;
+		javaNet.dispose; javaNet.destroy; javaNet = nil;
+		javaBackEnd.dispose; javaBackEnd.destroy; javaBackEnd = nil;
 	}
 
-	editScroll { arg source, span;
-		doc.undoManager.addEdit( BosqueTimelineVisualEdit.scroll( source, doc, span ).performEdit );	
-	}
-
-	editSelect { arg source, span;
-		doc.undoManager.addEdit( BosqueTimelineVisualEdit.select( source, doc, span ).performEdit );
-	}
+//	asSwingArg {
+//		^javaBackEnd.asSwingArg;
+//	}
+	
+	backend { ^javaBackEnd }
+	net { ^javaNet }
 }

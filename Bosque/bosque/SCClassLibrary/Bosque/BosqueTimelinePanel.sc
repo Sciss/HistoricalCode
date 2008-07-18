@@ -32,7 +32,7 @@ BosqueTimelinePanel {
 	
 	prInit { arg argDoc, parent, bounds;
 		var updTimeline, updSelection, updTransport, updTracks, fntSmall, forest, jPanel, ggScrollPane, view;
-		var updTrackSel, ggVolLab;
+		var updTrackSel, ggVolLab, jTimeAxis, jMarkAxis;
 		
 		doc		= argDoc;
 		forest	= doc.forest;
@@ -42,9 +42,19 @@ BosqueTimelinePanel {
 //		ggScrollPane = JSCScrollPane( parent, bounds ).resize_( 5 )
 //			.verticalScrollBarShown_( \always )
 //			.horizontalScrollBarShown_( \never );
-		jPanel = JavaObject( "de.sciss.timebased.gui.TimelinePanel", forest.swing );
+		jPanel = JavaObject( "de.sciss.timebased.gui.TimelinePanel", forest.swing, doc.timelineView.net );
+		jTimeAxis = jPanel.getTimelineAxis__;
+		jMarkAxis = jPanel.getMarkerAxis__;
+		jTimeAxis.setFont( fntSmall );
+		jMarkAxis.setFont( fntSmall );
+		BosqueTimelineAxis( doc, this, jTimeAxis );
+		jTimeAxis.setEditable( true );
+		jMarkAxis.setTrail( doc.markers );
+		jMarkAxis.setEditable( true );
+		jMarkAxis.destroy;
 //		view = JSCPlugView( ggScrollPane, bounds, jPanel ); // .resize_( 5 );
 		view = JSCPlugView( parent, bounds.insetAll( 60, 0, 0, 60 ), jPanel ).resize_( 5 );
+		view.onClose = { jTimeAxis.destroy };
 		jTrailView = JavaObject( "de.sciss.timebased.gui.TrailView", forest.swing, jPanel );
 		jTrailView.setFont( fntSmall );
 		jTrailView.setTrail( doc.trail );
@@ -97,21 +107,21 @@ BosqueTimelinePanel {
 				});
 			});
 
-		updTimeline = UpdateListener.newFor( doc.timeline, { arg upd, timeline, what ... params;
+		updTimeline = UpdateListener.newFor( doc.timelineView, { arg upd, view, what ... params;
 			switch( what,
-			\visible, {
-				jTrailView.setVisibleSpan( timeline.visibleSpan );
-				jPanel.setVisibleSpan( timeline.visibleSpan );
+			\scrolled, {
+				jTrailView.setVisibleSpan( doc.timelineView.span );
+//				jPanel.setVisibleSpan( doc.timelineView.span );
 				this.prSetVolEnv;
-			},
-			\position, {
-				jPanel.setPosition( timeline.position );
-			},
-			\selection, {
-				jPanel.setSelectionSpan( timeline.selectionSpan );
-			},
-			\rate, {
-				jPanel.setRate( timeline.rate );
+//			},
+//			\positioned, {
+//				jPanel.setPosition( view.cursor.position );
+//			},
+//			\selected, {
+//				jPanel.setSelectionSpan( view.selection.span );
+//			},
+//			\rate, {
+//				jPanel.setRate( doc.timeline.rate );
 			});
 		});
 		
@@ -128,9 +138,7 @@ BosqueTimelinePanel {
 		updTransport = UpdateListener.newFor( doc.transport, { arg upd, transport, what, param1, param2;
 			switch( what,
 			\play, {
-//				("jPanel.setPosition( "++param1++" )").postln;
-				jPanel.setPosition( param1 );
-//				("jPanel.play( "++param2++" )").postln;
+//				jPanel.setPosition( param1 );
 				jPanel.play( param2 );
 			},
 			\stop, {
@@ -143,7 +151,7 @@ BosqueTimelinePanel {
 			},
 			\resume, {
 				"---resume".postln;
-				jPanel.setPosition( param1 );
+//				jPanel.setPosition( param1 );
 				jPanel.play( param2 );
 			});
 		});
@@ -240,7 +248,7 @@ BosqueTimelinePanel {
 		
 		if( e.clickCount == 2, {
 			bounds	= e.component.bounds;
-			visiSpan	= doc.timeline.visibleSpan;
+			visiSpan	= doc.timelineView.span;
 			frame	= ((e.x / bounds.width) * visiSpan.length).asInteger + visiSpan.start;
 			level	= (e.y / bounds.height).linlin( 0, 1, 12, -48 );
 			stake	= BosqueEnvStake( frame, level );
@@ -271,7 +279,7 @@ BosqueTimelinePanel {
 		if( volEnvDispFakeStart, { sel[0] == false });
 		if( volEnvDispFakeStop,  { sel[sel.size-1] == false });
 		newVals	= e.component.value;
-		visiSpan	= doc.timeline.visibleSpan;
+		visiSpan	= doc.timelineView.span;
 //		[ "SEL", sel ].postln;
 //		[ "OLD", volEnvDispValues ].postln;
 //		[ "NEW", newVals ].postln;
@@ -296,7 +304,7 @@ BosqueTimelinePanel {
 	
 	prSetVolEnv {
 		var visiSpan, scale, offset, volEnvDispFakeStart, volEnvDispFakeStop, idx, stake, stake2, volEnv, level;
-		visiSpan 			= doc.timeline.visibleSpan;
+		visiSpan 			= doc.timelineView.span;
 		volEnv			= doc.volEnv;
 		volEnvDispStakes	= volEnv.getRange( visiSpan );
 		stake			= volEnvDispStakes.first;
@@ -339,7 +347,7 @@ BosqueTimelinePanel {
 	}
 	
 	trailModified { arg e;
-//		if( e.span.touches( doc.timeline.visibleSpan )) ...
+//		if( e.span.touches( doc.timelineView.span )) ...
 		this.prSetVolEnv;
 	}
 
@@ -386,7 +394,7 @@ BosqueTimelinePanel {
 		dragStartX	= e.x;
 		dragStartY	= e.y;
 		dragStarted	= false;
-		visiSpan		= doc.timeline.visibleSpan;
+		visiSpan		= doc.timelineView.span;
 		dragStartPos	= (e.x / e.component.bounds.width.max(1) * visiSpan.length + visiSpan.start).asInteger;
 		y			= e.y / e.component.bounds.height.max(1) / trackVScale;
 		dragStartTrack= doc.tracks.detect({ arg t; (t.y <= y) and: { t.y + t.height > y }});
@@ -470,7 +478,7 @@ BosqueTimelinePanel {
 			deltaTrack = if( dragTrack.notNil, { doc.tracks.indexOf( dragTrack ) - doc.tracks.indexOf( dragStartTrack )}, 0 );
 			jTrailView.setDragPainted( false );
 			dragStarted = false;
-			deltaTime = (dx / e.component.bounds.width.max(1) * doc.timeline.visibleSpan.length).asInteger;
+			deltaTime = (dx / e.component.bounds.width.max(1) * doc.timelineView.span.length).asInteger;
 			if( (deltaTime != 0) or: { deltaTrack != 0 }, {
 				ce = JSyncCompoundEdit.new;
 				sel = doc.selectedRegions.getAll;
@@ -484,7 +492,7 @@ BosqueTimelinePanel {
 				});
 //				"////////////// after removeAll".postln; doc.trail.debugDump;
 				sel = sel.collect({ arg stake;
-					newStart = (stake.span.start + deltaTime).clip( 0, doc.timeline.length - stake.span.length );
+					newStart = (stake.span.start + deltaTime).clip( 0, doc.timeline.span.length - stake.span.length );
 					newTrack = doc.tracks[ (doc.tracks.indexOf( stake.track ) + deltaTrack).clip( 0, doc.tracks.size - 1 )];
 					disposeStake = nil;
 					if( newStart != stake.span.start, {
@@ -547,7 +555,7 @@ BosqueTimelinePanel {
 			dx = e.x - dragStartX;
 			jTrailView.setDragPainted( false );
 			dragStarted = false;
-			deltaTime = (dx / e.component.bounds.width.max(1) * doc.timeline.visibleSpan.length).asInteger;
+			deltaTime = (dx / e.component.bounds.width.max(1) * doc.timelineView.span.length).asInteger;
 			if( deltaTime != 0, {
 				ce = JSyncCompoundEdit.new;
 				sel = doc.selectedRegions.getAll;
@@ -569,7 +577,7 @@ BosqueTimelinePanel {
 							});
 						});
 					}, {
-						newStop = (stake.span.stop + deltaTime).clip( stake.span.start + 1000, doc.timeline.length );
+						newStop = (stake.span.stop + deltaTime).clip( stake.span.start + 1000, doc.timeline.span.length );
 						if( stake.isKindOf( BosqueAudioRegionStake ), {
 							newStop = newStop.min( stake.span.start + stake.faf.numFrames - stake.fileStartFrame );
 						});

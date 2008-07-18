@@ -6,7 +6,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.27, 06-Jul-08
+ *	@version	0.27, 18-Jul-08
  */
 BosqueTimelineEditor : Object {
 	var <forest;
@@ -97,7 +97,7 @@ BosqueTimelineEditor : Object {
 				af 		= doc.audioFiles[ ggFileList.value ? -1 ];
 				track	= doc.selectedTracks[ 0 ];
 				switch( value - 2,
-				0, { this.prAudioFileAddRegion( af, doc, doc.timeline.position, track )},
+				0, { this.prAudioFileAddRegion( af, doc, doc.timelineView.cursor.position, track )},
 				1, { this.prAudioFileReplaceFile( af, doc )},
 				2, { this.prAudioFileReplaceRegions( af, doc )},
 				3, { this.prAudioFileConsolidate( doc )}
@@ -279,7 +279,7 @@ BosqueTimelineEditor : Object {
 		
 		view = winTimeline.view;
 
-		BosqueTimelineAxis( doc, view, Rect( 60, 20, view.bounds.width - 60, 15 ));
+//		BosqueTimelineAxis( doc, view, Rect( 60, 20, view.bounds.width - 60, 15 ));
 		ggTimelinePanel = BosqueTimelinePanel( doc, view, Rect( 0, 35, view.bounds.width, view.bounds.height - 51 ));
 		BosqueTimelineScroll( doc, view, Rect( 0, view.bounds.height - 16, view.bounds.width - 16, 16 ));
 
@@ -402,38 +402,38 @@ BosqueTimelineEditor : Object {
 //~ggTrail = ggTrailView;
 
 		view.keyDownAction = { arg view, char, modifiers, lala, key;
-			var timeline, length, pos;
+			var timelineView, length, pos;
 //			[ "key", key ].postln;
 			if( (modifiers & 0x00040000) != 0, {	// ctrl down
 				switch( key,
 				37, {				// csr left
-					timeline = doc.timeline;
-					length = timeline.visibleSpan.getLength;
-					if( length > 0 and: { length < timeline.length }, {
-						pos = timeline.position.clip( timeline.visibleSpan.start, timeline.visibleSpan.stop ) - timeline.visibleSpan.start;
-						length = (length << 1).min( timeline.length );
-						pos = (timeline.visibleSpan.start - pos).clip( 0, timeline.length - length );
-//						timeline.visibleSpan = Span( pos, pos + length );
-						timeline.editScroll( this, Span( pos, pos + length ));
+					timelineView = doc.timelineView;
+					length = timelineView.span.length;
+					if( length > 0 and: { length < doc.timeline.span.length }, {
+						pos = timelineView.cursor.position.clip( timelineView.span.start, timelineView.span.stop ) - timelineView.span.start;
+						length = (length << 1).min( doc.timeline.span.length );
+						pos = (timelineView.span.start - pos).clip( 0, doc.timeline.span.length - length );
+//						timelineView.span = Span( pos, pos + length );
+						doc.editScroll( this, Span( pos, pos + length ));
 					});
 				},
 				39, {				// csr right
-					timeline = doc.timeline;
-					length = timeline.visibleSpan.getLength;
+					timelineView = doc.timelineView;
+					length = timelineView.span.getLength;
 					if( length > 256, {
-						pos = timeline.position.clip( timeline.visibleSpan.start, timeline.visibleSpan.stop ) - timeline.visibleSpan.start;
+						pos = timelineView.cursor.position.clip( timelineView.span.start, timelineView.span.stop ) - timelineView.span.start;
 						length = length >> 1;
-//						pos = ((timeline.visibleSpan.start + pos) >> 1).clip( 0, timeline.length - length );
-						pos = (timeline.visibleSpan.start + (pos >> 1)).clip( 0, timeline.length - length );
-//						timeline.visibleSpan = Span( pos, pos + length );
-						timeline.editScroll( this, Span( pos, pos + length ));
+//						pos = ((timelineView.span.start + pos) >> 1).clip( 0, timeline.span.length - length );
+						pos = (timelineView.span.start + (pos >> 1)).clip( 0, doc.timeline.span.length - length );
+//						timelineView.span = Span( pos, pos + length );
+						doc.editScroll( this, Span( pos, pos + length ));
 					});
 				});
 			}, { if( (modifiers & 0x00100000) != 0, {	// meta down
 				switch( key,
 				37, {				// csr left
-					timeline = doc.timeline;
-					timeline.editScroll( this, Span( 0, timeline.length ));
+					timelineView = doc.timelineView;
+					doc.editScroll( this, Span( 0, doc.timeline.span.length ));
 				});
 			})});
 		};
@@ -462,8 +462,8 @@ BosqueTimelineEditor : Object {
 			.action_({ arg b;
 				if( b.value == 0, {
 					doc.transport.loop = nil;
-				}, { if( doc.timeline.selectionSpan.length >= doc.timeline.rate, {
-					doc.transport.loop = doc.timeline.selectionSpan;
+				}, { if( doc.timelineView.selection.span.length >= doc.timeline.rate, {
+					doc.transport.loop = doc.timelineView.selection.span;
 				}, {
 					b.value = 0;
 				})});
@@ -474,7 +474,7 @@ BosqueTimelineEditor : Object {
 		fPlayPosStr = { arg frame; ScissUtil.toTimeString( frame / doc.timeline.rate )};
 		updTimeline = UpdateListener.newFor( doc.timeline, { arg upd, timeline, what;
 			if( taskPlayPos.isPlaying.not and: { (what === \position) or: { what === \rate }}, {
-				ggPlayPos.string_( fPlayPosStr.value( timeline.position ));
+				ggPlayPos.string_( fPlayPosStr.value( doc.timelineView.cursor.position ));
 			});
 		});
 		fTaskPlayPos = { inf.do({ ggPlayPos.string_( fPlayPosStr.value( doc.transport.currentFrame )); 0.05.wait })};
@@ -649,7 +649,7 @@ BosqueTimelineEditor : Object {
 					doc.selectedTracks.clear( this );
 					oldStakes = doc.trail.getAll;
 					doc.trail.clear( this );
-					oldTimelineLen = doc.timeline.length;
+					oldTimelineLen = doc.timeline.span.length;
 					doc.timeline.clear;
 					oldTracks = doc.tracks.getAll;
 					doc.tracks.clear( this );
@@ -799,43 +799,43 @@ BosqueTimelineEditor : Object {
 	
 	prTimelineInsertSpan { arg doc;
 		this.queryStringDialog( "Insert Time", "Amount of seconds", "60.0", { arg result;
-			var timeline, span, ce;
-			timeline	= doc.timeline;
-			result	= (result.asFloat * timeline.rate).asInteger;
+			var timelineView, span, ce;
+			timelineView	= doc.timelineView;
+			result	= (result.asFloat * doc.timeline.rate).asInteger;
 			if( (result > 0) and: { result < 1e9 }, {  // filter out +-inf!
 				ce = JSyncCompoundEdit( "Insert Time Span" );
-				span = Span( timeline.position, timeline.position + result );
+				span = Span( timelineView.cursor.position, timelineView.cursor.position + result );
 				doc.editInsertTimeSpan( this, span, ce );
-				ce.addPerform( BosqueTimelineVisualEdit.select( this, doc, span ));
+				ce.addPerform( BosqueTimelineViewEdit.select( this, timelineView, span ));
 				doc.undoManager.addEdit( ce.performAndEnd );
 			});
 		});
 	}
 
 	prTimelineClearSpan { arg doc;
-		var timeline, ce;
-		timeline	= doc.timeline;
-		if( timeline.selectionSpan.length > 0, {
+		var timelineView, ce;
+		timelineView	= doc.timelineView;
+		if( timelineView.selection.span.length > 0, {
 			ce = JSyncCompoundEdit( "Clear Time Span" );
-			doc.editClearTimeSpan( this, timeline.selectionSpan, ce );
+			doc.editClearTimeSpan( this, timelineView.selection.span, ce );
 			doc.undoManager.addEdit( ce.performAndEnd );
 		});
 	}
 
 	prTimelineRemoveSpan { arg doc;
-		var timeline, ce;
-		timeline	= doc.timeline;
-		if( timeline.selectionSpan.length > 0, {
+		var timelineView, ce;
+		timelineView	= doc.timelineView;
+		if( timelineView.selection.span.length > 0, {
 			ce = JSyncCompoundEdit( "Remove Time Span" );
-			doc.editRemoveTimeSpan( this, timeline.selectionSpan, ce );
-			ce.addPerform( BosqueTimelineVisualEdit.select( this, doc, Span.new ));
+			doc.editRemoveTimeSpan( this, timelineView.selection.span, ce );
+			ce.addPerform( BosqueTimelineViewEdit.select( this, timelineView, Span.new ));
 			doc.undoManager.addEdit( ce.performAndEnd );
 		});
 	}
 
 	prTimelineSplitObjects { arg doc;
 		var pos, ce;
-		pos	= doc.timeline.position;
+		pos	= doc.timelineView.cursor.position;
 		ce = JSyncCompoundEdit( "Split Objects" );
 		doc.editClearTimeSpan( this, Span( pos, pos ), ce, { arg stake; doc.selectedRegions.includes( stake )});
 		doc.undoManager.addEdit( ce.performAndEnd );
@@ -844,7 +844,7 @@ BosqueTimelineEditor : Object {
 	prTimelineInsertFunc { arg doc;
 		var span, track, ce, name, stake, clearSpan, trail;
 		
-		span 	= doc.timeline.selectionSpan;
+		span 	= doc.timelineView.selection.span;
 		track	= doc.selectedTracks[0];
 		if( span.isEmpty or: { track.isNil }, { ^this });
 
@@ -854,13 +854,13 @@ BosqueTimelineEditor : Object {
 		// WARNING: Symbol -> asCompileString is broken, doesn't escape apostroph!!!!
 		// therefore we force the name to be a String here !!!
 		stake = BosqueFuncRegionStake( span, name.asString, track );
-		clearSpan = Span( span.start, min( span.stop, doc.timeline.length ));
+		clearSpan = Span( span.start, min( span.stop, doc.timeline.span.length ));
 		if( clearSpan.isEmpty.not, {
 			doc.editClearTimeSpan( this, clearSpan, ce, { arg stake; stake.track == track });
 		});
 // N.A.!
-//		if( span.stop > doc.timeline.length, {
-//			insertSpan = Span( doc.timeline.length, span.stop );
+//		if( span.stop > doc.timeline.span.length, {
+//			insertSpan = Span( doc.timeline.span.length, span.stop );
 //			doc.editInsertTimeSpan( this, insertSpan, ce );
 //		});
 		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, [ stake ], false ));
@@ -874,7 +874,7 @@ BosqueTimelineEditor : Object {
 	prTimelineInsertEnv { arg doc;
 		var span, track, ce, name, stake, clearSpan, trail;
 		
-		span 	= doc.timeline.selectionSpan;
+		span 	= doc.timelineView.selection.span;
 		track	= doc.selectedTracks[0];
 		if( span.isEmpty or: { track.isNil }, { ^this });
 
@@ -883,7 +883,7 @@ BosqueTimelineEditor : Object {
 		// WARNING: Symbol -> asCompileString is broken, doesn't escape apostroph!!!!
 		// therefore we force the name to be a String here !!!
 		stake = BosqueEnvRegionStake( span, name.asString, track );
-		clearSpan = Span( span.start, min( span.stop, doc.timeline.length ));
+		clearSpan = Span( span.start, min( span.stop, doc.timeline.span.length ));
 		if( clearSpan.isEmpty.not, {
 			doc.editClearTimeSpan( this, clearSpan, ce, { arg stake; stake.track == track });
 		});
@@ -906,8 +906,8 @@ BosqueTimelineEditor : Object {
 				ce	= JSyncCompoundEdit( "Change Gain" );
 				trail = doc.volEnv;
 				trail.editBegin( ce );
-				stakes = trail.editGetRange( doc.timeline.selectionSpan, true, ce );
-				trail.editClearSpan( this, doc.timeline.selectionSpan, nil, ce );
+				stakes = trail.editGetRange( doc.timelineView.selection.span, true, ce );
+				trail.editClearSpan( this, doc.timelineView.selection.span, nil, ce );
 				stakes = stakes.collect({ arg stake; stake.replaceLevel( stake.level + result )});
 				stakes = trail.editAddAll( this, stakes, ce );
 				trail.editEnd( ce );
@@ -945,12 +945,12 @@ name = af.name.asSymbol;
 			// WARNING: Symbol -> asCompileString is broken, doesn't escape apostroph!!!!
 			// therefore we force the name to be a String here !!!
 			stake = BosqueAudioRegionStake( span, name.asString, track, faf: af );
-			clearSpan = Span( span.start, min( span.stop, doc.timeline.length ));
+			clearSpan = Span( span.start, min( span.stop, doc.timeline.span.length ));
 			if( clearSpan.isEmpty.not, {
 				doc.editClearTimeSpan( this, clearSpan, ce, { arg stake; stake.track == track });
 			});
-			if( span.stop > doc.timeline.length, {
-				insertSpan = Span( doc.timeline.length, span.stop );
+			if( span.stop > doc.timeline.span.length, {
+				insertSpan = Span( doc.timeline.span.length, span.stop );
 				doc.editInsertTimeSpan( this, insertSpan, ce );
 			});
 //			ce.addPerform( BosqueEditAddSessionObjects( this, af.regions, [ stake ]));
@@ -1159,12 +1159,12 @@ name = af.name.asSymbol;
 		stakes = doc.forest.clipBoard.getData( \stakeList );
 		origStart	= stakes.minItem({ arg stake; stake.span.start }).span.start;
 		origStop	= stakes.maxItem({ arg stake; stake.span.stop }).span.stop;
-		newStart	= doc.timeline.position;
+		newStart	= doc.timelineView.cursor.position;
 		delta	= newStart - origStart;
 		newStop	= origStop + delta;
 		ce		= JSyncCompoundEdit.new;
-		if( newStop > doc.timeline.length, {
-			doc.editInsertTimeSpan( this, Span( doc.timeline.length, newStop ), ce );
+		if( newStop > doc.timeline.span.length, {
+			doc.editInsertTimeSpan( this, Span( doc.timeline.span.length, newStop ), ce );
 		});
 		if( delta != 0, {
 			stakes = stakes.collect({ arg oldStake; stake = oldStake.shiftVirtual( delta ); oldStake.dispose; stake });

@@ -1,7 +1,7 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.15, 05-Sep-07
+ *	@version	0.16, 18-Jul-08
  */
 BosqueSession : Object {
 	var <forest;
@@ -9,6 +9,7 @@ BosqueSession : Object {
 	// data
 	var <audioFiles;
 	var <timeline;
+	var <timelineView;
 	var <trail;
 	var <tracks;
 	var <busConfigs;
@@ -19,6 +20,7 @@ BosqueSession : Object {
 	var <selectedRegions;
 	var <selectedTracks;
 //	var <selectedBusConfigs;
+	var <markers;
 	var <audioPlayer;
 	var dirty = false;
 	
@@ -33,7 +35,8 @@ BosqueSession : Object {
 	prInit {
 		forest			= Bosque.default;
 		audioFiles		= BosqueSessionCollection.new;
-		timeline			= BosqueTimeline( this );
+		timeline			= BosqueTimeline( 44100 );
+		timelineView		= BosqueTimelineView( timeline );
 		transport			= BosqueTransport( this );
 		trail			= BosqueTrail.new.rate_( timeline.rate );
 		volEnv			= Trail.new.rate_( timeline.rate );
@@ -43,6 +46,7 @@ BosqueSession : Object {
 		tracks			= BosqueSessionCollection.new;
 		selectedTracks	= BosqueSessionCollection.new;
 		busConfigs		= BosqueSessionCollection.new;
+		markers			= BosqueTrail.new;
 //		selectedBusConfigs	= BosqueSessionCollection.new;
 		
 		trails			= [ trail, volEnv ];
@@ -55,6 +59,18 @@ BosqueSession : Object {
 		});
 	}
 	
+	editPosition { arg source, pos;
+		undoManager.addEdit( BosqueTimelineViewEdit.position( source, timelineView, pos ).performEdit );	
+	}
+
+	editScroll { arg source, span;
+		undoManager.addEdit( BosqueTimelineViewEdit.scroll( source, timelineView, span ).performEdit );	
+	}
+
+	editSelect { arg source, span;
+		undoManager.addEdit( BosqueTimelineViewEdit.select( source, timelineView, span ).performEdit );
+	}
+
 	path_ { arg string;
 		path = string;
 		name = if( path.notNil, { path.basename.splitext.first }, "Untitled" );
@@ -88,7 +104,11 @@ BosqueSession : Object {
 		stream << "})";
 	}
 	
-	doTimeline { arg func; func.value( timeline )}
+	// note: this is now operating on a fake object!
+	doTimeline { arg func;
+		func.value( BosqueLegacityTimeline( this ))
+	}
+	
 	doTrail { arg func; func.value( trail )}
 	doAudioFiles { arg func; func.value( audioFiles )}
 	doTracks { arg func; func.value( tracks )}
@@ -126,9 +146,9 @@ BosqueSession : Object {
 			t.editInsertSpan( source, span, nil, ce );
 			t.editEnd( ce );
 		});
-		ce.addPerform( BosqueTimelineEdit.length( source, this, timeline.length + span.length ));
-		if( timeline.visibleSpan.isEmpty, {
-			ce.addPerform( BosqueTimelineVisualEdit.scroll( source, this, span ));
+		ce.addPerform( BosqueTimelineEdit.span( source, this, timeline.span.replaceStop( timeline.span.stop + span.length )));
+		if( timelineView.span.isEmpty, {
+			ce.addPerform( BosqueTimelineViewEdit.scroll( source, timelineView, span ));
 		});
 	}
 	
@@ -140,37 +160,37 @@ BosqueSession : Object {
 
 	editRemoveTimeSpan { arg source, span, ce;
 		var start, stop, visiSpan, selSpan;
-		if( timeline.position > span.start, {
-			ce.addPerform( BosqueTimelineVisualEdit.position( source, this, max( 0, timeline.position - span.length )));
+		if( timelineView.cursor.position > span.start, {
+			ce.addPerform( BosqueTimelineViewEdit.position( source, timelineView, max( timeline.span.start, timelineView.cursor.position - span.length )));
 		});
-		visiSpan	= timeline.visibleSpan;
-		stop		= timeline.length - span.length;
+		visiSpan	= timelineView.span;
+		stop		= timeline.span.length - span.length;
 		if( visiSpan.stop > span.start, {
 			if( visiSpan.start < span.start, {
 				if( stop < visiSpan.stop, {
-					ce.addPerform( BosqueTimelineVisualEdit.scroll( source, this,
+					ce.addPerform( BosqueTimelineViewEdit.scroll( source, timelineView,
 						Span( max( 0, stop - visiSpan.length ), stop )));
 				});
 			}, {
 				start = max( 0, visiSpan.start - span.length );
-				ce.addPerform( BosqueTimelineVisualEdit.scroll( source, this,
+				ce.addPerform( BosqueTimelineViewEdit.scroll( source, timelineView,
 					Span( start, min( stop, start + visiSpan.length ))));
 			});
 		});
-		selSpan = timeline.selectionSpan;
+		selSpan = timelineView.selection.span;
 		if( selSpan.isEmpty.not and: { selSpan.stop > span.start }, {
 			if( selSpan.start < span.start, {
 				if( stop < selSpan.stop, {
-					ce.addPerform( BosqueTimelineVisualEdit.select( source, this,
+					ce.addPerform( BosqueTimelineViewEdit.select( source, timelineView,
 						Span( max( 0, stop - selSpan.length ), stop )));
 				});
 			}, {
 				start = max( 0, selSpan.start - span.length );
-				ce.addPerform( BosqueTimelineVisualEdit.select( source, this,
+				ce.addPerform( BosqueTimelineViewEdit.select( source, timelineView,
 					Span( start, min( stop, start + selSpan.length ))));
 			});
 		});
-		ce.addPerform( BosqueTimelineEdit.length( source, this, timeline.length - span.length ));
+		ce.addPerform( BosqueTimelineEdit.span( source, this, timeline.span.replaceStop( timeline.span.stop - span.length )));
 		trails.do({ arg t;
 			t.editBegin( ce );
 			t.editRemoveSpan( source, span, nil, ce );
