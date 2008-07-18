@@ -59,7 +59,7 @@ Bosque : Object {
 	
 	var <midiOut;
 
-	var <master;
+	var <master, <app;
 	
 	*initClass {
 //		Class.initClassTree( SwingOSC );
@@ -77,7 +77,8 @@ Bosque : Object {
 		scsynth		= Server.default; // Server( \forest, VerboseNetAddr( "127.0.0.1", 57001 )); // Server.default;
 	  swing.doWhenBooted({
 
-		master			= JavaObject( "de.sciss.timebased.net.Master" );
+		master			= JavaObject( "de.sciss.timebased.net.Master", swing );
+		app				= JavaObject( "de.sciss.timebased.Main", swing );
 
 //		soundCard				= [ "Fireface 800 (393)", "Fireface 800 (EB1)" ][ config ]; // "Mobile I/O 2882 [2600]"
 //		numInputBusChannels	= [ 10, 10 ][ config ];

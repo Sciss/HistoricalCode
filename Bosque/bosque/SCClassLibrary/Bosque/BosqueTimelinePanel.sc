@@ -49,7 +49,8 @@ BosqueTimelinePanel {
 		jMarkAxis.setFont( fntSmall );
 		BosqueTimelineAxis( doc, this, jTimeAxis );
 		jTimeAxis.setEditable( true );
-		jMarkAxis.setTrail( doc.markers );
+//		jMarkAxis.setTrail( doc.markers );
+		jPanel.setMarkerTrail( doc.markers );
 		jMarkAxis.setEditable( true );
 		jMarkAxis.destroy;
 //		view = JSCPlugView( ggScrollPane, bounds, jPanel ); // .resize_( 5 );
