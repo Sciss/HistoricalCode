@@ -45,7 +45,7 @@
 	</target>
 	<target name="main" depends="clean,jar" />
 	<target name="test" depends="jar">
-        <java jar="${jar.dir}/${ant.project.name}.jar" fork="true">
+        <java jar="${jar.file}" fork="true">
         	<!-- <arg value="..."/> -->
     	</java>
 	</target>

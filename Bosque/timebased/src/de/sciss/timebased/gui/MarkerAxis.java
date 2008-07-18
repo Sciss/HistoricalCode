@@ -37,7 +37,6 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -48,11 +47,10 @@ import java.awt.Stroke;
 import java.awt.TexturePaint;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 import java.awt.geom.GeneralPath;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -68,6 +66,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.event.AncestorEvent;
+import javax.swing.event.MouseInputAdapter;
+import javax.swing.event.MouseInputListener;
 import javax.swing.undo.UndoManager;
 
 import de.sciss.app.AbstractApplication;
@@ -76,7 +76,6 @@ import de.sciss.app.BasicEvent;
 import de.sciss.app.DynamicListening;
 import de.sciss.app.AbstractCompoundEdit;
 import de.sciss.app.EventManager;
-import de.sciss.app.GraphicsHandler;
 import de.sciss.common.BasicCompoundEdit;
 import de.sciss.common.BasicWindowHandler;
 import de.sciss.gui.ComponentHost;
@@ -113,20 +112,20 @@ import de.sciss.util.ParamSpace;
  */
 public class MarkerAxis
 extends JComponent
-implements	TimelineView.Listener, MouseListener, MouseMotionListener, KeyListener,
+implements	TimelineView.Listener,
 			DynamicListening, Trail.Listener, Disposable,
 			EventManager.Processor
 {
-	private final Font			fntLabel; //		= new Font( "Helvetica", Font.ITALIC, 10 );
+//	private final Font			fntLabel; //		= new Font( "Helvetica", Font.ITALIC, 10 );
 
 	private String[]			markLabels		= new String[0];
 	private int[]				markFlagPos		= new int[0];
 	private int					numMarkers		= 0;
-	private final GeneralPath   shpFlags		= new GeneralPath();
+	protected final GeneralPath shpFlags		= new GeneralPath();
 	private int					recentWidth		= -1;
 	private boolean				doRecalc		= true;
-	private Span				visibleSpan		= new Span();
-	private double				scale			= 1.0;
+	protected Span				visibleSpan		= new Span();
+	protected double			scale			= 1.0;
 
 	private static final int[] pntBarGradientPixels = { 0xFFB8B8B8, 0xFFC0C0C0, 0xFFC8C8C8, 0xFFD3D3D3,
 														0xFFDBDBDB, 0xFFE4E4E4, 0xFFEBEBEB, 0xFFF1F1F1,
@@ -167,18 +166,22 @@ implements	TimelineView.Listener, MouseListener, MouseMotionListener, KeyListene
 	private DefaultUnitTranslator	timeTrans;
 	
 	// ---- dnd ----
-	private MarkerStake			dragMark		= null;
-	private MarkerStake			dragLastMark	= null;
-	private boolean				dragStarted		= false;
-	private int					dragStartX		= 0;
+	protected MarkerStake		dragMark		= null;
+	protected MarkerStake		dragLastMark	= null;
+	protected boolean			dragStarted		= false;
+	protected int				dragStartX		= 0;
 	
-	private boolean				dispatchedStart	= false;
+	protected boolean			dispatchedStart	= false;
 	
-	private final TimelineView	view;
-	protected Trail				trail			= null;
-	private UndoManager			undoMgr			= null;
+	protected final TimelineView	view;
+	protected Trail					trail			= null;
+	protected UndoManager			undoMgr			= null;
 	
 	private final EventManager	elm				= new EventManager( this );
+	private boolean				editable		= false;
+	
+	private final MouseInputListener	mil;
+	private final KeyListener			kl;
 	
 	static {
 		pntMarkDragPixels = new int[ pntMarkGradientPixels.length ];
@@ -191,7 +194,6 @@ implements	TimelineView.Listener, MouseListener, MouseMotionListener, KeyListene
 	{
 		this( tlv, null );
 	}
-
 
 	/**
 	 *  Constructs a new object for
@@ -207,7 +209,7 @@ implements	TimelineView.Listener, MouseListener, MouseMotionListener, KeyListene
 		this.view	= tlv;
 		this.host	= host;
 		
-		fntLabel	= AbstractApplication.getApplication().getGraphicsHandler().getFont( GraphicsHandler.FONT_LABEL | GraphicsHandler.FONT_MINI ).deriveFont( Font.ITALIC );
+//		fntLabel	= AbstractApplication.getApplication().getGraphicsHandler().getFont( GraphicsHandler.FONT_LABEL | GraphicsHandler.FONT_MINI ).deriveFont( Font.ITALIC );
 		
 		setMaximumSize( new Dimension( getMaximumSize().width, barExtent ));
 		setMinimumSize( new Dimension( getMinimumSize().width, barExtent ));
@@ -224,9 +226,106 @@ implements	TimelineView.Listener, MouseListener, MouseMotionListener, KeyListene
 		pntMarkFlagDrag = new TexturePaint( img3, new Rectangle( 0, 0, 1, markExtent ));
 
 		setOpaque( true );
-		this.addMouseListener( this );
-		this.addMouseMotionListener( this );
-		this.addKeyListener( this );
+		
+		mil = new MouseInputAdapter() {
+			public void mousePressed( MouseEvent e )
+		    {
+				final long pos = (long) (e.getX() / scale + visibleSpan.getStart() + 0.5);
+			
+				if( shpFlags.contains( e.getPoint() )) {
+					if( e.isAltDown() ) {					// delete marker
+						removeMarkerLeftTo( pos + 1 );
+					} else if( e.getClickCount() == 2 ) {	// rename
+						editMarkerLeftTo( pos + 1 );
+					} else {								// start drag
+						dragMark			= getMarkerLeftTo( pos + 1 );
+						dragStarted			= false;
+						dragStartX			= e.getX();
+						if( dragMark != null ) {
+							dispatchedStart = true;
+							dispatchEvent( Event.DRAGSTARTED, dragMark.getSpan() );
+							requestFocus();
+						}
+					}
+					
+				} else if( !e.isAltDown() && (e.getClickCount() == 2) ) {		// insert marker
+					addMarker( pos );
+				}
+			}
+
+			public void mouseReleased( MouseEvent e )
+			{
+				AbstractCompoundEdit ce;
+			
+				if( dispatchedStart ) {
+					dispatchedStart = false;
+					dispatchEvent( Event.DRAGSTOPPED, (dragLastMark != null) ?
+						dragLastMark.getSpan() : dragMark.getSpan() );
+				}
+				
+				try {
+					if( dragLastMark != null ) {
+						ce	= new BasicCompoundEdit( getResourceString( "editMoveMarker" ));
+						trail.editBegin( ce );
+						try {
+							trail.editRemove( this, dragMark, ce );
+							trail.editAdd( this, dragLastMark, ce );
+						}
+						catch( IOException e1 ) {	// should never happen
+							System.err.println( e1 );
+							ce.cancel();
+							return;
+						}
+						trail.editEnd( ce );
+						ce.perform();
+						ce.end();
+						if( undoMgr != null ) undoMgr.addEdit( ce );
+					}
+				}
+				finally {
+					dragStarted		= false;
+					dragMark		= null;
+					dragLastMark	= null;
+				}
+			}
+			
+			public void mouseDragged( MouseEvent e )
+			{
+				if( dragMark == null ) return;
+
+				if( !dragStarted ) {
+					if( Math.abs( e.getX() - dragStartX ) < 5 ) return;
+					dragStarted = true;
+				}
+
+				final Span			dirtySpan;
+				final long			oldPos	= dragLastMark != null ? dragLastMark.pos : dragMark.pos;
+				final long			newPos	= view.getTimeline().getSpan().clip( (long) ((e.getX() - dragStartX) / scale + dragMark.pos + 0.5) );
+
+				if( oldPos == newPos ) return;
+				
+				dirtySpan		= new Span( Math.min( oldPos, newPos ), Math.max( oldPos, newPos ));
+				dragLastMark	= new MarkerStake( newPos, dragMark.name );
+				if( dispatchedStart ) dispatchEvent( Event.DRAGADJUSTED, dirtySpan );
+			}
+		};
+		
+		kl = new KeyAdapter() {
+		    public void keyPressed( KeyEvent e )
+			{
+				if( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
+					dragMark		= null;
+					dragLastMark	= null;
+					if( dragStarted ) {
+						dragStarted	= false;
+					}
+					if( dispatchedStart ) {
+						dispatchedStart = false;
+						dispatchEvent( Event.DRAGSTOPPED, visibleSpan );
+					}
+				}
+			}
+		};
 	}
 	
 	public void setTrail( Trail t )
@@ -246,7 +345,23 @@ implements	TimelineView.Listener, MouseListener, MouseMotionListener, KeyListene
 		this.undoMgr = undoMgr;
 	}
 	
-	private String getResourceString( String key )
+	public void setEditable( boolean editable )
+	{
+		if( this.editable != editable ) {
+			this.editable = editable;
+			if( editable ) {
+				this.addMouseListener( mil );
+				this.addMouseMotionListener( mil );
+				this.addKeyListener( kl );
+			} else {
+				this.removeMouseListener( mil );
+				this.removeMouseMotionListener( mil );
+				this.removeKeyListener( kl );
+			}
+		}
+	}
+
+	protected static String getResourceString( String key )
 	{
 		return( AbstractApplication.getApplication().getResourceString( key ));
 	}
@@ -292,7 +407,7 @@ implements	TimelineView.Listener, MouseListener, MouseMotionListener, KeyListene
 		
 		final Graphics2D	g2	= (Graphics2D) g;
 		
-		g2.setFont( fntLabel );
+//		g2.setFont( fntLabel );
 		
 		final FontMetrics	fm	= g2.getFontMetrics();
 		final int			y	= fm.getAscent() + 2;
@@ -383,7 +498,7 @@ implements	TimelineView.Listener, MouseListener, MouseMotionListener, KeyListene
 		if( undoMgr != null ) undoMgr.addEdit( ce );
 	}
 	
-	private void removeMarkerLeftTo( long pos )
+	protected void removeMarkerLeftTo( long pos )
 	{
 		if( trail == null ) throw new IllegalStateException();
 		
@@ -412,7 +527,7 @@ implements	TimelineView.Listener, MouseListener, MouseMotionListener, KeyListene
 		if( undoMgr != null ) undoMgr.addEdit( ce );
 	}
 
-	private void editMarkerLeftTo( long pos )
+	protected void editMarkerLeftTo( long pos )
 	{
 		if( trail == null ) throw new IllegalStateException();
 		
@@ -537,7 +652,7 @@ implements	TimelineView.Listener, MouseListener, MouseMotionListener, KeyListene
 		if( undoMgr != null ) undoMgr.addEdit( ce );
 	}
 
-	private MarkerStake getMarkerLeftTo( long pos )
+	protected MarkerStake getMarkerLeftTo( long pos )
 	{
 		if( trail == null ) throw new IllegalStateException();
 		
@@ -551,7 +666,7 @@ implements	TimelineView.Listener, MouseListener, MouseMotionListener, KeyListene
 		return (MarkerStake) trail.get( idx, true );
 	}
 	
-	private void dispatchEvent( int id, Span modSpan )
+	protected void dispatchEvent( int id, Span modSpan )
 	{
 		if( elm != null ) {
 			elm.dispatchEvent( new Event( this, id, System.currentTimeMillis(), this, modSpan ));
@@ -624,120 +739,6 @@ implements	TimelineView.Listener, MouseListener, MouseMotionListener, KeyListene
 		}
 	}
 
-// ---------------- MouseListener interface ---------------- 
-// we're listening to the ourselves
-
-	public void mouseEntered( MouseEvent e ) { /* ignore */ }
-	public void mouseExited( MouseEvent e ) { /* ignore */ }
-
-	public void mousePressed( MouseEvent e )
-    {
-		final long pos = (long) (e.getX() / scale + visibleSpan.getStart() + 0.5);
-	
-		if( shpFlags.contains( e.getPoint() )) {
-			if( e.isAltDown() ) {					// delete marker
-				removeMarkerLeftTo( pos + 1 );
-			} else if( e.getClickCount() == 2 ) {	// rename
-				editMarkerLeftTo( pos + 1 );
-			} else {								// start drag
-				dragMark			= getMarkerLeftTo( pos + 1 );
-				dragStarted			= false;
-				dragStartX			= e.getX();
-				if( dragMark != null ) {
-					dispatchedStart = true;
-					dispatchEvent( Event.DRAGSTARTED, dragMark.getSpan() );
-					requestFocus();
-				}
-			}
-			
-		} else if( !e.isAltDown() && (e.getClickCount() == 2) ) {		// insert marker
-			addMarker( pos );
-		}
-	}
-
-	public void mouseReleased( MouseEvent e )
-	{
-		AbstractCompoundEdit ce;
-	
-		if( dispatchedStart ) {
-			dispatchedStart = false;
-			dispatchEvent( Event.DRAGSTOPPED, (dragLastMark != null) ?
-				dragLastMark.getSpan() : dragMark.getSpan() );
-		}
-		
-		try {
-			if( dragLastMark != null ) {
-				ce	= new BasicCompoundEdit( getResourceString( "editMoveMarker" ));
-				trail.editBegin( ce );
-				try {
-					trail.editRemove( this, dragMark, ce );
-					trail.editAdd( this, dragLastMark, ce );
-				}
-				catch( IOException e1 ) {	// should never happen
-					System.err.println( e1 );
-					ce.cancel();
-					return;
-				}
-				trail.editEnd( ce );
-				ce.perform();
-				ce.end();
-				if( undoMgr != null ) undoMgr.addEdit( ce );
-			}
-		}
-		finally {
-			dragStarted		= false;
-			dragMark		= null;
-			dragLastMark	= null;
-		}
-	}
-	
-	public void mouseClicked( MouseEvent e ) { /* ignored */ }
-
-// ---------------- MouseMotionListener interface ---------------- 
-// we're listening to ourselves
-
-    public void mouseMoved( MouseEvent e ) { /* ignore */ }
-
-	public void mouseDragged( MouseEvent e )
-	{
-		if( dragMark == null ) return;
-
-		if( !dragStarted ) {
-			if( Math.abs( e.getX() - dragStartX ) < 5 ) return;
-			dragStarted = true;
-		}
-
-		final Span			dirtySpan;
-		final long			oldPos	= dragLastMark != null ? dragLastMark.pos : dragMark.pos;
-		final long			newPos	= view.getTimeline().getSpan().clip( (long) ((e.getX() - dragStartX) / scale + dragMark.pos + 0.5) );
-
-		if( oldPos == newPos ) return;
-		
-		dirtySpan		= new Span( Math.min( oldPos, newPos ), Math.max( oldPos, newPos ));
-		dragLastMark	= new MarkerStake( newPos, dragMark.name );
-		if( dispatchedStart ) dispatchEvent( Event.DRAGADJUSTED, dirtySpan );
-	}
-
-// ---------------- KeyListener interface ---------------- 
-// we're listening to ourselves
-
-    public void keyPressed( KeyEvent e )
-	{
-		if( e.getKeyCode() == KeyEvent.VK_ESCAPE ) {
-			dragMark		= null;
-			dragLastMark	= null;
-			if( dragStarted ) {
-				dragStarted	= false;
-			}
-			if( dispatchedStart ) {
-				dispatchedStart = false;
-				dispatchEvent( Event.DRAGSTOPPED, visibleSpan );
-			}
-		}
-	}
-	
-    public void keyReleased( KeyEvent e ) { /* ignored */ }
-    public void keyTyped( KeyEvent e ) { /* ignored */ }
 	
 // ---------------- TimelineListener interface ---------------- 
   

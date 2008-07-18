@@ -1,5 +1,5 @@
 /*
- *  Timeline.java
+ *  BasicTimeline.java
  *  TimeBased
  *
  *  Copyright (c) 2004-2008 Hanns Holger Rutz. All rights reserved.
@@ -78,6 +78,11 @@ implements Timeline, EventManager.Processor
 	{
 		this.rate	= rate;
 		this.span	= span;
+	}
+	
+	public void dispose()
+	{
+		elm.dispose();
 	}
 	
 	/**

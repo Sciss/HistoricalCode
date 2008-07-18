@@ -1,3 +1,32 @@
+/*
+ *  BasicTimelineView.java
+ *  TimeBased
+ *
+ *  Copyright (c) 2004-2008 Hanns Holger Rutz. All rights reserved.
+ *
+ *	This software is free software; you can redistribute it and/or
+ *	modify it under the terms of the GNU General Public License
+ *	as published by the Free Software Foundation; either
+ *	version 2, june 1991 of the License, or (at your option) any later version.
+ *
+ *	This software is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *	General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public
+ *	License (gpl.txt) along with this software; if not, write to the Free Software
+ *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ *
+ *
+ *  Changelog:
+ *		17-Jul-08	created
+ */
+
 package de.sciss.timebased.timeline;
 
 import java.awt.EventQueue;
@@ -9,10 +38,14 @@ import de.sciss.io.Span;
 public class BasicTimelineView
 implements TimelineView, EventManager.Processor
 {
-	private final Timeline			tl;
-	protected Span					span;
-	private final TimelineCursor	cursor;
-	private final TimelineSelection	sel;
+	private final Timeline						tl;
+	protected Span								span;
+	private final TimelineCursor				cursor;
+	private final TimelineSelection				sel;
+	
+	private final Timeline.Listener				tll;
+	private final TimelineCursor.Listener		tlcl;
+	private final TimelineSelection.Listener	tlsl;
 	
 	// --- event handling ---
 
@@ -34,7 +67,7 @@ implements TimelineView, EventManager.Processor
 		this.tl		= tl;
 		this.cursor	= cursor;
 		this.sel	= sel;
-		tl.addListener( new Timeline.Listener() {
+		tll = new Timeline.Listener() {
 			public void timelineChanged( Timeline.Event e )
 			{
 				final Span tlSpan = e.getTimeline().getSpan();
@@ -51,19 +84,32 @@ implements TimelineView, EventManager.Processor
 				}
 				elm.dispatchEvent( Event.convert( e, BasicTimelineView.this ));
 			}
-		});
-		cursor.addListener( new TimelineCursor.Listener() {
+		};
+		
+		tlcl = new TimelineCursor.Listener() {
 			public void timelinePositioned( TimelineCursor.Event e )
 			{
 				elm.dispatchEvent( Event.convert( e, BasicTimelineView.this ));
 			}
-		});
-		sel.addListener( new TimelineSelection.Listener() {
+		};
+		
+		tlsl = new TimelineSelection.Listener() {
 			public void timelineSelected( TimelineSelection.Event e )
 			{
 				elm.dispatchEvent( Event.convert( e, BasicTimelineView.this ));
 			}
-		});
+		};
+		
+		tl.addListener( tll );
+		cursor.addListener( tlcl );
+		sel.addListener( tlsl );
+	}
+	
+	public void dispose()
+	{
+		tl.removeListener( tll );
+		cursor.removeListener( tlcl );
+		sel.removeListener( tlsl );
 	}
 	
 	public Timeline getTimeline()

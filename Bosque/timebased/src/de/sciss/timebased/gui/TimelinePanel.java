@@ -51,7 +51,7 @@ import de.sciss.timebased.timeline.TimelineView;
  */
 public class TimelinePanel
 extends ComponentHost
-implements TopPainter
+implements TopPainter, TimelineView.Listener
 {
 	private final Color colrSelection			= new Color( 0x00, 0x00, 0xFF, 0x2F ); // GraphicsUtil.colrSelection;
 	private final Color colrPosition			= new Color( 0xFF, 0x00, 0x00, 0x7F );
@@ -68,16 +68,17 @@ implements TopPainter
 //	private float[]		vpDash					= { 3.0f, 5.0f };
 	private float		vpScale;
 	
-	private Span		timelineVis				= new Span();
-	private Span		timelineSel				= new Span();
-	protected long		timelinePos				= 0;
+	private Span		timelineVis;
+	private Span		timelineSel;
+	protected long		timelinePos;
+	private Span		timelineSpan;
+	protected double	timelineRate;
 
 	private final Timer	playTimer;
 	
 	// !!! for some crazy reason, these need to be volatile because otherwise
 	// the playTimer's actionPerformed body might use a cached value !!!
 	// how can this happen when javax.swing.Timer is playing on the event thread?!
-	protected double		timelineRate			= 44100.0;
 	protected double		playRate				= 1.0;
 	protected long			playStartPos			= 0;
 	protected long			playStartTime;
@@ -85,6 +86,8 @@ implements TopPainter
 
 	private final TimelineAxis	timeAxis;
 	private final MarkerAxis	markAxis;
+	
+	private final TimelineView	tlv;
 	
 	public TimelinePanel()
 	{
@@ -98,6 +101,16 @@ implements TopPainter
 
 	public TimelinePanel( TimelineView tlv )
 	{
+		super();
+		
+		this.tlv = tlv;
+
+		timelineVis		= tlv.getSpan();
+		timelineSel		= tlv.getSelection().getSpan();
+		timelinePos		= tlv.getCursor().getPosition();
+		timelineSpan	= tlv.getTimeline().getSpan();
+		timelineRate	= tlv.getTimeline().getRate();
+
 		addTopPainter( this );
 		setLayout( new BoxLayout( this, BoxLayout.Y_AXIS ));
 		
@@ -120,6 +133,18 @@ implements TopPainter
 				updatePositionAndRepaint();
 			}
 		});
+		
+		tlv.addListener( this );
+	}
+	
+	public TimelineAxis getTimelineAxis()
+	{
+		return timeAxis;
+	}
+
+	public MarkerAxis getMarkerAxis()
+	{
+		return markAxis;
 	}
 
 	public void paintOnTop( Graphics2D g2 )
@@ -151,58 +176,58 @@ implements TopPainter
 //		}
 	}
 
-	public void setVisibleSpan( long start, long stop )
-	{
-		setVisibleSpan( new Span( start, stop ));
-	}
-
-	public void setVisibleSpan( Span span )
-	{
-		timelineVis	= span;
-
-//		updateOverviews( false, true );
-		updateTransformsAndRepaint( false );
-	}
-	
-	public void setSelectionSpan( long start, long stop )
-	{
-		setSelectionSpan( new Span( start, stop ));
-	}
-
-	public void setSelectionSpan( Span span )
-	{
-//		final boolean	wasEmpty = timelineSel.isEmpty();
-//		final boolean	isEmpty;
-	
-		timelineSel	= span;
-
-		updateSelectionAndRepaint();
-//		isEmpty	= timelineSel.isEmpty();
-//		if( wasEmpty != isEmpty ) {
-//			updateEditEnabled( !isEmpty );
-//		}
-    }
-	
-	public void setPosition( long pos )
-	{
-		timelinePos		= pos;
-		playStartPos	= pos;
-		playStartTime	= System.currentTimeMillis();
-//System.out.println( "setPosition : " + timelinePos );
-		
-		updatePositionAndRepaint();
-//		scroll.setPosition( timelinePos, 0, pointerTool.validDrag ?
-//			TimelineScroll.TYPE_DRAG : TimelineScroll.TYPE_UNKNOWN );
-	}
-
-	public void setRate( double rate )
-	{
-		timelineRate				= rate;
-//		timelineLen					= doc.timeline.getLength();
-		playTimer.setDelay( Math.min( (int) (1000 / (vpScale * timelineRate * playRate)), 33 ));
-//		updateAFDGadget();
-//		updateOverviews( false, true );
-	}
+//	public void setVisibleSpan( long start, long stop )
+//	{
+//		setVisibleSpan( new Span( start, stop ));
+//	}
+//
+//	public void setVisibleSpan( Span span )
+//	{
+//		timelineVis	= span;
+//
+////		updateOverviews( false, true );
+//		updateTransformsAndRepaint( false );
+//	}
+//	
+//	public void setSelectionSpan( long start, long stop )
+//	{
+//		setSelectionSpan( new Span( start, stop ));
+//	}
+//
+//	public void setSelectionSpan( Span span )
+//	{
+////		final boolean	wasEmpty = timelineSel.isEmpty();
+////		final boolean	isEmpty;
+//	
+//		timelineSel	= span;
+//
+//		updateSelectionAndRepaint();
+////		isEmpty	= timelineSel.isEmpty();
+////		if( wasEmpty != isEmpty ) {
+////			updateEditEnabled( !isEmpty );
+////		}
+//    }
+//	
+//	public void setPosition( long pos )
+//	{
+//		timelinePos		= pos;
+//		playStartPos	= pos;
+//		playStartTime	= System.currentTimeMillis();
+////System.out.println( "setPosition : " + timelinePos );
+//		
+//		updatePositionAndRepaint();
+////		scroll.setPosition( timelinePos, 0, pointerTool.validDrag ?
+////			TimelineScroll.TYPE_DRAG : TimelineScroll.TYPE_UNKNOWN );
+//	}
+//
+//	public void setRate( double rate )
+//	{
+//		timelineRate				= rate;
+////		timelineLen					= doc.timeline.getLength();
+//		playTimer.setDelay( Math.min( (int) (1000 / (vpScale * timelineRate * playRate)), 33 ));
+////		updateAFDGadget();
+////		updateOverviews( false, true );
+//	}
 	
 	public void play( double rate )
 	{
@@ -222,6 +247,7 @@ implements TopPainter
 
 	public void dispose()
 	{
+		tlv.removeListener( this );
 		this.stop();
 		super.dispose();
 	}
@@ -376,4 +402,49 @@ vpSelectionColors.add( colrSelection );
 //			}
 		}
 	}
+
+	// ---------------- TimelineListener interface ---------------- 
+
+	public void timelineSelected( TimelineView.Event e )
+    {
+		final boolean	wasEmpty = timelineSel.isEmpty();
+		final boolean	isEmpty;
+	
+		timelineSel	= e.getView().getSelection().getSpan();
+
+		updateSelectionAndRepaint();
+		isEmpty	= timelineSel.isEmpty();
+		if( wasEmpty != isEmpty ) {
+//			updateEditEnabled( !isEmpty );
+		}
+    }
+
+	// warning : don't call doc.setAudioFileDescr, it will restore the old markers!
+	public void timelineChanged( TimelineView.Event e )
+    {
+		final Timeline tl = e.getView().getTimeline();
+		timelineRate				= tl.getRate();
+		timelineSpan				= tl.getSpan();
+		playTimer.setDelay( Math.min( (int) (1000 / (vpScale * timelineRate * playRate)), 33 ));
+// EEE
+//		updateAFDGadget();
+//		updateOverviews( false, true );
+    }
+
+	public void timelinePositioned( TimelineView.Event e )
+	{
+		timelinePos = e.getView().getCursor().getPosition();
+		
+		updatePositionAndRepaint();
+//		scroll.setPosition( timelinePos, 0, pointerTool.validDrag ?
+//			TimelineScroll.TYPE_DRAG : TimelineScroll.TYPE_UNKNOWN );
+	}
+
+    public void timelineScrolled( TimelineView.Event e )
+    {
+    	timelineVis	= e.getView().getSpan();
+
+//		updateOverviews( false, true );
+		updateTransformsAndRepaint( false );
+    }
 }

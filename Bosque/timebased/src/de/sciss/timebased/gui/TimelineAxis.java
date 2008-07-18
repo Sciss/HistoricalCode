@@ -136,6 +136,7 @@ implements	TimelineView.Listener,
         			}
         			span	= new Span( Math.min( position, selectionStart ),
         								Math.max( position, selectionStart ));
+//System.out.println( "sel span " + span2 + "; pos " + position + "; selectionStart " + selectionStart + "; new span " + span );
         			edit	= TimelineView.Edit.select( this, view, span ).perform();
                 } else {
         			if( altDrag ) {
@@ -221,6 +222,7 @@ implements	TimelineView.Listener,
     public void startListening()
     {
     	if( !isListening ) {
+//System.out.println( "TLA start" );
     		isListening = true;
     		view.addListener( this );
     		recalcSpace();
@@ -230,6 +232,7 @@ implements	TimelineView.Listener,
     public void stopListening()
     {
     	if( isListening ) {
+//System.out.println( "TLA stop" );
     		isListening = false;
     		view.removeListener( this );
     	}
