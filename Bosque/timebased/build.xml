@@ -2,8 +2,45 @@
 <!--                               -->
 <!-- ANT BUILD FILE FOR TIMEBASED  -->
 <!--                               -->
-<project default="jar"> 
-<target name="jar"> 
- 	<jar jarfile="TimeBased.jar" basedir="bin"/>
-</target>
+<project name="TimeBased" default="main">
+	<property name="src.dir"		value="src"/>
+	<property name="build.dir"		value="build"/>
+	<property name="classes.dir"	value="${build.dir}/classes"/>
+	<property name="jar.file"		value="${ant.project.name}.jar"/>
+	<property name="resources.dir"	value="resources"/>
+	<property name="lib.dir"		value="libraries"/>
+	<property name="libraries"		value="${lib.dir}/MRJAdapter.jar:../SwingOSC/build/SwingOSC.jar"/>
+	<property name="version"		value="0.11"/>
+	<property name="debug"			value="true"/>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+<!--		<delete dir="${dist.dir}" /> -->
+		<delete includeemptydirs="true">
+			<fileset dir="${lib.dir}" excludes="*.jar"/>
+		</delete>
+	</target>
+	<target name="compile">
+		<mkdir dir="${classes.dir}" />
+		<javac debug="${debug}" srcdir="${src.dir}" destdir="${classes.dir}" classpath="${libraries}" source="1.5" target="1.5"/>
+	</target>
+	<target name="jar" depends="compile">
+<!--		<mkdir dir="${jar.dir}" /> -->
+		<jar destfile="${jar.file}" basedir="${classes.dir}">
+<!--			<manifest>
+				<attribute name="Main-Class" value="${main-class}" />
+			</manifest> -->
+		</jar>
+		<jar destfile="${jar.file}" basedir="${resources.dir}" update="true"/>
+		<unjar dest="${lib.dir}">
+			<fileset dir="${lib.dir}">
+				<include name="*.jar" />
+			</fileset>
+		</unjar>
+		<jar destfile="${jar.file}" basedir="${lib.dir}" excludes="*.jar" update="true" />
+		<delete includeemptydirs="true">
+			<fileset dir="${lib.dir}" excludes="*.jar" />
+		</delete>
+	</target>
+	<target name="main" depends="clean,jar" />
 </project>
