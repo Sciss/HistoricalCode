@@ -26,7 +26,7 @@ BosqueEnvTool {
 		var ty1, ty2, yscale, ce, frame, env, idxHit, hitStake;
 		var splitStake1, splitStake2, modSpan;
 		
-		visiSpan		= doc.timeline.visibleSpan;
+		visiSpan		= doc.timelineView.span;
 		bounds		= e.component.bounds;
 		trackPos		= (e.x / bounds.width.max(1) * visiSpan.length).asInteger + visiSpan.start;
 		yscale		= bounds.height.max(1) * timelinePanel.trackVScale;
