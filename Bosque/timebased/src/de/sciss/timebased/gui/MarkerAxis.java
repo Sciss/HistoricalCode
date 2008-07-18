@@ -73,6 +73,7 @@ import javax.swing.undo.UndoManager;
 import de.sciss.app.AbstractApplication;
 import de.sciss.app.AncestorAdapter;
 import de.sciss.app.BasicEvent;
+import de.sciss.app.DynamicAncestorAdapter;
 import de.sciss.app.DynamicListening;
 import de.sciss.app.AbstractCompoundEdit;
 import de.sciss.app.EventManager;
@@ -124,8 +125,8 @@ implements	TimelineView.Listener,
 	protected final GeneralPath shpFlags		= new GeneralPath();
 	private int					recentWidth		= -1;
 	private boolean				doRecalc		= true;
-	protected Span				visibleSpan		= new Span();
-	protected double			scale			= 1.0;
+	protected Span				visibleSpan;
+//	protected double			scale			= 1.0;
 
 	private static final int[] pntBarGradientPixels = { 0xFFB8B8B8, 0xFFC0C0C0, 0xFFC8C8C8, 0xFFD3D3D3,
 														0xFFDBDBDB, 0xFFE4E4E4, 0xFFEBEBEB, 0xFFF1F1F1,
@@ -209,6 +210,8 @@ implements	TimelineView.Listener,
 		this.view	= tlv;
 		this.host	= host;
 		
+		visibleSpan	= tlv.getSpan();
+		
 //		fntLabel	= AbstractApplication.getApplication().getGraphicsHandler().getFont( GraphicsHandler.FONT_LABEL | GraphicsHandler.FONT_MINI ).deriveFont( Font.ITALIC );
 		
 		setMaximumSize( new Dimension( getMaximumSize().width, barExtent ));
@@ -230,8 +233,9 @@ implements	TimelineView.Listener,
 		mil = new MouseInputAdapter() {
 			public void mousePressed( MouseEvent e )
 		    {
-				final long pos = (long) (e.getX() / scale + visibleSpan.getStart() + 0.5);
-			
+				final double	scale	= (double) visibleSpan.getLength() / Math.max( 1, getWidth() );
+				final long		pos		= (long) (e.getX() * scale + visibleSpan.start + 0.5);
+				
 				if( shpFlags.contains( e.getPoint() )) {
 					if( e.isAltDown() ) {					// delete marker
 						removeMarkerLeftTo( pos + 1 );
@@ -298,9 +302,10 @@ implements	TimelineView.Listener,
 					dragStarted = true;
 				}
 
-				final Span			dirtySpan;
-				final long			oldPos	= dragLastMark != null ? dragLastMark.pos : dragMark.pos;
-				final long			newPos	= view.getTimeline().getSpan().clip( (long) ((e.getX() - dragStartX) / scale + dragMark.pos + 0.5) );
+				final Span		dirtySpan;
+				final long		oldPos	= dragLastMark != null ? dragLastMark.pos : dragMark.pos;
+				final double	scale	= (double) getWidth() / visibleSpan.getLength();
+				final long		newPos	= view.getTimeline().getSpan().clip( (long) ((e.getX() - dragStartX) / scale + dragMark.pos + 0.5) );
 
 				if( oldPos == newPos ) return;
 				
@@ -326,6 +331,8 @@ implements	TimelineView.Listener,
 				}
 			}
 		};
+		
+        new DynamicAncestorAdapter( this ).addTo( this );
 	}
 	
 	public void setTrail( Trail t )
@@ -369,16 +376,14 @@ implements	TimelineView.Listener,
 	private void recalcDisplay( FontMetrics fm )
 	{
 		final List		markers;
-		long			start, stop;
+//		final long		start		= visibleSpan.start;
+//		final long		stop		= visibleSpan.stop;
+		final double	scale		= (double) recentWidth / visibleSpan.getLength();
+
 		MarkerStake		mark;
 		
 		shpFlags.reset();
 		numMarkers	= 0;
-		
-		visibleSpan = view.getSpan();	// so we don't have to do that after startListening
-		start		= visibleSpan.start;
-		stop		= visibleSpan.stop;
-		scale		= (double) recentWidth / (stop - start);
 		
 		if( trail != null ) {
 			markers		= trail.getRange( visibleSpan, true );	// XXX plus a bit before
@@ -395,7 +400,7 @@ implements	TimelineView.Listener,
 		for( int i = 0; i < numMarkers; i++ ) {
 			mark				= (MarkerStake) markers.get( i );
 			markLabels[ i ]		= mark.name;
-			markFlagPos[ i ]	= (int) (((mark.pos - start) * scale) + 0.5);
+			markFlagPos[ i ]	= (int) (((mark.pos - visibleSpan.start) * scale) + 0.5);
 			shpFlags.append( new Rectangle( markFlagPos[ i ], 1, fm.stringWidth( mark.name ) + 8, markExtent ), false );
 		}
 		doRecalc	= false;
@@ -465,7 +470,7 @@ implements	TimelineView.Listener,
 
 	private void triggerRedisplay()
 	{
-		doRecalc	= true;
+		doRecalc = true;
 		if( host != null ) {
 			host.update( this );
 		} else if( isVisible() ) {
@@ -672,7 +677,17 @@ implements	TimelineView.Listener,
 			elm.dispatchEvent( new Event( this, id, System.currentTimeMillis(), this, modSpan ));
 		}
 	}
+	
+	public void addListener( Listener l )
+	{
+		elm.addListener( l );
+	}
 
+	public void removeListener( Listener l )
+	{
+		elm.removeListener( l );
+	}
+	
 	// -------------- EventManager.Processor interface --------------
 	public void processEvent( BasicEvent e )
 	{
@@ -738,7 +753,6 @@ implements	TimelineView.Listener,
 			triggerRedisplay();
 		}
 	}
-
 	
 // ---------------- TimelineListener interface ---------------- 
   
@@ -748,9 +762,7 @@ implements	TimelineView.Listener,
 
    	public void timelineScrolled( TimelineView.Event e )
     {
-   		visibleSpan = view.getSpan();
-   		scale		= (double) getWidth() / visibleSpan.getLength();
-			
+   		visibleSpan = view.getSpan();			
    		triggerRedisplay();
     }
 

@@ -40,6 +40,7 @@ import javax.swing.Timer;
 import de.sciss.gui.ComponentHost;
 import de.sciss.gui.TopPainter;
 import de.sciss.io.Span;
+import de.sciss.timebased.Trail;
 import de.sciss.timebased.timeline.BasicTimeline;
 import de.sciss.timebased.timeline.BasicTimelineView;
 import de.sciss.timebased.timeline.Timeline;
@@ -84,11 +85,15 @@ implements TopPainter, TimelineView.Listener
 	protected long			playStartTime;
 	protected boolean		isPlaying				= false;
 
-	private final TimelineAxis	timeAxis;
-	private final MarkerAxis	markAxis;
+	private final TimelineAxis		timeAxis;
+	private final MarkerAxis		markAxis;
+	private Trail					markerTrail		= null;
+	private final Trail.Listener	markerListener;
+
+	private final TimelineView		tlv;
 	
-	private final TimelineView	tlv;
-	
+	protected boolean	markVisible;
+
 	public TimelinePanel()
 	{
 		this( new BasicTimeline() );
@@ -110,6 +115,7 @@ implements TopPainter, TimelineView.Listener
 		timelinePos		= tlv.getCursor().getPosition();
 		timelineSpan	= tlv.getTimeline().getSpan();
 		timelineRate	= tlv.getTimeline().getRate();
+		markVisible		= true;
 
 		addTopPainter( this );
 		setLayout( new BoxLayout( this, BoxLayout.Y_AXIS ));
@@ -134,9 +140,65 @@ implements TopPainter, TimelineView.Listener
 			}
 		});
 		
+		// ---------- Listeners ---------- 
+		markerListener = new Trail.Listener() {
+			public void trailModified( Trail.Event e )
+			{
+//				System.out.println( "HUHUHUHU " + e.getAffectedSpan() );
+				repaintMarkers( e.getAffectedSpan() );
+			}
+		};
 		tlv.addListener( this );
+		markAxis.addListener( new MarkerAxis.Listener() {
+			public void markerDragStarted( MarkerAxis.Event e )
+			{
+				addCatchBypass();
+			}
+			
+			public void markerDragStopped( MarkerAxis.Event e )
+			{
+				removeCatchBypass();
+			}
+
+			public void markerDragAdjusted( MarkerAxis.Event e )
+			{
+				repaintMarkers( e.getModificatioSpan() );
+			}
+		});
 	}
 	
+	public void setMarkerTrail( Trail t )
+	{
+		if( markerTrail != null ) {
+			markerTrail.removeListener( markerListener );
+		}
+		markerTrail = t;
+		if( markerTrail != null ) {
+			markerTrail.addListener( markerListener );
+		}
+		markAxis.setTrail( markerTrail );
+	}
+
+	public void addCatchBypass() { /* scroll.addCatchBypass(); XXX*/ }
+	public void removeCatchBypass() { /* scroll.removeCatchBypass(); XXX*/ }
+
+	protected void repaintMarkers( Span affectedSpan )
+	{
+		if( !markVisible || !affectedSpan.touches( timelineVis )) return;
+	
+		final Span span	 = affectedSpan.shift( -timelineVis.start );
+		final Rectangle updateRect = new Rectangle(
+			(int) (span.start * vpScale), 0,
+			(int) (span.getLength() * vpScale) + 2, getHeight() ).
+				intersection( new Rectangle( 0, 0, getWidth(), getHeight() ));
+		if( !updateRect.isEmpty() ) {
+			// update markAxis in any case, even if it's invisible
+			// coz otherwise the flag stakes are not updated!
+//			update( markAxis );
+			repaint( updateRect );
+		}
+	}
+
 	public TimelineAxis getTimelineAxis()
 	{
 		return timeAxis;
@@ -162,9 +224,9 @@ implements TopPainter, TimelineView.Listener
 			g2.fillRect( vpSelectionRect.x, r.y - vpRecentRect.y, vpSelectionRect.width, r.height );
 		}
 		
-//		if( markVisible ) {
-//			markAxis.paintFlagSticks( g2, vpRecentRect );
-//		}
+		if( markVisible ) {
+			markAxis.paintFlagSticks( g2, vpRecentRect );
+		}
 		
 		g2.setColor( colrPosition );
 		g2.drawLine( vpPosition, 0, vpPosition, vpRecentRect.height );
@@ -248,6 +310,7 @@ implements TopPainter, TimelineView.Listener
 	public void dispose()
 	{
 		tlv.removeListener( this );
+		setMarkerTrail( null );
 		this.stop();
 		super.dispose();
 	}
