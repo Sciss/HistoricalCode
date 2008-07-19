@@ -202,4 +202,7 @@ implements TimelineView, EventManager.Processor
 		elm.dispatchEvent( new Event( source, Event.SCROLLED,
 		                              System.currentTimeMillis(), this ));
 	}
+
+// ------------------- inner classes -------------------
+	
 }

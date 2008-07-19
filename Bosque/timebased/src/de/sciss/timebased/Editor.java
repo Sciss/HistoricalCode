@@ -1,5 +1,5 @@
 /*
- *  Master.java
+ *  Editor.java
  *  TimeBased
  *
  *  Copyright (c) 2004-2008 Hanns Holger Rutz. All rights reserved.
@@ -24,46 +24,14 @@
  *
  *
  *  Changelog:
- *		18-Jul-08	created
+ *		19-Jul-08	created
  */
 
-package de.sciss.timebased.net;
+package de.sciss.timebased;
 
-import java.io.IOException;
-
-import de.sciss.net.OSCMessage;
-import de.sciss.net.OSCPacket;
-import de.sciss.swingosc.SwingClient;
-import de.sciss.swingosc.SwingOSC;
-
-public class Master
+public interface Editor
 {
-	private final SwingClient client;
-	
-	public Master()
-	{
-		this( SwingOSC.getInstance().getCurrentClient() );
-	}
-	
-	public Master( SwingClient client )
-	{
-		this.client	= client;
-	}
-	
-	public SwingClient getClient() { return client; }
-	
-	public void reply( OSCPacket p )
-	{
-		try {
-			client.reply( p );
-		}
-		catch( IOException e1 ) {
-			e1.printStackTrace();
-		}
-	}
-	
-	public void reply( String cmd, Object... args )
-	{
-		reply( new OSCMessage( cmd, args ));
-	}
+	public int editBegin( Object source, String name );
+	public void editEnd( int id );
+	public void editCancel( int id );
 }

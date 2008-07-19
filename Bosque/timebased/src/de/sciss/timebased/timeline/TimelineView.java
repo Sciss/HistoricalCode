@@ -178,6 +178,16 @@ extends Disposable
 		}
 	}
 	
+// --------------------- Editor interface ---------------------
+	
+	public interface Editor
+	extends de.sciss.timebased.Editor
+	{
+		public void editPosition( int id, long newPos );
+		public void editScroll( int id, Span newSpan );
+		public void editSelect( int id, Span newSpan );
+	}
+	
 	// --------------------------------------------------
 	
 	public static class Edit

@@ -37,6 +37,7 @@ package de.sciss.timebased;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
@@ -1464,7 +1465,43 @@ if( DEBUG ) {
 		} // for( i = 0; i < this.countListeners(); i++ )
 	}
 
-// --------------------- internal classes ---------------------
+// --------------------- inner classes ---------------------
+
+	public static class Editor
+	extends AbstractEditor
+	implements Trail.Editor
+	{
+		private final BasicTrail trail;
+		
+		public Editor( BasicTrail trail )
+		{
+			this.trail = trail;
+		}
+		
+		public int editBegin( Object source, String name )
+		{
+			final int		id	= super.editBegin( source, name );
+			final Client	c	= getClient( id );
+			trail.editBegin( c.edit );
+			return id;
+		}
+		
+		public void editAdd( int id, Stake... stakes )
+		throws IOException
+		{
+			final Client c = getClient( id );
+			trail.editAddAll( c.source, Arrays.asList( stakes ), c.edit );
+		}
+		
+		public void editRemove( int id, Stake... stakes )
+		throws IOException
+		{
+			final Client c = getClient( id );
+			trail.editRemoveAll( c.source, Arrays.asList( stakes ), c.edit );
+		}
+	}
+	
+// --------------------- inner classes ---------------------
 	
 	// undable edits
 		

@@ -109,6 +109,15 @@ extends Disposable, TreeNode
 		public void trailModified( Trail.Event e );
 	}
 
+// --------------------- Editor interface ---------------------
+	
+	public interface Editor
+	extends de.sciss.timebased.Editor
+	{
+		public void editAdd( int id, Stake... stakes ) throws IOException;
+		public void editRemove( int id, Stake... stakes ) throws IOException;
+	}
+	
 // --------------------- internal classes ---------------------
 
 	public static class Event

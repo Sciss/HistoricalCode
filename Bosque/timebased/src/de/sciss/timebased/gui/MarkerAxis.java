@@ -68,16 +68,13 @@ import javax.swing.KeyStroke;
 import javax.swing.event.AncestorEvent;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.MouseInputListener;
-import javax.swing.undo.UndoManager;
 
 import de.sciss.app.AbstractApplication;
 import de.sciss.app.AncestorAdapter;
 import de.sciss.app.BasicEvent;
 import de.sciss.app.DynamicAncestorAdapter;
 import de.sciss.app.DynamicListening;
-import de.sciss.app.AbstractCompoundEdit;
 import de.sciss.app.EventManager;
-import de.sciss.common.BasicCompoundEdit;
 import de.sciss.common.BasicWindowHandler;
 import de.sciss.gui.ComponentHost;
 import de.sciss.gui.DoClickAction;
@@ -149,37 +146,36 @@ implements	TimelineView.Listener,
 	private static final Stroke	strkStick	= new BasicStroke( 1.0f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL,
 		1.0f, new float[] { 4.0f, 4.0f }, 0.0f );
 
-	private static final int	markExtent = pntMarkGradientPixels.length;
-	private final Paint			pntBackground;
-	private final Paint			pntMarkFlag, pntMarkFlagDrag;
-	private final BufferedImage img1, img2, img3;
+	private static final int			markExtent = pntMarkGradientPixels.length;
+	private final Paint					pntBackground;
+	private final Paint					pntMarkFlag, pntMarkFlagDrag;
+	private final BufferedImage			img1, img2, img3;
 
-	private final ComponentHost	host;
-	private boolean				isListening	= false;
+	private final ComponentHost			host;
+	private boolean						isListening	= false;
 
 	// ----- Edit-Marker Dialog -----
-	private JPanel					editMarkerPane	= null;
-	private Object[]				editOptions		= null;
-	private ParamField				ggMarkPos;
-	protected JTextField			ggMarkName;
-	private JButton					ggEditPrev, ggEditNext;
-	protected int					editIdx			= -1;
-	private DefaultUnitTranslator	timeTrans;
+	private JPanel						editMarkerPane	= null;
+	private Object[]					editOptions		= null;
+	private ParamField					ggMarkPos;
+	protected JTextField				ggMarkName;
+	private JButton						ggEditPrev, ggEditNext;
+	protected int						editIdx			= -1;
+	private DefaultUnitTranslator		timeTrans;
 	
 	// ---- dnd ----
-	protected MarkerStake		dragMark		= null;
-	protected MarkerStake		dragLastMark	= null;
-	protected boolean			dragStarted		= false;
-	protected int				dragStartX		= 0;
+	protected MarkerStake				dragMark		= null;
+	protected MarkerStake				dragLastMark	= null;
+	protected boolean					dragStarted		= false;
+	protected int						dragStartX		= 0;
 	
-	protected boolean			dispatchedStart	= false;
+	protected boolean					dispatchedStart	= false;
 	
-	protected final TimelineView	view;
-	protected Trail					trail			= null;
-	protected UndoManager			undoMgr			= null;
+	protected final TimelineView		view;
+	protected Trail						trail			= null;
 	
-	private final EventManager	elm				= new EventManager( this );
-	private boolean				editable		= false;
+	private final EventManager			elm				= new EventManager( this );
+	protected Trail.Editor				editor			= null;
 	
 	private final MouseInputListener	mil;
 	private final KeyListener			kl;
@@ -259,38 +255,27 @@ implements	TimelineView.Listener,
 
 			public void mouseReleased( MouseEvent e )
 			{
-				AbstractCompoundEdit ce;
-			
 				if( dispatchedStart ) {
 					dispatchedStart = false;
 					dispatchEvent( Event.DRAGSTOPPED, (dragLastMark != null) ?
 						dragLastMark.getSpan() : dragMark.getSpan() );
 				}
 				
-				try {
-					if( dragLastMark != null ) {
-						ce	= new BasicCompoundEdit( getResourceString( "editMoveMarker" ));
-						trail.editBegin( ce );
-						try {
-							trail.editRemove( this, dragMark, ce );
-							trail.editAdd( this, dragLastMark, ce );
-						}
-						catch( IOException e1 ) {	// should never happen
-							System.err.println( e1 );
-							ce.cancel();
-							return;
-						}
-						trail.editEnd( ce );
-						ce.perform();
-						ce.end();
-						if( undoMgr != null ) undoMgr.addEdit( ce );
+				if( (dragLastMark != null) && (editor != null) ) {
+					final int id = editor.editBegin( MarkerAxis.this, getResourceString( "editMoveMarker" ));
+					try {
+						editor.editRemove( id, dragMark );
+						editor.editAdd( id, dragLastMark );
+						editor.editEnd( id );
+					}
+					catch( IOException e1 ) {	// should never happen
+						System.err.println( e1 );
+						editor.editCancel( id );
 					}
 				}
-				finally {
-					dragStarted		= false;
-					dragMark		= null;
-					dragLastMark	= null;
-				}
+				dragStarted		= false;
+				dragMark		= null;
+				dragLastMark	= null;
 			}
 			
 			public void mouseDragged( MouseEvent e )
@@ -347,16 +332,11 @@ implements	TimelineView.Listener,
 		triggerRedisplay();
 	}
 	
-	public void setUndoManager( UndoManager undoMgr )
+	public void setEditor( Trail.Editor editor )
 	{
-		this.undoMgr = undoMgr;
-	}
-	
-	public void setEditable( boolean editable )
-	{
-		if( this.editable != editable ) {
-			this.editable = editable;
-			if( editable ) {
+		if( this.editor != editor ) {
+			this.editor = editor;
+			if( editor != null ) {
 				this.addMouseListener( mil );
 				this.addMouseMotionListener( mil );
 				this.addKeyListener( kl );
@@ -480,56 +460,40 @@ implements	TimelineView.Listener,
   
 	public void addMarker( long pos )
 	{
-		if( trail == null ) throw new IllegalStateException();
+		if( editor == null ) throw new IllegalStateException();
 		
-		final AbstractCompoundEdit	ce;
-	
-		pos		= view.getTimeline().getSpan().clip( pos );
-		ce		= new BasicCompoundEdit( getResourceString( "editAddMarker" ));
-		trail.editBegin( ce );
+		pos				= view.getTimeline().getSpan().clip( pos );
+		final int id	= editor.editBegin( this, getResourceString( "editAddMarker" ));
 		try {
-			trail.editAdd( this, new MarkerStake( pos, "Mark" ), ce );
+			editor.editAdd( id, new MarkerStake( pos, "Mark" ));
+			editor.editEnd( id );
 		}
 		catch( IOException e1 ) {	// should never happen
-			System.err.println( e1 );
-			ce.cancel();
-			return;
+			e1.printStackTrace();
+			editor.editCancel( id );
 		}
-		finally {
-			trail.editEnd( ce );
-		}
-		ce.perform();
-		ce.end();
-		if( undoMgr != null ) undoMgr.addEdit( ce );
 	}
 	
 	protected void removeMarkerLeftTo( long pos )
 	{
-		if( trail == null ) throw new IllegalStateException();
+		if( editor == null ) throw new IllegalStateException();
 		
-		final AbstractCompoundEdit	ce;
-		final MarkerStake		mark;
+		final MarkerStake mark;
 	
 		mark	= getMarkerLeftTo( pos );
 		pos		= view.getTimeline().getSpan().clip( pos );
 		if( mark == null ) return;
 		
-		ce		= new BasicCompoundEdit( getResourceString( "editDeleteMarker" ));
-		trail.editBegin( ce );
+		final int id = editor.editBegin( this, getResourceString( "editDeleteMarker" ));
 		try {
-			trail.editRemove( this, mark, ce );
+			editor.editRemove( id, mark );
+			editor.editEnd( id );
 		}
 		catch( IOException e1 ) {	// should never happen
-			System.err.println( e1 );
-			ce.cancel();
+			e1.printStackTrace();
+			editor.editCancel( id );
 			return;
 		}
-		finally {
-			trail.editEnd( ce );
-		}
-		ce.perform();
-		ce.end();
-		if( undoMgr != null ) undoMgr.addEdit( ce );
 	}
 
 	protected void editMarkerLeftTo( long pos )
@@ -627,34 +591,26 @@ implements	TimelineView.Listener,
 	
 	protected void commitEditMarker()
 	{
-		if( trail == null ) throw new IllegalStateException();
+		if( (editor == null) || (trail == null) ) throw new IllegalStateException();
 		
 		final MarkerStake mark = (MarkerStake) trail.get( editIdx, true );
 		if( mark == null ) return;
 
-		final long					positionSmps;
-		final AbstractCompoundEdit	ce;
+		final long positionSmps;
 
 		positionSmps	= (long) timeTrans.translate( ggMarkPos.getValue(), ParamSpace.spcTimeSmps ).val;
 		if( (positionSmps == mark.pos) && (ggMarkName.getText().equals( mark.name ))) return; // no change
 		
-		ce		= new BasicCompoundEdit( getResourceString( "editEditMarker" ));
-		trail.editBegin( ce );
+		final int id = editor.editBegin( this, getResourceString( "editEditMarker" ));
 		try {
-			trail.editRemove( this, mark, ce );
-			trail.editAdd( this, new MarkerStake( positionSmps, ggMarkName.getText() ), ce );
+			editor.editRemove( id, mark );
+			editor.editAdd( id, new MarkerStake( positionSmps, ggMarkName.getText() ));
+			editor.editEnd( id );
 		}
 		catch( IOException e1 ) {	// should never happen
-			System.err.println( e1 );
-			ce.cancel();
-			return;
+			e1.printStackTrace();
+			editor.editCancel( id );
 		}
-		finally {
-			trail.editEnd( ce );
-		}
-		ce.perform();
-		ce.end();
-		if( undoMgr != null ) undoMgr.addEdit( ce );
 	}
 
 	protected MarkerStake getMarkerLeftTo( long pos )
@@ -714,8 +670,8 @@ implements	TimelineView.Listener,
 	public void dispose()
 	{
 		stopListening();
-		trail = null;
-		undoMgr = null;
+		setEditor( null );
+		trail		= null;
 		markLabels	= null;
 		markFlagPos	= null;
 		shpFlags.reset();
