@@ -194,8 +194,10 @@ implements StakeRenderer
 		
 		if( value instanceof ForestRegionStake ) {
 			final ForestRegionStake frs = (ForestRegionStake) value;
-			bounds.y 		= (int) (frs.track.y * vscale + 0.5f) + 1;
-			bounds.height	= (int) (frs.track.height * vscale + 0.5f) - 2;
+//			bounds.y 		= (int) (frs.track.y * vscale + 0.5f) + 1;
+//			bounds.height	= (int) (frs.track.height * vscale + 0.5f) - 2;
+			bounds.y 		= (int) (0 * vscale + 0.5f) + 1;
+			bounds.height	= (int) (1 * vscale + 0.5f) - 2;
 			colr = (frs.colr != null) ? frs.colr : colrAtomB;
 			fadeIn = frs.fadeIn != null;
 			if( fadeIn ) {

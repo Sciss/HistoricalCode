@@ -1,15 +1,19 @@
 package de.sciss.timebased;
 
-public class ForestTrack
-{
-	public final int id;
-	public float y		= 0f;
-	public float height = 1f;
+import de.sciss.timebased.session.Track;
 
-	public ForestTrack( int id, float y, float height )
+public class ForestTrack
+extends Track
+{
+	private final int	id;
+	private final Trail	trail;
+
+	public ForestTrack( int id, Trail trail )
 	{
 		this.id 	= id;
-		this.y		= y;
-		this.height	= height;
-	}	
+		this.trail	= trail;
+	}
+	
+	public int getID() { return id; }
+	public Trail getTrail() { return trail; }
 }

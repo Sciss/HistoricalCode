@@ -41,6 +41,8 @@ import de.sciss.gui.ComponentHost;
 import de.sciss.gui.TopPainter;
 import de.sciss.io.Span;
 import de.sciss.timebased.Trail;
+import de.sciss.timebased.session.MutableSessionCollection;
+import de.sciss.timebased.session.SessionCollection;
 import de.sciss.timebased.timeline.BasicTimeline;
 import de.sciss.timebased.timeline.BasicTimelineView;
 import de.sciss.timebased.timeline.Timeline;
@@ -48,51 +50,56 @@ import de.sciss.timebased.timeline.TimelineView;
 
 /**
  *  @author		Hanns Holger Rutz
- *  @version	0.11, 23-Aug-07
+ *  @version	0.12, 18-Jul-08
  */
 public class TimelinePanel
 extends ComponentHost
 implements TopPainter, TimelineView.Listener
 {
-	private final Color colrSelection			= new Color( 0x00, 0x00, 0xFF, 0x2F ); // GraphicsUtil.colrSelection;
-	private final Color colrPosition			= new Color( 0xFF, 0x00, 0x00, 0x7F );
+	private final Color 						colrSelection			= new Color( 0x00, 0x00, 0xFF, 0x2F ); // GraphicsUtil.colrSelection;
+	private final Color 						colrPosition			= new Color( 0xFF, 0x00, 0x00, 0x7F );
 
-	private Rectangle   vpRecentRect			= new Rectangle();
-	private int			vpPosition				= -1;
-	private Rectangle   vpPositionRect			= new Rectangle();
-	private final ArrayList	vpSelections		= new ArrayList();
-	private final ArrayList	vpSelectionColors	= new ArrayList();
-	private Rectangle	vpSelectionRect			= new Rectangle();
+	private Rectangle  							vpRecentRect			= new Rectangle();
+	private int									vpPosition				= -1;
+	private Rectangle  							vpPositionRect			= new Rectangle();
+	private final ArrayList						vpSelections			= new ArrayList();
+	private final ArrayList						vpSelectionColors		= new ArrayList();
+	private Rectangle							vpSelectionRect			= new Rectangle();
 	
-	private Rectangle   vpUpdateRect			= new Rectangle();
-//	private Rectangle   vpZoomRect				= null;
-//	private float[]		vpDash					= { 3.0f, 5.0f };
-	private float		vpScale;
+	private Rectangle   						vpUpdateRect			= new Rectangle();
+//	private Rectangle   						vpZoomRect				= null;
+//	private float[]								vpDash					= { 3.0f, 5.0f };
+	private float								vpScale;
 	
-	private Span		timelineVis;
-	private Span		timelineSel;
-	protected long		timelinePos;
-	private Span		timelineSpan;
-	protected double	timelineRate;
+	private Span								timelineVis;
+	private Span								timelineSel;
+	protected long								timelinePos;
+//	private Span								timelineSpan;
+	protected double							timelineRate;
 
-	private final Timer	playTimer;
+	private final Timer							playTimer;
 	
 	// !!! for some crazy reason, these need to be volatile because otherwise
 	// the playTimer's actionPerformed body might use a cached value !!!
 	// how can this happen when javax.swing.Timer is playing on the event thread?!
-	protected double		playRate				= 1.0;
-	protected long			playStartPos			= 0;
-	protected long			playStartTime;
-	protected boolean		isPlaying				= false;
+	protected double							playRate				= 1.0;
+	protected long								playStartPos			= 0;
+	protected long								playStartTime;
+	protected boolean							isPlaying				= false;
 
-	private final TimelineAxis		timeAxis;
-	private final MarkerAxis		markAxis;
-	private Trail					markerTrail		= null;
-	private final Trail.Listener	markerListener;
+	private final TimelineAxis					timeAxis;
+	private final MarkerAxis					markAxis;
+	private Trail								markerTrail				= null;
+	private final Trail.Listener				markerListener;
 
-	private final TimelineView		tlv;
+	private final TimelineView					tlv;
 	
-	protected boolean	markVisible;
+	protected boolean							markVisible;
+	
+	private SessionCollection					activeTracks			= null;
+	private MutableSessionCollection			selectedTracks			= null;
+	private final SessionCollection.Listener	activeTracksListener;
+	private final SessionCollection.Listener	selectedTracksListener;
 
 	public TimelinePanel()
 	{
@@ -113,7 +120,7 @@ implements TopPainter, TimelineView.Listener
 		timelineVis		= tlv.getSpan();
 		timelineSel		= tlv.getSelection().getSpan();
 		timelinePos		= tlv.getCursor().getPosition();
-		timelineSpan	= tlv.getTimeline().getSpan();
+//		timelineSpan	= tlv.getTimeline().getSpan();
 		timelineRate	= tlv.getTimeline().getRate();
 		markVisible		= true;
 
@@ -140,7 +147,49 @@ implements TopPainter, TimelineView.Listener
 			}
 		});
 		
-		// ---------- Listeners ---------- 
+		// ---------- Listeners ----------
+		activeTracksListener = new SessionCollection.Listener() {
+			public void sessionCollectionChanged( SessionCollection.Event e )
+			{
+//				documentUpdate();
+				updateSelectionAndRepaint();
+//				final List coll = e.getCollection();
+				switch( e.getModificationType() ) {
+				case SessionCollection.Event.ACTION_ADDED:
+//					for( int i = 0; i < coll.size(); i++ ) {
+//						((Transmitter) coll.get( i )).getAudioTrail().addListener( waveTrailListener );
+//					}
+					break;
+					
+				case SessionCollection.Event.ACTION_REMOVED:
+//					for( int i = 0; i < coll.size(); i++ ) {
+//						((Transmitter) coll.get( i )).getAudioTrail().removeListener( waveTrailListener );
+//					}
+					break;
+				
+				default:
+					break;
+				}
+			}
+
+			public void sessionObjectMapChanged( SessionCollection.Event e ) { /* ignored */ }
+
+			public void sessionObjectChanged( SessionCollection.Event e )
+			{
+				// nothing
+			}
+		};
+		
+		selectedTracksListener = new SessionCollection.Listener() {
+			public void sessionCollectionChanged( SessionCollection.Event e )
+			{
+				updateSelectionAndRepaint();
+			}
+
+			public void sessionObjectMapChanged( SessionCollection.Event e ) { /* ignore */ }
+			public void sessionObjectChanged( SessionCollection.Event e ) { /* ignore */ }
+		};
+
 		markerListener = new Trail.Listener() {
 			public void trailModified( Trail.Event e )
 			{
@@ -167,6 +216,22 @@ implements TopPainter, TimelineView.Listener
 		});
 	}
 	
+	public void setTracks( SessionCollection activeTracks, MutableSessionCollection selectedTracks )
+	{
+		if( this.activeTracks != null ) {
+			this.activeTracks.removeListener( activeTracksListener );
+			this.selectedTracks.removeListener( selectedTracksListener );
+		}
+		this.activeTracks	= activeTracks;
+		this.selectedTracks	= selectedTracks;
+		if( this.activeTracks != null ) {
+			this.activeTracks.addListener( activeTracksListener );
+			this.selectedTracks.addListener( selectedTracksListener );
+		}
+	}
+
+	public TimelineView getTimelineView() { return tlv; }
+	
 	public void setMarkerTrail( Trail t )
 	{
 		if( markerTrail != null ) {
@@ -181,6 +246,13 @@ implements TopPainter, TimelineView.Listener
 
 	public void addCatchBypass() { /* scroll.addCatchBypass(); XXX*/ }
 	public void removeCatchBypass() { /* scroll.removeCatchBypass(); XXX*/ }
+
+//	// sync: attempts exclusive on MTE and shared on TIME!
+//	protected void updateOverviews( boolean allTracks )
+//	{
+////		waveView.update( timelineVis );
+//		if( allTracks ) updateAll();
+//	}
 
 	protected void repaintMarkers( Span affectedSpan )
 	{
@@ -349,7 +421,7 @@ implements TopPainter, TimelineView.Listener
 		pEmpty = (vpPositionRect.x + vpPositionRect.width < 0) || (vpPositionRect.x > vpRecentRect.width);
 		if( !pEmpty ) vpUpdateRect.setBounds( vpPositionRect );
 
-//			recalcTransforms();
+//		recalcTransforms();
 		if( vpScale > 0f ) {
 			vpPosition	= (int) ((timelinePos - timelineVis.getStart()) * vpScale + 0.5f);
 //				positionRect.setBounds( position, 0, 1, recentRect.height );
@@ -392,19 +464,13 @@ implements TopPainter, TimelineView.Listener
 //			}
 	}
 
-	private void updateSelectionAndRepaint()
+	protected void updateSelectionAndRepaint()
 	{
 		final Rectangle r = new Rectangle( 0, 0, getWidth(), getHeight() );
 	
 		vpUpdateRect.setBounds( vpSelectionRect );
 		recalcTransforms( r );
-//			try {
-//				doc.bird.waitShared( Session.DOOR_TIMETRNS | Session.DOOR_GRP );
-			updateSelection();
-//			}
-//			finally {
-//				doc.bird.releaseShared( Session.DOOR_TIMETRNS | Session.DOOR_GRP );
-//			}
+		updateSelection();
 		if( vpUpdateRect.isEmpty() ) {
 			vpUpdateRect.setBounds( vpSelectionRect );
 		} else if( !vpSelectionRect.isEmpty() ) {
@@ -487,7 +553,7 @@ vpSelectionColors.add( colrSelection );
     {
 		final Timeline tl = e.getView().getTimeline();
 		timelineRate				= tl.getRate();
-		timelineSpan				= tl.getSpan();
+//		timelineSpan				= tl.getSpan();
 		playTimer.setDelay( Math.min( (int) (1000 / (vpScale * timelineRate * playRate)), 33 ));
 // EEE
 //		updateAFDGadget();
