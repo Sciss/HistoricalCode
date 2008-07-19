@@ -106,8 +106,8 @@ implements Editor
 	
 	protected static class Client
 	{
-		protected final Object					source;
-		protected final AbstractCompoundEdit	edit;
+		public final Object					source;
+		public final AbstractCompoundEdit	edit;
 		
 		protected Client( Object source, String name )
 		{

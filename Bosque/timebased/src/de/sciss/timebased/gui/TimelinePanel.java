@@ -363,9 +363,10 @@ implements TopPainter, TimelineView.Listener
 ////		updateOverviews( false, true );
 //	}
 	
-	public void play( double rate )
+	public void play( long startPos, double rate )
 	{
-//System.out.println( "play : " + playStartPos );
+		playStartPos	= startPos; // timelinePos;
+		//System.out.println( "play : " + playStartPos );
 		playRate		= rate;
 		playStartTime	= System.currentTimeMillis();
 		playTimer.setDelay( Math.min( (int) (1000 / (vpScale * timelineRate * playRate)), 33 ));

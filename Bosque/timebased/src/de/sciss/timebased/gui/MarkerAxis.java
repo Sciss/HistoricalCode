@@ -71,10 +71,15 @@ import javax.swing.event.MouseInputListener;
 
 import de.sciss.app.AbstractApplication;
 import de.sciss.app.AncestorAdapter;
+import de.sciss.app.Application;
 import de.sciss.app.BasicEvent;
 import de.sciss.app.DynamicAncestorAdapter;
 import de.sciss.app.DynamicListening;
 import de.sciss.app.EventManager;
+<<<<<<< .mine
+import de.sciss.app.GraphicsHandler;
+=======
+>>>>>>> .r56
 import de.sciss.common.BasicWindowHandler;
 import de.sciss.gui.ComponentHost;
 import de.sciss.gui.DoClickAction;
@@ -225,6 +230,8 @@ implements	TimelineView.Listener,
 		pntMarkFlagDrag = new TexturePaint( img3, new Rectangle( 0, 0, 1, markExtent ));
 
 		setOpaque( true );
+ 		final Application app = AbstractApplication.getApplication();
+ 		if( app != null ) setFont( app.getGraphicsHandler().getFont( GraphicsHandler.FONT_SYSTEM | GraphicsHandler.FONT_MINI ));
 		
 		mil = new MouseInputAdapter() {
 			public void mousePressed( MouseEvent e )

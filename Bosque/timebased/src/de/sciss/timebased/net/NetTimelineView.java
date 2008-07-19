@@ -53,6 +53,7 @@ implements TimelineView
 	public NetTimelineView( TimelineView backend, NetTimeline timeline,
 							NetTimelineCursor cursor, NetTimelineSelection sel )
 	{
+System.out.println( getClass().getName() + " : THIS CLASS SHOULD NOT BE USED ANYMORE!!" );		
 		this.backend	= backend;
 		this.timeline	= timeline;
 		this.master		= timeline.getMaster();

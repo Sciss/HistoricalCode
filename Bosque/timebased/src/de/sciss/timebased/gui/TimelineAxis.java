@@ -36,15 +36,15 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.event.MouseInputListener;
-import javax.swing.undo.CompoundEdit;
-import javax.swing.undo.UndoManager;
-import javax.swing.undo.UndoableEdit;
 
 import de.sciss.gui.ComponentHost;
 import de.sciss.gui.VectorSpace;
 
+import de.sciss.app.AbstractApplication;
+import de.sciss.app.Application;
 import de.sciss.app.DynamicAncestorAdapter;
 import de.sciss.app.DynamicListening;
+import de.sciss.app.GraphicsHandler;
 
 import de.sciss.io.Span;
 import de.sciss.timebased.timeline.TimelineView;
@@ -58,18 +58,17 @@ import de.sciss.timebased.timeline.TimelineView;
  *  timeline.
  *
  *  @author		Hanns Holger Rutz
- *  @version	0.70, 20-Mar-08
+ *  @version	0.70, 19-Jul-08
  */
 public class TimelineAxis
 extends Axis
 implements	TimelineView.Listener,
 			DynamicListening
 {
-    private final TimelineView	view;
-	protected UndoManager		undoMgr			= null;
+    private final TimelineView			view;
 	
-	private boolean				isListening		= false;
-	private boolean				editable		= false;
+	private boolean						isListening		= false;
+	protected TimelineView.Editor		editor			= null;
 	
 	private final MouseInputListener	mil;
     
@@ -90,6 +89,9 @@ implements	TimelineView.Listener,
 		super( HORIZONTAL, TIMEFORMAT, host );
         
         this.view = view;
+        
+ 		final Application app = AbstractApplication.getApplication();
+ 		if( app != null ) setFont( app.getGraphicsHandler().getFont( GraphicsHandler.FONT_SYSTEM | GraphicsHandler.FONT_MINI ));
 		
 		// --- Listener ---
         mil = new MouseInputAdapter() {
@@ -113,16 +115,19 @@ implements	TimelineView.Listener,
         	
         	private void dragTimelinePosition( MouseEvent e )
         	{
-        		int				x   = e.getX();
+        		if( editor == null ) return;
+        		
+        		final int		x   = e.getX();
         		Span			span, span2;
         		long			position;
-        		UndoableEdit	edit;
 
         		// translate into a valid time offset
                 span        = view.getSpan();
                 position    = span.getStart() + (long) ((double) x / (double) getWidth() *
                                                         span.getLength());
                 position    = view.getTimeline().getSpan().clip( position );
+                
+                final int id = editor.editBegin( TimelineAxis.this, getResourceString( "editTimelineView" ));
                 
                 if( shiftDrag ) {
         			span2	= view.getSelection().getSpan();
@@ -137,19 +142,24 @@ implements	TimelineView.Listener,
         			span	= new Span( Math.min( position, selectionStart ),
         								Math.max( position, selectionStart ));
 //System.out.println( "sel span " + span2 + "; pos " + position + "; selectionStart " + selectionStart + "; new span " + span );
-        			edit	= TimelineView.Edit.select( this, view, span ).perform();
+//        			edit	= TimelineView.Edit.select( this, view, span ).perform();
+        			editor.editSelect( id, span );
                 } else {
         			if( altDrag ) {
-        				edit	= new CompoundEdit();
-        				edit.addEdit( TimelineView.Edit.select( this, view, new Span() ).perform() );
-        				edit.addEdit( TimelineView.Edit.position( this, view, position ).perform() );
-        				((CompoundEdit) edit).end();
+//        				edit	= new CompoundEdit();
+//        				edit.addEdit( TimelineView.Edit.select( this, view, new Span() ).perform() );
+//        				edit.addEdit( TimelineView.Edit.position( this, view, position ).perform() );
+//        				((CompoundEdit) edit).end();
+        				editor.editSelect( id, new Span() );
+        				editor.editPosition( id, position );
         				altDrag = false;
         			} else {
-        				edit	= TimelineView.Edit.position( this, view, position ).perform();
+//        				edit	= TimelineView.Edit.position( this, view, position ).perform();
+        				editor.editPosition( id, position );
         			}
                 }
-                if( undoMgr != null ) undoMgr.addEdit( edit );
+//                if( undoMgr != null ) undoMgr.addEdit( edit );
+                editor.editEnd( id );
         	}
         };
         
@@ -160,17 +170,12 @@ implements	TimelineView.Listener,
         
 //        recalcSpace();
 	}
-  
-	public void setUndoManager( UndoManager undoMgr )
-	{
-		this.undoMgr = undoMgr;
-	}
 	
-	public void setEditable( boolean editable )
+	public void setEditor( TimelineView.Editor editor )
 	{
-		if( this.editable != editable ) {
-			this.editable = editable;
-			if( editable ) {
+		if( this.editor != editor ) {
+			this.editor = editor;
+			if( editor != null ) {
 				this.addMouseListener( mil );
 				this.addMouseMotionListener( mil );
 			} else {
@@ -238,12 +243,18 @@ implements	TimelineView.Listener,
     	}
     }
 
+	protected static String getResourceString( String key )
+	{
+		return( AbstractApplication.getApplication().getResourceString( key ));
+	}
+
 	// -------------- Disposable interface --------------
 
 	public void dispose()
 	{
 		stopListening();
-		undoMgr = null;
+		setEditor( null );
+//		undoMgr = null;
 		super.dispose();
 	}
 

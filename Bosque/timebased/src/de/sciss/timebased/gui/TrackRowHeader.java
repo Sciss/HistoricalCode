@@ -53,6 +53,7 @@ import javax.swing.undo.UndoManager;
 import de.sciss.gui.GradientPanel;
 
 import de.sciss.app.AbstractApplication;
+import de.sciss.app.Application;
 import de.sciss.app.DynamicAncestorAdapter;
 import de.sciss.app.DynamicListening;
 import de.sciss.app.GraphicsHandler;
@@ -124,7 +125,8 @@ implements DynamicListening, Disposable
 		setLayout( lay );
 		
  		lbTrackName = new JLabel();
-		lbTrackName.setFont( AbstractApplication.getApplication().getGraphicsHandler().getFont( GraphicsHandler.FONT_SYSTEM | GraphicsHandler.FONT_SMALL ));
+ 		final Application app = AbstractApplication.getApplication();
+ 		if( app != null ) lbTrackName.setFont( app.getGraphicsHandler().getFont( GraphicsHandler.FONT_SYSTEM | GraphicsHandler.FONT_SMALL ));
 		cons		= lay.getConstraints( lbTrackName );
 		cons.setX( Spring.constant( 7 ));
 // doesnt' work (why???)

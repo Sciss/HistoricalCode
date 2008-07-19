@@ -48,6 +48,7 @@ implements TimelineCursor
 	
 	public NetTimelineCursor( NetTimeline timeline, TimelineCursor backend )
 	{
+System.out.println( getClass().getName() + " : THIS CLASS SHOULD NOT BE USED ANYMORE!!" );		
 		this.timeline	= timeline;
 		this.backend	= backend;
 		master			= timeline.getMaster();

@@ -47,6 +47,7 @@ implements Timeline
 //
 	public NetTimeline( Master master, Timeline backend )
 	{
+System.out.println( getClass().getName() + " : THIS CLASS SHOULD NOT BE USED ANYMORE!!" );		
 		this.master		= master;
 		this.backend	= backend;
 	}

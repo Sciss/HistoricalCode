@@ -34,6 +34,7 @@ import java.awt.EventQueue;
 import de.sciss.app.BasicEvent;
 import de.sciss.app.EventManager;
 import de.sciss.io.Span;
+import de.sciss.timebased.AbstractEditor;
 
 public class BasicTimelineView
 implements TimelineView, EventManager.Processor
@@ -205,4 +206,34 @@ implements TimelineView, EventManager.Processor
 
 // ------------------- inner classes -------------------
 	
+	public static class Editor
+	extends AbstractEditor
+	implements TimelineView.Editor
+	{
+		private final TimelineView view;
+		
+		public Editor( TimelineView view )
+		{
+			super();
+			this.view	= view;
+		}
+		
+		public void editPosition( int id, long newPos )
+		{
+			final Client c = getClient( id );
+			c.edit.addPerform( TimelineView.Edit.position( c.source, view, newPos ));
+		}
+		
+		public void editScroll( int id, Span newSpan )
+		{
+			final Client c = getClient( id );
+			c.edit.addPerform( TimelineView.Edit.scroll( c.source, view, newSpan ));
+		}
+		
+		public void editSelect( int id, Span newSpan )
+		{
+			final Client c = getClient( id );
+			c.edit.addPerform( TimelineView.Edit.select( c.source, view, newSpan ));
+		}
+	}
 }

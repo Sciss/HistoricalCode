@@ -53,6 +53,7 @@ implements Trail
 	
 	public NetTrail( Master master, Trail backend )
 	{
+System.out.println( getClass().getName() + " : THIS CLASS SHOULD NOT BE USED ANYMORE!!" );		
 		this.master		= master;
 		this.backend	= backend;
 	}
