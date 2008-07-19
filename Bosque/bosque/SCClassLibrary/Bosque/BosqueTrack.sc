@@ -1,19 +1,22 @@
-/**
+/*
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
- *
- *	@version	0.13, 28-Aug-07
+ */
+ 
+/**
+ *	@version	0.14, 19-Jul-08
  */
 BosqueTrack {
 	var <trackID;
 	var java;
-	var <>y = 0, <>height = 1;
+//	var <>y = 0, <>height = 1;
 	var <muted = false;
 	var <forest;
 	
 	var <busConfig;
 	var <name;
+	var <trail;
 	
-	*new { arg trackID;
+	*new { arg trackID, trail;
 		var forest, doc, tracks;
 		
 		forest		= Bosque.default;
@@ -21,15 +24,16 @@ BosqueTrack {
 		tracks		= doc.tracks;
 		tracks.do({ arg t; if( t.trackID == trackID, { ^t })});
 		
-		^super.new.prInit( trackID );
+		^super.new.prInit( trackID, trail );
 	}
 
-	prInit { arg argID;
+	prInit { arg argID, argTrail;
 		trackID	= argID;
+		trail	= argTrail;
 		forest	= Bosque.default;
-		forest.doWhenSwingBooted({
-			java = JavaObject( "de.sciss.timebased.ForestTrack", forest.swing, trackID, y, height );
-		});
+//		forest.doWhenSwingBooted({
+			java = JavaObject( "de.sciss.timebased.ForestTrack", forest.swing, trackID, trail );
+//		});
 //		forest.doWhenScSynthBooted({ this.prAudioInit });
 	}
 	
@@ -50,6 +54,7 @@ BosqueTrack {
 
 	name_ { arg str;
 		name = str;
+		java.setName( name );
 		this.changed( \name );
 	}
 	
@@ -80,16 +85,16 @@ BosqueTrack {
 			name.storeOn( stream );
 			stream << ")";
 		});
-		if( y != 0, {
-			stream << ".y_(";
-			y.storeOn( stream );
-			stream << ")";
-		});
-		if( height != 1, {
-			stream << ".height_(";
-			height.storeOn( stream );
-			stream << ")";
-		});
+//		if( y != 0, {
+//			stream << ".y_(";
+//			y.storeOn( stream );
+//			stream << ")";
+//		});
+//		if( height != 1, {
+//			stream << ".height_(";
+//			height.storeOn( stream );
+//			stream << ")";
+//		});
 		if( muted, {
 			stream << ".muted_(";
 			muted.storeOn( stream );

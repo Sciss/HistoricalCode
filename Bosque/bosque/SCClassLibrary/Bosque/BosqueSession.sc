@@ -12,15 +12,15 @@ BosqueSession : Object {
 	var <timelineView;
 	var <trail;
 	var <tracks;
+	var <selectedTracks;
 	var <busConfigs;
 	var <volEnv;
 
 	var <transport;
 	var <undoManager;
 	var <selectedRegions;
-	var <selectedTracks;
 //	var <selectedBusConfigs;
-	var <markers;
+	var <markers, <markerTrack;
 	var <audioPlayer;
 	var dirty = false;
 	
@@ -28,11 +28,12 @@ BosqueSession : Object {
 	
 	var trails;
 
-	*new {
-		^super.new.prInit;
+	*new { arg bosque;
+		^super.new.prInit( bosque );
 	}
 	
-	prInit {
+	prInit { arg bosque;
+		bosque.session	= this;
 		forest			= Bosque.default;
 		audioFiles		= BosqueSessionCollection.new;
 		timeline			= BosqueTimeline( 44100 );
@@ -47,6 +48,7 @@ BosqueSession : Object {
 		selectedTracks	= BosqueSessionCollection.new;
 		busConfigs		= BosqueSessionCollection.new;
 		markers			= BosqueTrail.new;
+		markerTrack		= BosqueTrack( -1, markers ).name_( "Markers" );
 //		selectedBusConfigs	= BosqueSessionCollection.new;
 		
 		trails			= [ trail, volEnv ];

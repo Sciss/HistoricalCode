@@ -20,7 +20,7 @@ Bosque : Object {
 
 	var <swing;
 	var <scsynth;
-	var <session;
+	var <>session;
 	var onSwingBoot, onScSynthBoot;
 
 	var <masterGroup, masterSynth, <masterVolume = 1.0;
@@ -145,7 +145,7 @@ Bosque : Object {
 //			});
 		}).add;
 
-		session		= BosqueSession.new;
+		BosqueSession( this );
 		UpdateListener.newFor( session.transport, { arg upd, transport, what; if( what === \play, {("% play ("++thisThread.seconds++")").postln; })});
 		
 //		swing.updateClasses( "file:///Users/rutz/Documents/workspace/TimeBased/TimeBased.jar" );

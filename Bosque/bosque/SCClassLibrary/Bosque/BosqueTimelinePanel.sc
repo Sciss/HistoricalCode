@@ -16,7 +16,7 @@ BosqueTimelinePanel {
 	// dnd
 	var dragStartX, dragStartY, dragConstrainH, dragConstrainV, dragStartPos, dragStartStake, dragStartTrack, dragValid = false, dragStarted = false;
 	var dragResizeEdge;
-	var ggTrackHeader, ggVolEnv;
+	var ggVolEnv;
 
   	var <trackVScale = 1;
   	
@@ -31,8 +31,9 @@ BosqueTimelinePanel {
 	}
 	
 	prInit { arg argDoc, parent, bounds;
-		var updTimeline, updSelection, updTransport, updTracks, fntSmall, forest, jPanel, ggScrollPane, view;
+		var updTimeline, updSelection, updTransport, updTracks, fntSmall, forest, jTimelinePanel, ggScrollPane, view;
 		var updTrackSel, ggVolLab, jTimeAxis, jMarkAxis;
+		var jTrackPanel;
 		
 		doc		= argDoc;
 		forest	= doc.forest;
@@ -42,25 +43,29 @@ BosqueTimelinePanel {
 //		ggScrollPane = JSCScrollPane( parent, bounds ).resize_( 5 )
 //			.verticalScrollBarShown_( \always )
 //			.horizontalScrollBarShown_( \never );
-		jPanel = JavaObject( "de.sciss.timebased.gui.TimelinePanel", forest.swing, doc.timelineView.net );
-		jTimeAxis = jPanel.getTimelineAxis__;
-		jMarkAxis = jPanel.getMarkerAxis__;
+		jTimelinePanel = JavaObject( "de.sciss.timebased.gui.TimelinePanel", forest.swing, doc.timelineView.net );
+		jTrackPanel	 = JavaObject( "de.sciss.timebased.gui.TrackPanel", forest.swing, jTimelinePanel );
+		jTrackPanel.setTracksEditable( true );
+		jTimeAxis = jTimelinePanel.getTimelineAxis__;
+		jMarkAxis = jTimelinePanel.getMarkerAxis__;
 		jTimeAxis.setFont( fntSmall );
 		jMarkAxis.setFont( fntSmall );
-		BosqueTimelineAxis( doc, this, jTimeAxis );
+//		BosqueTimelineAxis( doc, this, jTimeAxis );
 		jTimeAxis.setEditable( true );
 //		jMarkAxis.setTrail( doc.markers );
-		jPanel.setMarkerTrail( doc.markers );
+//		jTimelinePanel.setMarkerTrail( doc.markers );
+		jTrackPanel.setTracks( doc.tracks.net, doc.selectedTracks.net );
+		jTrackPanel.setMarkerTrack( doc.markerTrack );
 		jMarkAxis.setEditable( true );
 		jMarkAxis.destroy;
-//		view = JSCPlugView( ggScrollPane, bounds, jPanel ); // .resize_( 5 );
-		view = JSCPlugView( parent, bounds.insetAll( 60, 0, 0, 60 ), jPanel ).resize_( 5 );
+//		view = JSCPlugView( ggScrollPane, bounds, jTimelinePanel ); // .resize_( 5 );
+		view = JSCPlugView( parent, bounds.insetAll( 0, 0, 0, 60 ), jTrackPanel ).resize_( 5 );
 		view.onClose = { jTimeAxis.destroy };
-		jTrailView = JavaObject( "de.sciss.timebased.gui.TrailView", forest.swing, jPanel );
+		jTrailView = JavaObject( "de.sciss.timebased.gui.TrailView", forest.swing, jTimelinePanel );
 		jTrailView.setFont( fntSmall );
 		jTrailView.setTrail( doc.trail );
-		jPanel.add( jTrailView );
-~jPanel = jPanel;
+		jTimelinePanel.add( jTrailView );
+~jTimelinePanel = jTimelinePanel;
 ~jTrailView = jTrailView;
 
 		ggVolLab = JSCStaticText( parent, Rect( bounds.left, view.bounds.bottom, 60, 60 ))
@@ -82,47 +87,47 @@ BosqueTimelinePanel {
 
 		mapUpdTrack = IdentityDictionary.new;
 
-		ggTrackHeader = JSCUserView( parent, bounds.resizeTo( 60, bounds.height - 60 )).resize_( 4 )
-			.canFocus_( false )
-			.drawFunc_({ arg b; var y, h, bounds, vscale;
-				bounds = b.bounds;
-				vscale = trackVScale * bounds.height;
-				JPen.translate( bounds.left + 0.5, bounds.top + 0.5 );
-				JPen.line( (bounds.width - 1) @ 0, (bounds.width - 1) @ (bounds.height - 1) );
-				JPen.strokeColor = Color.black;
-				JPen.stroke;
-				doc.tracks.do({ arg track, i;
-//				[ i, track.y, track.height, trackVScale ].postln;
-					y = track.y * vscale;
-					h = track.height * vscale;
-					if( doc.selectedTracks.includes( track ), {
-						JPen.fillColor = Color.blue( 1, 0.2 );
-						JPen.addRect( Rect( 0, y, bounds.width - 1, h ));
-						JPen.fill;
-					});
-					JPen.line( 0 @ y, (bounds.width - 1) @ y );
-					JPen.stroke;
-					JPen.fillColor = track.muted.if( Color.red, Color.black );
-					JPen.stringAtPoint( track.name, 4 @ (y + 4 ));
-					JPen.fill;
-				});
-			});
-
+//		ggTrackHeader = JSCUserView( parent, bounds.resizeTo( 60, bounds.height - 60 )).resize_( 4 )
+//			.canFocus_( false )
+//			.drawFunc_({ arg b; var y, h, bounds, vscale;
+//				bounds = b.bounds;
+//				vscale = trackVScale * bounds.height;
+//				JPen.translate( bounds.left + 0.5, bounds.top + 0.5 );
+//				JPen.line( (bounds.width - 1) @ 0, (bounds.width - 1) @ (bounds.height - 1) );
+//				JPen.strokeColor = Color.black;
+//				JPen.stroke;
+//				doc.tracks.do({ arg track, i;
+////				[ i, track.y, track.height, trackVScale ].postln;
+//					y = track.y * vscale;
+//					h = track.height * vscale;
+//					if( doc.selectedTracks.includes( track ), {
+//						JPen.fillColor = Color.blue( 1, 0.2 );
+//						JPen.addRect( Rect( 0, y, bounds.width - 1, h ));
+//						JPen.fill;
+//					});
+//					JPen.line( 0 @ y, (bounds.width - 1) @ y );
+//					JPen.stroke;
+//					JPen.fillColor = track.muted.if( Color.red, Color.black );
+//					JPen.stringAtPoint( track.name, 4 @ (y + 4 ));
+//					JPen.fill;
+//				});
+//			});
+//
 		updTimeline = UpdateListener.newFor( doc.timelineView, { arg upd, view, what ... params;
 			switch( what,
 			\scrolled, {
 				jTrailView.setVisibleSpan( doc.timelineView.span );
-//				jPanel.setVisibleSpan( doc.timelineView.span );
+//				jTimelinePanel.setVisibleSpan( doc.timelineView.span );
 				this.prSetVolEnv;
 //			},
 //			\positioned, {
-//				jPanel.setPosition( view.cursor.position );
+//				jTimelinePanel.setPosition( view.cursor.position );
 //			},
 //			\selected, {
-//				jPanel.setSelectionSpan( view.selection.span );
+//				jTimelinePanel.setSelectionSpan( view.selection.span );
 //			},
 //			\rate, {
-//				jPanel.setRate( doc.timeline.rate );
+//				jTimelinePanel.setRate( doc.timeline.rate );
 			});
 		});
 		
@@ -139,21 +144,21 @@ BosqueTimelinePanel {
 		updTransport = UpdateListener.newFor( doc.transport, { arg upd, transport, what, param1, param2;
 			switch( what,
 			\play, {
-//				jPanel.setPosition( param1 );
-				jPanel.play( param2 );
+//				jTimelinePanel.setPosition( param1 );
+				jTimelinePanel.play( param2 );
 			},
 			\stop, {
-//				("jPanel.stop").postln;
-				jPanel.stop;
+//				("jTimelinePanel.stop").postln;
+				jTimelinePanel.stop;
 			},
 			\pause, {
 				"---pause".postln;
-				jPanel.stop;
+				jTimelinePanel.stop;
 			},
 			\resume, {
 				"---resume".postln;
-//				jPanel.setPosition( param1 );
-				jPanel.play( param2 );
+//				jTimelinePanel.setPosition( param1 );
+				jTimelinePanel.play( param2 );
 			});
 		});
 
@@ -162,32 +167,32 @@ BosqueTimelinePanel {
 			switch( what,
 			\add, {
 				coll.do({ arg t;
-					jTrailView.addTrack( t );
-					upd2 = UpdateListener.newFor( t, { arg upd, track, what; if( what == \muted, { ggTrackHeader.refresh })});
+//					jTrailView.addTrack( t );
+					upd2 = UpdateListener.newFor( t, { arg upd, track, what; /* if( what == \muted, { ggTrackHeader.refresh })*/ });
 					mapUpdTrack[ t ] = upd2;
 				});
-				this.prRecalcTrackBounds;
+//				this.prRecalcTrackBounds;
 			},
 			\remove, {
 				coll.do({ arg t;
-					jTrailView.removeTrack( t );
+//					jTrailView.removeTrack( t );
 					upd2 = mapUpdTrack.removeAt( t );
 					if( upd2.notNil, { upd2.remove });
 				});
-				this.prRecalcTrackBounds;
+//				this.prRecalcTrackBounds;
 			});
 		});
 		
-		updTrackSel = UpdateListener.newFor( doc.selectedTracks, { arg upd, sc, what ... coll;
-			if( (what === \add) or: { what === \remove }, {
-				ggTrackHeader.refresh;
-			});
-		});
+//		updTrackSel = UpdateListener.newFor( doc.selectedTracks, { arg upd, sc, what ... coll;
+//			if( (what === \add) or: { what === \remove }, {
+//				ggTrackHeader.refresh;
+//			});
+//		});
 		
 		doc.volEnv.addListener( this );
 		
 		view.onClose = {
-			jPanel.dispose;
+			jTimelinePanel.dispose;
 			updTimeline.remove;
 			updSelection.remove;
 			updTransport.remove;
@@ -200,19 +205,19 @@ BosqueTimelinePanel {
 		view.mouseMoveAction	= { arg ... args; this.mouseDragged( Bosque.createMouseEvent( *args ))};
 		view.mouseUpAction		= { arg ... args; this.mouseReleased( Bosque.createMouseEvent( *args ))};
 
-		ggTrackHeader.mouseDownAction  = { arg ... args; this.prMousePressedTrackHeader( Bosque.createMouseEvent( *args ))};
-
+//		ggTrackHeader.mouseDownAction  = { arg ... args; this.prMousePressedTrackHeader( Bosque.createMouseEvent( *args ))};
+//
 		ggVolEnv.mouseDownAction = { arg ... args; this.prMousePressedVolEnv( Bosque.createMouseEvent( *args ))};
 		ggVolEnv.mouseUpAction = { arg ... args; ggVolLab.string = ""; this.prMouseReleasedVolEnv( Bosque.createMouseEvent( *args ))};
 	}
 	
-	prRecalcTrackBounds {
-		var y = 0;
-		doc.tracks.do({ arg t; t.y = y; y = y + t.height; /* [ t, t.y, t.height ].postln */});
-		trackVScale = if( y == 0, 1, { 1/y });
-//		[ "trackVScale", trackVScale ].postln;
-		ggTrackHeader.refresh;
-	}
+//	prRecalcTrackBounds {
+//		var y = 0;
+//		doc.tracks.do({ arg t; t.y = y; y = y + t.height; /* [ t, t.y, t.height ].postln */});
+//		trackVScale = if( y == 0, 1, { 1/y });
+////		[ "trackVScale", trackVScale ].postln;
+//		ggTrackHeader.refresh;
+//	}
 	
 	tool_ { arg type;
 		tool = type;
@@ -354,38 +359,38 @@ BosqueTimelinePanel {
 
 	// -------------------------------- Track Header --------------------------------
 
-	prMousePressedTrackHeader { arg e;
-		var t, y, edit;
-		
-		y	= e.y / e.component.bounds.height.max(1) / trackVScale;
-		t	= doc.tracks.detect({ arg t; (t.y <= y) and: { t.y + t.height > y }});
-
-		if( t.isNil, { ^this });
-		
-		if( e.isAltDown, {	// toggle mute
-			edit		= JSyncCompoundEdit( "Change Track Mute" );
-			t.editMute( this, t.muted.not, edit );
-			edit.performEdit.end;
-		}, {
-			if( doc.selectedTracks.includes( t ), {
-				if( e.isShiftDown, {   // deselect single
-					edit = BosqueEditRemoveSessionObjects( this, doc.selectedTracks, [ t ], false ).performEdit;
-				});
-			}, {
-				if( e.isShiftDown or: { doc.selectedTracks.isEmpty }, {  // add single to selection
-					edit = BosqueEditAddSessionObjects( this, doc.selectedTracks, [ t ], false).performEdit;
-				}, {					// replace selection with single
-					edit = JSyncCompoundEdit.new;
-					edit.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedTracks, doc.selectedTracks.getAll, false ));
-					edit.addPerform( BosqueEditAddSessionObjects( this, doc.selectedTracks, [ t ], false));
-					edit.performEdit.end;
-				});
-			});
-		});
-		if( edit.notNil, {
-			doc.undoManager.addEdit( edit );
-		});
-	}
+//	prMousePressedTrackHeader { arg e;
+//		var t, y, edit;
+//		
+//		y	= e.y / e.component.bounds.height.max(1) / trackVScale;
+//		t	= doc.tracks.detect({ arg t; (t.y <= y) and: { t.y + t.height > y }});
+//
+//		if( t.isNil, { ^this });
+//		
+//		if( e.isAltDown, {	// toggle mute
+//			edit		= JSyncCompoundEdit( "Change Track Mute" );
+//			t.editMute( this, t.muted.not, edit );
+//			edit.performEdit.end;
+//		}, {
+//			if( doc.selectedTracks.includes( t ), {
+//				if( e.isShiftDown, {   // deselect single
+//					edit = BosqueEditRemoveSessionObjects( this, doc.selectedTracks, [ t ], false ).performEdit;
+//				});
+//			}, {
+//				if( e.isShiftDown or: { doc.selectedTracks.isEmpty }, {  // add single to selection
+//					edit = BosqueEditAddSessionObjects( this, doc.selectedTracks, [ t ], false).performEdit;
+//				}, {					// replace selection with single
+//					edit = JSyncCompoundEdit.new;
+//					edit.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedTracks, doc.selectedTracks.getAll, false ));
+//					edit.addPerform( BosqueEditAddSessionObjects( this, doc.selectedTracks, [ t ], false));
+//					edit.performEdit.end;
+//				});
+//			});
+//		});
+//		if( edit.notNil, {
+//			doc.undoManager.addEdit( edit );
+//		});
+//	}
 
 	// -------------------------------- Move + Resize Tool --------------------------------
 
