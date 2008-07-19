@@ -8,7 +8,7 @@ BosqueTimelineView : Object {
 	var <cursor;
 	var <selection;
 	var <span;
-	var javaBackEnd, javaNet, javaResp;
+	var <java;
 	var updTLL, updTLCL, updTLSL;
 
 	*new { arg timeline, span /*, cursor, sel */;
@@ -23,10 +23,8 @@ BosqueTimelineView : Object {
 		cursor		= BosqueTimelineCursor( timeline ); // argCursor ?? { BosqueTimelineCursor( timeline )};
 		selection		= BosqueTimelineSelection( timeline ); // argSel ?? { BosqueTimelineSelection( timeline )};
 		swing		= Bosque.default.swing;
-		javaBackEnd	= JavaObject( "de.sciss.timebased.timeline.BasicTimelineView",
-			swing, timeline.backend, span, cursor.backend, selection.backend );
-		javaNet		= JavaObject( "de.sciss.timebased.net.NetTimelineView",
-			swing, javaBackEnd, timeline.net, cursor.net, selection.net );
+		java			= JavaObject( "de.sciss.timebased.timeline.BasicTimelineView",
+			swing, timeline, span, cursor, selection );
 		
 		updTLL = UpdateListener.newFor( timeline, { arg upd, tl ... rest;
 			var tlSpan;
@@ -38,7 +36,7 @@ BosqueTimelineView : Object {
 				}, {
 					Span( max( tlSpan.start, tlSpan.stop - span.length ), tlSpan. stop );
 				});
-				javaBackEnd.setSpan( javaBackEnd, span );
+				java.setSpan( java, span );
 				this.changed( \scrolled, span );
 			});
 			this.changed( \changed, *rest );
@@ -51,11 +49,6 @@ BosqueTimelineView : Object {
 		updTLSL = UpdateListener.newFor( selection, { arg upd, sel ... rest;
 			this.changed( \selected, *rest );
 		}, \changed );
-
-		javaNet.setID( javaNet.id );
-		javaResp = ScissOSCPathResponder( swing.addr, [ '/timeline', javaNet.id, \scroll ], { arg time, resp, msg;
-			this.span = Span( msg[ 3 ], msg[ 4 ]);
-		}).add;
 	}
 	
 //	storeModifiersOn { arg stream;
@@ -80,21 +73,19 @@ BosqueTimelineView : Object {
 		if( newSpan.equals( span ).not, {
 			span = newSpan;
 			this.changed( \scrolled, span );
-			javaBackEnd.setSpan( javaBackEnd, span );
+			java.setSpan( java, span );
 		});
 	}
 
 	dispose {
 		updTLL.remove; updTLCL.remove; updTLSL.remove;
-		javaResp.remove; javaResp = nil;
-		javaNet.dispose; javaNet.destroy; javaNet = nil;
-		javaBackEnd.destroy; javaBackEnd = nil;
+		java.destroy; java = nil;
 	}
 
-//	asSwingArg {
-//		^javaNet.asSwingArg; // !
-//	}
-
-	backend { ^javaBackEnd }
-	net { ^javaNet }
+	asSwingArg {
+		^java.asSwingArg;
+	}
+//
+//	backend { ^java }
+//	net { ^javaNet }
 }

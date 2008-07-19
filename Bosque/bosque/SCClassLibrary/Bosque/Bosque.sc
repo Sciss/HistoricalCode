@@ -1,7 +1,7 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.27, 20-Jun-08
+ *	@version	0.27, 19-Jul-08
  */
 Bosque : Object {
 	classvar <>default;
@@ -42,8 +42,9 @@ Bosque : Object {
 
 	classvar <>config				= 0; 	// 0 = Q3, 1 = Viehhalle
 	
-	classvar	midiOutDev	= "BCR2000"; // : Port 1";
-	classvar	midiInDev		= "BCR2000"; // : Port 1";
+	classvar	<>midiOutDev			= "BCF2000"; // "BCR2000"; // : Port 1";
+	classvar	<>midiInDev			= "BCF2000"; // "BCR2000"; // : Port 1";
+	classvar <>createCC			= false;
 
 	var <chris;
 	var <martin;
@@ -283,6 +284,8 @@ Bosque : Object {
 		
 		clpseTrigVal = Collapse({ arg val; chris.sendMsg( '/s_tv', val.linlin( 0, 127, 0.0, 1.0 ))}, 1, AppClock );
 		
+if( createCC, {
+		
 		// master volume
 		CCResponder( num: 81, function: { arg src, ch, num, val;
 //			midiRec.add([ thisThread.seconds, val ]);
@@ -334,8 +337,10 @@ Bosque : Object {
 //			});
 		});
 		
+});
+		
 		chris.sendMsg( '/s_tv', 1.0 );
-		if( midiOut.notNil, {
+		if( createCC && midiOut.notNil, {
 			midiOut.control( 0, 81, masterVolume.linlin( -51.5, 12, 0, 127 ));
 			midiOut.control( 0, 82, 127 );
 			midiOut.control( 0, 83, speedBoost.linlin( 1.0, 8.0, 0, 127 ));

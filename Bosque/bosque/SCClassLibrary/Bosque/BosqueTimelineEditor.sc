@@ -280,8 +280,8 @@ BosqueTimelineEditor : Object {
 		view = winTimeline.view;
 
 //		BosqueTimelineAxis( doc, view, Rect( 60, 20, view.bounds.width - 60, 15 ));
-		ggTimelinePanel = BosqueTimelinePanel( doc, view, Rect( 0, 35, view.bounds.width, view.bounds.height - 51 ));
-		BosqueTimelineScroll( doc, view, Rect( 0, view.bounds.height - 16, view.bounds.width - 16, 16 ));
+		ggTimelinePanel = BosqueTimelinePanel( doc, view, Rect( 0, 35, view.bounds.width, view.bounds.height - 35 ));
+//		BosqueTimelineScroll( doc, view, Rect( 0, view.bounds.height - 16, view.bounds.width - 16, 16 ));
 
 		vx = 1; vw = 80;
 		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
@@ -472,8 +472,8 @@ BosqueTimelineEditor : Object {
 		ggPlayPos = JSCStaticText( view, Rect( 0, 0, 160, 40 )).background_( Color.black )
 			.stringColor_( Color.yellow ).align_( \center ).font_( JFont( "Eurostile", 24, 1 )); // .string_( "00:00:00.000" );
 		fPlayPosStr = { arg frame; ScissUtil.toTimeString( frame / doc.timeline.rate )};
-		updTimeline = UpdateListener.newFor( doc.timeline, { arg upd, timeline, what;
-			if( taskPlayPos.isPlaying.not and: { (what === \position) or: { what === \rate }}, {
+		updTimeline = UpdateListener.newFor( doc.timelineView, { arg upd, timelineView, what, what2;
+			if( taskPlayPos.isPlaying.not and: { (what === \positioned) or: { (what === \changed) && (what2 === \rate) }}, {
 				ggPlayPos.string_( fPlayPosStr.value( doc.timelineView.cursor.position ));
 			});
 		});
@@ -515,7 +515,7 @@ BosqueTimelineEditor : Object {
 		}, forest.masterVolume.ampdb, false, 70, 50 ); });
 		ggVolume.numberView.maxDecimals_( 1 );
 		
-		clpseVolume = Collapse({ arg value; ggVolume.valueNoAction = value.ampdb; }, 0.15, AppClock );
+		clpseVolume = Collapse({ arg value; ggVolume.value = value.ampdb; }, 0.15, AppClock );
 		updVolume = UpdateListener.newFor( forest, { arg upd, obj, what, param1;
 			if( what === \masterVolume, { clpseVolume.instantaneous( param1 )});
 		});

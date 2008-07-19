@@ -33,7 +33,7 @@ BosqueTimelinePanel {
 	prInit { arg argDoc, parent, bounds;
 		var updTimeline, updSelection, updTransport, updTracks, fntSmall, forest, jTimelinePanel, ggScrollPane, view;
 		var updTrackSel, ggVolLab, jTimeAxis, jMarkAxis;
-		var jTrackPanel;
+		var jTrackPanel, jMarkerEditor, jTimeEditor, markerEditorMon, timelineEditorMon;
 		
 		doc		= argDoc;
 		forest	= doc.forest;
@@ -43,36 +43,44 @@ BosqueTimelinePanel {
 //		ggScrollPane = JSCScrollPane( parent, bounds ).resize_( 5 )
 //			.verticalScrollBarShown_( \always )
 //			.horizontalScrollBarShown_( \never );
-		jTimelinePanel = JavaObject( "de.sciss.timebased.gui.TimelinePanel", forest.swing, doc.timelineView.net );
+		jTimelinePanel = JavaObject( "de.sciss.timebased.gui.TimelinePanel", forest.swing, doc.timelineView );
 		jTrackPanel	 = JavaObject( "de.sciss.timebased.gui.TrackPanel", forest.swing, jTimelinePanel );
 		jTrackPanel.setTracksEditable( true );
 		jTimeAxis = jTimelinePanel.getTimelineAxis__;
 		jMarkAxis = jTimelinePanel.getMarkerAxis__;
-		jTimeAxis.setFont( fntSmall );
-		jMarkAxis.setFont( fntSmall );
+		jTimeEditor = JavaObject( "de.sciss.timebased.net.NetTimelineViewEditor", forest.swing, forest.master );
+		jTimeEditor.setID( doc.timelineView.java.id );
+		timelineEditorMon = BosqueNetEditorMonitor( forest.swing, '/time', doc.timelineView.java.id, doc.undoManager,
+			BosqueNetTimelineViewEditor( doc.timelineView ));
+		jTimeAxis.setEditor( jTimeEditor );
+//		jTimeAxis.setFont( fntSmall );
+//		jMarkAxis.setFont( fntSmall );
 //		BosqueTimelineAxis( doc, this, jTimeAxis );
-		jTimeAxis.setEditable( true );
 //		jMarkAxis.setTrail( doc.markers );
 //		jTimelinePanel.setMarkerTrail( doc.markers );
-		jTrackPanel.setTracks( doc.tracks.net, doc.selectedTracks.net );
+		jTrackPanel.setTracks( doc.tracks, doc.selectedTracks );
 		jTrackPanel.setMarkerTrack( doc.markerTrack );
-		jMarkAxis.setEditable( true );
+		jMarkerEditor = JavaObject( "de.sciss.timebased.net.NetMarkerTrailEditor", forest.swing, forest.master );
+		jMarkerEditor.setID( doc.markers.java.id );
+		markerEditorMon = BosqueNetEditorMonitor( forest.swing, '/trail', doc.markers.java.id, doc.undoManager,
+			BosqueNetMarkerTrailEditor( doc.markers ));
+		jMarkAxis.setEditor( jMarkerEditor );
 		jMarkAxis.destroy;
 //		view = JSCPlugView( ggScrollPane, bounds, jTimelinePanel ); // .resize_( 5 );
 		view = JSCPlugView( parent, bounds.insetAll( 0, 0, 0, 60 ), jTrackPanel ).resize_( 5 );
-		view.onClose = { jTimeAxis.destroy };
+		view.onClose = { jTimeAxis.destroy; jMarkerEditor.dispose; jMarkerEditor.destroy };
 		jTrailView = JavaObject( "de.sciss.timebased.gui.TrailView", forest.swing, jTimelinePanel );
-		jTrailView.setFont( fntSmall );
+//		jTrailView.setFont( fntSmall );
 		jTrailView.setTrail( doc.trail );
 		jTimelinePanel.add( jTrailView );
-~jTimelinePanel = jTimelinePanel;
-~jTrailView = jTrailView;
+//~jTimelinePanel = jTimelinePanel;
+//~jTrailView = jTrailView;
 
 		ggVolLab = JSCStaticText( parent, Rect( bounds.left, view.bounds.bottom, 60, 60 ))
 			.resize_( 7 )
 			.align_( \center )
 			.font_( fntSmall );
-		ggVolEnv = JSCEnvelopeView( parent, Rect( view.bounds.left, view.bounds.bottom, view.bounds.width, 60 ))
+		ggVolEnv = JSCEnvelopeView( parent, Rect( view.bounds.left + 62, view.bounds.bottom, view.bounds.width - 62, 60 ))
 			.drawLines_( true )
 			.selectionColor_( Color.red )
 			.resize_( 8 )
@@ -145,7 +153,7 @@ BosqueTimelinePanel {
 			switch( what,
 			\play, {
 //				jTimelinePanel.setPosition( param1 );
-				jTimelinePanel.play( param2 );
+				jTimelinePanel.play( param1, param2 );
 			},
 			\stop, {
 //				("jTimelinePanel.stop").postln;
@@ -158,7 +166,7 @@ BosqueTimelinePanel {
 			\resume, {
 				"---resume".postln;
 //				jTimelinePanel.setPosition( param1 );
-				jTimelinePanel.play( param2 );
+				jTimelinePanel.play( param1, param2 );
 			});
 		});
 

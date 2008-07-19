@@ -15,6 +15,7 @@ BosqueTrack {
 	var <busConfig;
 	var <name;
 	var <trail;
+	var <ctrlSpec;
 	
 	*new { arg trackID, trail;
 		var forest, doc, tracks;
@@ -51,6 +52,11 @@ BosqueTrack {
 		busConfig = cfg;
 		this.changed( \busConfig, cfg );
 	}
+	
+	ctrlSpec_ { arg spec;
+		ctrlSpec = spec;
+		this.changed( \ctrlSpec, spec );
+	}
 
 	name_ { arg str;
 		name = str;
@@ -70,6 +76,11 @@ BosqueTrack {
 	editBusConfig { arg source, cfg, ce;
 		var oldCfg = busConfig;
 		ce.addPerform( BosqueFunctionEdit({ this.busConfig = cfg }, { this.busConfig = oldCfg }, "Change Track Bus", true ));
+	}
+
+	editCtrlSpec { arg source, spec, ce;
+		var oldSpec = ctrlSpec;
+		ce.addPerform( BosqueFunctionEdit({ this.ctrlSpec = spec }, { this.ctrlSpec = oldSpec }, "Change Track Spec", true ));
 	}
 
 	editRename { arg source, newName, ce;
@@ -103,6 +114,11 @@ BosqueTrack {
 		if( busConfig.notNil, {
 			stream << ".busConfig_(";
 			busConfig.storeOn( stream );
+			stream << ")";
+		});
+		if( ctrlSpec.notNil, {
+			stream << ".ctrlSpec_(";
+			ctrlSpec.storeOn( stream );
 			stream << ")";
 		});
 	}

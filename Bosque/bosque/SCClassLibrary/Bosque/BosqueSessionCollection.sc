@@ -11,7 +11,7 @@ BosqueSessionCollection : Object {
 	
 	var debug = false;
 	
-	var javaBackEnd, javaNet, master;
+	var <java, master;
 	
 	*new {
 		^super.new.prInit;
@@ -23,19 +23,17 @@ BosqueSessionCollection : Object {
 		forest		= Bosque.default;
 		coll			= List.new;
 		master		= forest.master;
-		javaBackEnd	= JavaObject( "de.sciss.timebased.session.BasicSessionCollection", forest.swing );
-		javaNet		= javaBackEnd; // XXX
+		java			= JavaObject( "de.sciss.timebased.session.BasicSessionCollection", forest.swing );
 	}
 	
-	backend { ^javaBackEnd }
-	net { ^javaNet }
-
 	dispose {
 //		upd.remove;
 //		javaResp.remove; javaResp = nil;
-		javaNet.dispose; javaNet.destroy; javaNet = nil;
-		javaBackEnd.dispose; javaBackEnd.destroy; javaBackEnd = nil;
+//		javaNet.dispose; javaNet.destroy; javaNet = nil;
+		java.dispose; java.destroy; java = nil;
 	}
+	
+	asSwingArg { ^java.asSwingArg }
 
 	storeModifiersOn { arg stream;
 		stream << ".addAll(this,";
@@ -47,28 +45,28 @@ BosqueSessionCollection : Object {
 	clear { arg source;
 		var objects = coll;
 		coll = List.new;
-		javaBackEnd.clear( master );
+		java.clear( master );
 		this.changed( \remove, *objects );
 	}
 	
 	add { arg source, object;
 		if( debug, { [ \add, this.hash, source, object ].postln });
 		coll.add( object );
-		javaBackEnd.add( master, object );
+		java.add( master, object );
 		this.changed( \add, object );
 	}
 	
 	addAll { arg source, objects;
 		if( debug, {[ \addAll, this.hash, source, objects ].postln });
 		coll.addAll( objects );
-		javaBackEnd.addAll( master, objects.asList );
+		java.addAll( master, objects.asList );
 		this.changed( \add, *objects );
 	}
 
 	remove { arg source, object;
 		if( debug, {[ \remove, this.hash, source, object ].postln });
 		if( coll.remove( object ).notNil, {
-			javaBackEnd.remove( master, object );
+			java.remove( master, object );
 			this.changed( \remove, object );
 		});
 	}
@@ -76,7 +74,7 @@ BosqueSessionCollection : Object {
 	removeAll { arg source, objects;
 		if( debug, {[ \removeAll, this.hash, source, objects ].postln });
 		coll.removeAll( objects );
-		javaBackEnd.removeAll( master, objects.asList );
+		java.removeAll( master, objects.asList );
 		this.changed( \remove, *objects );
 	}
 		

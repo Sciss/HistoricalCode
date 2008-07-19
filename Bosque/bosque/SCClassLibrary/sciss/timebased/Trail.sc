@@ -10,7 +10,7 @@
  *		14-Sep-06		a couple of bug fixes
  *		10-Aug-07		re-synced with java version (performable edits)
  *
- *	@version	0.14, 13-Aug-07
+ *	@version	0.14, 19-Jul-08
  *	@author	Hanns Holger Rutz
  *
  *	@todo	asCompileString
@@ -20,7 +20,7 @@ Trail {
 	classvar <kTouchSplit		= 1;
 	classvar <kTouchResize		= 2;
 
-	classvar	kDebug			= false;
+	classvar	<>kDebug			= false;
 	classvar	startComparator;
 	classvar	stopComparator;
 	

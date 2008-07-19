@@ -6,7 +6,7 @@
  *
  *	SuperCollider implementation of the java class de.sciss.io.Span
  *
- *  @version	0.15, 12-May-08
+ *  @version	0.16, 18-Jul-08
  *  @author	Hanns Holger Rutz
  */
 Span {
@@ -155,6 +155,12 @@ Span {
         ^( start == stop );
     }
     
+     clip { arg position;
+     	if( start > position, {Ê^start });
+     	if( stop < position, {Ê^stop });
+     	^position;
+     }
+    
 	/**
 	 *  Checks if this span is equal to an object.
 	 *
@@ -213,12 +219,36 @@ Span {
 	
 		^span1.union( span2 );
 	}
+
+	*intersection {Êarg span1, span2;
+		if( span1.isNil, { ^nil });
+		
+		^span1.intersection( span2 );
+	}
 	
 	union { arg anotherSpan;
 		if( anotherSpan.isNil, { ^this });
 	
 		^Span( min( start, anotherSpan.start ),
 			   max( stop, anotherSpan.stop ));
+	}
+
+	intersection { arg anotherSpan;
+		var newStart, newStop;
+	
+		if( anotherSpan.isNil, { ^nil });
+		
+		newStart	= max( start, anotherSpan.start );
+		newStop	= min( stop, anotherSpan.stop );
+		^Span( newStart, newStop );
+	}
+
+	replaceStart { arg newStart;
+		^Span( newStart, stop );
+	}
+
+	replaceStop { arg newStop;
+		^Span( start, newStop );
 	}
 
 	shift { arg delta;

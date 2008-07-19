@@ -6,7 +6,7 @@
 BosqueTimelineSelection : Object {
 	var <timeline;
 	var <span;
-	var upd, javaBackEnd, javaNet, javaResp;
+	var upd, <java;
 
 	*new { arg timeline, span;
 		^super.new.prInit( timeline, span );
@@ -18,10 +18,8 @@ BosqueTimelineSelection : Object {
 		timeline		= argTimeline;
 		span			= argSpan ?? { Span( timeline.span.start, timeline.span.start )};
 		swing		= Bosque.default.swing;
-		javaBackEnd	= JavaObject( "de.sciss.timebased.timeline.BasicTimelineSelection",
-			swing, timeline.backend, span );
-		javaNet		= JavaObject( "de.sciss.timebased.net.NetTimelineSelection",
-			swing, timeline.net, javaBackEnd );
+		java			= JavaObject( "de.sciss.timebased.timeline.BasicTimelineSelection",
+			swing, timeline, span );
 		
 		upd		= UpdateListener.newFor( timeline, { arg upd, tl;
 			var tlSpan = tl.span;
@@ -29,32 +27,22 @@ BosqueTimelineSelection : Object {
 				this.span = span.intersection( tlSpan );
 			});
 		}, \changed );
-
-		javaNet.setID( javaNet.id );
-		javaResp = ScissOSCPathResponder( swing.addr, [ '/timeline', javaNet.id, \select ], { arg time, resp, msg;
-			this.span = Span( msg[ 3 ], msg[ 4 ]);
-		}).add;
 	}
 	
 	span_ {Êarg newSpan;
 		if( newSpan.equals( span ).not, {
 			span = newSpan;
 			this.changed( \changed, span );
-			javaBackEnd.setSpan( javaBackEnd, span );
+			java.setSpan( java, span );
 		});
 	}
 	
 	dispose {
 		upd.remove;
-		javaResp.remove; javaResp = nil;
-		javaNet.dispose; javaNet.destroy; javaNet = nil;
-		javaBackEnd.dispose; javaBackEnd.destroy; javaBackEnd = nil;
+		java.dispose; java.destroy; java = nil;
 	}
 	
-//	asSwingArg {
-//		^javaBackEnd.asSwingArg;
-//	}
-
-	backend { ^javaBackEnd }
-	net { ^javaNet }
+	asSwingArg {
+		^java.asSwingArg;
+	}
 }

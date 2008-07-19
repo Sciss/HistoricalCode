@@ -778,6 +778,9 @@ JSyncCompoundEdit : JCompoundEdit
 //	}
 
 	addPerform { arg edit;
+	
+//("ADD PERFORM " ++ edit).postln;
+	
 		collToPerform = collToPerform.add( edit );
 	}
 		

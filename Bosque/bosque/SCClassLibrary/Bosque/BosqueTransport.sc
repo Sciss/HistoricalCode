@@ -1,7 +1,7 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.16, 10-Sep-07
+ *	@version	0.17, 19-Jul-08
  */
 BosqueTransport : Object {
 	var <doc;
@@ -18,25 +18,27 @@ BosqueTransport : Object {
 	
 	prInit { arg argDoc;
 		doc = argDoc;
-		UpdateListener.newFor( doc.timeline, { arg upd, timeline, what;
+		UpdateListener.newFor( doc.timelineView, { arg upd, timelineView, what, what2;
 			var pos, wasPaused;
 			
 			wasPaused = paused;
 			if( running, {
 				switch( what,
-				\position, {
-					pos = doc.timeline.position;
+				\positioned, {
+					pos = timelineView.cursor.position;
 					this.stop( setPosition: false );
 					this.play( pos );
 					if( wasPaused, { this.pause });
 				},
-				\length, {
-					this.prMakeCollapse;
-				},
-				\rate, {
-					this.stop( setPosition: true );
-					this.play( pos );
-					if( wasPaused, { this.pause });
+				\changed, {
+					what2.postln;
+					switch( what2,
+					\span, { this.prMakeCollapse },
+					\rate, {
+						this.stop( setPosition: true );
+						this.play( pos );
+						if( wasPaused, { this.pause });
+					});
 				});
 			});
 		});
@@ -50,8 +52,8 @@ BosqueTransport : Object {
 	play { arg pos, rate = 1;
 		if( running, { ^this });
 		
-		pos			= pos ?? { doc.timeline.position };
-		if( pos >= doc.timeline.length, { pos = 0 });
+		pos			= pos ?? { doc.timelineView.cursor.position };
+		if( pos >= doc.timeline.span.stop, { pos = doc.timeline.span.start });
 		playStartTime	= thisThread.seconds;
 		playStartPos	= pos;
 		playRate		= rate;
@@ -72,7 +74,7 @@ BosqueTransport : Object {
 			dur	= (loop.stop - pos) / playRate2;
 		}, {
 			f = { this.stop };
-			dur	= (doc.timeline.length - pos) / playRate2;
+			dur	= (doc.timeline.span.stop - pos) / playRate2;
 		});
 		clpseStop = Collapse( f, dur, SystemClock ).defer;
 	}
@@ -87,7 +89,7 @@ BosqueTransport : Object {
 		running		= false;
 		paused		= false;
 		this.changed( \stop );
-		if( setPosition, { doc.timeline.editPosition( this, pos )});
+		if( setPosition, { doc.editPosition( this, pos )});
 	}
 	
 	pause {
@@ -116,9 +118,9 @@ BosqueTransport : Object {
 	
 	currentFrame {
 		if( running, {
-			^(playStartPos + ((thisThread.seconds - playStartTime) * playRate2).asInteger).min( doc.timeline.length );
+			^(playStartPos + ((thisThread.seconds - playStartTime) * playRate2).asInteger).min( doc.timeline.span.stop );
 		}, {
-			^doc.timeline.position;
+			^doc.timelineView.cursor.position;
 		});
 	}
 }
