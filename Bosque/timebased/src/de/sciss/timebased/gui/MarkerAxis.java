@@ -76,10 +76,7 @@ import de.sciss.app.BasicEvent;
 import de.sciss.app.DynamicAncestorAdapter;
 import de.sciss.app.DynamicListening;
 import de.sciss.app.EventManager;
-<<<<<<< .mine
 import de.sciss.app.GraphicsHandler;
-=======
->>>>>>> .r56
 import de.sciss.common.BasicWindowHandler;
 import de.sciss.gui.ComponentHost;
 import de.sciss.gui.DoClickAction;
