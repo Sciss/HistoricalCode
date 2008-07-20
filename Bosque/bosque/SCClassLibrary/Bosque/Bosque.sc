@@ -154,12 +154,12 @@ Bosque : Object {
 		cacheManager = JavaObject( "de.sciss.io.CacheManager", swing );
 		cacheManager.setFolderAndCapacity( workDir ++ "cache", 300 );
 		cacheManager.setActive( true );
-		onSwingBoot.do(_.value);
+		onSwingBoot.do({ arg x; x.value });
 		onSwingBoot = nil;
 		scsynth.doWhenBooted({
 			this.prAudioInit;
 			this.prMIDIInit;
-			onScSynthBoot.do(_.value);
+			onScSynthBoot.do({ arg x; x.value });
 			onScSynthBoot = nil;
 		}, inf );
 	  }, inf ); // swing.doWhenBooted

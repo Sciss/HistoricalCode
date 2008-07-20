@@ -190,7 +190,7 @@ BosqueObserver {
 				if( track.notNil and: { busConfig.isKindOf( BosqueBusConfig )}, {
 					b.object = busConfig.name;
 					ce		= JSyncCompoundEdit( "Change Track Bus" );
-					doc.selectedTracks.do(_.editBusConfig( this, busConfig, ce ));
+					doc.selectedTracks.select({ arg x; x.trackID >= 0 }).do({ arg x; x.editBusConfig( this, busConfig, ce )});
 					doc.undoManager.addEdit( ce.performEdit.end );
 				}, {
 					b.object = "";
@@ -202,13 +202,13 @@ BosqueObserver {
 			.action_({ arg b; var ce, value;
 				value	= b.value;
 				ce		= JSyncCompoundEdit( "Change Track Mute" );
-				doc.selectedTracks.do(_.editMute( this, value, ce ));
+				doc.selectedTracks.select({ arg x; x.trackID >= 0 }).do({ arg x; x.editMute( this, value, ce )});
 				doc.undoManager.addEdit( ce.performEdit.end );
 			});
 		flow.nextLine;
 
 		fTrackUpdate = {
-			var newSelNum = doc.selectedTracks.size, sth = newSelNum > 0;
+			var newSelNum = doc.selectedTracks.select({ arg x; x.trackID >= 0 }).size, sth = newSelNum > 0;
 			
 			if( newSelNum != selNum and: { ((newSelNum > 1) && (selNum > 1)).not }, {
 				if( newSelNum == 0, {
@@ -217,7 +217,7 @@ BosqueObserver {
 					ggTrackMute.value	= false;
 					ggBusConfig.object	= "";
 				}, {
-					track			= doc.selectedTracks[0];
+					track			= doc.selectedTracks.detect({ arg x; x.trackID >= 0 });
 //					ggTrackName.string	= "Track " ++ (doc.tracks.indexOf( track )+1); // track.name.asString;
 					ggTrackName.string	= track.name;
 					ggTrackMute.value	= track.muted;
@@ -246,7 +246,7 @@ BosqueObserver {
 		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, sel, false ));
 		doc.trail.editBegin( ce );
 		doc.trail.editRemoveAll( this, sel, ce );
-		sel = sel.collect( _.perform( setter, value ));
+		sel = sel.collect({Êarg x; x.perform( setter, value )});
 		doc.trail.editAddAll( this, sel, ce );
 		doc.trail.editEnd( ce );
 		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, sel, false ));

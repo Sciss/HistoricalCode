@@ -4,7 +4,7 @@
  
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.19, 06-Jul-08
+ *	@version	0.19, 20-Jul-08
  */
 BosqueTimelinePanel {
 	var <view;
@@ -34,6 +34,7 @@ BosqueTimelinePanel {
 		var updTimeline, updSelection, updTransport, updTracks, fntSmall, forest, jTimelinePanel, ggScrollPane, view;
 		var updTrackSel, ggVolLab, jTimeAxis, jMarkAxis;
 		var jTrackPanel, jMarkerEditor, jTimeEditor, markerEditorMon, timelineEditorMon;
+		var jSelTracksEditor, selTracksEditorMon;
 		
 		doc		= argDoc;
 		forest	= doc.forest;
@@ -45,7 +46,11 @@ BosqueTimelinePanel {
 //			.horizontalScrollBarShown_( \never );
 		jTimelinePanel = JavaObject( "de.sciss.timebased.gui.TimelinePanel", forest.swing, doc.timelineView );
 		jTrackPanel	 = JavaObject( "de.sciss.timebased.gui.TrackPanel", forest.swing, jTimelinePanel );
-		jTrackPanel.setTracksEditable( true );
+		jSelTracksEditor = JavaObject( "de.sciss.timebased.net.NetSessionCollectionEditor", forest.swing, forest.master );
+		jSelTracksEditor.setID( doc.selectedTracks.java.id );
+		selTracksEditorMon = BosqueNetEditorMonitor( forest.swing, '/coll', doc.selectedTracks.java.id, doc.undoManager,
+			BosqueNetTracksEditor( doc.selectedTracks, doc.tracks ));
+		jTrackPanel.setTracksEditor( jSelTracksEditor );
 		jTimeAxis = jTimelinePanel.getTimelineAxis__;
 		jMarkAxis = jTimelinePanel.getMarkerAxis__;
 		jTimeEditor = JavaObject( "de.sciss.timebased.net.NetTimelineViewEditor", forest.swing, forest.master );
@@ -275,7 +280,7 @@ BosqueTimelinePanel {
 			sel		= e.component.selection;
 			if( volEnvDispFakeStart, { sel[0] == false });
 			if( volEnvDispFakeStop,  { sel[sel.size-1] == false });
-			indices	= sel.collect({ arg val, idx; if( val, idx )}).reject(_.isNil);
+			indices	= sel.collect({ arg val, idx; if( val, idx )}).reject({ arg x; x.isNil });
 			stakes	= volEnvDispStakes.select({ arg stake, idx; indices.includes( idx )});
 			if( stakes.size > 0, {
 				ce		= JSyncCompoundEdit( "Edit Envelope" );

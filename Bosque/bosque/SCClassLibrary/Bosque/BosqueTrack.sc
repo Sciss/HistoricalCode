@@ -18,6 +18,7 @@ BosqueTrack {
 	var <ctrlSpec;
 	
 	*new { arg trackID, trail;
+	
 		var forest, doc, tracks;
 		
 		forest		= Bosque.default;
@@ -28,14 +29,12 @@ BosqueTrack {
 		^super.new.prInit( trackID, trail );
 	}
 
-	prInit { arg argID, argTrail;
-		trackID	= argID;
+	prInit { arg argTrackID, argTrail;
+		trackID	= argTrackID;
 		trail	= argTrail;
 		forest	= Bosque.default;
-//		forest.doWhenSwingBooted({
-			java = JavaObject( "de.sciss.timebased.ForestTrack", forest.swing, trackID, trail );
-//		});
-//		forest.doWhenScSynthBooted({ this.prAudioInit });
+		java		= JavaObject( "de.sciss.timebased.ForestTrack", forest.swing, trail, trackID );
+//		java.setID( java.id );
 	}
 	
 	muted_ { arg bool;
@@ -66,7 +65,8 @@ BosqueTrack {
 	
 	// use with care!!!
 	trackID_ { arg id;
-		trackID = id;		
+		trackID = id;
+		java.setID( java.id );
 	}
 
 	editMute { arg source, bool, ce;
@@ -127,7 +127,7 @@ BosqueTrack {
 	
 	dispose {
 //		java.dispose;
-		if( java.notNil, { java.destroy });
+		if( java.notNil, { java.destroy; java = nil });
 //		if( mon.notNil, { mon.stop });
 //		if( bus.notNil, { bus.free });
 	}

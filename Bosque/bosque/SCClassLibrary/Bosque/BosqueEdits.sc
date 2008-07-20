@@ -1,7 +1,7 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.12, 14-Aug-07
+ *	@version	0.13, 20-Jul-08
  */
 BosqueEditAddSessionObjects : JBasicUndoableEdit {
 	var	collSessionObjects;
@@ -23,7 +23,7 @@ BosqueEditAddSessionObjects : JBasicUndoableEdit {
 	 *  @see	de.sciss.meloncillo.session.SessionCollection.Event
 	 *  @synchronization		waitExclusive on doors
 	 */
-	*new { arg source, sc, objects, significant = true;
+	*new { arg source, sc, objects, significant;
 		^super.new.prInitEditAdd( source, sc, objects, significant );
 	}
 	
@@ -31,7 +31,7 @@ BosqueEditAddSessionObjects : JBasicUndoableEdit {
 		source			= argSource;
 		quoi				= sc;
 		collSessionObjects	= objects.copy;
-		signi			= significant;
+		signi			= significant ?? { sc.isSignificant };
 	}
 
 	performEdit {
@@ -95,7 +95,7 @@ BosqueEditRemoveSessionObjects : JBasicUndoableEdit {
 	 *  @see	de.sciss.meloncillo.session.SessionCollection.Event
 	 *  @synchronization		waitExclusive on doors
 	 */
-	*new { arg source, sc, objects, significant = true;
+	*new { arg source, sc, objects, significant;
 		^super.new.prInitEditRemove( source, sc, objects, significant );
 	}
 	
@@ -103,7 +103,7 @@ BosqueEditRemoveSessionObjects : JBasicUndoableEdit {
 		source				= argSource;
 		collSessionObjects		= objects.copy;
 		quoi					= sc;
-		signi				= significant;
+		signi				= significant ?? { sc.isSignificant };
 	}
 
 	performEdit {

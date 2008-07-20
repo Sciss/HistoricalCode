@@ -3,7 +3,7 @@
  */
  
 /** 
- *	@version	0.16, 19-Jul-08
+ *	@version	0.16, 20-Jul-08
  */
 BosqueSessionCollection : Object {
 //	var <forest;
@@ -12,18 +12,20 @@ BosqueSessionCollection : Object {
 	var debug = false;
 	
 	var <java, master;
+	var <isSignificant;
 	
-	*new {
-		^super.new.prInit;
+	*new { arg significant = true;
+		^super.new.prInit( significant );
 	}
 	
-	prInit {
+	prInit { arg significant;
 		var forest;
 		
 		forest		= Bosque.default;
+		isSignificant	= significant;
 		coll			= List.new;
 		master		= forest.master;
-		java			= JavaObject( "de.sciss.timebased.session.BasicSessionCollection", forest.swing );
+		java			= JavaObject( "de.sciss.timebased.session.BasicSessionCollection", forest.swing, significant );
 	}
 	
 	dispose {

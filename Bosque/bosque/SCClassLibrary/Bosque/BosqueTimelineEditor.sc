@@ -85,7 +85,7 @@ BosqueTimelineEditor : Object {
 			});
 		updAudioFiles = UpdateListener.newFor( doc.audioFiles, { arg upd, obj, what ... params;
 			if( (what === \add) or: { what === \remove }, {
-				ggFileList.items = obj.getAll.collect(_.name);
+				ggFileList.items = obj.getAll.collect({ arg x; x.name });
 			});
 		});
 		ggFileList.onClose = { updAudioFiles.remove };
@@ -95,7 +95,7 @@ BosqueTimelineEditor : Object {
 			.action_({ arg b; var value = b.value, af, track;
 				b.value = 0;
 				af 		= doc.audioFiles[ ggFileList.value ? -1 ];
-				track	= doc.selectedTracks[ 0 ];
+				track	= doc.selectedTracks.detect({ arg x; x.trackID >= 0 });
 				switch( value - 2,
 				0, { this.prAudioFileAddRegion( af, doc, doc.timelineView.cursor.position, track )},
 				1, { this.prAudioFileReplaceFile( af, doc )},
@@ -217,7 +217,7 @@ BosqueTimelineEditor : Object {
 
 		updBusConfigs = UpdateListener.newFor( doc.busConfigs, { arg upd, obj, what ... coll;
 			if( (what === \add) or: { what === \remove }, {
-				ggBusList.items = obj.getAll.collect(_.name);
+				ggBusList.items = obj.getAll.collect({ arg x; x.name });
 				ggBusList.valueAction = obj.size - 1;
 			});
 		});
@@ -260,13 +260,13 @@ BosqueTimelineEditor : Object {
 			
 		updTracks = UpdateListener.newFor( doc.tracks, { arg upd, obj, what ... coll;
 			if( (what === \add) or: { what === \remove }, {
-				ggTrackList.items = obj.getAll.collect(_.name);
+				ggTrackList.items = obj.getAll.select({ arg x; x.trackID >= 0 }).collect({ arg x; x.name });
 //				ggBusList.valueAction = obj.size - 1;
 			});
 		});
 		updSelectedTracks = UpdateListener.newFor( doc.selectedTracks, { arg upd, sc, what ... coll;
 			if( (what === \add) or: { what === \remove }, {
-				ggTrackList.value = if( doc.selectedTracks.notNil, { doc.tracks.indexOf( doc.selectedTracks[ 0 ])});
+				ggTrackList.value = if( doc.selectedTracks.notNil, { doc.tracks.indexOf( doc.selectedTracks.detect({ arg x; x.trackID >= 0 }))});
 			});
 		});
 		ggTrackList.onClose = { updTracks.remove; updSelectedTracks.remove };
@@ -589,7 +589,7 @@ BosqueTimelineEditor : Object {
 		transferable.isDataFlavorSupported = { arg thisF, flavor; thisF.transferDataFlavors.includes( flavor )};
 		transferable.getTransferData = { arg thisF, flavor, track;
 			if( flavor === \stakeList, {
-				track = doc.tracks[0];
+				track = doc.tracks.detect({ arg x; x.trackID >= 0 });
 				if( track.notNil, {
 					[ BosqueAudioRegionStake( Span( 0, afSpan.length ), af.name.asString, track, fileStartFrame: afSpan.start, faf: af )];
 				}, {
@@ -780,10 +780,9 @@ BosqueTimelineEditor : Object {
 
 	prTrackRemove { arg doc;
 		var ce, tracks, trackIndices, stakes;
-		
-		if( doc.selectedTracks.isEmpty, { ^this });
-		
-		tracks		= doc.selectedTracks.getAll;
+				
+		tracks		= doc.selectedTracks.getAll.select({ arg x; x.trackID >= 0 });
+		if( tracks.isEmpty, { ^this });
 		ce			= JSyncCompoundEdit( "Remove Tracks" );
 		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedTracks, tracks, false ));
 //		trackIndices	= tracks.collect(track{ arg track; doc.tracks.indexOf( track )});
@@ -792,7 +791,7 @@ BosqueTimelineEditor : Object {
 		doc.trail.editBegin( ce );
 		doc.trail.editRemoveAll( this, stakes, ce );
 		doc.trail.editEnd( ce );
-		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.tracks, tracks, true ).onDeath_({ arg edit; tracks.do( _.dispose )}));
+		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.tracks, tracks, true ).onDeath_({ arg edit; tracks.do({ arg x; x.dispose })}));
 //		tracks.do({ arg track; doc.trackMap.removeAt( track.id )});
 		doc.undoManager.addEdit( ce.performAndEnd );
 	}
@@ -845,7 +844,7 @@ BosqueTimelineEditor : Object {
 		var span, track, ce, name, stake, clearSpan, trail;
 		
 		span 	= doc.timelineView.selection.span;
-		track	= doc.selectedTracks[0];
+		track	= doc.selectedTracks.detect({ arg x; x.trackID >= 0 });
 		if( span.isEmpty or: { track.isNil }, { ^this });
 
 //"\n N O T   Y E T   I M P L E M E N T E D\n".error;
@@ -875,7 +874,7 @@ BosqueTimelineEditor : Object {
 		var span, track, ce, name, stake, clearSpan, trail;
 		
 		span 	= doc.timelineView.selection.span;
-		track	= doc.selectedTracks[0];
+		track	= doc.selectedTracks.detect({ arg x; x.trackID >= 0 });
 		if( span.isEmpty or: { track.isNil }, { ^this });
 
 		ce		= JSyncCompoundEdit( "Add Env Region" );
@@ -1026,7 +1025,7 @@ name = af.name.asSymbol;
 		
 	  fork {
 		ce = JSyncCompoundEdit( "Consolidate" );
-		stakes = doc.selectedRegions.getAll.select(_.isKindOf( BosqueAudioRegionStake ));
+		stakes = doc.selectedRegions.getAll.select({ arg x; x.isKindOf( BosqueAudioRegionStake )});
 		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, stakes, false ));
 		doc.trail.editBegin( ce );
 		doc.trail.editRemoveAll( this, stakes, ce );
@@ -1147,7 +1146,7 @@ name = af.name.asSymbol;
 		owner = ();
 		owner.lostOwnership = { arg thisF, clipBoard, contents;
 //			"Edit Copy: lost ownership".inform;
-			contents.object.do( _.dispose )};
+			contents.object.do({ arg x; x.dispose })};
 //		[ transferable, owner ].postcs;
 		doc.forest.clipBoard.setContents( transferable, owner );
 	}

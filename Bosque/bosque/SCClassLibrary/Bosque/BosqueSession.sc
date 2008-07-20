@@ -1,7 +1,7 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.16, 18-Jul-08
+ *	@version	0.16, 20-Jul-08
  */
 BosqueSession : Object {
 	var <forest;
@@ -42,13 +42,14 @@ BosqueSession : Object {
 		trail			= BosqueTrail.new.rate_( timeline.rate );
 		volEnv			= Trail.new.rate_( timeline.rate );
 		undoManager		= ScissUndoManager.new;
-		selectedRegions	= BosqueSessionCollection.new;
+		selectedRegions	= BosqueSessionCollection( false );
 		audioPlayer		= BosqueAudioPlayer( this );
 		tracks			= BosqueSessionCollection.new;
-		selectedTracks	= BosqueSessionCollection.new;
+		selectedTracks	= BosqueSessionCollection( false );
 		busConfigs		= BosqueSessionCollection.new;
 		markers			= BosqueTrail.new;
 		markerTrack		= BosqueTrack( -1, markers ).name_( "Markers" );
+		tracks.add( nil, markerTrack );
 //		selectedBusConfigs	= BosqueSessionCollection.new;
 		
 		trails			= [ trail, volEnv ];
@@ -131,13 +132,13 @@ BosqueSession : Object {
 		timeline.clear;
 		toDispose = audioFiles.getAll;
 		audioFiles.clear( this );
-		toDispose.do( _.dispose );
+		toDispose.do({ arg x; x.dispose });
 		toDispose = tracks.getAll;
 		tracks.clear( this );
-		toDispose.do( _.dispose );
+		toDispose.do({ arg x; x.dispose });
 		toDispose = busConfigs.getAll;
 		busConfigs.clear( this );
-		toDispose.do( _.dispose );
+		toDispose.do({ arg x; x.dispose });
 	}
 	
 	isDirty { ^dirty }
