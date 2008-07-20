@@ -31,7 +31,7 @@ BosqueTimelinePanel {
 	}
 	
 	prInit { arg argDoc, parent, bounds;
-		var updTimeline, updSelection, updTransport, updTracks, fntSmall, forest, jTimelinePanel, ggScrollPane, view;
+		var updSelection, updTransport, updTracks, fntSmall, forest, jTimelinePanel, ggScrollPane, view;
 		var updTrackSel, ggVolLab, jTimeAxis, jMarkAxis;
 		var jTrackPanel, jMarkerEditor, jTimeEditor, markerEditorMon, timelineEditorMon;
 		var jSelTracksEditor, selTracksEditorMon;
@@ -74,10 +74,12 @@ BosqueTimelinePanel {
 //		view = JSCPlugView( ggScrollPane, bounds, jTimelinePanel ); // .resize_( 5 );
 		view = JSCPlugView( parent, bounds.insetAll( 0, 0, 0, 60 ), jTrackPanel ).resize_( 5 );
 		view.onClose = { jTimeAxis.destroy; jMarkerEditor.dispose; jMarkerEditor.destroy };
-		jTrailView = JavaObject( "de.sciss.timebased.gui.TrailView", forest.swing, jTimelinePanel );
+		jTrailView = JavaObject( "de.sciss.timebased.gui.TrailView", forest.swing, doc.timelineView );
 //		jTrailView.setFont( fntSmall );
 		jTrailView.setTrail( doc.trail );
-		jTimelinePanel.add( jTrailView );
+//		jTimelinePanel.add( jTrailView );
+		jTrackPanel.setMainView( jTrailView );
+		jTrailView.setTracksTable( jTrackPanel );
 //~jTimelinePanel = jTimelinePanel;
 //~jTrailView = jTrailView;
 
@@ -126,23 +128,23 @@ BosqueTimelinePanel {
 //				});
 //			});
 //
-		updTimeline = UpdateListener.newFor( doc.timelineView, { arg upd, view, what ... params;
-			switch( what,
-			\scrolled, {
-				jTrailView.setVisibleSpan( doc.timelineView.span );
-//				jTimelinePanel.setVisibleSpan( doc.timelineView.span );
-				this.prSetVolEnv;
-//			},
-//			\positioned, {
-//				jTimelinePanel.setPosition( view.cursor.position );
-//			},
-//			\selected, {
-//				jTimelinePanel.setSelectionSpan( view.selection.span );
-//			},
-//			\rate, {
-//				jTimelinePanel.setRate( doc.timeline.rate );
-			});
-		});
+//		updTimeline = UpdateListener.newFor( doc.timelineView, { arg upd, view, what ... params;
+//			switch( what,
+//			\scrolled, {
+//				jTrailView.setVisibleSpan( doc.timelineView.span );
+////				jTimelinePanel.setVisibleSpan( doc.timelineView.span );
+//				this.prSetVolEnv;
+////			},
+////			\positioned, {
+////				jTimelinePanel.setPosition( view.cursor.position );
+////			},
+////			\selected, {
+////				jTimelinePanel.setSelectionSpan( view.selection.span );
+////			},
+////			\rate, {
+////				jTimelinePanel.setRate( doc.timeline.rate );
+//			});
+//		});
 		
 		updSelection = UpdateListener.newFor( doc.selectedRegions, { arg upd, sc, what ... coll;
 			switch( what,
@@ -206,7 +208,7 @@ BosqueTimelinePanel {
 		
 		view.onClose = {
 			jTimelinePanel.dispose;
-			updTimeline.remove;
+//			updTimeline.remove;
 			updSelection.remove;
 			updTransport.remove;
 			updTracks.remove;

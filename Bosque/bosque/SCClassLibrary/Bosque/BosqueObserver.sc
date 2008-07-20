@@ -1,7 +1,7 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.13, 20-Aug-07
+ *	@version	0.14, 20-Jul-08
  */
 BosqueObserver {
 	var <forest;
@@ -22,7 +22,7 @@ BosqueObserver {
 	prMakeGUI {
 		var stake, fntSmall, updRegionSel, view, flow, ggStakeName, ggColor, ggColorChooser, ggFadeIn, ggFadeOut, ggGain, fRegionUpdate, selNum = -1, nan;
 		var track, ggTab, ggTrackName, updTrackSel, fTrackUpdate, ggTrackMute;
-		var ggBusConfig;
+		var ggBusConfig, ggCtrlSpec;
 		var ggFuncEventName, ggFuncModTrack, ggFuncPosition;
 		
 		window = JSCWindow( "Observer", Rect( 0, 0, 254, 248 ), resizable: false ).userCanClose_( false ); // .alwaysOnTop_( true );
@@ -198,6 +198,23 @@ BosqueObserver {
 			});
 		flow.nextLine;
 
+		JSCStaticText( view, Rect( 0, 0, 60, 20 )).font_( fntSmall ).align_( \right ).string_( "Ctrl Spec:" );
+		ggCtrlSpec = JSCDragSink( view, Rect( 0, 0, 160, 20 )).font_( fntSmall )
+			.canReceiveDragHandler_({ arg b;
+				JSCView.currentDrag.isKindOf( ControlSpec );
+			})
+			.action_({ arg b; var ctrlSpec = b.object, ce;
+				if( track.notNil and: { ctrlSpec.isKindOf( ControlSpec )}, {
+					b.object = ctrlSpec.storeArgs; // ctrlSpec.name;
+					ce		= JSyncCompoundEdit( "Change Track Spec" );
+					doc.selectedTracks.select({ arg x; x.trackID >= 0 }).do({ arg x; x.editCtrlSpec( this, ctrlSpec, ce )});
+					doc.undoManager.addEdit( ce.performEdit.end );
+				}, {
+					b.object = "";
+				});
+			});
+		flow.nextLine;
+
 		ggTrackMute = JSCCheckBox( view, Rect( 0, 0, 60, 20 )).font_( fntSmall ).string_( "Mute" )
 			.action_({ arg b; var ce, value;
 				value	= b.value;
@@ -216,12 +233,14 @@ BosqueObserver {
 					ggTrackName.string	= "";
 					ggTrackMute.value	= false;
 					ggBusConfig.object	= "";
+					ggCtrlSpec.object	= "";
 				}, {
 					track			= doc.selectedTracks.detect({ arg x; x.trackID >= 0 });
 //					ggTrackName.string	= "Track " ++ (doc.tracks.indexOf( track )+1); // track.name.asString;
 					ggTrackName.string	= track.name;
 					ggTrackMute.value	= track.muted;
 					ggBusConfig.object	= track.busConfig.notNil.if({ track.busConfig.name }, "" );
+					ggCtrlSpec.object	= track.ctrlSpec.notNil.if({ track.ctrlSpec.storeArgs }, "" );
 				});
 				ggTrackMute.enabled	= sth;
 			});
