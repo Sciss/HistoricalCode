@@ -34,14 +34,14 @@ package de.sciss.app;
 import javax.swing.undo.AbstractUndoableEdit;
 
 /**
- *	@version	0.70, 01-May-06
+ *	@version	0.70, 19-Jul-08
  *	@author		Hanns Holger Rutz
  */
 public abstract class BasicUndoableEdit
 extends AbstractUndoableEdit
 implements PerformableEdit
 {
-	protected String getResourceString( String key )
+	protected static String getResourceString( String key )
 	{
 		final Application app = AbstractApplication.getApplication();
 		return app != null ? app.getResourceString( key ) : key;

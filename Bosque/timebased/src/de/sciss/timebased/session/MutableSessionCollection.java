@@ -29,10 +29,9 @@
 
 package de.sciss.timebased.session;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-
-import javax.swing.undo.UndoableEdit;
 
 import de.sciss.app.BasicUndoableEdit;
 import de.sciss.app.PerformableEdit;
@@ -44,78 +43,108 @@ extends SessionCollection
 	public boolean removeAll( Object source, List c );
 	public void clear( Object source );
 	
-	public static class EditSet
+	// -------------------------- Editor interface --------------------------
+	
+	public interface Editor
+	extends de.sciss.timebased.Editor
+	{
+		public void editAdd( int id, SessionObject... objects );
+		public void editRemove( int id, SessionObject... objects );
+	}
+	
+	// -------------------------- Edit class --------------------------
+	
+	public class Edit
 	extends BasicUndoableEdit
 	{
+		private final String					name;
+		private final List<SessionObject>		collToAdd;
+		private final List<SessionObject>		collToRemove;
 		private Object							source;
 		private final MutableSessionCollection	quoi;
-		private final List						oldSelection, newSelection;
 
 		/**
 		 *  Create and perform this edit. This
-		 *  invokes the <code>SessionObjectCollection.selectionSet</code> method,
-		 *  thus dispatching a <code>SessionObjectCollectionEvent</code>.
+		 *  invokes the <code>SessionObjectCollection.addAll</code> method,
+		 *  thus dispatching a <code>SessionCollection.Event</code>.
 		 *
-		 *  @param  source				who initiated the action
-		 *	@param	quoi				XXX
-		 *  @param  collNewSelection	the new collection of sessionObjects
-		 *								which form the new selection. the
-		 *								previous selection is discarded.
-		 *	@param	doors				XXX
-		 *
-		 *  @see	de.sciss.eisenkraut.session.SessionCollection
-		 *  @see	de.sciss.eisenkraut.session.SessionCollection.Event
-		 *
-		 *  @synchronization			waitExclusive on doors
+		 *  @param  source			who initiated the action
+		 *  @param  doc				session object to which the
+		 *							receivers are added
+		 *  @param  collToAdd   collection of receivers to
+		 *							add to the session.
+		 *  @see	de.sciss.meloncillo.session.SessionCollection
+		 *  @see	de.sciss.meloncillo.session.SessionCollection.Event
+		 *  @synchronization		waitExclusive on doors
 		 */
-		public EditSet( Object source, MutableSessionCollection quoi,
-									  List collNewSelection )
+		private Edit( String name, Object source, MutableSessionCollection quoi,
+					  List<SessionObject> collToAdd, List<SessionObject> collToRemove )
 		{
 			super();
-			this.source			= source;
-			this.quoi			= quoi;
-			oldSelection   		= quoi.getAll();
-			newSelection   		= new ArrayList( collNewSelection );
+			this.name				= name;
+			this.source				= source;
+			this.quoi				= quoi;
+			this.collToAdd			= collToAdd;
+			this.collToRemove		= collToRemove;
+//			perform();
+//			this.source				= this;
 		}
 
-		/**
-		 *  @return		false to tell the UndoManager it should not feature
-		 *				the edit as a single undoable step in the history.
-		 */
-		public boolean isSignificant()
+		public static Edit add( Object source, MutableSessionCollection msc,
+								SessionObject... collToAdd )
 		{
-			return false;
+			final Edit e = new Edit( getResourceString( "editAddSessionObjects" ),
+			                         source, msc, Arrays.asList( collToAdd ),
+			                         Collections.EMPTY_LIST );
+			return e;
+		}
+		
+		public static Edit remove( Object source, MutableSessionCollection msc,
+								   SessionObject... collToRemove )
+		{
+			final Edit e = new Edit( getResourceString( "editRemoveSessionObjects" ),
+			                         source, msc, Collections.EMPTY_LIST,
+			                         Arrays.asList( collToRemove ));
+			return e;
 		}
 
 		public PerformableEdit perform()
 		{
-			quoi.clear( source );
-			quoi.addAll( source, newSelection );
-			source			= this;
+			if( !collToRemove.isEmpty() ) {
+				quoi.removeAll( source, collToAdd );
+			}
+			if( !collToAdd.isEmpty() ) {
+				quoi.addAll( source, collToAdd );
+			}
+			this.source = this;
 			return this;
 		}
 
 		/**
 		 *  Undo the edit
-		 *  by calling the <code>SessionObjectCollection.selectionSet</code>,
-		 *  method. thus dispatching a <code>SessionObjectCollectionEvent</code>.
+		 *  by calling the <code>SessionObjectCollection.removeAll</code>,
+		 *  method, thus dispatching a <code>SessionCollection.Event</code>.
 		 *
 		 *  @synchronization	waitExlusive on doors.
 		 */
 		public void undo()
 		{
 			super.undo();
-			quoi.clear( source );
-			quoi.addAll( source, oldSelection );
+			if( !collToAdd.isEmpty() ) {
+				quoi.removeAll( source, collToAdd );
+			}
+			if( !collToRemove.isEmpty() ) {
+				quoi.addAll( source, collToAdd );
+			}
 		}
 		
 		/**
-		 *  Redo the selection edit.
+		 *  Redo the add operation.
 		 *  The original source is discarded
-		 *  which means, that, since a new <code>SessionObjectCollectionEvent</code>
+		 *  which means, that, since a new <code>SessionCollection.Event</code>
 		 *  is dispatched, even the original object
 		 *  causing the edit will not know the details
-		 *  of the action, hence thorougly look
+		 *  of the action, hence thoroughly look
 		 *  and adapt itself to the new edit.
 		 *
 		 *  @synchronization	waitExlusive on doors.
@@ -126,43 +155,9 @@ extends SessionCollection
 			perform();
 		}
 
-		/**
-		 *  Collapse multiple successive edits
-		 *  into one single edit. The new edit is sucked off by
-		 *  the old one.
-		 */
-		public boolean addEdit( UndoableEdit anEdit )
-		{
-			if( anEdit instanceof EditSet ) {
-				newSelection.clear();
-				newSelection.addAll( ((EditSet) anEdit).newSelection );
-				anEdit.die();
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		/**
-		 *  Collapse multiple successive edits
-		 *  into one single edit. The old edit is sucked off by
-		 *  the new one.
-		 */
-		public boolean replaceEdit( UndoableEdit anEdit )
-		{
-			if( anEdit instanceof EditSet ) {
-				oldSelection.clear();
-				oldSelection.addAll( ((EditSet) anEdit).oldSelection );
-				anEdit.die();
-				return true;
-			} else {
-				return false;
-			}
-		}
-
 		public String getPresentationName()
 		{
-			return getResourceString( "editSetSessionObjects" );
+			return name; // return getResourceString( "editAddSessionObjects" );
 		}
 	}
 }

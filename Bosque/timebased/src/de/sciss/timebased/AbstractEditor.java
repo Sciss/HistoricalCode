@@ -35,7 +35,6 @@ import java.util.Map;
 
 import javax.swing.undo.UndoManager;
 
-import de.sciss.app.AbstractCompoundEdit;
 import de.sciss.common.BasicCompoundEdit;
 
 public abstract class AbstractEditor
@@ -106,8 +105,8 @@ implements Editor
 	
 	protected static class Client
 	{
-		public final Object					source;
-		public final AbstractCompoundEdit	edit;
+		public final Object				source;
+		public final BasicCompoundEdit	edit;
 		
 		protected Client( Object source, String name )
 		{

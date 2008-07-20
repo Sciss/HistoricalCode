@@ -40,6 +40,7 @@ import java.util.List;
 
 import de.sciss.app.BasicEvent;
 import de.sciss.app.EventManager;
+import de.sciss.timebased.AbstractEditor;
 import de.sciss.util.MapManager;
 
 /**
@@ -52,6 +53,7 @@ implements MutableSessionCollection, EventManager.Processor
 {
 	protected final List			collObjects			= new ArrayList();
 	protected final MapManager.Listener	objectListener;
+	private final boolean			significant;
 	
 //	private final Set	dynamicSet	= new HashSet();
 
@@ -59,13 +61,20 @@ implements MutableSessionCollection, EventManager.Processor
 
 	protected EventManager elm = null;	// lazy
 
+	public BasicSessionCollection()
+	{
+		this( true );
+	}
+	
 	/**
 	 *  Creates a new empty collection.
 	 */
-	public BasicSessionCollection()
+	public BasicSessionCollection( boolean significant )
 	{
 		super();
-	
+
+		this.significant = significant;
+		 
 		objectListener = new MapManager.Listener() {
 			public void mapChanged( MapManager.Event e )
 			{
@@ -77,6 +86,21 @@ implements MutableSessionCollection, EventManager.Processor
 				dispatchObjectMapChange( e );
 			}
 		};
+	}
+	
+	/**
+	 * 	Queries whether modifying this collection
+	 * 	results in significant edits. A significant
+	 * 	edit is one which is available in the undo
+	 * 	manager as a separate step. Unsignificant
+	 * 	edits will be undo/redo performed along with
+	 * 	the neighbouring significant edits.
+	 * 
+	 *	@return	whether editing this collection is significant
+	 */
+	public boolean isSignificant()
+	{
+		return significant;
 	}
 	
 //	public void addDynamic( Object source, Object dynamic )
@@ -515,13 +539,42 @@ implements MutableSessionCollection, EventManager.Processor
 //		elm.debugDump();
 	}
 
-// ---------------- SessionObject interface ---------------- 
+	// --------------------- inner classes ---------------------
 
-	/**
-	 *  This simply returns <code>null</code>!
-	 */
-	public Class getDefaultEditor()
+	public static class Editor
+	extends AbstractEditor
+	implements MutableSessionCollection.Editor
 	{
-		return null;
+		private final BasicSessionCollection msc;
+		
+		public Editor( BasicSessionCollection msc)
+		{
+			this.msc = msc;
+		}
+		
+		public int editBegin( Object source, String name )
+		{
+			final int id = super.editBegin( source, name );
+			if( !msc.isSignificant() ) {
+				getClient( id ).edit.setSignificant( false );
+			}
+			return id;
+		}
+		
+		public void editAdd( int id, SessionObject... objects )
+		{
+			if( !EventQueue.isDispatchThread() ) throw new IllegalMonitorStateException();
+			
+			final Client c = getClient( id );
+			c.edit.addPerform( Edit.add( c.source, msc, objects ));
+		}
+		
+		public void editRemove( int id, SessionObject... objects )
+		{
+			if( !EventQueue.isDispatchThread() ) throw new IllegalMonitorStateException();
+			
+			final Client c = getClient( id );
+			c.edit.addPerform( Edit.remove( c.source, msc, objects ));
+		}
 	}
 }

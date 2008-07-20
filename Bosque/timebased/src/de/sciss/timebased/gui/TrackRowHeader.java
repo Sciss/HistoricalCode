@@ -39,16 +39,12 @@ import java.awt.Paint;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Spring;
 import javax.swing.SpringLayout;
-import javax.swing.undo.UndoableEdit;
-import javax.swing.undo.UndoManager;
 
 import de.sciss.gui.GradientPanel;
 
@@ -96,17 +92,15 @@ implements DynamicListening, Disposable
 	private static final Paint		pntDarken		= new GradientPaint(  0, 0, colrDarken,
 																		 36, 0, new Color( colrDarken.getRGB() & 0xFFFFFF, true ));
 	
-	private final MapManager.Listener trackListener;
-	private final SessionCollection.Listener selectedTracksListener;
+	private final MapManager.Listener			trackListener;
+	private final SessionCollection.Listener	selectedTracksListener;
 	
-	private final MouseListener	ml;
-	private boolean				editable		= false;
-	
-	protected UndoManager	undoMgr	= null;
-	
-	protected Track						t				= null;
-	protected SessionCollection			tracks			= null;
-	protected MutableSessionCollection	selectedTracks	= null;
+	private final MouseListener					ml;
+	protected MutableSessionCollection.Editor	editor			= null;
+		
+	protected Track								t				= null;
+	protected SessionCollection					tracks			= null;
+	protected MutableSessionCollection			selectedTracks	= null;
 	
 	private boolean	isListening	= false;
 	
@@ -156,47 +150,55 @@ implements DynamicListening, Disposable
 			 */
 			public void mousePressed( MouseEvent e )
 		    {
-				if( t == null ) return;
+				if( (editor == null) || (t == null) ) return;
 				
-				UndoableEdit	edit;
-				List			collTracks;
-			
+				final List<Track>	collToAdd;
+				final List<Track>	collToRemove;
+				final boolean		newSelected;
+
+				final int id = editor.editBegin( this, getResourceString( "editTrackSelection" ));
+				
 				if( e.isAltDown() ) {
-					selected = !selected;   // toggle item
-					if( selected ) {		// select all
-//						collTracks = doc.activeTransmitters.getAll();
-						collTracks = tracks.getAll();
+					newSelected = !selected;   // toggle item
+					if( newSelected ) {		// select all
+//						collToRemove	= Collections.EMPTY_LIST;
+						collToAdd		= tracks.getAll();
+						collToAdd.removeAll( selectedTracks.getAll() );
+						editor.editAdd( id, collToAdd.toArray( new SessionObject[ collToAdd.size() ]));
 					} else {				// deselect all
-						collTracks = new ArrayList( 1 );
+						collToRemove	= selectedTracks.getAll();
+						editor.editRemove( id, collToRemove.toArray( new SessionObject[ collToRemove.size() ]));
+//						collToAdd		= Collections.EMPTY_LIST; 
 					}
 				} else if( e.isMetaDown() ) {
-					selected = !selected;   // toggle item
-					if( selected ) {		// deselect all except uns
-						collTracks = Collections.singletonList( t );
+					newSelected = !selected;   // toggle item
+					if( newSelected ) {		// deselect all except uns
+						collToRemove	= selectedTracks.getAll();
+						editor.editRemove( id, collToRemove.toArray( new SessionObject[ collToRemove.size() ]));
+						editor.editAdd( id, t );
 					} else {				// select all except us
-//							collTracks = doc.activeTransmitters.getAll();
-						collTracks = tracks.getAll();
-						collTracks.remove( t );
+						editor.editRemove( id, t );
+						collToAdd		= tracks.getAll();
+						collToAdd.removeAll( selectedTracks.getAll() );
+						editor.editAdd( id, collToAdd.toArray( new SessionObject[ collToAdd.size() ]));
 					}
 				} else {
 					if( e.isShiftDown() ) {
-						collTracks = selectedTracks.getAll();
-						selected = !selected;
-						if( selected ) {
-							collTracks.add( t );			// add us to selection
+						newSelected = !selected;
+						if( newSelected ) {
+							editor.editAdd( id, t );		// add us to selection
 						} else {
-							collTracks.remove( t );		// remove us from selection
+							editor.editRemove( id, t );		// remove us from selection
 						}
 					} else {
 						if( selected ) return;						// no action
-						selected	= true;
-						collTracks	= Collections.singletonList( t );	// deselect all except uns
+						collToRemove	= selectedTracks.getAll();
+						editor.editRemove( id, collToRemove.toArray( new SessionObject[ collToRemove.size() ]));
+						editor.editAdd( id, t );	// deselect all except uns
 					}
 				}
-				// XXX should use a lazy edit here
-				edit = new MutableSessionCollection.EditSet( this, selectedTracks, collTracks ).perform();
-				if( undoMgr != null ) undoMgr.addEdit( edit );
-				repaint();
+				editor.editEnd( id );
+//				repaint();
 		    }
 		};
 
@@ -229,6 +231,11 @@ implements DynamicListening, Disposable
 		};
 	}
 	
+	protected static String getResourceString( String key )
+	{
+		return( AbstractApplication.getApplication().getResourceString( key ));
+	}
+	
 	public void setTrack( final Track t, final SessionCollection tracks,
 						  final MutableSessionCollection selectedTracks )
 	{
@@ -240,17 +247,11 @@ implements DynamicListening, Disposable
 		if( wasListening ) startListening();
 	}
 	   
-	   
-	public void setUndoManager( UndoManager undoMgr )
+	public void setEditor( MutableSessionCollection.Editor editor )
 	{
-		this.undoMgr = undoMgr;
-	}
-	
-	public void setEditable( boolean editable )
-	{
-		if( this.editable != editable ) {
-			this.editable = editable;
-			if( editable ) {
+		if( this.editor != editor ) {
+			this.editor = editor;
+			if( editor != null ) {
 				this.addMouseListener( ml );
 			} else {
 				this.removeMouseListener( ml );

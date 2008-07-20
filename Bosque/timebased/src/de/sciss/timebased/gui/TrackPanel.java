@@ -32,7 +32,7 @@ extends JPanel
 	
 	private final SessionCollection.Listener	activeTracksListener;
 	
-	private boolean tracksEditable	= false;
+	private MutableSessionCollection.Editor tracksEditor	= null;
 
 	public TrackPanel( TimelinePanel tlp )
 	{
@@ -172,7 +172,7 @@ newLp:	for( int ch = 0; ch < newNumWaveTracks; ch++ ) {
 //			chanHead = new TransmitterRowHeader( t, doc.getTracks(), doc.getMutableSelectedTracks(), doc.getUndoManager() );
 			chanHead = new TrackRowHeader();
 			chanHead.setTrack( t, activeTracks, selectedTracks );
-			chanHead.setEditable( tracksEditable );
+			chanHead.setEditor( tracksEditor );
 			collTrackHeaders.add( chanHead );
 			trackHeaderPanel.add( chanHead, ch );
 
@@ -188,15 +188,15 @@ newLp:	for( int ch = 0; ch < newNumWaveTracks; ch++ ) {
 		updateOverviews( /* false, */ true );
 	}
 	
-	public void setTracksEditable( boolean onOff )
+	public void setTracksEditor( MutableSessionCollection.Editor editor )
 	{
-		if( tracksEditable != onOff ) {
-			tracksEditable = onOff;
+		if( tracksEditor != editor ) {
+			tracksEditor = editor;
 			for( int i = 0; i < collTrackHeaders.size(); i++ ) {
 				final TrackRowHeader trh = (TrackRowHeader) collTrackHeaders.get( i );
-				trh.setEditable( tracksEditable );
+				trh.setEditor( tracksEditor );
 			}
-			markTrackHeader.setEditable( tracksEditable );
+			markTrackHeader.setEditor( tracksEditor );
 		}
 	}
 

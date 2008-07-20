@@ -5,13 +5,19 @@ import de.sciss.timebased.session.Track;
 public class ForestTrack
 extends Track
 {
-	private final int	id;
+	private int			id;
 	private final Trail	trail;
 
-	public ForestTrack( int id, Trail trail )
+	public ForestTrack( Trail trail, int id )
 	{
-		this.id 	= id;
 		this.trail	= trail;
+		setID( id );
+	}
+	
+	public void setID( int id )
+	{
+		this.id	= id;
+		getMap().putValue( null, "oscID", id );
 	}
 	
 	public int getID() { return id; }
