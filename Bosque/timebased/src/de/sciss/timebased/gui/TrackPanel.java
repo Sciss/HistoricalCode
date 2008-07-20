@@ -2,10 +2,14 @@ package de.sciss.timebased.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.Box;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import de.sciss.gui.GUIUtil;
@@ -17,6 +21,7 @@ import de.sciss.timebased.session.Track;
 
 public class TrackPanel
 extends JPanel
+implements TracksTable
 {
 	private final TimelineScroll		scroll;
 	private final JPanel				allHeaderPanel;
@@ -27,12 +32,17 @@ extends JPanel
     private MutableSessionCollection	selectedTracks		= null;
     private Track						markerTrack			= null;
     
-    private final TimelinePanel tlp;
-	private final List collTrackHeaders		= new ArrayList();
+    private final TimelinePanel			tlp;
+	private final List<TrackRowHeader> collTrackHeaders		= new ArrayList<TrackRowHeader>();
+	private final Map<Track,TrackRowHeader>	mapTrackHeaders	= new HashMap<Track,TrackRowHeader>();
 	
 	private final SessionCollection.Listener	activeTracksListener;
 	
 	private MutableSessionCollection.Editor tracksEditor	= null;
+	private JComponent						mainView		= null;
+	
+//	private int							recentWidth			= -1;
+//	private int							recentHeight			= -1;
 
 	public TrackPanel( TimelinePanel tlp )
 	{
@@ -86,6 +96,8 @@ extends JPanel
 				// nothing
 			}
 		};
+		
+		tlp.setTracksTable( this );
 	}
 	
 	public void setTracks( SessionCollection activeTracks, MutableSessionCollection selectedTracks )
@@ -121,7 +133,7 @@ extends JPanel
 		int					oldNumWaveTracks, newNumWaveTracks;
 //		final List			collChannelMeters;
 //		PeakMeter[]			meters;
-		TrackRowHeader		chanHead;
+		TrackRowHeader		trackRowHead;
 		Track				t;
 //		Axis				chanRuler;
 //		PeakMeter			chanMeter;
@@ -137,22 +149,22 @@ extends JPanel
 	
 		// first kick out editors whose tracks have been removed
 		for( int ch = 0; ch < oldNumWaveTracks; ch++ ) {
-			chanHead	= (TrackRowHeader) collTrackHeaders.get( ch );
-			t			= chanHead.getTrack();
+			trackRowHead	= collTrackHeaders.get( ch );
+			t			= trackRowHead.getTrack();
 
 			if( !activeTracks.contains( t )) {
-//System.out.println( "removing " + t );
-				chanHead	= (TrackRowHeader) collTrackHeaders.remove( ch );
+				trackRowHead	= collTrackHeaders.remove( ch );
+				mapTrackHeaders.remove( t );
 //				chanMeter	= (PeakMeter) collChannelMeters.remove( ch );
 //				chanRuler	= (Axis) collChannelRulers.remove( ch );
 				oldNumWaveTracks--;
 				// XXX : dispose trnsEdit (e.g. free vectors, remove listeners!!)
-				trackHeaderPanel.remove( chanHead );
+				trackHeaderPanel.remove( trackRowHead );
 //				flagsPanel.remove( chanHead );
 //				metersPanel.remove( chanMeter );
 //				rulersPanel.remove( chanRuler );
 				ch--;
-				chanHead.dispose();
+				trackRowHead.dispose();
 //				chanMeter.dispose();
 //				chanRuler.dispose();
 			}
@@ -165,16 +177,17 @@ extends JPanel
 newLp:	for( int ch = 0; ch < newNumWaveTracks; ch++ ) {
 			t = (Track) activeTracks.get( ch );
 			for( int ch2 = 0; ch2 < oldNumWaveTracks; ch2++ ) {
-				chanHead = (TrackRowHeader) collTrackHeaders.get( ch2 );
-				if( chanHead.getTrack() == t ) continue newLp;
+				trackRowHead = collTrackHeaders.get( ch2 );
+				if( trackRowHead.getTrack() == t ) continue newLp;
 			}
 			
 //			chanHead = new TransmitterRowHeader( t, doc.getTracks(), doc.getMutableSelectedTracks(), doc.getUndoManager() );
-			chanHead = new TrackRowHeader();
-			chanHead.setTrack( t, activeTracks, selectedTracks );
-			chanHead.setEditor( tracksEditor );
-			collTrackHeaders.add( chanHead );
-			trackHeaderPanel.add( chanHead, ch );
+			trackRowHead = new TrackRowHeader();
+			trackRowHead.setTrack( t, activeTracks, selectedTracks );
+			trackRowHead.setEditor( tracksEditor );
+			collTrackHeaders.add( trackRowHead );
+			mapTrackHeaders.put( t, trackRowHead );
+			trackHeaderPanel.add( trackRowHead, ch );
 
 //			chanMeter = new PeakMeter();
 //			collChannelMeters.add( chanMeter );
@@ -193,7 +206,7 @@ newLp:	for( int ch = 0; ch < newNumWaveTracks; ch++ ) {
 		if( tracksEditor != editor ) {
 			tracksEditor = editor;
 			for( int i = 0; i < collTrackHeaders.size(); i++ ) {
-				final TrackRowHeader trh = (TrackRowHeader) collTrackHeaders.get( i );
+				final TrackRowHeader trh = collTrackHeaders.get( i );
 				trh.setEditor( tracksEditor );
 			}
 			markTrackHeader.setEditor( tracksEditor );
@@ -211,6 +224,48 @@ newLp:	for( int ch = 0; ch < newNumWaveTracks; ch++ ) {
 	{
 		markerTrack = t;
 		checkSetMarkTrack();
-		tlp.setMarkerTrail( (markerTrack != null) ? markerTrack.getTrail() : null );
+		tlp.setMarkerTrack( markerTrack );
+	}
+
+	public void setMainView( JComponent view )
+	{
+		if( mainView != null ) {
+			tlp.remove( mainView );
+		}
+		mainView = view;
+		if( view != null ) {
+			tlp.add( mainView );
+		}
+	}
+
+// ------------------ TracksTable interface ------------------
+	
+	public JComponent getMainView() { return mainView; }
+	
+	public TrackRowHeader getRowHeader( Track t ) { return mapTrackHeaders.get( t );}
+
+	public Rectangle getTrackBounds( Track t, Rectangle r )
+	{
+		if( r == null ) r = new Rectangle();
+		
+		TrackRowHeader trh = mapTrackHeaders.get( t );
+		if( trh == null ) {
+			documentUpdate();
+			trh = mapTrackHeaders.get( t );
+			if( trh == null ) throw new IllegalArgumentException( t.toString() );
+		}
+		
+		trh.getBounds( r );
+		r.x = 0;
+		if( mainView != null ) {
+			r.width = mainView.getWidth();
+		} else {
+			r.width = 0;
+		}
+//		r.x    += r.width - (mainView != null ? mainView.getX() : 0);
+//		r.width = getWidth() - r.x;
+//		r.y	   += trackHeaderPanel.getY();
+		
+		return r;
 	}
 }

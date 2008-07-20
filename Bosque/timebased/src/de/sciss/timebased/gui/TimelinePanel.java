@@ -35,6 +35,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import javax.swing.BoxLayout;
+import javax.swing.JComponent;
 import javax.swing.Timer;
 
 import de.sciss.gui.ComponentHost;
@@ -43,6 +44,7 @@ import de.sciss.io.Span;
 import de.sciss.timebased.Trail;
 import de.sciss.timebased.session.MutableSessionCollection;
 import de.sciss.timebased.session.SessionCollection;
+import de.sciss.timebased.session.Track;
 import de.sciss.timebased.timeline.BasicTimeline;
 import de.sciss.timebased.timeline.BasicTimelineView;
 import de.sciss.timebased.timeline.Timeline;
@@ -58,6 +60,7 @@ implements TopPainter, TimelineView.Listener
 {
 	private final Color 						colrSelection			= new Color( 0x00, 0x00, 0xFF, 0x2F ); // GraphicsUtil.colrSelection;
 	private final Color 						colrPosition			= new Color( 0xFF, 0x00, 0x00, 0x7F );
+	private final Color							colrSelection2			= new Color( 0x00, 0x00, 0x00, 0x20 );  // selected timeline span over unselected trns
 
 	private Rectangle  							vpRecentRect			= new Rectangle();
 	private int									vpPosition				= -1;
@@ -89,6 +92,7 @@ implements TopPainter, TimelineView.Listener
 
 	private final TimelineAxis					timeAxis;
 	private final MarkerAxis					markAxis;
+	private Track								markerTrack				= null;
 	private Trail								markerTrail				= null;
 	private final Trail.Listener				markerListener;
 
@@ -100,6 +104,8 @@ implements TopPainter, TimelineView.Listener
 	private MutableSessionCollection			selectedTracks			= null;
 	private final SessionCollection.Listener	activeTracksListener;
 	private final SessionCollection.Listener	selectedTracksListener;
+	
+	private TracksTable							tracksTable;
 
 	public TimelinePanel()
 	{
@@ -216,6 +222,11 @@ implements TopPainter, TimelineView.Listener
 		});
 	}
 	
+	public void setTracksTable( TracksTable tt )
+	{
+		this.tracksTable = tt;
+	}
+	
 	public void setTracks( SessionCollection activeTracks, MutableSessionCollection selectedTracks )
 	{
 		if( this.activeTracks != null ) {
@@ -232,12 +243,14 @@ implements TopPainter, TimelineView.Listener
 
 	public TimelineView getTimelineView() { return tlv; }
 	
-	public void setMarkerTrail( Trail t )
+	public void setMarkerTrack( Track t )
 	{
+		final Trail mt = (t != null) ? t.getTrail() : null;
+		markerTrack	= t;
 		if( markerTrail != null ) {
 			markerTrail.removeListener( markerListener );
 		}
-		markerTrail = t;
+		markerTrail = mt;
 		if( markerTrail != null ) {
 			markerTrail.addListener( markerListener );
 		}
@@ -383,7 +396,7 @@ implements TopPainter, TimelineView.Listener
 	public void dispose()
 	{
 		tlv.removeListener( this );
-		setMarkerTrail( null );
+		setMarkerTrack( null );
 		this.stop();
 		super.dispose();
 	}
@@ -465,6 +478,9 @@ implements TopPainter, TimelineView.Listener
 //			}
 	}
 
+	/**
+	 *  Only call in the Swing thread!
+	 */
 	protected void updateSelectionAndRepaint()
 	{
 		final Rectangle r = new Rectangle( 0, 0, getWidth(), getHeight() );
@@ -480,15 +496,7 @@ implements TopPainter, TimelineView.Listener
 		vpUpdateRect = vpUpdateRect.intersection( new Rectangle( 0, 0, getWidth(), getHeight() ));
 		if( !vpUpdateRect.isEmpty() ) {
 			repaint( vpUpdateRect );
-//ggTrackPanel.repaint( updateRect );
 		}
-//			if( !updateRect.isEmpty() ) {
-//				Graphics g = getGraphics();
-//				if( g != null ) {
-//					paintDirty( g, updateRect );
-//				}
-//				g.dispose();
-//			}
 	}
 
 	private void updateTransformsAndRepaint( boolean verticalSelection )
@@ -505,31 +513,38 @@ implements TopPainter, TimelineView.Listener
 		}
 	}
 
+	// sync: caller must sync on timeline + grp + tc
 	private void updateSelection()
 	{
-//		Rectangle	r;
-//		Track		t;
-//		int			x, y;
+		final JComponent	tracksMainView;
+		final int			x, y;
+		Track				t;
+		Rectangle			r;
 
 		vpSelections.clear();
 		vpSelectionColors.clear();
-		if( !timelineSel.isEmpty() ) {
-vpSelections.add( new Rectangle( 0, 0, getWidth(), getHeight() ));
-vpSelectionColors.add( colrSelection );
-//			x			= waveView.getX();
-//			y			= waveView.getY();
-//			vpSelections.add( timeAxis.getBounds() );
-//			vpSelectionColors.add( colrSelection );
-//			t			= doc.markerTrack;
-//			vpSelections.add( markAxis.getBounds() );
-//			vpSelectionColors.add( doc.selectedTracks.contains( t ) ? colrSelection : colrSelection2 );
-//			for( int ch = 0; ch < waveView.getNumChannels(); ch++ ) {
-//				r		= new Rectangle( waveView.rectForChannel( ch ));
-//				r.translate( x, y );
-//				t		= (Track) doc.audioTracks.get( ch );
-//				vpSelections.add( r );
-//				vpSelectionColors.add( doc.selectedTracks.contains( t ) ? colrSelection : colrSelection2 );
-//			}
+		
+		if( (tracksTable == null) || timelineSel.isEmpty() ) return;
+		tracksMainView	= tracksTable.getMainView();
+		if( tracksMainView == null ) return;
+		
+		x			= tracksMainView.getX();
+		y			= tracksMainView.getY();
+		vpSelections.add( timeAxis.getBounds() );
+		vpSelectionColors.add( colrSelection );
+		if( selectedTracks == null ) return;
+		
+		if( markerTrack != null ) {
+			vpSelections.add( markAxis.getBounds() );
+			vpSelectionColors.add( selectedTracks.contains( markerTrack ) ? colrSelection : colrSelection2 );
+		}
+
+		for( int i = 0; i < activeTracks.size(); i++ ) {
+			t	= (Track) activeTracks.get( i );
+			r	= tracksTable.getTrackBounds( t, null );
+			r.translate( x, y );
+			vpSelections.add( r );
+			vpSelectionColors.add( selectedTracks.contains( t ) ? colrSelection : colrSelection2 );
 		}
 	}
 

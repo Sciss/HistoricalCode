@@ -31,6 +31,7 @@
 
 package de.sciss.util;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,7 +43,7 @@ import de.sciss.app.EventManager;
 
 /**
  *  @author		Hanns Holger Rutz
- *  @version	0.70, 07-Dec-07
+ *  @version	0.71, 20-Jul-08
  */
 public class MapManager
 implements EventManager.Processor /*, XMLRepresentation */
@@ -61,8 +62,8 @@ implements EventManager.Processor /*, XMLRepresentation */
 	
 	private final Map			backingMap;
 	protected final Object		owner;
-	private final Map			contextMap;
-	private final EventManager	elm				= new EventManager( this );
+	private Map					contextMap		= null;
+	private EventManager		elm				= null;
 
 	/**
 	 */
@@ -70,7 +71,6 @@ implements EventManager.Processor /*, XMLRepresentation */
 	{
 		this.owner			= owner;
 		this.backingMap		= backingMap;
-		contextMap			= new HashMap();
 	}
 
 	public MapManager( Object owner )
@@ -80,6 +80,7 @@ implements EventManager.Processor /*, XMLRepresentation */
 
 	public void addListener( MapManager.Listener listener )
 	{
+		if( elm == null ) elm = new EventManager( this );
 		elm.addListener( listener );
 	}
 
@@ -90,19 +91,19 @@ implements EventManager.Processor /*, XMLRepresentation */
 	
 	public void cloneMap( MapManager orig )
 	{
-		Iterator	iter;
-		Object		key;
-		
-		iter = orig.backingMap.keySet().iterator();
-		while( iter.hasNext() ) {
-			key = iter.next();
+		for( Iterator iter = orig.backingMap.keySet().iterator(); iter.hasNext(); ) {
+			final Object key = iter.next();
 			this.backingMap.put( key, orig.backingMap.get( key ));	// all supported types are immutable
 		}
 
-		iter = orig.contextMap.keySet().iterator();
-		while( iter.hasNext() ) {
-			key = iter.next();
-			this.contextMap.put( key, new Context( (Context) orig.contextMap.get( key )));
+		if( orig.contextMap == null ) return;
+		final Set keySet = orig.contextMap.keySet();
+		if( keySet.isEmpty() ) return;
+		
+		if( contextMap == null ) contextMap = new HashMap();
+		for( Iterator iter = keySet.iterator(); iter.hasNext(); ) {
+			final Object key = iter.next();
+			contextMap.put( key, new Context( (Context) orig.contextMap.get( key )));
 		}
 	}
 	
@@ -114,12 +115,11 @@ implements EventManager.Processor /*, XMLRepresentation */
 		
 		if( (inclusionFlags == Context.ALL_INCLUSIVE) &&
 			(exclusionFlags == Context.NONE_EXCLUSIVE) ) return fltKeys;
+		
+		if( contextMap == null ) return Collections.EMPTY_SET;
 	
-		Iterator iter = fltKeys.iterator();
-		Context c;
-
-		while( iter.hasNext() ) {
-			c = (Context) contextMap.get( iter.next() );
+		for( Iterator iter = fltKeys.iterator(); iter.hasNext(); ) {
+			final Context c = (Context) contextMap.get( iter.next() );
 			if( (c == null) || ((c.flags & inclusionFlags) == 0) || ((c.flags & exclusionFlags) != 0) ) {
 				iter.remove();
 			}
@@ -135,7 +135,7 @@ implements EventManager.Processor /*, XMLRepresentation */
 
 	public void putContext( Object source, String key, MapManager.Context context )
 	{
-//System.err.println( "putContext key = "+key );
+		if( contextMap == null ) contextMap = new HashMap();
 		contextMap.put( key, context );
 		Object o = getValue( key );
 		if( (context.defaultValue != null) ) {
@@ -157,7 +157,7 @@ implements EventManager.Processor /*, XMLRepresentation */
 	
 	public MapManager.Context getContext( String key )
 	{
-		return (Context) contextMap.get( key );
+		return (Context) (contextMap != null ? contextMap.get( key ) : null);
 	}
 	
 	public Object putValue( Object source, String key, Object value )
@@ -172,8 +172,10 @@ implements EventManager.Processor /*, XMLRepresentation */
 			Set keySet = new HashSet( 1 );
 			keySet.add( key );
 
-			elm.dispatchEvent( new MapManager.Event( this, source, keySet ));
-			checkOwnerModification( source, keySet );
+			if( elm != null ) {
+				elm.dispatchEvent( new MapManager.Event( this, source, keySet ));
+				checkOwnerModification( source, keySet );
+			}
 		}
 		return( oldVal );
 	}
@@ -186,8 +188,10 @@ implements EventManager.Processor /*, XMLRepresentation */
 			final Set keySet = new HashSet( 1 );
 			keySet.add( key );
 
-			elm.dispatchEvent( new MapManager.Event( this, source, keySet ));
-			checkOwnerModification( source, keySet );
+			if( elm != null ) {
+				elm.dispatchEvent( new MapManager.Event( this, source, keySet ));
+				checkOwnerModification( source, keySet );
+			}
 		}
 		return result;
 	}
@@ -198,8 +202,10 @@ implements EventManager.Processor /*, XMLRepresentation */
 		backingMap.putAll( map );
 		if( (source != null) ) {
 			Set keySet = new HashSet( map.keySet() );
-			elm.dispatchEvent( new MapManager.Event( this, source, keySet ));
-			checkOwnerModification( source, keySet );
+			if( elm != null ) {
+				elm.dispatchEvent( new MapManager.Event( this, source, keySet ));
+				checkOwnerModification( source, keySet );
+			}
 		}
 	}
 
@@ -214,7 +220,7 @@ implements EventManager.Processor /*, XMLRepresentation */
 		boolean dispatch	= !keySet.isEmpty() && (source != null);
 		
 		backingMap.clear();
-		if( dispatch ) {
+		if( dispatch && (elm != null) ) {
 			elm.dispatchEvent( new MapManager.Event( this, source, keySet ));
 			checkOwnerModification( source, keySet );
 		}
@@ -238,7 +244,7 @@ implements EventManager.Processor /*, XMLRepresentation */
 		
 		while( iter.hasNext() ) {
 			key	= iter.next().toString();
-			c	= (Context) this.contextMap.get( key );
+			c	= (Context) (contextMap != null ? contextMap.get( key ) : null);
 			targetMap.putContext( source, key, c );
 		}
 	}
@@ -285,11 +291,10 @@ implements EventManager.Processor /*, XMLRepresentation */
 	 */
 	public void processEvent( BasicEvent e )
 	{
-		MapManager.Listener listener;
-		int i;
-		MapManager.Event mme = (MapManager.Event) e;
+		final MapManager.Event	mme = (MapManager.Event) e;
+		MapManager.Listener		listener;
 		
-		for( i = 0; i < elm.countListeners(); i++ ) {
+		for( int i = 0; i < elm.countListeners(); i++ ) {
 			listener = (MapManager.Listener) elm.getListener( i );
 			switch( e.getID() ) {
 			case MapManager.Event.MAP_CHANGED:

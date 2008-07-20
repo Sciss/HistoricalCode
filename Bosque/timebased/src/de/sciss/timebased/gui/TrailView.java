@@ -30,8 +30,8 @@ package de.sciss.timebased.gui;
 import de.sciss.gui.ComponentHost;
 import de.sciss.io.Span;
 import de.sciss.timebased.Stake;
-import de.sciss.timebased.ForestTrack;
 import de.sciss.timebased.Trail;
+import de.sciss.timebased.timeline.TimelineView;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -39,7 +39,6 @@ import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -48,11 +47,11 @@ import javax.swing.JComponent;
 
 /**
  *  @author		Hanns Holger Rutz
- *  @version	0.10, 14-Aug-07
+ *  @version	0.11, 20-Jul-08
  */
 public class TrailView
 extends JComponent
-implements Trail.Listener
+implements Trail.Listener, TimelineView.Listener
 {
 	private Trail				t;
 	private Span				timelineVis		= new Span();
@@ -68,18 +67,25 @@ implements Trail.Listener
 	private static final Color	colrDrag		= Color.black;
 	private static final Stroke	strkDrag		= new BasicStroke( 2f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL, 1f, new float[] { 4f, 4f }, 0f );
 
-	private final List			tracks			= new ArrayList();
-	private float				trackVScale		= 1f;
+//	private final List			tracks			= new ArrayList();
+//	private float				trackVScale		= 1f;
 	
-	public TrailView( ComponentHost host )
+//	private final TimelineView	tlv;
+	
+	private TracksTable			tracksTable		= null;
+	
+	public TrailView( ComponentHost host, TimelineView tlv )
 	{
 		super();
 		this.host	= host;
+//		this.tlv	= tlv;
+		
+		tlv.addListener( this );
 	}
 
-	public TrailView()
+	public TrailView( TimelineView tlv )
 	{
-		this( null );
+		this( null, tlv );
 	}
 	
 	public StakeRenderer getStakeRenderer()
@@ -87,31 +93,31 @@ implements Trail.Listener
 		return stakeRenderer;
 	}
 	
-	public void addTrack( ForestTrack ft )
-	{
-		tracks.add( ft );
-		recalcTrackBounds();
-		triggerRedisplay();
-	}
+//	public void addTrack( ForestTrack ft )
+//	{
+//		tracks.add( ft );
+//		recalcTrackBounds();
+//		triggerRedisplay();
+//	}
+//	
+//	public void removeTrack( ForestTrack ft )
+//	{
+//		tracks.remove( ft );
+//		recalcTrackBounds();
+//		triggerRedisplay();
+//	}
 	
-	public void removeTrack( ForestTrack ft )
-	{
-		tracks.remove( ft );
-		recalcTrackBounds();
-		triggerRedisplay();
-	}
-	
-	private void recalcTrackBounds()
-	{
-		float y = 0f;
-//		ForestTrack ft;
-//		for( int i = 0; i < tracks.size(); i++ ) {
-//			ft = (ForestTrack) tracks.get( i );
-//			ft.y = y;
-//			y += ft.height;
-//		}
-		trackVScale = y == 0f ? 1f : (1f / y);
-	}
+//	private void recalcTrackBounds()
+//	{
+////		float y = 0f;
+////		ForestTrack ft;
+////		for( int i = 0; i < tracks.size(); i++ ) {
+////			ft = (ForestTrack) tracks.get( i );
+////			ft.y = y;
+////			y += ft.height;
+////		}
+////		trackVScale = y == 0f ? 1f : (1f / y);
+//	}
 	
 	public void setTrail( Trail t )
 	{
@@ -125,11 +131,22 @@ implements Trail.Listener
 		triggerRedisplay();
 	}
 	
-	public void setVisibleSpan( Span span )
+	public void setTracksTable( TracksTable tt )
 	{
-		timelineVis = span;
+		tracksTable = tt;
 		triggerRedisplay();
 	}
+	
+	public TracksTable getTracksTable()
+	{
+		return tracksTable;
+	}
+	
+//	public void setVisibleSpan( Span span )
+//	{
+//		timelineVis = span;
+//		triggerRedisplay();
+//	}
 	
 	public Span getVisibleSpan()
 	{
@@ -197,7 +214,7 @@ implements Trail.Listener
 		final int				w			= getWidth();
 		final int				h			= getHeight();
 		final double			hscale		= (double) w / timelineVis.getLength();
-		final float				vscale		= trackVScale * h;
+		final float				vscale		= h; // trackVScale * h;
 		Stake					s;
 		Component				c;
 		boolean					selected;	 // , muted = false, frozen = false;	// not yet used
@@ -247,6 +264,18 @@ implements Trail.Listener
 		}
 	}
 
+	// ----------- TimelineView.Listener interface -----------
+	
+	public void timelineChanged( TimelineView.Event e ) { /* nothing */ }
+	public void timelinePositioned( TimelineView.Event e ) { /* nothing */ }
+	public void timelineSelected( TimelineView.Event e ) { /* nothing */ }
+	
+	public void timelineScrolled( TimelineView.Event e )
+	{
+		timelineVis = e.getView().getSpan();
+		triggerRedisplay();
+	}
+	
 	// ----------- Trail.Listener interface -----------
 	
 	public void trailModified( Trail.Event e )

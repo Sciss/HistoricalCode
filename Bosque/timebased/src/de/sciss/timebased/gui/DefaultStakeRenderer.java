@@ -181,12 +181,12 @@ implements StakeRenderer
 		this.selected	= isSelected;
 		this.hscale		= horizScale;
 //		this.vscale		= vscale;
-		
-		bounds.setBounds( 
-			(int) ((stakeSpan.start - viewSpan.start) * horizScale + 0.5),
-			0, // (a.getY() * h + 0.5),
-			(int) (stakeSpan.getLength() * horizScale + 0.5),
-			tv.getHeight() ); // (a.getHeight() * h + 0.5) );
+				
+//		bounds.setBounds( 
+//			(int) ((stakeSpan.start - viewSpan.start) * horizScale + 0.5),
+//			0, // (a.getY() * h + 0.5),
+//			(int) (stakeSpan.getLength() * horizScale + 0.5),
+//			tv.getHeight() ); // (a.getHeight() * h + 0.5) );
 		
 //		System.out.println( "Bounds = " + bounds );
 		
@@ -194,10 +194,19 @@ implements StakeRenderer
 		
 		if( value instanceof ForestRegionStake ) {
 			final ForestRegionStake frs = (ForestRegionStake) value;
+			
+			tv.getTracksTable().getTrackBounds( frs.track, bounds );
+			final int offx = (int) ((stakeSpan.start - viewSpan.start) * hscale + 0.5);
+			bounds.x += offx;
+			bounds.width = (int) ((stakeSpan.stop - viewSpan.start) * hscale + 0.5) - offx;
+			
 //			bounds.y 		= (int) (frs.track.y * vscale + 0.5f) + 1;
 //			bounds.height	= (int) (frs.track.height * vscale + 0.5f) - 2;
-			bounds.y 		= (int) (0 * vscale + 0.5f) + 1;
-			bounds.height	= (int) (1 * vscale + 0.5f) - 2;
+//			bounds.y 		= (int) (0 * vscale + 0.5f) + 1;
+//			bounds.height	= (int) (1 * vscale + 0.5f) - 2;
+			
+//			System.out.println( bounds );
+			
 			colr = (frs.colr != null) ? frs.colr : colrAtomB;
 			fadeIn = frs.fadeIn != null;
 			if( fadeIn ) {

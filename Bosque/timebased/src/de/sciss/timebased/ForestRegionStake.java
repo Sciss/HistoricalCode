@@ -31,15 +31,20 @@ package de.sciss.timebased;
 import java.awt.Color;
 
 import de.sciss.io.Span;
+import de.sciss.timebased.session.SessionObject;
+import de.sciss.util.MapManager;
 
 public class ForestRegionStake
 extends RegionStake
+implements SessionObject
 {
 	public final ForestTrack	track;
 	public final Color	 		colr;
 	public final Fade			fadeIn;
 	public final Fade			fadeOut;
 	public final float			gain;
+	
+	private final MapManager	map;
 	
 	public ForestRegionStake( Span span, String name, ForestTrack track, Color colr, Fade fadeIn, Fade fadeOut, float gain )
 	{
@@ -51,6 +56,11 @@ extends RegionStake
 		this.fadeIn		= fadeIn;
 		this.fadeOut	= fadeOut;
 		this.gain		= gain;
+		
+		// shit this doesn't make senses, a stake
+		// is considered immutable, a session object
+		// not...
+		map				= new MapManager( this );
 	}
 	
 	public ForestRegionStake( ForestRegionStake orig )
@@ -67,6 +77,17 @@ extends RegionStake
 //	{
 //		t	= null;
 //	}
+	
+	public String getName()
+	{
+		return name;
+	}
+	
+	public MapManager getMap()
+	{
+		return map;
+//		return null; // XXX woooo, not so good
+	}
 	
 	public Stake replaceStart( long newStart )
 	{
