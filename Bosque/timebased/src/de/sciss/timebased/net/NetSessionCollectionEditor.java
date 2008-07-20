@@ -3,15 +3,22 @@ package de.sciss.timebased.net;
 import java.awt.EventQueue;
 
 import de.sciss.timebased.session.MutableSessionCollection;
+import de.sciss.timebased.session.SessionCollection;
 import de.sciss.timebased.session.SessionObject;
 
+/**
+ * 	@version	0.11, 20-Jul-08
+ */
 public class NetSessionCollectionEditor
 extends NetEditor
 implements MutableSessionCollection.Editor
 {
-	public NetSessionCollectionEditor( Master master )
+	private final SessionCollection all;
+	
+	public NetSessionCollectionEditor( Master master, SessionCollection all )
 	{
 		super( master, "/coll" );
+		this.all = all;
 	}
 	
 	public void editAdd( int editID, SessionObject... objects )
@@ -36,7 +43,8 @@ implements MutableSessionCollection.Editor
 			final Object[] args = new Object[ num + 1 ];
 			args[ 0 ] = cmd;
 			for( int j = 1, k = i; j < args.length; j++, k++ ) {
-				args[ j ] = objects[ k ].getMap().getValue( "oscID" );
+//				args[ j ] = objects[ k ].getMap().getValue( "oscID" );
+				args[ j ] = all.indexOf( objects[ k ]);
 			}
 			c.add( args );
 			i += num;

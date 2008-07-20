@@ -32,13 +32,15 @@ import java.awt.Color;
 
 import de.sciss.io.Span;
 import de.sciss.timebased.session.SessionObject;
+import de.sciss.timebased.session.Track;
+import de.sciss.timebased.session.TrackBased;
 import de.sciss.util.MapManager;
 
 public class ForestRegionStake
 extends RegionStake
-implements SessionObject
+implements SessionObject, TrackBased
 {
-	public final ForestTrack	track;
+	protected final ForestTrack	track;
 	public final Color	 		colr;
 	public final Fade			fadeIn;
 	public final Fade			fadeOut;
@@ -67,6 +69,8 @@ implements SessionObject
 	{
 		this( orig.span, orig.name, orig.track, orig.colr, orig.fadeIn, orig.fadeOut, orig.gain );
 	}
+	
+	public Track getTrack() { return track; }
 
 	public Stake duplicate()
 	{

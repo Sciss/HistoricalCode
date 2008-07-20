@@ -243,7 +243,13 @@ newLp:	for( int ch = 0; ch < newNumWaveTracks; ch++ ) {
 	public JComponent getMainView() { return mainView; }
 	
 	public TrackRowHeader getRowHeader( Track t ) { return mapTrackHeaders.get( t );}
+	
+	public int getNumTracks() { return activeTracks.size(); }
 
+	public Track getTrack( int i ) { return (Track) activeTracks.get( i );}
+	
+	public int indexOf( Track t ) { return activeTracks.indexOf( t );}
+	
 	public Rectangle getTrackBounds( Track t, Rectangle r )
 	{
 		if( r == null ) r = new Rectangle();

@@ -11,4 +11,7 @@ public interface TracksTable
 	public JComponent getMainView();
 	public TrackRowHeader getRowHeader( Track t );
 	public Rectangle getTrackBounds( Track t, Rectangle r );
+	public int getNumTracks();
+	public Track getTrack( int i );
+	public int indexOf( Track t );
 }

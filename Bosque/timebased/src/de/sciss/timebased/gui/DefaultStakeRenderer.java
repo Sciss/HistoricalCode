@@ -69,7 +69,7 @@ public class DefaultStakeRenderer
 extends JComponent
 implements StakeRenderer
 {
-	protected final Rectangle			bounds					= new Rectangle();
+	private Rectangle					bounds;
 	protected String					name;
 	
 //	private static final Color			colrAtom				= new Color( 0x60, 0x00, 0x80, 0x40 );
@@ -172,15 +172,18 @@ implements StakeRenderer
 		yZoom = val;
 	}
 	
-	public Component getStakeRendererComponent( TrailView tv, Stake value, boolean isSelected, double horizScale, float vscale )
+	public Component getStakeRendererComponent( TrailView tv, Stake value, boolean isSelected, double horizScale,
+												Rectangle stakeBounds )
 	{
 		stakeSpan		= value.getSpan();
 		viewSpan		= tv.getVisibleSpan();
 		sfv				= null;
 		env				= null;
-		this.selected	= isSelected;
-		this.hscale		= horizScale;
+		selected		= isSelected;
+		hscale			= horizScale;
 //		this.vscale		= vscale;
+		
+		bounds			= stakeBounds;
 				
 //		bounds.setBounds( 
 //			(int) ((stakeSpan.start - viewSpan.start) * horizScale + 0.5),
@@ -195,10 +198,10 @@ implements StakeRenderer
 		if( value instanceof ForestRegionStake ) {
 			final ForestRegionStake frs = (ForestRegionStake) value;
 			
-			tv.getTracksTable().getTrackBounds( frs.track, bounds );
-			final int offx = (int) ((stakeSpan.start - viewSpan.start) * hscale + 0.5);
-			bounds.x += offx;
-			bounds.width = (int) ((stakeSpan.stop - viewSpan.start) * hscale + 0.5) - offx;
+//			tv.getTracksTable().getTrackBounds( frs.getTrack(), bounds );
+//			final int offx = (int) ((stakeSpan.start - viewSpan.start) * hscale + 0.5);
+//			bounds.x += offx;
+//			bounds.width = (int) ((stakeSpan.stop - viewSpan.start) * hscale + 0.5) - offx;
 			
 //			bounds.y 		= (int) (frs.track.y * vscale + 0.5f) + 1;
 //			bounds.height	= (int) (frs.track.height * vscale + 0.5f) - 2;
@@ -215,7 +218,7 @@ implements StakeRenderer
 				if( frs.fadeIn.type == Fade.TYPE_LINEAR ) {
 //					curveFadeIn.setCurve( 1, bounds.height - 1, 1, hndlExtent, 1, hndlExtent, px, hndlExtent ); // x1, y1, ctrlx, ctrly, x2, y2
 //					shpFadeIn.append( curveFadeIn, false );
-					lineFadeIn.setLine( 0, bounds.height - 1, px, hndlExtent );
+					lineFadeIn.setLine( 0, stakeBounds.height - 1, px, hndlExtent );
 					shpFillFadeIn.append( lineFadeIn, false );
 					shpFillFadeIn.lineTo( 0, hndlExtent );
 					shpDrawFadeIn = lineFadeIn;
@@ -228,9 +231,9 @@ implements StakeRenderer
 				if( frs.fadeOut.type == Fade.TYPE_LINEAR ) {
 //					curveFadeIn.setCurve( 1, bounds.height - 1, 1, hndlExtent, 1, hndlExtent, px, hndlExtent ); // x1, y1, ctrlx, ctrly, x2, y2
 //					shpFadeIn.append( curveFadeIn, false );
-					lineFadeOut.setLine( bounds.width - 1, bounds.height - 1, bounds.width - 1 - px, hndlExtent );
+					lineFadeOut.setLine( stakeBounds.width - 1, stakeBounds.height - 1, stakeBounds.width - 1 - px, hndlExtent );
 					shpFillFadeOut.append( lineFadeOut, false );
-					shpFillFadeOut.lineTo( bounds.width - 1, hndlExtent );
+					shpFillFadeOut.lineTo( stakeBounds.width - 1, hndlExtent );
 					shpDrawFadeOut = lineFadeOut;
 				}
 			}
@@ -245,12 +248,12 @@ whichRegion:
 				final Span sfvSpanV = spanClip.shift( -viewSpan.start );
 				final Span sfvSpanF = spanClip.shift( fars.getFileStartFrame() - stakeSpan.start );
 				final int sfvw = (int) (sfvSpanV.getLength() * horizScale + 0.5) ;
-				final int sfvh = bounds.height - hndlExtent - 1;
+				final int sfvh = stakeBounds.height - hndlExtent - 1;
 				if( (sfvw > 0) && (sfvh > 0) ) {	// currently error with 0 size in SoundFileView !
 					sfv = fars.getSoundFileView();
 					if( sfv == null ) break whichRegion;
 					final Insets in = sfv.getInsets();
-					sfv.setBounds( (int) (sfvSpanV.start * horizScale + 0.5) - in.left - bounds.x,
+					sfv.setBounds( (int) (sfvSpanV.start * horizScale + 0.5) - in.left - stakeBounds.x,
 								   hndlExtent - in.top,
 								   sfvw + (in.left + in.right),
 								   sfvh + (in.top + in.bottom ));
@@ -288,6 +291,16 @@ whichRegion:
 		}
 
 		return this;
+	}
+	
+	public Insets getInsets( Insets in, TrailView tv, Stake value )
+	{
+		if( in == null ) return new Insets( hndlExtent, 0, 0, 0 );
+		in.top	  = hndlExtent;
+		in.left   = 0;
+		in.bottom = 0;
+		in.right  = 0;
+		return in;
 	}
 	
 	public void paint( Graphics g )

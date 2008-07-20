@@ -30,8 +30,12 @@ package de.sciss.timebased.gui;
 import de.sciss.timebased.Stake;
 
 import java.awt.Component;
+import java.awt.Insets;
+import java.awt.Rectangle;
 
 public interface StakeRenderer 
 {
-	public Component getStakeRendererComponent( TrailView tv, Stake value, boolean selected, double hscale, float vscale );
+	public Component getStakeRendererComponent( TrailView tv, Stake value, boolean selected,
+												double hscale, Rectangle bounds );
+	public Insets getInsets( Insets in, TrailView tv, Stake value );
 }
