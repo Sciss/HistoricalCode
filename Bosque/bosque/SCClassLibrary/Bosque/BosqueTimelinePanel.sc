@@ -34,7 +34,7 @@ BosqueTimelinePanel {
 		var updSelection, updTransport, updTracks, fntSmall, forest, jTimelinePanel, ggScrollPane, view;
 		var updTrackSel, ggVolLab, jTimeAxis, jMarkAxis;
 		var jTrackPanel, jMarkerEditor, jTimeEditor, markerEditorMon, timelineEditorMon;
-		var jSelTracksEditor, selTracksEditorMon;
+		var jSelTracksEditor, selTracksEditorMon, jTrailViewListener, respTrailViewListener;
 		
 		doc		= argDoc;
 		forest	= doc.forest;
@@ -46,10 +46,10 @@ BosqueTimelinePanel {
 //			.horizontalScrollBarShown_( \never );
 		jTimelinePanel = JavaObject( "de.sciss.timebased.gui.TimelinePanel", forest.swing, doc.timelineView );
 		jTrackPanel	 = JavaObject( "de.sciss.timebased.gui.TrackPanel", forest.swing, jTimelinePanel );
-		jSelTracksEditor = JavaObject( "de.sciss.timebased.net.NetSessionCollectionEditor", forest.swing, forest.master );
+		jSelTracksEditor = JavaObject( "de.sciss.timebased.net.NetSessionCollectionEditor", forest.swing, forest.master, doc.tracks );
 		jSelTracksEditor.setID( doc.selectedTracks.java.id );
 		selTracksEditorMon = BosqueNetEditorMonitor( forest.swing, '/coll', doc.selectedTracks.java.id, doc.undoManager,
-			BosqueNetTracksEditor( doc.selectedTracks, doc.tracks ));
+			BosqueNetSessionCollectionEditor( doc.selectedTracks, doc.tracks ));
 		jTrackPanel.setTracksEditor( jSelTracksEditor );
 		jTimeAxis = jTimelinePanel.getTimelineAxis__;
 		jMarkAxis = jTimelinePanel.getMarkerAxis__;
@@ -74,12 +74,47 @@ BosqueTimelinePanel {
 //		view = JSCPlugView( ggScrollPane, bounds, jTimelinePanel ); // .resize_( 5 );
 		view = JSCPlugView( parent, bounds.insetAll( 0, 0, 0, 60 ), jTrackPanel ).resize_( 5 );
 		view.onClose = { jTimeAxis.destroy; jMarkerEditor.dispose; jMarkerEditor.destroy };
-		jTrailView = JavaObject( "de.sciss.timebased.gui.TrailView", forest.swing, doc.timelineView );
+		jTrailView = JavaObject( "de.sciss.timebased.gui.TrailView", forest.swing, jTimelinePanel, doc.timelineView );
 //		jTrailView.setFont( fntSmall );
 		jTrailView.setTrail( doc.trail );
 //		jTimelinePanel.add( jTrailView );
 		jTrackPanel.setMainView( jTrailView );
 		jTrailView.setTracksTable( jTrackPanel );
+		
+		jTrailViewListener	= JavaObject( "de.sciss.timebased.net.NetTrailViewListener", forest.swing, forest.master, jTrailView );
+		jTrailViewListener.setID( jTrailView.id );
+		
+		respTrailViewListener = ScissOSCPathResponder( forest.swing.addr, [ '/trail', jTrailView.id, \mouse ], {
+			arg time, resp, msg;
+			var cmd, oscID, mouse, action, frame, level, innerLevel, trackIdx, stakeIdx, x, y, modifiers, button, clickCount;
+			var e;
+			
+			#cmd, oscID, mouse, action, frame, level, innerLevel, trackIdx, stakeIdx, x, y, modifiers, button, clickCount = msg;
+			
+			e = Event( 13 );
+			e[ \x ] = x;
+			e[ \y ] = y;
+			e[ \clickCount ] = clickCount;
+			e[ \button ] = button;
+			e[ \component ] = view;
+			e[ \modifiers ] = modifiers;
+			e[ \isAltDown ] = (modifiers & 0x08) != 0;
+			e[ \isShiftDown ] = (modifiers & 0x1) != 0;
+			e[ \isControlDown ] = (modifiers & 0x02) != 0;
+			e[ \isMetaDown ] = (modifiers & 0x04) != 0;
+			e[ \frame ] = frame;
+			e[ \level ] = level;
+			e[ \innerLevel ] = innerLevel;
+			e[ \track ] = doc.tracks.at( trackIdx );
+			e[ \stake ] = doc.trail.get( stakeIdx );
+			
+			switch( action,
+			\moved, { this.mouseDragged( e )},
+			\pressed, { this.mousePressed( e )},
+			\released, { this.mouseReleased( e )}
+			);
+		}).add;
+		
 //~jTimelinePanel = jTimelinePanel;
 //~jTrailView = jTrailView;
 
@@ -216,9 +251,9 @@ BosqueTimelinePanel {
 			doc.volEnv.removeListener( this );
 		};
 		
-		view.mouseDownAction	= { arg ... args; this.mousePressed( Bosque.createMouseEvent( *args ))};
-		view.mouseMoveAction	= { arg ... args; this.mouseDragged( Bosque.createMouseEvent( *args ))};
-		view.mouseUpAction		= { arg ... args; this.mouseReleased( Bosque.createMouseEvent( *args ))};
+//		view.mouseDownAction	= { arg ... args; this.mousePressed( Bosque.createMouseEvent( *args ))};
+//		view.mouseMoveAction	= { arg ... args; this.mouseDragged( Bosque.createMouseEvent( *args ))};
+//		view.mouseUpAction		= { arg ... args; this.mouseReleased( Bosque.createMouseEvent( *args ))};
 
 //		ggTrackHeader.mouseDownAction  = { arg ... args; this.prMousePressedTrackHeader( Bosque.createMouseEvent( *args ))};
 //
@@ -242,7 +277,7 @@ BosqueTimelinePanel {
 		switch( tool,
 		\move,   { this.prMousePressedMoveResize( e )},
 		\resize, { this.prMousePressedMoveResize( e )},
-		\env, { envTool.mousePressed( e )}
+		\env,    { envTool.mousePressed( e )}
 		);
 	}
 
@@ -250,7 +285,7 @@ BosqueTimelinePanel {
 		switch( tool,
 		\move,   { this.prMouseDraggedMove( e )},
 		\resize, { this.prMouseDraggedResize( e )},
-		\env, { envTool.mouseDragged( e )}
+		\env,    { envTool.mouseDragged( e )}
 		);
 	}
 	
@@ -258,7 +293,7 @@ BosqueTimelinePanel {
 		switch( tool,
 		\move,   { this.prMouseReleasedMove( e )},
 		\resize, { this.prMouseReleasedResize( e )},
-		\env, { envTool.mouseReleased( e )}
+		\env,    { envTool.mouseReleased( e )}
 		);
 	}
 	
@@ -410,26 +445,19 @@ BosqueTimelinePanel {
 	// -------------------------------- Move + Resize Tool --------------------------------
 
 	prMousePressedMoveResize { arg e;
-		var visiSpan, coll, edit, y;
+		var edit;
 		
 		dragStartX	= e.x;
 		dragStartY	= e.y;
 		dragStarted	= false;
-		visiSpan		= doc.timelineView.span;
-		dragStartPos	= (e.x / e.component.bounds.width.max(1) * visiSpan.length + visiSpan.start).asInteger;
-		y			= e.y / e.component.bounds.height.max(1) / trackVScale;
-		dragStartTrack= doc.tracks.detect({ arg t; (t.y <= y) and: { t.y + t.height > y }});
-
-//dragStartTrack.postcs;
+		dragStartPos	= e.frame;
+		dragStartTrack= e.track;
 
 		dragValid		= dragStartTrack.notNil;
 		if( dragValid.not, { ^this });	// invalid
 
-//		idx			= doc.trail.indexOfPos( pos );
-//		[ x, pos, idx ].postln;
-//		stake		= doc.trail.getLeftMost( idx );
-		dragStartStake = doc.trail.editFilterStakeAt( dragStartPos, nil, { arg stake; stake.track == dragStartTrack });
-		if( dragStartStake.notNil and: { dragStartStake.span.containsPos( dragStartPos )}, {
+		dragStartStake = e.stake;
+		if( dragStartStake.notNil, {
 			if( doc.selectedRegions.includes( dragStartStake ), {
 				if( e.isShiftDown, {   // deselect single
 					edit = BosqueEditRemoveSessionObjects( this, doc.selectedRegions, [ dragStartStake ], false ).performEdit;
@@ -446,8 +474,7 @@ BosqueTimelinePanel {
 			});
 		}, {
 			if( e.isShiftDown.not and: { doc.selectedRegions.isEmpty.not }, {   // deselect all
-				coll = doc.selectedRegions.getAll;
-				edit = BosqueEditRemoveSessionObjects( this, doc.selectedRegions, coll, false ).performEdit;
+				edit = BosqueEditRemoveSessionObjects( this, doc.selectedRegions, doc.selectedRegions.getAll, false ).performEdit;
 			});
 		});
 		if( edit.notNil, {
@@ -490,16 +517,16 @@ BosqueTimelinePanel {
 	}
 	
 	prMouseReleasedMove { arg e;
-		var dx, dy, y, dragTrack, deltaTrack, deltaTime, ce, sel, duplicate, newStart, newTrack, disposeStake;
+		var dragTrack, deltaTrack, deltaTime, ce, sel, duplicate, newStart, newTrack, disposeStake;
+		
+		dragValid = false;
 		if( dragStarted, {
-			dx = if( dragConstrainV, 0, { e.x - dragStartX });
-			dy = if( dragConstrainH, 0, { e.y - dragStartY });
-			y  = e.y / e.component.bounds.height.max(1) / trackVScale;
-			dragTrack = doc.tracks.detect({ arg t; (t.y <= y) and: { t.y + t.height > y }});
-			deltaTrack = if( dragTrack.notNil, { doc.tracks.indexOf( dragTrack ) - doc.tracks.indexOf( dragStartTrack )}, 0 );
+			dragTrack = e.track;
+			deltaTrack = if( dragConstrainH, 0, { if( dragTrack.notNil, { doc.tracks.indexOf( dragTrack ) - doc.tracks.indexOf( dragStartTrack )}, 0 )});
+			
 			jTrailView.setDragPainted( false );
 			dragStarted = false;
-			deltaTime = (dx / e.component.bounds.width.max(1) * doc.timelineView.span.length).asInteger;
+			deltaTime = if( dragConstrainV, 0, { e.frame - dragStartPos });
 			if( (deltaTime != 0) or: { deltaTrack != 0 }, {
 				ce = JSyncCompoundEdit.new;
 				sel = doc.selectedRegions.getAll;
@@ -571,12 +598,12 @@ BosqueTimelinePanel {
 	}
 	
 	prMouseReleasedResize { arg e;
-		var dx, deltaTime, ce, sel, disposeStake, newStart, newStop, oldFade;
+		var deltaTime, ce, sel, disposeStake, newStart, newStop, oldFade;
+		dragValid = false;
 		if( dragStarted, {
-			dx = e.x - dragStartX;
 			jTrailView.setDragPainted( false );
 			dragStarted = false;
-			deltaTime = (dx / e.component.bounds.width.max(1) * doc.timelineView.span.length).asInteger;
+			deltaTime = e.frame - dragStartPos;
 			if( deltaTime != 0, {
 				ce = JSyncCompoundEdit.new;
 				sel = doc.selectedRegions.getAll;

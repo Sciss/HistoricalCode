@@ -4,7 +4,7 @@
  
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.11, 10-Jul-08
+ *	@version	0.12, 20-Jul-08
  */
 BosqueEnvTool {
 	var hndlExtent	= 13;
@@ -22,25 +22,17 @@ BosqueEnvTool {
 	}
 	
 	mousePressed { arg e;
-		var oldPressedStake, bounds, track, trackPos, visiSpan, coll, edit, y, level;
-		var ty1, ty2, yscale, ce, frame, env, idxHit, hitStake;
+		var oldPressedStake, track, trackPos, coll, edit, level;
+		var ce, frame, env, idxHit, hitStake;
 		var splitStake1, splitStake2, modSpan;
-		
-		visiSpan		= doc.timelineView.span;
-		bounds		= e.component.bounds;
-		trackPos		= (e.x / bounds.width.max(1) * visiSpan.length).asInteger + visiSpan.start;
-		yscale		= bounds.height.max(1) * timelinePanel.trackVScale;
-		y			= e.y / yscale;
-		track		= doc.tracks.detect({ arg t; (t.y <= y) and: { t.y + t.height > y }});
-		if( track.isNil, { ^this });
 
+		trackPos			= e.frame;
+		track			= e.track;
 		oldPressedStake	= pressedStake;
-		pressedStake		= doc.trail.editFilterStakeAt( trackPos, nil, { arg stake; stake.track == track });
+		pressedStake		= e.stake;
 		if( pressedStake.isNil or: { pressedStake.span.containsPos( trackPos ).not }, { ^this });
 
-		ty1		= track.y * yscale + hndlExtent;
-		ty2		= (track.y + track.height) * yscale;
-		level	= ((ty2 - e.y) / (ty2 - ty1)).clip( 0, 1 );
+		level	= e.innerLevel.clip( 0, 1 );
 		frame	= trackPos - pressedStake.span.start;
 		env		= pressedStake.env;
 
@@ -73,10 +65,10 @@ BosqueEnvTool {
 	}
 
 	mouseDragged { arg e;
-	
+		// nada
 	}
 
 	mouseReleased { arg e;
-	
+		// nada
 	}
 }

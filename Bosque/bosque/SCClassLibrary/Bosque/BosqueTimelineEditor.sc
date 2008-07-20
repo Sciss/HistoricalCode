@@ -924,6 +924,7 @@ BosqueTimelineEditor : Object {
 			});
 			onComplete.value( af );
 		} { arg error;
+//			error.reportError;
 			this.showMessageDialog( "Add Audio File", "Error while opening\n" ++ path ++ "\n: " ++ error.what, \error );
 			onFailure.value;
 		};

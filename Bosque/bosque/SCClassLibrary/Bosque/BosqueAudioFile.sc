@@ -59,5 +59,8 @@ BosqueAudioFile : Object {
 //		regions.clear;
 	}
 	
+	// XXX doc.audioFiles sould not have a server instance !!!
+	asSwingArg { "BosqueAudioFile:asSwingArg : INVALID".warn; ^nil.asSwingArg }
+	
 	storeArgs { ^[ path ]}
 }

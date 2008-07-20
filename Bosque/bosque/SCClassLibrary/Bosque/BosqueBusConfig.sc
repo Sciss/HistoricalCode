@@ -27,6 +27,8 @@ BosqueBusConfig {
 		^super.new.prInit( busCfgID, numInputs, numOutputs );
 	}
 	
+	asSwingArg { "BosqueBusConfig:asSwingArg : INVALID".warn; ^nil.asSwingArg }
+	
 	prInit { arg argID, argNumInputs, argNumOutputs;
 		busCfgID		= argID;
 		forest		= Bosque.default;
