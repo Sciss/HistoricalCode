@@ -32,26 +32,48 @@
 	win.front;\
 )\
 \
+\cf5 // again monitor Track_1, but using a Swing GUI\cf3 \
 \cf2 GUI\cf3 .swing; \cf5 // here we don't need to defer to AppClock\cf3 \
 (\
-	\cf2 var\cf3  slid, upd, rout, win;\
+	\cf2 var\cf3  slid, upd, rout, track;\
 \
 	~doc = \cf2 Bosque\cf3 .default.session;\
-	~track = ~doc.tracks.find( \cf4 \\Track_1\cf3  );\
+	track = ~doc.tracks.find( \cf4 \\Track_1\cf3  );\
 	\
-	win = \cf2 GUI\cf3 .window.new( \cf6 "Env.at"\cf3 , \cf2 Rect\cf3 ( 100, 100, 40, 200 ), resizable: \cf2 false\cf3  );\
-	slid = \cf2 GUI\cf3 .slider.new( win, \cf2 Rect\cf3 ( 5, 5, 20, 190 )).background_( \cf2 Color\cf3 .black ).knobColor_( \cf2 Color\cf3 .white );\
+	~win = \cf2 GUI\cf3 .window.new( \cf6 "Env.at"\cf3 , \cf2 Rect\cf3 ( 100, 100, 60, 200 ), resizable: \cf2 false\cf3  );\
+	slid = \cf2 GUI\cf3 .slider.new( ~win, \cf2 Rect\cf3 ( 5, 5, 20, 190 )).background_( \cf2 Color\cf3 .black ).knobColor_( \cf2 Color\cf3 .white );\
 	upd = \cf2 UpdateListener\cf3 .newFor( ~doc.transport, \{ \cf2 arg\cf3  upd, trnsp, what, param;\
 		what.postcs;\
 		switch( what,\
 		\cf4 \\play\cf3 , \{ rout = fork \{ \cf2 inf\cf3 .do(\{\
-			slid.value = ~track.level ? 0.0;\
+			slid.value = track.level ? 0.0;\
 			0.05.wait;\
 		\})\}\},\
 		\cf4 \\stop\cf3 , \{ rout.stop; rout = \cf2 nil\cf3  \}\
 		);\
 	\});\
 	slid.onClose = \{ rout.stop; rout = \cf2 nil\cf3 ; upd.remove \};\
-	win.front;\
+	~win.front;\
+)\
+\
+\cf5 // Track_2 hinzufuegen\cf3 \
+(\
+	\cf2 var\cf3  slid, upd, rout, track;\
+\
+	~doc = \cf2 Bosque\cf3 .default.session;\
+	track = ~doc.tracks.find( \cf4 \\Track_2\cf3  );\
+	\
+	slid = \cf2 GUI\cf3 .slider.new( ~win, \cf2 Rect\cf3 ( 28, 5, 20, 190 )).background_( \cf2 Color\cf3 .black ).knobColor_( \cf2 Color\cf3 .white );\
+	upd = \cf2 UpdateListener\cf3 .newFor( ~doc.transport, \{ \cf2 arg\cf3  upd, trnsp, what, param;\
+		what.postcs;\
+		switch( what,\
+		\cf4 \\play\cf3 , \{ rout = fork \{ \cf2 inf\cf3 .do(\{\
+			slid.value = track.level ? 0.0;\
+			0.05.wait;\
+		\})\}\},\
+		\cf4 \\stop\cf3 , \{ rout.stop; rout = \cf2 nil\cf3  \}\
+		);\
+	\});\
+	slid.onClose = \{ rout.stop; rout = \cf2 nil\cf3 ; upd.remove \};\
 )\
 }
