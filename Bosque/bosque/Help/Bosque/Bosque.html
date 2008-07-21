@@ -24,6 +24,9 @@ span.Apple-tab-span {white-space:pre}
 <p class="p1">// a SwingOSC server (v0.60) needs to be running</p>
 <p class="p2"><span class="s1">SwingOSC</span>.default.boot;</p>
 <p class="p3"><br></p>
+<p class="p1">// !!! SuperCollider: OSCpathResponder is partly broken in SC 3.2,</p>
+<p class="p1">// hence a recent SVN version of SuperCollider must be used !!!</p>
+<p class="p3"><br></p>
 <p class="p1">// ----- define the hardware setup -----</p>
 <p class="p1">// you see, these are not saved with the sessions</p>
 <p class="p2">(</p>
@@ -35,6 +38,7 @@ span.Apple-tab-span {white-space:pre}
 <p class="p2"><span class="s1">Bosque</span>.masterChanMap<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= [ 0, 1, 2, 3, 4, 5, 6, 7 ];<span class="Apple-converted-space">  </span><span class="s3">// define the master channel indices</span></p>
 <p class="p1">// location of the timebased library</p>
 <p class="p4"><span class="s1">Bosque</span><span class="s4">.timeBasedJar<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= </span>"file:///Users/rutz/Documents/workspace/TimeBased/TimeBased.jar"<span class="s4">;</span></p>
+<p class="p2"><span class="s1">Bosque</span>.createSynthDefs;</p>
 <p class="p2">)</p>
 <p class="p3"><br></p>
 <p class="p1">// ----- launch the app -----</p>
