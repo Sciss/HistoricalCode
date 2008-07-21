@@ -48,7 +48,7 @@ BosqueSession : Object {
 		selectedTracks	= BosqueSessionCollection( false );
 		busConfigs		= BosqueSessionCollection.new;
 		markers			= BosqueTrail.new;
-		markerTrack		= BosqueTrack( -1, markers ).name_( "Markers" );
+		markerTrack		= BosqueTrack( -1, markers ).name_( \Markers );
 		tracks.add( nil, markerTrack );
 //		selectedBusConfigs	= BosqueSessionCollection.new;
 		

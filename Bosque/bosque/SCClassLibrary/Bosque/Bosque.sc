@@ -165,6 +165,10 @@ Bosque : Object {
 	  }, inf ); // swing.doWhenBooted
 	}
 	
+	*track { arg name;
+		^this.default.session.tracks.detect({ arg t; t.name == name });
+	}
+	
 	bootScSynth {
 		var o;
 		

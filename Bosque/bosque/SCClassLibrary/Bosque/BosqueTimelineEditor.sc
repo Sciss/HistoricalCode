@@ -591,7 +591,7 @@ BosqueTimelineEditor : Object {
 			if( flavor === \stakeList, {
 				track = doc.tracks.detect({ arg x; x.trackID >= 0 });
 				if( track.notNil, {
-					[ BosqueAudioRegionStake( Span( 0, afSpan.length ), af.name.asString, track, fileStartFrame: afSpan.start, faf: af )];
+					[ BosqueAudioRegionStake( Span( 0, afSpan.length ), af.name, track, fileStartFrame: afSpan.start, faf: af )];
 				}, {
 					[];
 				});
@@ -673,15 +673,8 @@ BosqueTimelineEditor : Object {
 							while({ ids.indexOf( id ).notNil }, { id = id + 1 });
 							b.busCfgID = id;
 						});
-						if( doc.busConfigs.detect({ arg b2; b2.name == b.name }).notNil, {
-							names	= doc.busConfigs.collect({ arg cfg; cfg.name });
-							id		= 1;
-							name		= b.name ++ "." ++ id;
-							while({ names.detect({ arg n2; n2 == name }).notNil }, {
-								id	 = id + 1;
-								name	= b.name ++ "." ++ id;
-							});
-							b.name	= name;
+						if( doc.busConfigs.find( b.name ).notNil, {
+							b.name	= doc.busConfigs.createUniqueName( b.name.asString ++ "_%", 1 );
 						});
 						doc.busConfigs.add( this, b );
 					});
@@ -691,7 +684,11 @@ BosqueTimelineEditor : Object {
 							id		= 0;
 							while({ ids.indexOf( id ).notNil }, { id = id + 1 });
 							t.trackID	= id;
-							t.name	= "Track " ++ (id + 1);
+//							t.name	= doc.tracks("Track " ++ (id + 1)).asSymbol;
+//							t.name	= doc.tracks.createUniqueName( "Track_%", id + 1 );
+						});
+						if( doc.tracks.find( t.name ).notNil, {
+							t.name	= doc.tracks.createUniqueName( t.name.asString ++ "_%", 1 );
 						});
 						doc.tracks.add( this, t );
 					});
@@ -770,7 +767,7 @@ BosqueTimelineEditor : Object {
 		ids		= doc.tracks.collect({ arg track; track.trackID });
 		id		= 0;
 		while({ ids.indexOf( id ).notNil }, { id = id + 1 });
-		track	= BosqueTrack( id ).name_( "Track " ++ (id + 1) );
+		track	= BosqueTrack( id, doc.trail ).name_( doc.tracks.createUniqueName( "Track_%", id + 1 ));
 		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedTracks, doc.selectedTracks.getAll, false ));
 //		doc.trackMap[ id ] = track;
 		ce.addPerform( BosqueEditAddSessionObjects( this, doc.tracks, [ track ], true )); // ( .onDeath_({ arg edit; track.dispose }););
@@ -850,9 +847,11 @@ BosqueTimelineEditor : Object {
 //"\n N O T   Y E T   I M P L E M E N T E D\n".error;
 		ce		= JSyncCompoundEdit( "Add Func Region" );
 		name		= "Func";
-		// WARNING: Symbol -> asCompileString is broken, doesn't escape apostroph!!!!
+		trail	= doc.trail;
+		// In 2007: WARNING: Symbol -> asCompileString is broken, doesn't escape apostroph!!!!
 		// therefore we force the name to be a String here !!!
-		stake = BosqueFuncRegionStake( span, name.asString, track );
+		// In 2008: Apostroph is properly escaped, we stick to Symbol now!
+		stake	= BosqueFuncRegionStake( span, name.asSymbol, track );
 		clearSpan = Span( span.start, min( span.stop, doc.timeline.span.length ));
 		if( clearSpan.isEmpty.not, {
 			doc.editClearTimeSpan( this, clearSpan, ce, { arg stake; stake.track == track });
@@ -863,7 +862,6 @@ BosqueTimelineEditor : Object {
 //			doc.editInsertTimeSpan( this, insertSpan, ce );
 //		});
 		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, [ stake ], false ));
-		trail = doc.trail;
 		trail.editBegin( ce );
 		trail.editAdd( this, stake, ce );
 		trail.editEnd( ce );

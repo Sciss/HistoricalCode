@@ -55,8 +55,8 @@ BosqueBusConfig {
 		this.changed( \connections );
 	}
 	
-	name_ { arg str;
-		name = str;
+	name_ { arg symbol;
+		name = symbol.asSymbol;
 		this.changed( \name );
 	}
 	

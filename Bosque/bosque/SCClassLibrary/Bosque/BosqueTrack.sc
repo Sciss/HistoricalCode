@@ -37,6 +37,40 @@ BosqueTrack {
 //		java.setID( java.id );
 	}
 	
+	/**
+	 *	@param	frame	the frame at which to query the level.
+	 *					if nil, the current timeline position is used
+	 *	@return	the current level for a given time frame, in the range
+	 *			[ 0 ... 1 ], or nil if no envelope found.
+	 */
+	level { arg frame;
+		var idx, stake, rawLevel;
+		frame = frame ?? { Bosque.default.session.transport.currentFrame };
+		idx   = trail.indexOfPos( frame );
+		if( idx < 0, { idx = (idx + 2).neg });
+		stake = trail.get( idx );
+		while({ stake.notNil }, {
+//			if( stake.isKindOf( BosqueEnvRegionStake ), { ^stake.level( frame )});
+			// goddammit we need a FilterTrail... XXX
+			if( stake.isKindOf( BosqueEnvRegionStake ) and: { stake.track === this }, { ^stake.level( frame )});
+			idx = idx - 1;
+			stake = trail.get( idx );
+		});
+		^nil;
+	}
+	
+	/**
+	 *	@param	frame	the frame at which to query the level.
+	 *					if nil, the current timeline position is used
+	 *	@return	the current level for a given time frame, mapped to the
+	 *			track's control spec, or nil if no envelope found.
+	 */
+	map { arg frame;
+		var raw = this.level( frame );
+		if( raw.isNil or: { ctrlSpec.isNil }, { ^raw });
+		^ctrlSpec.map( raw );
+	}	
+	
 	muted_ { arg bool;
 		if( bool != muted, {
 			muted = bool;
