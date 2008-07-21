@@ -29,6 +29,12 @@ BosqueTimelineSelection : Object {
 		}, \changed );
 	}
 	
+	storeModifiersOn { arg stream;
+		stream << ".span_(";
+		span.storeOn( stream );
+		stream << ")";
+	}
+	
 	span_ {Êarg newSpan;
 		if( newSpan.equals( span ).not, {
 			span = newSpan;

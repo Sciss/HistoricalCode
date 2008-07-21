@@ -21,23 +21,14 @@ BosqueTimeline : Object {
 		java			= JavaObject( "de.sciss.timebased.timeline.BasicTimeline", swing, rate, span );
 	}
 	
-//	storeModifiersOn { arg stream;
-//		stream << ".rate_(";
-//		rate.storeOn( stream );
-//		stream << ")";
-//		stream << ".length_(";
-//		length.storeOn( stream );
-//		stream << ")";
-//		stream << ".position_(";
-//		position.storeOn( stream );
-//		stream << ")";
-//		stream << ".visibleSpan_(";
-//		visibleSpan.storeOn( stream );
-//		stream << ")";
-//		stream << ".selectionSpan_(";
-//		selectionSpan.storeOn( stream );
-//		stream << ")";
-//	}
+	storeModifiersOn { arg stream;
+		stream << ".rate_(";
+		rate.storeOn( stream );
+		stream << ")";
+		stream << ".span_(";
+		span.storeOn( stream );
+		stream << ")";
+	}
 	
 	span_ { arg newSpan;
 		if( newSpan.equals( span ).not, {

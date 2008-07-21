@@ -37,6 +37,11 @@ BosqueTrack {
 //		java.setID( java.id );
 	}
 	
+	// use with care!
+	prSetTrail { arg t;
+		trail = t;
+	}
+	
 	/**
 	 *	@param	frame	the frame at which to query the level.
 	 *					if nil, the current timeline position is used

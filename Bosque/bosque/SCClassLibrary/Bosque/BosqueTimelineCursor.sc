@@ -27,6 +27,12 @@ BosqueTimelineCursor : Object {
 			});
 		}, \changed );
 	}
+
+	storeModifiersOn { arg stream;
+		stream << ".position_(";
+		position.storeOn( stream );
+		stream << ")";
+	}
 	
 	position_ {Êarg newPos;
 		if( newPos != position, {

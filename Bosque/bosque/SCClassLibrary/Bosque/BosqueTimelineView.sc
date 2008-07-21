@@ -51,24 +51,20 @@ BosqueTimelineView : Object {
 		}, \changed );
 	}
 	
-//	storeModifiersOn { arg stream;
-//		stream << ".rate_(";
-//		rate.storeOn( stream );
-//		stream << ")";
-//		stream << ".length_(";
-//		length.storeOn( stream );
-//		stream << ")";
-//		stream << ".position_(";
-//		position.storeOn( stream );
-//		stream << ")";
-//		stream << ".visibleSpan_(";
-//		visibleSpan.storeOn( stream );
-//		stream << ")";
-//		stream << ".selectionSpan_(";
-//		selectionSpan.storeOn( stream );
-//		stream << ")";
-//	}
+	storeModifiersOn { arg stream;
+		stream << ".span_(";
+		span.storeOn( stream );
+		stream << ")";
+		stream << ".doCursor({ arg csr; csr";
+		cursor.storeModifiersOn( stream );
+		stream << "}).doSelection({ arg sel; sel";
+		selection.storeModifiersOn( stream );
+		stream << "})";
+	}
 	
+	doCursor { arg func; func.value( cursor )}
+	doSelection { arg func; func.value( selection )}
+
 	span_ {Êarg newSpan;
 		if( newSpan.equals( span ).not, {
 			span = newSpan;

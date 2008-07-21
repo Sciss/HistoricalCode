@@ -86,6 +86,10 @@ BosqueSession : Object {
 		timeline.storeModifiersOn( stream );
 		stream << "})";
 		stream.nl; stream.tab;
+		stream << ".doTimelineView({ arg tlv; tlv";
+		timelineView.storeModifiersOn( stream );
+		stream << "})";
+		stream.nl; stream.tab;
 		stream << ".doAudioFiles({ arg af; af";
 		audioFiles.storeModifiersOn( stream );
 		stream << "})";
@@ -105,16 +109,30 @@ BosqueSession : Object {
 		stream << ".doVolEnv({ arg tr; tr";
 		volEnv.storeModifiersOn( stream );
 		stream << "})";
+		stream.nl; stream.tab;
+		stream << ".doMarkers({ arg m; m";
+		markers.storeModifiersOn( stream );
+		stream << "})";
 	}
 	
 	// note: this is now operating on a fake object!
 	doTimeline { arg func;
 		func.value( BosqueLegacityTimeline( this ))
 	}
-	
+
+	doTimelineView { arg func; func.value( timelineView )}
 	doTrail { arg func; func.value( trail )}
+	doMarkers { arg func; func.value( markers )}
 	doAudioFiles { arg func; func.value( audioFiles )}
-	doTracks { arg func; func.value( tracks )}
+	doTracks { arg func;
+		func.value( tracks );
+		tracks.do({ arg t;
+			if( t.trackID >= 0, {
+				t.prSetTrail( trail );
+			});
+		});
+	}
+	
 	doBusConfigs { arg func; func.value( busConfigs )}
 	doVolEnv { arg func; func.value( volEnv )}
 	
