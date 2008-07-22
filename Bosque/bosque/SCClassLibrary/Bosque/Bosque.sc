@@ -58,7 +58,8 @@ Bosque : Object {
 	
 	var <subwChannel;
 	
-	var <midiOut;
+	var <midiOut;	// a MIDIOut
+	var <midiIn;	// a MIDIEndPoint
 
 	var <master, <app;
 	
@@ -282,11 +283,14 @@ Bosque : Object {
 		});
 		if( midiInEP.notNil, {
 			MIDIIn.connect( 0, midiInEP );
+			midiIn = midiInEP;
 		});
 
 		CCResponder.init;
 		
 		clpseTrigVal = Collapse({ arg val; chris.sendMsg( '/s_tv', val.linlin( 0, 127, 0.0, 1.0 ))}, 1, AppClock );
+		
+		BosqueMIDIController( this );
 		
 if( createCC, {
 		

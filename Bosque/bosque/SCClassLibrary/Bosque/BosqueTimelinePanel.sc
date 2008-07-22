@@ -35,7 +35,7 @@ BosqueTimelinePanel {
 		var updTrackSel, ggVolLab, jTimeAxis, jMarkAxis;
 		var jTrackPanel, jMarkerEditor, jTimeEditor, markerEditorMon, timelineEditorMon;
 		var jSelTracksEditor, selTracksEditorMon, jTrailViewListener, respTrailViewListener;
-		var jTrackRowHeaderFactory, jStakeRenderer, routLevelStrings, updTimeline;
+		var jTrackRowHeaderFactory, jStakeRenderer, routLevelStrings, updTimelineCursor;
 		
 		doc		= argDoc;
 		forest	= doc.forest;
@@ -170,25 +170,9 @@ BosqueTimelinePanel {
 //				});
 //			});
 //
-		updTimeline = UpdateListener.newFor( doc.timelineView, { arg upd, view, what ... params;
-			switch( what,
-//			\scrolled, {
-//				jTrailView.setVisibleSpan( doc.timelineView.span );
-//				jTimelinePanel.setVisibleSpan( doc.timelineView.span );
-//				this.prSetVolEnv;
-//			},
-			\positioned, {
-//				jTimelinePanel.setPosition( view.cursor.position );
-				this.prUpdateLevelStrings;
-			}
-//			\selected, {
-//				jTimelinePanel.setSelectionSpan( view.selection.span );
-//			},
-//			\rate, {
-//				jTimelinePanel.setRate( doc.timeline.rate );
-//			}
-			);
-		});
+		updTimelineCursor = UpdateListener.newFor( doc.timelineView.cursor, { arg upd, csr, what;
+			this.prUpdateLevelStrings;
+		}, \changed );
 		
 		updSelection = UpdateListener.newFor( doc.selectedRegions, { arg upd, sc, what ... coll;
 			switch( what,
