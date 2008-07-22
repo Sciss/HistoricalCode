@@ -809,7 +809,7 @@ if( DEBUG ) {
 		return trail;
 	}
 	
-	protected abstract BasicTrail createEmptyCopy();
+	public abstract BasicTrail createEmptyCopy();
 
 	/**
 	 *	@param stakes	sorted stakes to cut

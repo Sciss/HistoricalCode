@@ -28,17 +28,15 @@
 package de.sciss.timebased.gui;
 
 import de.sciss.io.Span;
-//import de.sciss.swingosc.EnvelopeView;
 import de.sciss.swingosc.SoundFileView;
 import de.sciss.timebased.BasicTrail;
 import de.sciss.timebased.EnvSegmentStake;
 import de.sciss.timebased.Fade;
-import de.sciss.timebased.ForestAudioRegionStake;
-import de.sciss.timebased.ForestEnvRegionStake;
-import de.sciss.timebased.ForestRegionStake;
-//import de.sciss.timebased.ForestTrack;
 import de.sciss.timebased.RegionStake;
 import de.sciss.timebased.Stake;
+import de.sciss.timebased.bosque.BosqueAudioRegionStake;
+import de.sciss.timebased.bosque.BosqueEnvRegionStake;
+import de.sciss.timebased.bosque.BosqueRegionStake;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -195,8 +193,8 @@ implements StakeRenderer
 		
 		name = (value instanceof RegionStake) ? ((RegionStake) value).name : null;
 		
-		if( value instanceof ForestRegionStake ) {
-			final ForestRegionStake frs = (ForestRegionStake) value;
+		if( value instanceof BosqueRegionStake ) {
+			final BosqueRegionStake frs = (BosqueRegionStake) value;
 			
 //			tv.getTracksTable().getTrackBounds( frs.getTrack(), bounds );
 //			final int offx = (int) ((stakeSpan.start - viewSpan.start) * hscale + 0.5);
@@ -239,11 +237,11 @@ implements StakeRenderer
 			}
 			
 whichRegion:
-			if( frs instanceof ForestEnvRegionStake ) {
-				env	= ((ForestEnvRegionStake) frs).getEnv();
+			if( frs instanceof BosqueEnvRegionStake ) {
+				env	= ((BosqueEnvRegionStake) frs).getEnv();
 				
-			} else if( frs instanceof ForestAudioRegionStake ) {
-				final ForestAudioRegionStake fars = (ForestAudioRegionStake) value;
+			} else if( frs instanceof BosqueAudioRegionStake ) {
+				final BosqueAudioRegionStake fars = (BosqueAudioRegionStake) value;
 				final Span spanClip = stakeSpan.intersection( viewSpan );
 				final Span sfvSpanV = spanClip.shift( -viewSpan.start );
 				final Span sfvSpanF = spanClip.shift( fars.getFileStartFrame() - stakeSpan.start );

@@ -1,14 +1,15 @@
-package de.sciss.timebased;
+package de.sciss.timebased.bosque;
 
+import de.sciss.timebased.Trail;
 import de.sciss.timebased.session.Track;
 
-public class ForestTrack
+public class BosqueTrack
 extends Track
 {
 	private int			id;
 	private final Trail	trail;
 
-	public ForestTrack( Trail trail, int id )
+	public BosqueTrack( Trail trail, int id )
 	{
 		this.trail	= trail;
 		setID( id );

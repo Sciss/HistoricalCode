@@ -26,21 +26,24 @@
  *  Changelog:
  */
 
-package de.sciss.timebased;
+package de.sciss.timebased.bosque;
 
 import java.awt.Color;
 
 import de.sciss.io.Span;
+import de.sciss.timebased.Fade;
+import de.sciss.timebased.RegionStake;
+import de.sciss.timebased.Stake;
 import de.sciss.timebased.session.SessionObject;
 import de.sciss.timebased.session.Track;
 import de.sciss.timebased.session.TrackBased;
 import de.sciss.util.MapManager;
 
-public class ForestRegionStake
+public class BosqueRegionStake
 extends RegionStake
 implements SessionObject, TrackBased
 {
-	protected final ForestTrack	track;
+	protected final BosqueTrack	track;
 	public final Color	 		colr;
 	public final Fade			fadeIn;
 	public final Fade			fadeOut;
@@ -48,7 +51,7 @@ implements SessionObject, TrackBased
 	
 	private final MapManager	map;
 	
-	public ForestRegionStake( Span span, String name, ForestTrack track, Color colr, Fade fadeIn, Fade fadeOut, float gain )
+	public BosqueRegionStake( Span span, String name, BosqueTrack track, Color colr, Fade fadeIn, Fade fadeOut, float gain )
 	{
 		super( span, name );
 		
@@ -65,7 +68,7 @@ implements SessionObject, TrackBased
 		map				= new MapManager( this );
 	}
 	
-	public ForestRegionStake( ForestRegionStake orig )
+	public BosqueRegionStake( BosqueRegionStake orig )
 	{
 		this( orig.span, orig.name, orig.track, orig.colr, orig.fadeIn, orig.fadeOut, orig.gain );
 	}
@@ -74,7 +77,7 @@ implements SessionObject, TrackBased
 
 	public Stake duplicate()
 	{
-		return new ForestRegionStake( this );
+		return new BosqueRegionStake( this );
 	}
 
 //	public void dispose()
@@ -95,16 +98,16 @@ implements SessionObject, TrackBased
 	
 	public Stake replaceStart( long newStart )
 	{
-		return new ForestRegionStake( new Span( newStart, span.stop ), name, track, colr, fadeIn, fadeOut, gain );
+		return new BosqueRegionStake( new Span( newStart, span.stop ), name, track, colr, fadeIn, fadeOut, gain );
 	}
 	
 	public Stake replaceStop( long newStop )
 	{
-		return new ForestRegionStake( new Span( span.start, newStop ), name, track, colr, fadeIn, fadeOut, gain );
+		return new BosqueRegionStake( new Span( span.start, newStop ), name, track, colr, fadeIn, fadeOut, gain );
 	}
 	
 	public Stake shiftVirtual( long delta )
 	{
-		return new ForestRegionStake( span.shift( delta ), name, track, colr, fadeIn, fadeOut, gain );
+		return new BosqueRegionStake( span.shift( delta ), name, track, colr, fadeIn, fadeOut, gain );
 	}
 }
