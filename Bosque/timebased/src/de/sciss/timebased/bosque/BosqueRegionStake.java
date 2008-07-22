@@ -31,7 +31,6 @@ package de.sciss.timebased.bosque;
 import java.awt.Color;
 
 import de.sciss.io.Span;
-import de.sciss.timebased.Fade;
 import de.sciss.timebased.RegionStake;
 import de.sciss.timebased.Stake;
 import de.sciss.timebased.session.SessionObject;

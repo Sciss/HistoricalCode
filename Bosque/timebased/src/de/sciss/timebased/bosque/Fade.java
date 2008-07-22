@@ -1,4 +1,4 @@
-package de.sciss.timebased;
+package de.sciss.timebased.bosque;
 
 public class Fade {
 	public static final int TYPE_LINEAR	= 0;

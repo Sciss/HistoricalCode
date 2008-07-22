@@ -6,8 +6,11 @@ import de.sciss.timebased.session.Track;
 public class BosqueTrack
 extends Track
 {
+	public static final int	OWNER_LEVEL	= 0x0001;
+	
 	private int			id;
 	private final Trail	trail;
+	private String		levelString;
 
 	public BosqueTrack( Trail trail, int id )
 	{
@@ -23,4 +26,12 @@ extends Track
 	
 	public int getID() { return id; }
 	public Trail getTrail() { return trail; }
+	
+	public void setLevelString( /* Object source,*/ String text )
+	{
+		levelString = text;
+		getMap().dispatchOwnerModification( this, OWNER_LEVEL, text );
+	}
+	
+	public String getLevelString() { return levelString; }
 }

@@ -32,20 +32,19 @@ import java.awt.Color;
 
 import de.sciss.io.Span;
 import de.sciss.swingosc.SoundFileView;
-import de.sciss.timebased.Fade;
 import de.sciss.timebased.Stake;
 
 /**
  *  @version	0.12, 13-Aug-07
  *	@author		Hanns Holger Rutz
  */
-public class BosqueAudioRegionStake
+public class AudioRegionStake
 extends BosqueRegionStake
 {
 	private final SoundFileView	sfv;
 	private final long			fileStartFrame;
 	
-	public BosqueAudioRegionStake( Span span, String name, BosqueTrack track, Color colr, Fade fadeIn, Fade fadeOut, float gain, long fileStartFrame, SoundFileView sfv )
+	public AudioRegionStake( Span span, String name, BosqueTrack track, Color colr, Fade fadeIn, Fade fadeOut, float gain, long fileStartFrame, SoundFileView sfv )
 	{
 		super( span, name, track, colr, fadeIn, fadeOut, gain );
 		this.sfv			= sfv;
@@ -62,14 +61,14 @@ extends BosqueRegionStake
 		return fileStartFrame;
 	}
 
-	public BosqueAudioRegionStake( BosqueAudioRegionStake orig )
+	public AudioRegionStake( AudioRegionStake orig )
 	{
 		this( orig.span, orig.name, orig.track, orig.colr, orig.fadeIn, orig.fadeOut, orig.gain, orig.fileStartFrame, orig.sfv );
 	}
 
 	public Stake duplicate()
 	{
-		return new BosqueAudioRegionStake( this );
+		return new AudioRegionStake( this );
 	}
 
 //	public void dispose()
@@ -79,16 +78,16 @@ extends BosqueRegionStake
 	
 	public Stake replaceStart( long newStart )
 	{
-		return new BosqueAudioRegionStake( new Span( newStart, span.stop ), name, track, colr, fadeIn, fadeOut, gain, fileStartFrame + (newStart - span.start), sfv );
+		return new AudioRegionStake( new Span( newStart, span.stop ), name, track, colr, fadeIn, fadeOut, gain, fileStartFrame + (newStart - span.start), sfv );
 	}
 	
 	public Stake replaceStop( long newStop )
 	{
-		return new BosqueAudioRegionStake( new Span( span.start, newStop ), name, track, colr, fadeIn, fadeOut, gain, fileStartFrame, sfv );
+		return new AudioRegionStake( new Span( span.start, newStop ), name, track, colr, fadeIn, fadeOut, gain, fileStartFrame, sfv );
 	}
 	
 	public Stake shiftVirtual( long delta )
 	{
-		return new BosqueAudioRegionStake( span.shift( delta ), name, track, colr, fadeIn, fadeOut, gain, fileStartFrame, sfv );
+		return new AudioRegionStake( span.shift( delta ), name, track, colr, fadeIn, fadeOut, gain, fileStartFrame, sfv );
 	}
 }

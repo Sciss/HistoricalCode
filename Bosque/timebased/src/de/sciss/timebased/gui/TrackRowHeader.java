@@ -72,7 +72,7 @@ import de.sciss.util.MapManager;
  *	carry insert effects and the like.
  *
  *  @author		Hanns Holger Rutz
- *  @version	0.75, 18-Jul-08
+ *  @version	0.75, 22-Jul-08
  */
 public class TrackRowHeader
 extends JPanel
@@ -205,13 +205,16 @@ implements DynamicListening, Disposable
 //		this.addMouseListener( ml );
 		
 		trackListener = new MapManager.Listener() {
-			public void mapChanged( MapManager.Event e ) { /* ignore */ }
+			public void mapChanged( MapManager.Event e ) {
+				trackMapChanged( e );
+			}
 		
 			public void mapOwnerModified( MapManager.Event e )
 			{
 				if( e.getOwnerModType() == SessionObject.OWNER_RENAMED ) {
 					checkTrackName();
 				}
+				trackChanged( e );
 			}
 		};
 
@@ -229,6 +232,22 @@ implements DynamicListening, Disposable
 			public void sessionObjectChanged( SessionCollection.Event e ) { /* ignore */ }
 			public void sessionObjectMapChanged( SessionCollection.Event e ) { /* ignore */ }
 		};
+	}
+	
+	/**
+	 *	@param e
+	 */
+	protected void trackChanged( MapManager.Event e )
+	{
+		// nada
+	}
+
+	/**
+	 *	@param e
+	 */
+	protected void trackMapChanged( MapManager.Event e )
+	{
+		// nada
 	}
 	
 	protected static String getResourceString( String key )

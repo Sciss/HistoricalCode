@@ -27,9 +27,11 @@
  *		06-Jul-08	created
  */
 
-package de.sciss.timebased;
+package de.sciss.timebased.bosque;
 
 import de.sciss.io.Span;
+import de.sciss.timebased.BasicStake;
+import de.sciss.timebased.Stake;
 
 /**
  * 	Segment of an envelope (breakpoint function). Note that

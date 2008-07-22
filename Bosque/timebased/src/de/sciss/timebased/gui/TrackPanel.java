@@ -27,6 +27,7 @@ implements TracksTable
 	private final JPanel				allHeaderPanel;
 	private final JPanel				trackHeaderPanel;
     protected final TrackRowHeader		markTrackHeader;
+    private TrackRowHeaderFactory		trhf				= new DefaultTrackRowHeaderFactory();
     
     private SessionCollection			activeTracks		= null;
     private MutableSessionCollection	selectedTracks		= null;
@@ -182,7 +183,8 @@ newLp:	for( int ch = 0; ch < newNumWaveTracks; ch++ ) {
 			}
 			
 //			chanHead = new TransmitterRowHeader( t, doc.getTracks(), doc.getMutableSelectedTracks(), doc.getUndoManager() );
-			trackRowHead = new TrackRowHeader();
+//			trackRowHead = new TrackRowHeader();
+			trackRowHead = trhf.createRowHeader( t );
 			trackRowHead.setTrack( t, activeTracks, selectedTracks );
 			trackRowHead.setEditor( tracksEditor );
 			collTrackHeaders.add( trackRowHead );

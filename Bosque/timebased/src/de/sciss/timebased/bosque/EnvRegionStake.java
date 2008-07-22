@@ -33,7 +33,6 @@ import java.io.IOException;
 
 import de.sciss.io.Span;
 import de.sciss.timebased.BasicTrail;
-import de.sciss.timebased.Fade;
 import de.sciss.timebased.RegionTrail;
 import de.sciss.timebased.Stake;
 import de.sciss.timebased.Trail;
@@ -42,14 +41,14 @@ import de.sciss.timebased.Trail;
  *  @version	0.10, 06-Jul-08
  *	@author		Hanns Holger Rutz
  */
-public class BosqueEnvRegionStake
+public class EnvRegionStake
 extends BosqueRegionStake
 implements Trail.Listener
 {
 	private final BasicTrail env;  // actually BasicTrail<EnvSegmentStake>
 	private RegionTrail t;
 	
-	public BosqueEnvRegionStake( Span span, String name, BosqueTrack track, Color colr, Fade fadeIn, Fade fadeOut, float gain, BasicTrail env )
+	public EnvRegionStake( Span span, String name, BosqueTrack track, Color colr, Fade fadeIn, Fade fadeOut, float gain, BasicTrail env )
 	{
 		super( span, name, track, colr, fadeIn, fadeOut, gain );
 		this.env	= env;
@@ -76,7 +75,7 @@ implements Trail.Listener
 		this.t = t;
 	}
 
-	public BosqueEnvRegionStake( BosqueEnvRegionStake orig )
+	public EnvRegionStake( EnvRegionStake orig )
 	{
 		this( orig.span, orig.name, orig.track, orig.colr, orig.fadeIn, orig.fadeOut, orig.gain, orig.getEnvCopy() );
 	}
@@ -100,7 +99,7 @@ implements Trail.Listener
 
 	public Stake duplicate()
 	{
-		return new BosqueEnvRegionStake( this );
+		return new EnvRegionStake( this );
 	}
 
 //	public void dispose()
@@ -119,7 +118,7 @@ implements Trail.Listener
 		catch( IOException e1 ) {	// never happens
 			e1.printStackTrace();
 		}
-		return new BosqueEnvRegionStake( spanNew, name, track, colr, fadeIn, fadeOut, gain, envNew );
+		return new EnvRegionStake( spanNew, name, track, colr, fadeIn, fadeOut, gain, envNew );
 	}
 	
 	public Stake replaceStop( long newStop )
@@ -132,11 +131,11 @@ implements Trail.Listener
 		catch( IOException e1 ) {	// never happens
 			e1.printStackTrace();
 		}
-		return new BosqueEnvRegionStake( spanNew, name, track, colr, fadeIn, fadeOut, gain, envNew );
+		return new EnvRegionStake( spanNew, name, track, colr, fadeIn, fadeOut, gain, envNew );
 	}
 	
 	public Stake shiftVirtual( long delta )
 	{
-		return new BosqueEnvRegionStake( span.shift( delta ), name, track, colr, fadeIn, fadeOut, gain, getEnvCopy() );
+		return new EnvRegionStake( span.shift( delta ), name, track, colr, fadeIn, fadeOut, gain, getEnvCopy() );
 	}
 }
