@@ -109,36 +109,15 @@ implements Trail.Listener, TimelineView.Listener, EventManager.Processor,
 		this( null, tlv );
 	}
 	
+	public void setStakeRenderer( StakeRenderer sr )
+	{
+		stakeRenderer = sr;
+	}
+	
 	public StakeRenderer getStakeRenderer()
 	{
 		return stakeRenderer;
 	}
-	
-//	public void addTrack( ForestTrack ft )
-//	{
-//		tracks.add( ft );
-//		recalcTrackBounds();
-//		triggerRedisplay();
-//	}
-//	
-//	public void removeTrack( ForestTrack ft )
-//	{
-//		tracks.remove( ft );
-//		recalcTrackBounds();
-//		triggerRedisplay();
-//	}
-	
-//	private void recalcTrackBounds()
-//	{
-////		float y = 0f;
-////		ForestTrack ft;
-////		for( int i = 0; i < tracks.size(); i++ ) {
-////			ft = (ForestTrack) tracks.get( i );
-////			ft.y = y;
-////			y += ft.height;
-////		}
-////		trackVScale = y == 0f ? 1f : (1f / y);
-//	}
 	
 	public void setTrail( Trail t )
 	{
