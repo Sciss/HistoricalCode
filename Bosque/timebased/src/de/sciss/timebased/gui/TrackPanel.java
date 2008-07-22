@@ -115,6 +115,11 @@ implements TracksTable
 		tlp.setTracks( activeTracks, selectedTracks );
 	}
 	
+	public void setTrackRowHeaderFactory( TrackRowHeaderFactory trhf )
+	{
+		this.trhf = trhf;
+	}
+	
 	public void dispose()
 	{
 		setTracks( null, null );
