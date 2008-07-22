@@ -31,6 +31,7 @@ import de.sciss.io.Span;
 import de.sciss.swingosc.SoundFileView;
 import de.sciss.timebased.BasicTrail;
 import de.sciss.timebased.Stake;
+import de.sciss.timebased.Trail;
 import de.sciss.timebased.gui.DefaultStakeRenderer;
 import de.sciss.timebased.gui.TrailView;
 
@@ -42,6 +43,7 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.TexturePaint;
 import java.awt.image.BufferedImage;
+import java.awt.event.MouseEvent;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
@@ -95,6 +97,67 @@ extends DefaultStakeRenderer
 	public void setYZoom( float val )
 	{
 		yZoom = val;
+	}
+	
+	public int getHitIndex( Stake s, long frame, float innerLevel,
+		 Rectangle stakeBounds, MouseEvent me )
+	{
+		if( !((me.getID() == MouseEvent.MOUSE_PRESSED) &&
+		      s instanceof EnvRegionStake) ) {
+			return super.getHitIndex( s, frame, innerLevel, stakeBounds, me );
+		}
+		
+		final EnvRegionStake ers = (EnvRegionStake) s;
+		final Trail		t		= ers.getEnv();
+		frame -= ers.getSpan().start;
+		final double	hScal	= (double) ers.getSpan().getLength() / stakeBounds.width;
+//		final Span		checka	= new Span( frame - (long) (2 * hScal), frame + (long) (2 * hScal) );
+//		final List		checkaL	= t.getRange( checka, true );
+		int				startIdx = t.indexOf( frame - (long) (3 * hScal), true );
+		if( startIdx < 0 ) startIdx = Math.max( 0, -(startIdx + 2) );
+		int				stopIdx	=  t.indexOf( frame + (long) (3 * hScal), true );
+		if( stopIdx < 0 ) stopIdx = Math.max( 0, -(stopIdx + 2) );
+		final float		vScal	= 1.0f / stakeBounds.height;
+//System.out.println( "checkin points " + startIdx + " thru " + stopIdx + "; hScal " + hScal + " (since length = " + ers.getSpan().getLength() + "; and width = " + stakeBounds.width + ") ; vScal " + vScal );
+		
+		double d1, startCost, stopCost = 0.0;
+		double bestCost = 20; // bit more than 3*3 + 3*3
+		float f1;
+		int hitIdx = -1;
+
+//System.out.println( "frame is " + frame + "; innerLevel is " + innerLevel );
+		                    
+		for( int i = startIdx; i <= stopIdx; i++ ) {
+			final EnvSegmentStake ess = (EnvSegmentStake) t.get( i, true );
+//System.out.println( "index " + i + "; ess.span = " + ess.getSpan() );
+			if( i == startIdx ) {
+				d1 = (ess.getSpan().start - frame) / hScal;
+				f1 = (ess.getStartLevel() - innerLevel) / vScal;
+//System.out.println( "  start d1 = " + d1 + "; f1 = " + f1 );
+				startCost = d1 * d1 + f1 * f1;
+			} else {
+				startCost = stopCost;
+			}
+			d1 = (ess.getSpan().stop - frame) / hScal;
+			f1 = (ess.getStopLevel() - innerLevel) / vScal;
+//System.out.println( "  stop d1 = " + d1 + "; f1 = " + f1 );
+			stopCost = d1 * d1 + f1 * f1;
+			if( startCost < stopCost ) {
+				if( startCost < bestCost ) {
+//System.out.println( " => startCost = " + startCost );
+					hitIdx = i;
+					bestCost = startCost;
+				}
+			} else {
+				if( stopCost < bestCost ) {
+//System.out.println( " => stopCost = " + stopCost );
+					hitIdx = i + 1;
+					stopCost = startCost;
+				}
+			}
+		}
+
+		return hitIdx;
 	}
 	
 	protected void customizeRendererComponent( TrailView tv, Stake value )

@@ -10,6 +10,7 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.TexturePaint;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
@@ -131,5 +132,11 @@ implements StakeRenderer
 		in.bottom = 0;
 		in.right  = 0;
 		return in;
+	}
+
+	public int getHitIndex( Stake s, long frame, float innerLevel,
+		 Rectangle stakeBounds, MouseEvent me )
+	{
+		return -1;
 	}
 }

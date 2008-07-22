@@ -41,7 +41,7 @@ implements TrailView.Listener, Disposable
 	// ------------ TrailView.Listener interface ------------
 	
 	public void mouseAction( MouseEvent e, long frame, float level, float innerLevel,
-							 Track track, Stake stake )
+							 int hitIdx, Track track, Stake stake )
 	{
 		final String action;
 		
@@ -64,7 +64,7 @@ implements TrailView.Listener, Disposable
 		final int stakeIdx = (stake != null) ? view.getTrail().indexOf( stake, true ) : -1;
 		
 		master.reply( "/trail", oscID, "mouse", action, frame, level, innerLevel,
-		              trackIdx, stakeIdx,
+		              hitIdx, trackIdx, stakeIdx,
 		              e.getX(), e.getY(), e.getModifiers(),
 		              e.getButton(), e.getClickCount() );
 	}

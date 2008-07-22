@@ -32,10 +32,14 @@ import de.sciss.timebased.Stake;
 import java.awt.Component;
 import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
 
 public interface StakeRenderer 
 {
 	public Component getStakeRendererComponent( TrailView tv, Stake value, boolean selected,
 												double hscale, Rectangle bounds );
 	public Insets getInsets( Insets in, TrailView tv, Stake value );
+
+	public int getHitIndex( Stake s, long frame, float innerLevel,
+							Rectangle stakeBounds, MouseEvent me );
 }

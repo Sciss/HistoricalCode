@@ -342,12 +342,13 @@ implements Trail.Listener, TimelineView.Listener, EventManager.Processor,
 	public void processEvent( BasicEvent be )
 	{
 		final Event		e		= (Event) be;
-		final double	hscale	= (double) timelineVis.getLength() / Math.max( 1, getWidth() );
-		final long		frame	= (long) (e.me.getX() * hscale + 0.5) + timelineVis.start;
+		final double	hscale	= (double) getWidth() / timelineVis.getLength();
+		final long		frame	= (long) (e.me.getX() / hscale + 0.5) + timelineVis.start;
 		final float		level;
 		final float		innerLevel;
 		Track			track	= null;
 		Stake			stake	= null;
+		int				hitIdx	= -1;
 	
 findTrack:
 		if( tracksTable != null ) {
@@ -373,8 +374,14 @@ findStake:
 			level	= 1.0f - ((float) (e.me.getY() - stakeBounds.y) / (Math.max( 1, stakeBounds.height - 1)) );
 			if( stake != null ) {
 				stakeRenderer.getInsets( stakeInsets, this, stake );
-				innerLevel	= 1.0f - ((float) (e.me.getY() - (stakeBounds.y + stakeInsets.top)) /
-					(Math.max( 1, stakeBounds.height - (stakeInsets.top + stakeInsets.bottom) - 1)) );
+				final int offx	   = (int) ((stake.getSpan().start - timelineVis.start) * hscale + 0.5);
+				stakeBounds.x     += offx + stakeInsets.left;
+				stakeBounds.width  = (int) ((stake.getSpan().stop - timelineVis.start) * hscale + 0.5) - offx - (stakeInsets.left + stakeInsets.right);
+				stakeBounds.y      += stakeInsets.top;
+				stakeBounds.height -= stakeInsets.top + stakeInsets.bottom;
+				innerLevel	= 1.0f - ((float) (e.me.getY() - stakeBounds.y) /
+					(Math.max( 1, stakeBounds.height - 1)) );
+				hitIdx = stakeRenderer.getHitIndex( stake, frame, innerLevel, stakeBounds, e.me );
 			} else {
 				innerLevel	= level;
 			}
@@ -389,10 +396,10 @@ findStake:
 				innerLevel	= level;
 			}
 		}
-		
+				
 		for( int i = 0; i < elm.countListeners(); i++ ) {
 			final Listener l = (Listener) elm.getListener( i );
-			l.mouseAction( e.me, frame, level, innerLevel, track, stake );
+			l.mouseAction( e.me, frame, level, innerLevel, hitIdx, track, stake );
 		}
 	}
 
@@ -400,7 +407,8 @@ findStake:
 	
 	public interface Listener
 	{
-		public void mouseAction( MouseEvent e, long frame, float level, float innerLevel, Track t, Stake s );
+		public void mouseAction( MouseEvent e, long frame, float level, float innerLevel,
+								 int hitIdx, Track t, Stake s );
 	}
 	
 	private static class Event
