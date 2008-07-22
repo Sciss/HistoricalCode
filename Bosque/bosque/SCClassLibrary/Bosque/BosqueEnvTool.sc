@@ -4,7 +4,7 @@
  
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.12, 20-Jul-08
+ *	@version	0.12, 23-Jul-08
  */
 BosqueEnvTool {
 	var hndlExtent	= 13;
@@ -23,8 +23,8 @@ BosqueEnvTool {
 	
 	mousePressed { arg e;
 		var oldPressedStake, track, trackPos, coll, edit, level;
-		var ce, frame, env, idxHit, hitStake;
-		var splitStake1, splitStake2, modSpan;
+		var ce, frame, env, hitIdx, hitStake1, hitStake2;
+		var newStake1, newStake2, modSpan;
 
 		trackPos			= e.frame;
 		track			= e.track;
@@ -36,27 +36,47 @@ BosqueEnvTool {
 		frame	= trackPos - pressedStake.span.start;
 		env		= pressedStake.env;
 
-		if( (e.clickCount == 2) and: { oldPressedStake === pressedStake }, {
+		if( e.isAltDown, {
+//			e.hitIdx.postln;
+			hitIdx = e.hitIdx;
+			if( (hitIdx > 0) and: {hitIdx < env.numStakes }, {
+				hitStake1 = env.get( hitIdx - 1 );
+				hitStake2 = env.get( hitIdx );
+				newStake1	 = hitStake1.replaceStopWithLevel( hitStake2.span.stop, hitStake2.stopLevel );
+				ce		= JSyncCompoundEdit( "Edit Envelope" );
+				env.editBegin( ce );
+				env.editRemoveAll( this, [ hitStake1, hitStake2 ], ce );
+				env.editAdd( this, newStake1, ce );
+				env.editEnd( ce );
+				doc.undoManager.addEdit( ce.performAndEnd );
+				modSpan		= newStake1.span.shift( pressedStake.span.start );
+				doc.trail.modified( this, modSpan );
+			});
+			
+		}, { if( (e.clickCount == 2) and: { oldPressedStake === pressedStake }, {
 //			segmStake		= BosqueEnvSegmentStake.sc( frame, level );
-			idxHit		= env.indexOf( frame );
-			if( idxHit >= -1, { ^this });	// don't put another point on dem una same position
-			hitStake		= env.get( (idxHit + 2).neg );
-			Assertion({ hitStake.span.containsPos( frame )});
-			splitStake1	= hitStake.replaceStopWithLevel( frame, level );
-			splitStake2	= hitStake.replaceStartWithLevel( frame, level );
+//			hitIdx		= e.hitIdx; // env.indexOf( frame );
+//			if( hitIdx < 0, {
+				hitIdx = env.indexOf( frame );
+//			});
+			if( hitIdx >= -1, { ^this });	// don't put another point on dem una same position
+			hitStake1		= env.get( (hitIdx + 2).neg );
+			Assertion({ hitStake1.span.containsPos( frame )});
+			newStake1		= hitStake1.replaceStopWithLevel( frame, level );
+			newStake2		= hitStake1.replaceStartWithLevel( frame, level );
 //			segmStake		= BosqueEnvSegmentStake.sc( span!!!, level, stopLevel!!! );
 			ce			= JSyncCompoundEdit( "Edit Envelope" );
 			env.editBegin( ce );
-			env.editRemove( this, hitStake, ce );
-			env.editAddAll( this, [ splitStake1, splitStake2 ], ce );
+			env.editRemove( this, hitStake1, ce );
+			env.editAddAll( this, [ newStake1, newStake2 ], ce );
 			env.editEnd( ce );
 			doc.undoManager.addEdit( ce.performAndEnd );
-			modSpan		= splitStake1.span.union( splitStake2.span ).shift( pressedStake.span.start );
+			modSpan		= hitStake1.span.shift( pressedStake.span.start );
 //			modSpan.postcs;
 //			doc.trail.prDispatchModification( this, modSpan );
 			doc.trail.modified( this, modSpan );
 //			"Yepp".postln;
-		});
+		})});
 
 //		if( edit.notNil, {
 //			doc.undoManager.addEdit( edit );

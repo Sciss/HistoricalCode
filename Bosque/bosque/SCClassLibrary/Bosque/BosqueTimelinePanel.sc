@@ -93,10 +93,10 @@ BosqueTimelinePanel {
 		
 		respTrailViewListener = ScissOSCPathResponder( forest.swing.addr, [ '/trail', jTrailView.id, \mouse ], {
 			arg time, resp, msg;
-			var cmd, oscID, mouse, action, frame, level, innerLevel, trackIdx, stakeIdx, x, y, modifiers, button, clickCount;
+			var cmd, oscID, mouse, action, frame, level, innerLevel, hitIdx, trackIdx, stakeIdx, x, y, modifiers, button, clickCount;
 			var e;
 			
-			#cmd, oscID, mouse, action, frame, level, innerLevel, trackIdx, stakeIdx, x, y, modifiers, button, clickCount = msg;
+			#cmd, oscID, mouse, action, frame, level, innerLevel, hitIdx, trackIdx, stakeIdx, x, y, modifiers, button, clickCount = msg;
 			
 			e = Event( 13 );
 			e[ \x ] = x;
@@ -112,6 +112,7 @@ BosqueTimelinePanel {
 			e[ \frame ] = frame;
 			e[ \level ] = level;
 			e[ \innerLevel ] = innerLevel;
+			e[ \hitIdx ] = hitIdx;
 			e[ \track ] = doc.tracks.at( trackIdx );
 			e[ \stake ] = doc.trail.get( stakeIdx );
 			
