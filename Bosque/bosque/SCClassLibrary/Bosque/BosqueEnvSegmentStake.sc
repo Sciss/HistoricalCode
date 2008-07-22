@@ -23,7 +23,7 @@ BosqueEnvSegmentStake : Stake {
 		stopLevel		= argStopLevel;
 		shape		= argShape;
 		curve		= argCurve;
-		java			= JavaObject( "de.sciss.timebased.EnvSegmentStake", Bosque.default.swing,
+		java			= JavaObject( "de.sciss.timebased.bosque.EnvSegmentStake", Bosque.default.swing,
 								span, startLevel, stopLevel, shape, curve );
 	}
 	

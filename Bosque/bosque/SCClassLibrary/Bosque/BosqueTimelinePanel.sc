@@ -4,7 +4,7 @@
  
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.19, 20-Jul-08
+ *	@version	0.19, 22-Jul-08
  */
 BosqueTimelinePanel {
 	var <view;
@@ -35,6 +35,7 @@ BosqueTimelinePanel {
 		var updTrackSel, ggVolLab, jTimeAxis, jMarkAxis;
 		var jTrackPanel, jMarkerEditor, jTimeEditor, markerEditorMon, timelineEditorMon;
 		var jSelTracksEditor, selTracksEditorMon, jTrailViewListener, respTrailViewListener;
+		var jTrackRowHeaderFactory, jStakeRenderer, routLevelStrings, updTimeline;
 		
 		doc		= argDoc;
 		forest	= doc.forest;
@@ -46,6 +47,10 @@ BosqueTimelinePanel {
 //			.horizontalScrollBarShown_( \never );
 		jTimelinePanel = JavaObject( "de.sciss.timebased.gui.TimelinePanel", forest.swing, doc.timelineView );
 		jTrackPanel	 = JavaObject( "de.sciss.timebased.gui.TrackPanel", forest.swing, jTimelinePanel );
+		jTrackRowHeaderFactory = JavaObject( "de.sciss.timebased.bosque.BosqueTrackRowHeaderFactory", forest.swing );
+		jTrackRowHeaderFactory.setLevelFont( JFont( "Arial Narrow", 12 ));
+		jTrackRowHeaderFactory.setLevelColor( Color.new255( 62, 100, 85 ));
+		jTrackPanel.setTrackRowHeaderFactory( jTrackRowHeaderFactory );
 		jSelTracksEditor = JavaObject( "de.sciss.timebased.net.NetSessionCollectionEditor", forest.swing, forest.master, doc.tracks );
 		jSelTracksEditor.setID( doc.selectedTracks.java.id );
 		selTracksEditorMon = BosqueNetEditorMonitor( forest.swing, '/coll', doc.selectedTracks.java.id, doc.undoManager,
@@ -77,6 +82,8 @@ BosqueTimelinePanel {
 		jTrailView = JavaObject( "de.sciss.timebased.gui.TrailView", forest.swing, jTimelinePanel, doc.timelineView );
 //		jTrailView.setFont( fntSmall );
 		jTrailView.setTrail( doc.trail );
+		jStakeRenderer = JavaObject( "de.sciss.timebased.bosque.BosqueStakeRenderer", forest.swing ); 
+		jTrailView.setStakeRenderer( jStakeRenderer );
 //		jTimelinePanel.add( jTrailView );
 		jTrackPanel.setMainView( jTrailView );
 		jTrailView.setTracksTable( jTrackPanel );
@@ -163,23 +170,25 @@ BosqueTimelinePanel {
 //				});
 //			});
 //
-//		updTimeline = UpdateListener.newFor( doc.timelineView, { arg upd, view, what ... params;
-//			switch( what,
+		updTimeline = UpdateListener.newFor( doc.timelineView, { arg upd, view, what ... params;
+			switch( what,
 //			\scrolled, {
 //				jTrailView.setVisibleSpan( doc.timelineView.span );
-////				jTimelinePanel.setVisibleSpan( doc.timelineView.span );
+//				jTimelinePanel.setVisibleSpan( doc.timelineView.span );
 //				this.prSetVolEnv;
-////			},
-////			\positioned, {
-////				jTimelinePanel.setPosition( view.cursor.position );
-////			},
-////			\selected, {
-////				jTimelinePanel.setSelectionSpan( view.selection.span );
-////			},
-////			\rate, {
-////				jTimelinePanel.setRate( doc.timeline.rate );
-//			});
-//		});
+//			},
+			\positioned, {
+//				jTimelinePanel.setPosition( view.cursor.position );
+				this.prUpdateLevelStrings;
+			}
+//			\selected, {
+//				jTimelinePanel.setSelectionSpan( view.selection.span );
+//			},
+//			\rate, {
+//				jTimelinePanel.setRate( doc.timeline.rate );
+//			}
+			);
+		});
 		
 		updSelection = UpdateListener.newFor( doc.selectedRegions, { arg upd, sc, what ... coll;
 			switch( what,
@@ -196,19 +205,23 @@ BosqueTimelinePanel {
 			\play, {
 //				jTimelinePanel.setPosition( param1 );
 				jTimelinePanel.play( param1, param2 );
+				routLevelStrings = this.prStartRoutLevelStrings;
 			},
 			\stop, {
 //				("jTimelinePanel.stop").postln;
 				jTimelinePanel.stop;
+				routLevelStrings.stop; routLevelStrings = nil;
 			},
 			\pause, {
-				"---pause".postln;
+//				"---pause".postln;
 				jTimelinePanel.stop;
+				routLevelStrings.stop; routLevelStrings = nil;
 			},
 			\resume, {
-				"---resume".postln;
+//				"---resume".postln;
 //				jTimelinePanel.setPosition( param1 );
 				jTimelinePanel.play( param1, param2 );
+				routLevelStrings = this.prStartRoutLevelStrings;
 			});
 		});
 
@@ -261,6 +274,20 @@ BosqueTimelinePanel {
 		ggVolEnv.mouseUpAction = { arg ... args; ggVolLab.string = ""; this.prMouseReleasedVolEnv( Bosque.createMouseEvent( *args ))};
 	}
 	
+	prStartRoutLevelStrings {
+		^{
+			inf.do({
+				this.prUpdateLevelStrings;
+				0.03.wait;
+			});
+		}.fork;
+	}
+	
+	prUpdateLevelStrings {
+		var frame = doc.transport.currentFrame;
+		doc.tracks.do({ arg t; if( t.trackID >= 0, { t.updateLevelString( frame )})});
+	}
+
 //	prRecalcTrackBounds {
 //		var y = 0;
 //		doc.tracks.do({ arg t; t.y = y; y = y + t.height; /* [ t, t.y, t.height ].postln */});

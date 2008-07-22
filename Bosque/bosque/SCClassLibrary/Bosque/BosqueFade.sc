@@ -17,7 +17,7 @@ BosqueFade {
 	}
 	
 	asSwingArg {
-		^([ '[', '/new', "de.sciss.timebased.Fade", [ \lin ].indexOf( type ) ? 0, numFrames, curve, ']' ]);
+		^([ '[', '/new', "de.sciss.timebased.bosque.Fade", [ \lin ].indexOf( type ) ? 0, numFrames, curve, ']' ]);
 	}
 	
 	storeArgs { ^[ type, numFrames, curve ]}

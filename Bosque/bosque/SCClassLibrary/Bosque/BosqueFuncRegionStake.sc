@@ -21,7 +21,7 @@ BosqueFuncRegionStake : BosqueRegionStake {
 		modTrack		= argModTrack;
 		position		= argPosition;
 					// not abstract in java!
-		java			= JavaObject( "de.sciss.timebased.ForestRegionStake", Bosque.default.swing,
+		java			= JavaObject( "de.sciss.timebased.bosque.BosqueRegionStake", Bosque.default.swing,
 				 				span, name, track, colr, fadeIn, fadeOut, gain );
 	}
 

@@ -17,7 +17,7 @@ BosqueAudioRegionStake : BosqueRegionStake {
 	prInitFARS { arg argFileStartFrame, argFAF;
 		fileStartFrame	= argFileStartFrame;
 		faf				= argFAF;
-		java				= JavaObject( "de.sciss.timebased.ForestAudioRegionStake", faf.forest.swing,
+		java				= JavaObject( "de.sciss.timebased.bosque.AudioRegionStake", faf.forest.swing,
 							span, name, track, colr, fadeIn, fadeOut, gain, fileStartFrame, faf.view );
 //		java				= JavaObject( "de.sciss.timebased.RegionStake", faf.forest.swing, span, name );
 	}

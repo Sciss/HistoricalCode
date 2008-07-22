@@ -41,7 +41,7 @@ BosqueEnvRegionStake : BosqueRegionStake {
 	
 	prInitFERS { arg argEnv;
 		env	= argEnv ?? { this.prCreateDefaultEnv };
-		java		= JavaObject( "de.sciss.timebased.ForestEnvRegionStake", Bosque.default.swing,
+		java		= JavaObject( "de.sciss.timebased.bosque.EnvRegionStake", Bosque.default.swing,
 							span, name, track, colr, fadeIn, fadeOut, gain, env );
 	}
 	

@@ -17,6 +17,9 @@ BosqueTrack {
 	var <trail;
 	var <ctrlSpec;
 	
+	// level display
+	var lvlStr;
+	
 	*new { arg trackID, trail;
 	
 		var forest, doc, tracks;
@@ -33,13 +36,36 @@ BosqueTrack {
 		trackID	= argTrackID;
 		trail	= argTrail;
 		forest	= Bosque.default;
-		java		= JavaObject( "de.sciss.timebased.ForestTrack", forest.swing, trail, trackID );
+		java		= JavaObject( "de.sciss.timebased.bosque.BosqueTrack", forest.swing, trail, trackID );
 //		java.setID( java.id );
 	}
 	
 	// use with care!
 	prSetTrail { arg t;
 		trail = t;
+	}
+	
+//	setLevelString { arg str;
+//		java.server.listSendMsg([ '/method', java.id, \setLevelString ] ++ str.asSwingArg );
+//	}
+
+	updateLevelString { arg frame;
+		var mapped, newStr;
+		
+		mapped = this.map( frame );
+		if( mapped.notNil, {
+			if( ctrlSpec.notNil, {
+				newStr = mapped.round( 0.01 ).asString ++ ctrlSpec.units;
+			}, {
+				newStr = mapped.round( 0.01 ).asString;
+			});
+		}, {
+			newStr = "";
+		});
+		if( newStr != lvlStr, {
+			lvlStr = newStr;
+			java.server.listSendMsg([ '/method', java.id, \setLevelString ] ++ newStr.asSwingArg );
+		});
 	}
 	
 	/**
