@@ -198,9 +198,9 @@ Bosque : Object {
 	}
 
 	doWhenScSynthBooted { arg onComplete;
-		if( scsynth.serverRunning, onComplete, {
+//		if( scsynth.serverRunning, onComplete, {
 			onScSynthBoot = onScSynthBoot.add( onComplete );
-		});
+//		});
 	}
 	
 	prAudioInit {

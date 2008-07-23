@@ -431,7 +431,6 @@ BosqueAudioPlayer : Object {
 	
 	prStop {
 		task.stop; taskVol.stop;
-//		scsynth.sendBundle( bufferLatency + transportDelta, diskGroup.freeAllMsg );
 		if( scsynth.notNil, { scsynth.sendBundle( bufferLatency + transportDelta, diskGroup.freeAllMsg, bosque.preFilterGroup.freeAllMsg, bosque.postFilterGroup.freeAllMsg )});
 	}
 	
