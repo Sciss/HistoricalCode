@@ -47,6 +47,14 @@ extends BasicTrail
 		return new RegionTrail();
 	}
 	
+	public BasicTrail duplicate()
+	{
+		final BasicTrail dup = createEmptyCopy();
+		dup.editGetCollByStart( null ).addAll( getAll( true ));
+		dup.editGetCollByStop( null ).addAll( getAll( false ));
+		return dup;
+	}
+	
 	public void modified( Object source, Span span )
 	{
 		dispatchModification( source, span );

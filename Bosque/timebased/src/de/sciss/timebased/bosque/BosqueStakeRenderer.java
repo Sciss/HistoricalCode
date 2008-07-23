@@ -117,7 +117,7 @@ extends DefaultStakeRenderer
 		int				startIdx = t.indexOf( frame - (long) (3 * hScal), true );
 		if( startIdx < 0 ) startIdx = Math.max( 0, -(startIdx + 2) );
 		int				stopIdx	=  t.indexOf( frame + (long) (3 * hScal), true );
-		if( stopIdx < 0 ) stopIdx = Math.max( 0, -(stopIdx + 2) );
+		if( stopIdx < 0 ) stopIdx = -(stopIdx + 2);
 		final float		vScal	= 1.0f / stakeBounds.height;
 //System.out.println( "checkin points " + startIdx + " thru " + stopIdx + "; hScal " + hScal + " (since length = " + ers.getSpan().getLength() + "; and width = " + stakeBounds.width + ") ; vScal " + vScal );
 		
