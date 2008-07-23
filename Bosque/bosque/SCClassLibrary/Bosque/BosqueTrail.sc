@@ -10,7 +10,7 @@
  *	getAllAudioStakes.
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.15, 23-Jul-08
+ *	@version	0.16, 23-Jul-08
  */
 BosqueTrail : Trail {
 	var <bosque;
@@ -27,6 +27,25 @@ BosqueTrail : Trail {
  	
  	createEmptyCopy {
  		^this.class.new( touchMode );
+ 	}
+ 	
+ 	*prNew {Êarg touchMode, java;
+ 		^super.new( touchMode ).prInitDirect( java );
+ 	}
+ 	
+ 	prInitDirect { arg argJava;
+		bosque	= Bosque.default;
+		java		= argJava;
+ 	}
+ 	
+ 	duplicate {
+ 		var newTJ, newT;
+
+ 		newTJ = java.duplicate__;
+ 		newT = this.class.prNew( touchMode, newTJ );
+		newT.prEditGetCollByStart.addAll( collStakesByStart );
+		newT.prEditGetCollByStop.addAll( collStakesByStop );
+		^newT;
  	}
 
 	clear { arg source;

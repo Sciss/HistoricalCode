@@ -558,16 +558,21 @@ BosqueTimelinePanel {
 					newStart = (stake.span.start + deltaTime).clip( 0, doc.timeline.span.length - stake.span.length );
 					newTrack = doc.tracks[ (doc.tracks.indexOf( stake.track ) + deltaTrack).clip( 0, doc.tracks.size - 1 )];
 					disposeStake = nil;
-					if( newStart != stake.span.start, {
-						stake = disposeStake = stake.shiftVirtual( newStart - stake.span.start );
-					});
-					if( newTrack != stake.track, {
-						stake = stake.replaceTrack( newTrack );
-						if( disposeStake.notNil, { disposeStake.dispose });
-						disposeStake = stake;
-					});
+
+// THIS IS FAULTY FOR SOME REASON (REPLACETRACK) XXX
+//					if( newStart != stake.span.start, {
+//						stake = disposeStake = stake.shiftVirtual( newStart - stake.span.start );
+//					});
+//					if( newTrack != stake.track, {
+//						stake = stake.replaceTrack( newTrack );
+//						if( disposeStake.notNil, { disposeStake.dispose });
+//						disposeStake = stake;
+//					});
+
+					stake = disposeStake = stake.replaceTrackAndMove( newTrack, newStart );
+
 					if( duplicate and: { disposeStake.isNil }, {
-						stake = stake.duplicate;
+						stake = disposeStake = stake.duplicate;
 					});
 					stake;
 				});

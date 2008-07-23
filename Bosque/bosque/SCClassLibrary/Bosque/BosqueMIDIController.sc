@@ -184,7 +184,7 @@ BosqueMIDIController {
 				stake.env.remove( nil, lastSegm );
 //				stake.dirtyDirtyRegionStop( lastSegm.span.start + stake.span.start );
 				newStake = stake.replaceStop( lastSegm.span.start + stake.span.start );
-				stake.dispose;
+//				stake.dispose;
 				bosque.timelineEditor.editAddEnvStake( newStake );
 			});
 		});

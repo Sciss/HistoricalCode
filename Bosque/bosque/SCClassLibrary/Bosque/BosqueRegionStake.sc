@@ -36,6 +36,15 @@ BosqueRegionStake : RegionStake {
 	replaceTrack { arg newTrack;
 		var args = this.storeArgs;
 		args[ 2 ] = newTrack;
+		this.protDupArgs( args );
+		^this.class.new( *args );
+	}
+
+	replaceTrackAndMove { arg newTrack, newStart;
+		var args = this.storeArgs;
+		args[ 0 ] = span.shift( newStart - span.start );
+		args[ 2 ] = newTrack;
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 
@@ -44,6 +53,7 @@ BosqueRegionStake : RegionStake {
 		args[ 0 ] = Span( newStart, span.stop );
 		args[ 4 ] = fadeIn.replaceFrames( 0 );
 		this.protFixFade( args );
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 	
@@ -52,30 +62,35 @@ BosqueRegionStake : RegionStake {
 		args[ 0 ] = Span( span.start, newStop );
 		args[ 5 ] = fadeOut.replaceFrames( 0 );
 		this.protFixFade( args );
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 
 	replaceColor { arg newColor;
 		var args = this.storeArgs;
 		args[ 3 ] = newColor;
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 
 	replaceFadeIn { arg newFadeIn;
 		var args = this.storeArgs;
 		args[ 4 ] = newFadeIn;
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 
 	replaceFadeOut { arg newFadeOut;
 		var args = this.storeArgs;
 		args[ 5 ] = newFadeOut;
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 
 	replaceGain { arg newGain;
 		var args = this.storeArgs;
 		args[ 6 ] = newGain;
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 

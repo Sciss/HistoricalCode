@@ -28,18 +28,21 @@ BosqueFuncRegionStake : BosqueRegionStake {
 	replaceEventName { arg newName;
 		var args = this.storeArgs;
 		args[ 7 ] = newName;
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 
 	replaceModTrack { arg newTrack;
 		var args = this.storeArgs;
 		args[ 8 ] = newTrack;
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 
 	replacePosition { arg newPosition;
 		var args = this.storeArgs;
 		args[ 9 ] = newPosition;
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 	

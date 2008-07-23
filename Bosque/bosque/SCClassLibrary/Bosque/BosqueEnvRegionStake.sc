@@ -45,13 +45,29 @@ BosqueEnvRegionStake : BosqueRegionStake {
 							span, name, track, colr, fadeIn, fadeOut, gain, env );
 	}
 	
+//	replaceTrack { arg newTrack;
+//		var args, envNew;
+//		
+//		args 	= this.storeArgs;
+//		envNew	= env.createEmptyCopy;
+//		envNew.addAll( nil, env.getAll );
+//		args[ 2 ] = newTrack;
+//		args[ 7 ]	= envNew;
+//		^this.class.new( *args );
+//	}
+
+	protDupArgs { arg args;
+		super.protDupArgs;
+		if( args[ 7 ] == env, { args[ 7 ] = env.duplicate });
+	}
+
 	replaceStart { arg newStart;
 		var delta, spanNew, envNew, args;
 
 		delta	= newStart - span.start;
 		spanNew	= Span( newStart, span.stop );
-		envNew	= env.createEmptyCopy;
 
+		envNew	= env.createEmptyCopy;
 		envNew.addAll( nil, env.getCuttedRange( Span( delta, env.span.stop ), true, Trail.kTouchSplit, delta.neg ));
 		
 		args		= this.storeArgs;
@@ -59,6 +75,7 @@ BosqueEnvRegionStake : BosqueRegionStake {
 		args[ 4 ]	= fadeIn.replaceFrames( 0 );
 		args[ 7 ]	= envNew;
 		this.protFixFade( args );
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 	
@@ -74,6 +91,7 @@ BosqueEnvRegionStake : BosqueRegionStake {
 		args[ 5 ]	= fadeOut.replaceFrames( 0 );
 		args[ 7 ]	= envNew;
 		this.protFixFade( args );
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 	

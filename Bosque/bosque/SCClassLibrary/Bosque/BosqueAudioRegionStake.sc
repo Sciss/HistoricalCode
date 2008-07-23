@@ -33,12 +33,14 @@ BosqueAudioRegionStake : BosqueRegionStake {
 	replaceFile { arg newFile;
 		var args = this.storeArgs;
 		args[ 8 ] = newFile;
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 
 	replaceFileStartFrame { arg newStartFrame;
 		var args = this.storeArgs;
 		args[ 7 ] = newStartFrame;
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 
@@ -48,6 +50,7 @@ BosqueAudioRegionStake : BosqueRegionStake {
 		args[ 4 ] = fadeIn.replaceFrames( 0 );
 		args[ 7 ] = fileStartFrame + (newStart - span.start);      // !
 		this.protFixFade( args );
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 	
@@ -56,6 +59,7 @@ BosqueAudioRegionStake : BosqueRegionStake {
 		args[ 0 ] = Span( span.start, newStop );
 		args[ 5 ] = fadeOut.replaceFrames( 0 );
 		this.protFixFade( args );
+		this.protDupArgs( args );
 		^this.class.new( *args );
 	}
 
