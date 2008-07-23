@@ -1,11 +1,11 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.20, 08-Sep-07
+ *	@version	0.21, 23-Jul-08
  */
 BosqueAudioPlayer : Object {
 	var <doc;
-	var <forest;
+	var <bosque;
 	var task, taskVol;
 	var <scsynth, <nw, <sampleRate;
 	var <diskGroup;
@@ -31,18 +31,18 @@ BosqueAudioPlayer : Object {
 	
 	prInit { arg argDoc;
 		doc		= argDoc;
-		forest	= doc.forest;
-		forest.doWhenScSynthBooted({ this.prAudioInit });
+		bosque	= doc.bosque;
+		bosque.doWhenScSynthBooted({ this.prAudioInit });
 		
 //		task		= Routine({ this.prTaskBody });
 //		taskVol	= Routine({ this.prTaskVolBody });
 	}
 	
 	prAudioInit {
-		scsynth		= forest.scsynth;
+		scsynth		= bosque.scsynth;
 		nw			= NodeWatcher.newFrom( scsynth );
 		sampleRate	= scsynth.sampleRate;
-		diskGroup		= forest.diskGroup;
+		diskGroup		= bosque.diskGroup;
 		volBus		= Bus.control( scsynth );
 		volBus.set( 1.0 );
 		UpdateListener.newFor( doc.transport, { arg upd, transport, what ... params;
@@ -58,7 +58,7 @@ BosqueAudioPlayer : Object {
 	// ---------- func region support ----------
 	makeFuncSynth { arg stake, defName, args, target, addAction = \addToHead;
 		var synth, event = stake.event;
-		synth = Synth.basicNew( defName /* ? \forestDur */, scsynth );
+		synth = Synth.basicNew( defName /* ? \bosqueDur */, scsynth );
 //		if( dur.notNil, {
 //			args = args ++ [ \dur, dur ];
 //		});
@@ -84,7 +84,7 @@ BosqueAudioPlayer : Object {
 
 //	makeFuncSynthWithBufRead { arg stake, defName, args, target, addAction = \addToTail;
 //		var synth, event = stake.event;
-//		synth = Synth.basicNew( defName /* ? \forestDur */, scsynth );
+//		synth = Synth.basicNew( defName /* ? \bosqueDur */, scsynth );
 //		bndl.add( synth.newMsg( target ?? { stake.group }, args, addAction ));
 //		nw.register( synth );
 //		UpdateListener.newFor( synth, { arg upd, obj, what;
@@ -110,7 +110,7 @@ BosqueAudioPlayer : Object {
 
 	makeFuncDur { arg stake, dur, group;
 		var synth, event = stake.event;
-		synth = Synth.basicNew( \forestDur, scsynth );
+		synth = Synth.basicNew( \bosqueDur, scsynth );
 		bndl.add( synth.newMsg( group, [ \dur, dur ]));
 		nw.register( synth );
 		event.upd = event.upd.add( UpdateListener.newFor( synth, { arg upd, obj, what;
@@ -158,8 +158,8 @@ BosqueAudioPlayer : Object {
 	}
 	
 	funcTrackingSense { arg tv, sense = 0.5;
-		forest.chris.sendMsg( '/tv', tv );
-		forest.chris.sendMsg( '/sense', sense );
+		bosque.chris.sendMsg( '/tv', tv );
+		bosque.chris.sendMsg( '/sense', sense );
 	}
 	
 	makeFuncTrack { arg stake, type = \dancerSpeed, spec = \spec;
@@ -171,20 +171,20 @@ BosqueAudioPlayer : Object {
 		};
 		switch( type,
 		\dancerSpeed, {
-			oUpd	= forest.trackDancer;
+			oUpd	= bosque.trackDancer;
 			fUpd = { arg upd, obj, x, y, speed;
 //				[ x, y, speed ].postln;
 				fSet.value( speed );
 			};
 		},
 		\dancerX, {
-			oUpd	= forest.trackDancer;
+			oUpd	= bosque.trackDancer;
 			fUpd = { arg upd, obj, x, y, speed;
 				fSet.value( x );
 			};
 		},
 		\dancerY, {
-			oUpd	= forest.trackDancer;
+			oUpd	= bosque.trackDancer;
 			fUpd = { arg upd, obj, x, y, speed;
 				fSet.value( y );
 			};
@@ -200,7 +200,7 @@ BosqueAudioPlayer : Object {
 	makeFuncField { arg stake, matrix = \matrix;
 		var event = stake.event, fMatrix;
 		fMatrix = event[ matrix ];
-		event.upd = event.upd.add( UpdateListener.newFor( forest.trackField, { arg upd, obj ... values;
+		event.upd = event.upd.add( UpdateListener.newFor( bosque.trackField, { arg upd, obj ... values;
 			// due to Object -> change, we'll get values == [ nil ] in some cases!!!
 			if( values[0].notNil, { fMatrix.value( values )}, fMatrix );
 		}));
@@ -224,7 +224,7 @@ BosqueAudioPlayer : Object {
 		fTrig		= event[ trig ];
 		switch( type,
 		\dancerSpeed, {
-			oUpd	= forest.trackDancer;
+			oUpd	= bosque.trackDancer;
 //			oldVals = 0.0;
 			above = false;
 			fUpd = { arg upd, obj, x, y, speed;
@@ -240,7 +240,7 @@ BosqueAudioPlayer : Object {
 			};
 		},
 		\dancerX, {
-			oUpd	= forest.trackDancer;
+			oUpd	= bosque.trackDancer;
 //			oldVals = 0.0;
 			above = false;
 			fUpd = { arg upd, obj, x, y, speed;
@@ -255,7 +255,7 @@ BosqueAudioPlayer : Object {
 			};
 		},
 		\dancerY, {
-			oUpd	= forest.trackDancer;
+			oUpd	= bosque.trackDancer;
 //			oldVals = 0.0;
 			above = false;
 			fUpd = { arg upd, obj, x, y, speed;
@@ -272,7 +272,7 @@ BosqueAudioPlayer : Object {
 		\fieldSpeed, {
 			oldVals = false ! Bosque.numFieldsV ! Bosque.numFieldsH;
 			above = false; // ! Bosque.numFieldsV ! Bosque.numFieldsH;
-			oUpd	= forest.trackField;
+			oUpd	= bosque.trackField;
 			fUpd = { arg upd, obj ... fields; var x, y, speed;
 //				fields.do({ arg field;
 //					#x, y, speed = field;
@@ -306,7 +306,7 @@ BosqueAudioPlayer : Object {
 		},
 		\trackSpeed, {
 			above = false ! Bosque.numTracks;
-			oUpd	= forest.trackTrack;
+			oUpd	= bosque.trackTrack;
 			fUpd = { arg upd, obj ... tracks; var x, y, speed;
 				tracks.do({ arg track, idx;
 					#x, y, speed = track;
@@ -339,7 +339,7 @@ BosqueAudioPlayer : Object {
 
 	makeFuncBang { arg stake, trig = \trig;
 		var event = stake.event;
-		event.upd = event.upd.add( UpdateListener.newFor( forest.trackBang, event[ trig ]));
+		event.upd = event.upd.add( UpdateListener.newFor( bosque.trackBang, event[ trig ]));
 		if( debugFunc, {
 			[ stake, "makeFuncBang" ].postln;
 		});
@@ -415,7 +415,7 @@ BosqueAudioPlayer : Object {
 		startLevel	= startStake.level + ((stopStake.level - startStake.level) *
 			((start - startStake.pos) / (stopStake.pos - startStake.pos).max(1)));
 		dur			= (stopStake.pos - start).max(0) / sampleRate;
-		synth		= Synth.basicNew( \forestXEnvWrite, scsynth, -1 );
+		synth		= Synth.basicNew( \bosqueXEnvWrite, scsynth, -1 );
 		if( debugVol, { [ "taskVolSpawn", startStake, stopStake, start, startLevel, stopStake.level, dur ].postcs });
 		scsynth.sendBundle( bufferLatency, synth.newMsg( diskGroup,
 			[ \bus, volBus.index, \start, startLevel.dbamp, \end, stopStake.level.dbamp, \dur, dur ]));
@@ -432,7 +432,7 @@ BosqueAudioPlayer : Object {
 	prStop {
 		task.stop; taskVol.stop;
 //		scsynth.sendBundle( bufferLatency + transportDelta, diskGroup.freeAllMsg );
-		scsynth.sendBundle( bufferLatency + transportDelta, diskGroup.freeAllMsg, forest.preFilterGroup.freeAllMsg, forest.postFilterGroup.freeAllMsg );
+		scsynth.sendBundle( bufferLatency + transportDelta, diskGroup.freeAllMsg, bosque.preFilterGroup.freeAllMsg, bosque.postFilterGroup.freeAllMsg );
 	}
 	
 	prPause {

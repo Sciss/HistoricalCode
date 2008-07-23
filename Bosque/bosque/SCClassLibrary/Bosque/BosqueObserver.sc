@@ -1,10 +1,10 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.14, 20-Jul-08
+ *	@version	0.15, 23-Jul-08
  */
 BosqueObserver {
-	var <forest;
+	var <bosque;
 	var <window;
 	var <doc;
 	var <colors;
@@ -14,9 +14,9 @@ BosqueObserver {
 	}
 	
 	prInit {
-		forest	= Bosque.default;
-		doc		= forest.session;
-		forest.doWhenSwingBooted({ this.prMakeGUI });
+		bosque	= Bosque.default;
+		doc		= bosque.session;
+		bosque.doWhenSwingBooted({ this.prMakeGUI });
 	}
 	
 	prMakeGUI {

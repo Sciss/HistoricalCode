@@ -1,11 +1,11 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.13, 10-Sep-07
+ *	@version	0.14, 23-Jul-08
  */
 BosqueBusConfig {
 	var <busCfgID;
-	var <forest;
+	var <bosque;
 	var <numInputs, <numOutputs;
 	var connections;
 	var <bus;
@@ -17,10 +17,10 @@ BosqueBusConfig {
 	var debugSynthDefs = false;
 
 	*new { arg busCfgID, numInputs, numOutputs;
-		var forest, doc, busConfigs;
+		var bosque, doc, busConfigs;
 		
-		forest		= Bosque.default;
-		doc			= forest.session;
+		bosque		= Bosque.default;
+		doc			= bosque.session;
 		busConfigs	= doc.busConfigs;
 		busConfigs.do({ arg b; if( b.busCfgID == busCfgID, { ^b })});
 		
@@ -31,11 +31,11 @@ BosqueBusConfig {
 	
 	prInit { arg argID, argNumInputs, argNumOutputs;
 		busCfgID		= argID;
-		forest		= Bosque.default;
+		bosque		= Bosque.default;
 		numInputs		= argNumInputs;
 		numOutputs	= argNumOutputs;
 		
-		forest.doWhenScSynthBooted({ this.prAudioInit });
+		bosque.doWhenScSynthBooted({ this.prAudioInit });
 	}
 
 	connections_ { arg conn;
@@ -95,9 +95,9 @@ BosqueBusConfig {
 
 	prAudioInit {
 //		("prAudioInit : " ++ name).postln;
-		bus		= Bus.audio( forest.scsynth, max( numInputs, numOutputs ));
-		groupPan	= Group( forest.panGroup );
-		groupMix	= Group( forest.mixGroup );
+		bus		= Bus.audio( bosque.scsynth, max( numInputs, numOutputs ));
+		groupPan	= Group( bosque.panGroup );
+		groupMix	= Group( bosque.mixGroup );
 		
 		if( connections.notNil, { ^this.prCreateConnSynths });
 	}
@@ -113,7 +113,7 @@ BosqueBusConfig {
 //			this.dumpBackTrace;
 //		});
 
-		defNamePan = \forestBus ++ busCfgID;
+		defNamePan = \bosqueBus ++ busCfgID;
 		defPan = SynthDef( defNamePan, { arg bus;
 			var inp, outp;
 			
@@ -128,8 +128,8 @@ BosqueBusConfig {
 			ReplaceOut.ar( bus, outp );	// 0.0 get replaced with Silent.ar !
 		});
 		if( debugSynthDefs, { Kurs.viewSynthDef( defPan )});
-		numMixChans = min( numOutputs, forest.masterBus.numChannels );
-		defNameMix = \forestMix ++ numMixChans;
+		numMixChans = min( numOutputs, bosque.masterBus.numChannels );
+		defNameMix = \bosqueMix ++ numMixChans;
 		defMix = SynthDef( defNameMix, { arg inBus, outBus;
 			Out.ar( outBus, In.ar( inBus, numMixChans ));
 		});
@@ -137,13 +137,13 @@ BosqueBusConfig {
 		bundle = OSCBundle.new;
 		bundle.addPrepare([ "/d_recv", defPan.asBytes ]);
 		bundle.addPrepare([ "/d_recv", defMix.asBytes ]);
-		synthPan = Synth.basicNew( defNamePan, forest.scsynth );
-		synthMix = Synth.basicNew( defNameMix, forest.scsynth );
+		synthPan = Synth.basicNew( defNamePan, bosque.scsynth );
+		synthMix = Synth.basicNew( defNameMix, bosque.scsynth );
 		bundle.add( groupMix.freeAllMsg );
 		bundle.add( groupPan.freeAllMsg );
 		bundle.add( synthPan.newMsg( groupPan, [ \bus, bus.index ]));
-		bundle.add( synthMix.newMsg( groupMix, [ \inBus, bus.index, \outBus,  forest.masterBus.index ]));
-		bundle.send( forest.scsynth ); // , bufferLatency
+		bundle.add( synthMix.newMsg( groupMix, [ \inBus, bus.index, \outBus,  bosque.masterBus.index ]));
+		bundle.send( bosque.scsynth ); // , bufferLatency
 	}
 
 	dispose {

@@ -76,6 +76,10 @@ BosqueEnvRegionStake : BosqueRegionStake {
 		this.protFixFade( args );
 		^this.class.new( *args );
 	}
+	
+//	dirtyDirtyRegionStop { arg newStop;
+//		span = Span( span.start, newStop );
+//	}
 
 	playToBundle { arg bndl, player, frameOffset = 0;
 		// XXX
@@ -105,5 +109,10 @@ BosqueEnvRegionStake : BosqueRegionStake {
 //		env.addAll( nil, segm );
 		env.add( nil, segm );
 		^env;
+	}
+
+	dispose {
+		env.dispose;
+		^super.dispose;
 	}
 }

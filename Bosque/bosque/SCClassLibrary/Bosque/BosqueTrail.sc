@@ -10,10 +10,10 @@
  *	getAllAudioStakes.
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.14, 06-Jul-08
+ *	@version	0.15, 23-Jul-08
  */
 BosqueTrail : Trail {
-	var <forest;
+	var <bosque;
 	var <java;
 	
 	*new { arg touchMode = kTouchSplit;
@@ -21,8 +21,8 @@ BosqueTrail : Trail {
 	}
 	
 	prInitBosqueTrail {
-		forest	= Bosque.default;
-		java		= JavaObject( "de.sciss.timebased.RegionTrail", forest.swing );
+		bosque	= Bosque.default;
+		java		= JavaObject( "de.sciss.timebased.RegionTrail", bosque.swing );
  	}
  	
  	createEmptyCopy {

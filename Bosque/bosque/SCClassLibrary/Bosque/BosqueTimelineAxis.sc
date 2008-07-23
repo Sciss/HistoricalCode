@@ -1,7 +1,7 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.12, 18-Jul-08
+ *	@version	0.13, 23-Jul-08
  */
 BosqueTimelineAxis {
 //	var <view;
@@ -15,12 +15,12 @@ BosqueTimelineAxis {
 	}
 	
 	prInit { arg argDoc, argPanel, argJava;
-		var forest, fntSmall;
+		var bosque, fntSmall;
 		
 		doc = argDoc;
 		panel = argPanel;
 		java = argJava;
-		forest = doc.forest;
+		bosque = doc.bosque;
 		fntSmall = JFont( "Helvetica", 10 );
 //		view = JSCPlugView( parent, bounds, java ).resize_( 2 );
 		java.setFont( fntSmall );

@@ -1,12 +1,12 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.13, 21-Aug-07
+ *	@version	0.14, 23-Jul-08
  */
 BosqueAudioFile : Object {
 	classvar	<>overviews	= true;
 
-	var <forest;
+	var <bosque;
 	var <path;
 	var <view;
 	var <name;
@@ -16,10 +16,10 @@ BosqueAudioFile : Object {
 	var <synthDefName;
 	
 	*new { arg path;
-		var forest, doc, audioFiles;
+		var bosque, doc, audioFiles;
 		
-		forest		= Bosque.default;
-		doc			= forest.session;
+		bosque		= Bosque.default;
+		doc			= bosque.session;
 		audioFiles	= doc.audioFiles;
 		audioFiles.do({ arg af; if( af.path == path, { ^af })});
 		
@@ -30,24 +30,24 @@ BosqueAudioFile : Object {
 		var sf;
 
 		path			= argPath;
-		forest		= Bosque.default;
+		bosque		= Bosque.default;
 		sf			= SoundFile.openRead( path );
 		if( sf.isNil, { Error( "Could not open audio file '" ++ path ++ "'" ).throw });
 		sf.close;
 		name			= PathName( argPath ).fileNameWithoutExtension;
 		numChannels	= sf.numChannels;
-		synthDefName	= \forestDiskIn ++ numChannels;
+		synthDefName	= \bosqueDiskIn ++ numChannels;
 		numFrames		= sf.numFrames;
 //		regions		= BosqueSessionCollection.new;
 
 		if( overviews, {
-			forest.doWhenSwingBooted({
-				view = JavaObject( "de.sciss.swingosc.SoundFileView", forest.swing );
+			bosque.doWhenSwingBooted({
+				view = JavaObject( "de.sciss.swingosc.SoundFileView", bosque.swing );
 				view.setGridPainted( false );
 				view.setTimeCursorPainted( false );
 	//			view.setBackground( Color.new255( 0xFF, 0xFF, 0xFF, 0x7F ));
 	//			view.setObjWaveColors( Color.black ! numChannels );
-				view.setCacheManager( forest.cacheManager );
+				view.setCacheManager( bosque.cacheManager );
 				view.readSndFile( path, 0, numFrames );
 			});
 		});

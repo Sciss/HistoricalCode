@@ -62,6 +62,7 @@ Bosque : Object {
 	var <midiIn;	// a MIDIEndPoint
 
 	var <master, <app;
+	var <timelineEditor;
 	
 	*initClass {
 //		Class.initClassTree( SwingOSC );
@@ -76,7 +77,7 @@ Bosque : Object {
 		if( default.isNil, { default = this });
 
 		swing		= SwingOSC.default;
-		scsynth		= Server.default; // Server( \forest, VerboseNetAddr( "127.0.0.1", 57001 )); // Server.default;
+		scsynth		= Server.default; // Server( \bosque, VerboseNetAddr( "127.0.0.1", 57001 )); // Server.default;
 	  swing.doWhenBooted({
 
 		master			= JavaObject( "de.sciss.timebased.net.Master", swing );
@@ -147,7 +148,8 @@ Bosque : Object {
 //			});
 		}).add;
 
-		BosqueSession( this );
+		session = BosqueSession( this );
+		session.init;
 		UpdateListener.newFor( session.transport, { arg upd, transport, what; if( what === \play, {("% play ("++thisThread.seconds++")").postln; })});
 		
 //		swing.updateClasses( "file:///Users/rutz/Documents/workspace/TimeBased/TimeBased.jar" );
@@ -163,11 +165,19 @@ Bosque : Object {
 			onScSynthBoot.do({ arg x; x.value });
 			onScSynthBoot = nil;
 		}, inf );
+		
+		timelineEditor = BosqueTimelineEditor( this );
+		
 	  }, inf ); // swing.doWhenBooted
 	}
 	
 	*track { arg name;
 		^this.default.session.tracks.detect({ arg t; t.name == name });
+	}
+
+	*mark { arg name;
+		// very inefficient !!! XXX
+		^this.default.session.markers.getAll.detect({ arg m; m.name == name });
 	}
 	
 	bootScSynth {
@@ -197,9 +207,9 @@ Bosque : Object {
 	prAudioInit {
 		masterGroup		= Group( scsynth );
 		masterBus			= Bus.audio( scsynth, masterBusNumChannels );
-		masterSynth		= Synth.head( masterGroup, \forestMaster ++ masterBus.numChannels, [ \bus, masterBus.index, \amp, masterVolume ] );
+		masterSynth		= Synth.head( masterGroup, \bosqueMaster ++ masterBus.numChannels, [ \bus, masterBus.index, \amp, masterVolume ] );
 		masterChanMap.do({ arg outputIdx, inputIdx;
-			Synth.tail( masterGroup, \forestRoute1, [ \inBus, masterBus.index + inputIdx, \outBus, outputIdx ]);
+			Synth.tail( masterGroup, \bosqueRoute1, [ \inBus, masterBus.index + inputIdx, \outBus, outputIdx ]);
 		});
 		mixGroup			= Group.before( masterGroup );
 		postFilterGroup	= Group.before( mixGroup );
@@ -221,7 +231,7 @@ Bosque : Object {
 	
 	*createSynthDefs {
 		(1..masterBusNumChannels).do({ arg numChannels;
-			SynthDef( \forestDiskIn ++ numChannels, { arg out, i_bufNum, i_dur, i_fadeIn, i_fadeOut, amp = 1;
+			SynthDef( \bosqueDiskIn ++ numChannels, { arg out, i_bufNum, i_dur, i_fadeIn, i_fadeOut, amp = 1;
 				var env;
 				env = EnvGen.kr( Env.linen( i_fadeIn, i_dur - (i_fadeIn + i_fadeOut), i_fadeOut, 1.0, \lin ), doneAction: 2 ) * amp;
 				Out.ar( out, DiskIn.ar( numChannels, i_bufNum ) * env );
@@ -229,25 +239,25 @@ Bosque : Object {
 			}).writeDefFile;
 		});
 		
-		SynthDef( \forestMaster ++ masterBusNumChannels, { arg bus = 0, amp = 1, volBus;
+		SynthDef( \bosqueMaster ++ masterBusNumChannels, { arg bus = 0, amp = 1, volBus;
 			//            1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
 			amp = amp * [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.3, 1.3, 1.3, 1.3, 1.2, 1.2 ].keep( masterBusNumChannels );
 			ReplaceOut.ar( bus, Limiter.ar( In.ar( bus, masterBusNumChannels ) * amp * In.kr( volBus ), 0.99 ));
 		}, [ nil, 0.1, nil ]).writeDefFile;
 
-		SynthDef( \forestRoute1, { arg inBus, outBus;
+		SynthDef( \bosqueRoute1, { arg inBus, outBus;
 			Out.ar( outBus, In.ar( inBus ));
 		}).writeDefFile;
 
-		SynthDef( \forestDur, { arg dur;
+		SynthDef( \bosqueDur, { arg dur;
 			Line.kr( dur: dur, doneAction: 2 );
 		}).writeDefFile;
 		
-		SynthDef( \forestEnvWrite, { arg bus, start, end, dur;
+		SynthDef( \bosqueEnvWrite, { arg bus, start, end, dur;
 			Out.kr( bus, Line.kr( start, end, dur, doneAction: 2 ));
 		}).writeDefFile;
 
-		SynthDef( \forestXEnvWrite, { arg bus, start, end, dur;
+		SynthDef( \bosqueXEnvWrite, { arg bus, start, end, dur;
 			Out.kr( bus, XLine.kr( start, end, dur, doneAction: 2 ));
 		}).writeDefFile;
 	}
@@ -473,14 +483,14 @@ if( createCC, {
 	}
 
 	*launch {
-		var forest;
+		var bosque;
 		
 		this.prAddSwingClasses;
 		
-		forest = this.new;
-		BosqueTimelineEditor.new;
-		forest.bootScSynth;
-//		forest.scsynth.makeWindow;
+		bosque = this.new;
+//		timelineEditor = BosqueTimelineEditor( this );
+		bosque.bootScSynth;
+//		bosque.scsynth.makeWindow;
 //		this.allGUI;
 	}
 

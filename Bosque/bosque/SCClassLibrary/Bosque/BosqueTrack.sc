@@ -3,14 +3,14 @@
  */
  
 /**
- *	@version	0.14, 19-Jul-08
+ *	@version	0.15, 23-Jul-08
  */
 BosqueTrack {
 	var <trackID;
 	var java;
 //	var <>y = 0, <>height = 1;
 	var <muted = false;
-	var <forest;
+	var <bosque;
 	
 	var <busConfig;
 	var <name;
@@ -19,13 +19,14 @@ BosqueTrack {
 	
 	// level display
 	var lvlStr;
+	var <>liveReplc;
 	
 	*new { arg trackID, trail;
 	
-		var forest, doc, tracks;
+		var bosque, doc, tracks;
 		
-		forest		= Bosque.default;
-		doc			= forest.session;
+		bosque		= Bosque.default;
+		doc			= bosque.session;
 		tracks		= doc.tracks;
 		tracks.do({ arg t; if( t.trackID == trackID, { ^t })});
 		
@@ -35,8 +36,8 @@ BosqueTrack {
 	prInit { arg argTrackID, argTrail;
 		trackID	= argTrackID;
 		trail	= argTrail;
-		forest	= Bosque.default;
-		java		= JavaObject( "de.sciss.timebased.bosque.BosqueTrack", forest.swing, trail, trackID );
+		bosque	= Bosque.default;
+		java		= JavaObject( "de.sciss.timebased.bosque.BosqueTrack", bosque.swing, trail, trackID );
 //		java.setID( java.id );
 	}
 	
@@ -75,8 +76,12 @@ BosqueTrack {
 	 *			[ 0 ... 1 ], or nil if no envelope found.
 	 */
 	level { arg frame;
-		var idx, stake, rawLevel;
+		var idx, stake, level;
 		frame = frame ?? { Bosque.default.session.transport.currentFrame };
+		if( liveReplc.notNil, {
+			level = liveReplc.level( frame );
+			if( level.notNil, { ^level });
+		});
 		idx   = trail.indexOfPos( frame );
 		if( idx < 0, { idx = (idx + 2).neg });
 		stake = trail.get( idx );

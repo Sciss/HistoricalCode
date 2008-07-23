@@ -3,10 +3,10 @@
  */
  
 /** 
- *	@version	0.16, 21-Jul-08
+ *	@version	0.17, 23-Jul-08
  */
 BosqueSessionCollection : Object {
-//	var <forest;
+//	var <bosque;
 	var coll;
 	
 	var debug = false;
@@ -20,14 +20,14 @@ BosqueSessionCollection : Object {
 	}
 	
 	prInit { arg significant, hasJava, uniqueNames;
-		var forest;
+		var bosque;
 		
-		forest		= Bosque.default;
+		bosque		= Bosque.default;
 		isSignificant	= significant;
 		coll			= List.new;
-		master		= forest.master;
+		master		= bosque.master;
 		if( hasJava, {
-			java		= JavaObject( "de.sciss.timebased.session.BasicSessionCollection", forest.swing, significant );
+			java		= JavaObject( "de.sciss.timebased.session.BasicSessionCollection", bosque.swing, significant );
 		});
 		if( uniqueNames, { mapNames = IdentityDictionary.new });
 	}

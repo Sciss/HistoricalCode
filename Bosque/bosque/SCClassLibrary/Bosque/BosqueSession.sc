@@ -1,10 +1,10 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.16, 20-Jul-08
+ *	@version	0.16, 23-Jul-08
  */
 BosqueSession : Object {
-	var <forest;
+	var <bosque;
 	
 	// data
 	var <audioFiles;
@@ -32,9 +32,12 @@ BosqueSession : Object {
 		^super.new.prInit( bosque );
 	}
 	
-	prInit { arg bosque;
-		bosque.session	= this;
-		forest			= Bosque.default;
+	prInit { arg argBosque;
+//		bosque.session	= this;
+		bosque			= argBosque ?? { Bosque.default };
+	}
+	
+	init {
 		audioFiles		= BosqueSessionCollection.new;
 		timeline			= BosqueTimeline( 44100 );
 		timelineView		= BosqueTimelineView( timeline );
@@ -140,7 +143,7 @@ BosqueSession : Object {
 		var toDispose;
 		transport.stop;
 		this.path = nil;
-		forest.clipBoard.clear;
+		bosque.clipBoard.clear;
 		undoManager.discardAllEdits;
 		selectedRegions.clear( this );
 		selectedTracks.clear( this );

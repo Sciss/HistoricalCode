@@ -1,7 +1,7 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.13, 06-Jul-08
+ *	@version	0.14, 23-Jul-08
  */
 BosqueFuncRegionStake : BosqueRegionStake {
 	var <eventName;
@@ -69,7 +69,7 @@ BosqueFuncRegionStake : BosqueRegionStake {
 //				"3".postln;
 			});
 //			"4".postln;
-			group = if( position === \pre, { player.forest.preFilterGroup }, { player.forest.postFilterGroup });
+			group = if( position === \pre, { player.bosque.preFilterGroup }, { player.bosque.postFilterGroup });
 //			"5".postln;
 			if( event.playToBundle( this, bndl, player, durSecs, frameOffset, busIndex, numChannels, group, position ), {
 //				"HHHHHHHH".postln;

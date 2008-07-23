@@ -6,29 +6,33 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.27, 18-Jul-08
+ *	@version	0.28, 23-Jul-08
  */
 BosqueTimelineEditor : Object {
-	var <forest;
+	var <bosque;
 	var <winTimeline;
 	var <winMenu;
 	var <winCollections;
 	var <winTransport;
 	var <observer;
+	var <panel;
+	var doc;
 
-	*new {
-		^super.new.prInit;
+	*new { arg bosque;
+		^super.new.prInit( bosque );
 	}
 	
-	prInit {
-		forest	= Bosque.default;
-		forest.doWhenSwingBooted({ this.prMakeGUI });
+	prInit { arg argBosque;
+		bosque	= argBosque ?? { Bosque.default };
+//		bosque.doWhenSwingBooted({ this.prMakeGUI });
+		doc		= bosque.session;
+		this.prMakeGUI;
 	}
 	
 	prMakeGUI {
 		var view, view2, updAudioFiles, updTimeline, ggFileList, ggBusList;
-		var fntSmall, fntBig, doc, flow;
-		var ggPlay, ggStop, updTransport, updDirty, updSelectedTracks, updTracks, ggTimelinePanel;
+		var fntSmall, fntBig, flow;
+		var ggPlay, ggStop, updTransport, updDirty, updSelectedTracks, updTracks;
 		var vx, vw, clpseYZoom, ggTabColl, updBusConfigs, ggBusMatrix, ggBusGain, ggBusApply, busSelCol, busSelRow, busConn;
 		var ggPlayPos, taskPlayPos, fTaskPlayPos, fPlayPosStr, ggTrackList, ggVolume, updVolume, clpseVolume;
 		var scrB = JSCWindow.screenBounds;
@@ -43,9 +47,7 @@ BosqueTimelineEditor : Object {
 
 		fntSmall	= JFont( "Lucida Grande", 10 );
 		fntBig	= JFont( "Helvetica", 24 );
-		
-		doc = forest.session;
-		
+				
 		// ----------------------------- Collections Window -----------------------------
 
 		ggTabColl = JSCTabbedPane( winCollections, winCollections.view.bounds ).resize_( 5 );
@@ -280,7 +282,7 @@ BosqueTimelineEditor : Object {
 		view = winTimeline.view;
 
 //		BosqueTimelineAxis( doc, view, Rect( 60, 20, view.bounds.width - 60, 15 ));
-		ggTimelinePanel = BosqueTimelinePanel( doc, view, Rect( 0, 35, view.bounds.width, view.bounds.height - 35 ));
+		panel = BosqueTimelinePanel( doc, view, Rect( 0, 35, view.bounds.width, view.bounds.height - 35 ));
 //		BosqueTimelineScroll( doc, view, Rect( 0, view.bounds.height - 16, view.bounds.width - 16, 16 ));
 
 		vx = 1; vw = 80;
@@ -378,10 +380,10 @@ BosqueTimelineEditor : Object {
 		winTimeline.onClose = { updDirty.remove };
 
 		clpseYZoom = Collapse({ arg yZoom;
-			ggTimelinePanel.jTrailView.server.sendBundle( nil,
-				[ '/methodr', '[', '/method', ggTimelinePanel.jTrailView.id, \getStakeRenderer, ']',
+			panel.jTrailView.server.sendBundle( nil,
+				[ '/methodr', '[', '/method', panel.jTrailView.id, \getStakeRenderer, ']',
 					\setYZoom, yZoom ],
-			[ '/method', ggTimelinePanel.jTrailView.id, \triggerRedisplay ]);
+			[ '/method', panel.jTrailView.id, \triggerRedisplay ]);
 		}, 0.2 );
 		vx = vx + vw + 4; vw = 80;
 		JSCSlider( view, Rect( vx, 1, vw, 20 )).canFocus_( false ).value_( 0 ).action_({ arg b;
@@ -394,7 +396,7 @@ BosqueTimelineEditor : Object {
 		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
 			.items_([ "Move", "Resize", "Env" ])
 			.action_({ arg b;
-				ggTimelinePanel.tool = [ \move, \resize, \env ][ b.value ];
+				panel.tool = [ \move, \resize, \env ][ b.value ];
 			});
 		
 //~ggScroll = ggScrollPane;
@@ -502,21 +504,21 @@ BosqueTimelineEditor : Object {
 			.font_( fntBig )
 			.states_([[ "" ++ 0xE2.asAscii ++ 0x9C.asAscii ++ 0xB6.asAscii ]])  // Solid star
 			.action_({ arg b;
-				forest.trackBang.changed;
+				bosque.trackBang.changed;
 			});
 			
 		flow.nextLine;
 		
 //		ggVolume = JEZSlider( view, 250 @ 20, "Master Gain", ControlSpec( 0.ampdb, 4.ampdb, \db, units: " dB"), { arg ez;
-//			forest.masterVolume = ez.value.dbamp;
-//		}, forest.masterVolume.ampdb, false, 70, 50 );
+//			bosque.masterVolume = ez.value.dbamp;
+//		}, bosque.masterVolume.ampdb, false, 70, 50 );
 		GUI.useID( \swing, { ggVolume = EZSlider( view, 250 @ 20, "Master Gain", ControlSpec( 0.ampdb, 4.ampdb, \db, units: " dB"), { arg ez;
-			forest.masterVolume = ez.value.dbamp;
-		}, forest.masterVolume.ampdb, false, 70, 50 ); });
+			bosque.masterVolume = ez.value.dbamp;
+		}, bosque.masterVolume.ampdb, false, 70, 50 ); });
 		ggVolume.numberView.maxDecimals_( 1 );
 		
 		clpseVolume = Collapse({ arg value; ggVolume.value = value.ampdb; }, 0.15, AppClock );
-		updVolume = UpdateListener.newFor( forest, { arg upd, obj, what, param1;
+		updVolume = UpdateListener.newFor( bosque, { arg upd, obj, what, param1;
 			if( what === \masterVolume, { clpseVolume.instantaneous( param1 )});
 		});
 		ggVolume.numberView.onClose = { updVolume.remove };
@@ -599,7 +601,7 @@ BosqueTimelineEditor : Object {
 		};
 		owner = ();
 		owner.lostOwnership = { arg thisF, clipBoard, contents; };
-		doc.forest.clipBoard.setContents( transferable, owner );
+		doc.bosque.clipBoard.setContents( transferable, owner );
 	}
 	
 	prFileOpen { arg doc, ignoreDirty = false;
@@ -643,7 +645,7 @@ BosqueTimelineEditor : Object {
 					f.close;
 					
 					// temporary clear stuff
-					doc.forest.clipBoard.clear;
+					doc.bosque.clipBoard.clear;
 					doc.undoManager.discardAllEdits;
 					doc.selectedRegions.clear( this );
 					doc.selectedTracks.clear( this );
@@ -869,20 +871,28 @@ BosqueTimelineEditor : Object {
 	}
 	
 	prTimelineInsertEnv { arg doc;
-		var span, track, ce, name, stake, clearSpan, trail;
+		var span, track, name, stake;
 		
 		span 	= doc.timelineView.selection.span;
 		track	= doc.selectedTracks.detect({ arg x; x.trackID >= 0 });
 		if( span.isEmpty or: { track.isNil }, { ^this });
 
-		ce		= JSyncCompoundEdit( "Add Env Region" );
 		name		= "Env";
 		// WARNING: Symbol -> asCompileString is broken, doesn't escape apostroph!!!!
 		// therefore we force the name to be a String here !!!
 		stake = BosqueEnvRegionStake( span, name.asString, track );
+		
+		this.editAddEnvStake( stake );
+	}
+	
+	editAddEnvStake { arg stake;
+		var clearSpan, ce, span, trail;
+		
+		span		= stake.span;
+		ce		= JSyncCompoundEdit( "Add Env Region" );
 		clearSpan = Span( span.start, min( span.stop, doc.timeline.span.length ));
 		if( clearSpan.isEmpty.not, {
-			doc.editClearTimeSpan( this, clearSpan, ce, { arg stake; stake.track == track });
+			doc.editClearTimeSpan( this, clearSpan, ce, { arg stake2; stake2.track == stake.track });
 		});
 		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, [ stake ], false ));
 		trail = doc.trail;
@@ -1147,14 +1157,14 @@ name = af.name.asSymbol;
 //			"Edit Copy: lost ownership".inform;
 			contents.object.do({ arg x; x.dispose })};
 //		[ transferable, owner ].postcs;
-		doc.forest.clipBoard.setContents( transferable, owner );
+		doc.bosque.clipBoard.setContents( transferable, owner );
 	}
 
 	prEditPaste { arg doc;
 		var ce, stakes, stake, origStart, origStop, delta, newStart, newStop;
 	
-		if( doc.forest.clipBoard.isDataFlavorAvailable( \stakeList ).not, { ^this });
-		stakes = doc.forest.clipBoard.getData( \stakeList );
+		if( doc.bosque.clipBoard.isDataFlavorAvailable( \stakeList ).not, { ^this });
+		stakes = doc.bosque.clipBoard.getData( \stakeList );
 		origStart	= stakes.minItem({ arg stake; stake.span.start }).span.start;
 		origStop	= stakes.maxItem({ arg stake; stake.span.stop }).span.stop;
 		newStart	= doc.timelineView.cursor.position;
@@ -1197,15 +1207,15 @@ name = af.name.asSymbol;
 			ids			= doc.busConfigs.collect({ arg b; b.busCfgID });
 			id			= 0;
 			while({ ids.indexOf( id ).notNil }, { id = id + 1 });
-			jOptionPane	= JavaObject.getClass( "javax.swing.JOptionPane", forest.swing );
-			jName		= JavaObject( "javax.swing.JTextField", forest.swing, "Bus "++(id+1), 10 );
-			jNumInputs	= JavaObject( "javax.swing.JTextField", forest.swing, Bosque.masterBusNumChannels.asString, 3 );
-			jNumOutputs	= JavaObject( "javax.swing.JTextField", forest.swing, Bosque.masterBusNumChannels.asString, 3 );
-			jLab1		= JavaObject( "javax.swing.JLabel", forest.swing, "Name" );
-			jLab2		= JavaObject( "javax.swing.JLabel", forest.swing, "Input Channels" );
-			jLab3		= JavaObject( "javax.swing.JLabel", forest.swing, "Output Channels" );
-			jLayout		= JavaObject( "java.awt.GridLayout", forest.swing, 3, 2 );
-			jPanel		= JavaObject( "javax.swing.JPanel", forest.swing, jLayout );
+			jOptionPane	= JavaObject.getClass( "javax.swing.JOptionPane", bosque.swing );
+			jName		= JavaObject( "javax.swing.JTextField", bosque.swing, "Bus "++(id+1), 10 );
+			jNumInputs	= JavaObject( "javax.swing.JTextField", bosque.swing, Bosque.masterBusNumChannels.asString, 3 );
+			jNumOutputs	= JavaObject( "javax.swing.JTextField", bosque.swing, Bosque.masterBusNumChannels.asString, 3 );
+			jLab1		= JavaObject( "javax.swing.JLabel", bosque.swing, "Name" );
+			jLab2		= JavaObject( "javax.swing.JLabel", bosque.swing, "Input Channels" );
+			jLab3		= JavaObject( "javax.swing.JLabel", bosque.swing, "Output Channels" );
+			jLayout		= JavaObject( "java.awt.GridLayout", bosque.swing, 3, 2 );
+			jPanel		= JavaObject( "javax.swing.JPanel", bosque.swing, jLayout );
 			jPanel.add( jLab1 );
 			jPanel.add( jName );
 			jPanel.add( jLab2 );
@@ -1293,13 +1303,13 @@ try {
 	}
 
 	showMessageDialog { arg title, text, type = \info;
-		forest.swing.sendMsg( '/method', "javax.swing.JOptionPane", \showMessageDialog, '[', '/ref', \null, ']', text, title, [ \error, \info, \warn, \question ].indexOf( type ) ? -1 );
+		bosque.swing.sendMsg( '/method', "javax.swing.JOptionPane", \showMessageDialog, '[', '/ref', \null, ']', text, title, [ \error, \info, \warn, \question ].indexOf( type ) ? -1 );
 	}
 	
 	queryStringDialog { arg title, text, value, onComplete, parent;
 		{
 			var result, jOptionPane;
-			jOptionPane = JavaObject.getClass( "javax.swing.JOptionPane", forest.swing );
+			jOptionPane = JavaObject.getClass( "javax.swing.JOptionPane", bosque.swing );
 			result = JavaObject.withTimeOut( 60.0, { jOptionPane.showInputDialog_( parent, text, title, 3, nil, nil, value ); });
 			jOptionPane.destroy;
 			if( result.notNil, { onComplete.value( result )});
@@ -1309,7 +1319,7 @@ try {
 	showConfirmDialog { arg title, text, options = \yesno, type = \question, onComplete, parent;
 		{
 			var result, jOptionPane;
-			jOptionPane = JavaObject.getClass( "javax.swing.JOptionPane", forest.swing );
+			jOptionPane = JavaObject.getClass( "javax.swing.JOptionPane", bosque.swing );
 			result = JavaObject.withTimeOut( 60.0, { jOptionPane.showConfirmDialog_( parent, text, title, [ \yesno, \yesnocancel, \okcancel ].indexOf( options ) ? -1, [ \error, \info, \warn, \question ].indexOf( type ) ? -1 ); });
 			jOptionPane.destroy;
 			if( result.notNil, { onComplete.value( [ \yes, \no, \cancel ][ result ])});

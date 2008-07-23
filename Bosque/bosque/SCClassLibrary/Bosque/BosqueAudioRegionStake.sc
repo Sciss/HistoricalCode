@@ -1,7 +1,7 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.17, 06-Jul-08
+ *	@version	0.18, 23-Jul-08
  */
 BosqueAudioRegionStake : BosqueRegionStake {
 	var <faf;
@@ -17,9 +17,9 @@ BosqueAudioRegionStake : BosqueRegionStake {
 	prInitFARS { arg argFileStartFrame, argFAF;
 		fileStartFrame	= argFileStartFrame;
 		faf				= argFAF;
-		java				= JavaObject( "de.sciss.timebased.bosque.AudioRegionStake", faf.forest.swing,
+		java				= JavaObject( "de.sciss.timebased.bosque.AudioRegionStake", faf.bosque.swing,
 							span, name, track, colr, fadeIn, fadeOut, gain, fileStartFrame, faf.view );
-//		java				= JavaObject( "de.sciss.timebased.RegionStake", faf.forest.swing, span, name );
+//		java				= JavaObject( "de.sciss.timebased.RegionStake", faf.bosque.swing, span, name );
 	}
 
 //	*newFrom { arg anotherRegion;
@@ -75,7 +75,7 @@ BosqueAudioRegionStake : BosqueRegionStake {
 	playToBundle { arg bndl, player, frameOffset = 0;
 		var buffer, s, durFrames, durSecs, fadeFrames, fadeInSecs, fadeOutSecs;
 		
-//		SynthDef( \forestDiskIn ++ numChannels, { arg out, i_bufNum, i_dur, i_fadeIn, i_fadeOut, gate = 1, amp ... })
+//		SynthDef( \bosqueDiskIn ++ numChannels, { arg out, i_bufNum, i_dur, i_fadeIn, i_fadeOut, gate = 1, amp ... })
 		if( track.busConfig.isNil, { ^this });
 
 		s			= player.scsynth;
