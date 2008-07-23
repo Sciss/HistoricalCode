@@ -159,15 +159,14 @@ Bosque : Object {
 		cacheManager.setActive( true );
 		onSwingBoot.do({ arg x; x.value });
 		onSwingBoot = nil;
+		timelineEditor = BosqueTimelineEditor( this );
 		scsynth.doWhenBooted({
 			this.prAudioInit;
 			this.prMIDIInit;
 			onScSynthBoot.do({ arg x; x.value });
 			onScSynthBoot = nil;
 		}, inf );
-		
-		timelineEditor = BosqueTimelineEditor( this );
-		
+				
 	  }, inf ); // swing.doWhenBooted
 	}
 	
