@@ -81,7 +81,8 @@ extends DefaultStakeRenderer
 	// env
 	private final Line2D				envLine					= new Line2D.Double();
 	private final Rectangle2D			envKnob					= new Rectangle2D.Double();
-
+	private static final int			envKnobExtent			= 5;
+	
 	static {
 		final BufferedImage img;
 		img		= new BufferedImage( 4, 2, BufferedImage.TYPE_INT_ARGB );
@@ -247,6 +248,7 @@ whichRegion:
 			g2.setColor( selected ? colrAtomBgS : colrAtomBg );
 			g2.fillRect( 1, 1 + hndlExtent, bounds.width - 2, bounds.height - hndlExtent - 2 );
 			if( env != null ) {
+				g2.setColor( selected ? Color.white : Color.black );
 				paintEnv( g2 );
 			}
 		} else {
@@ -272,12 +274,11 @@ whichRegion:
 	{
 		final Span	insideSpan	= viewSpan.intersection( stakeSpan ).shift( -stakeSpan.start );
 		final int	numStakes	= env.getNumStakes();
+		final int	envNegRad	= -envKnobExtent / 2;
 		boolean		drawStart	= true;
 		int idx = env.indexOf( insideSpan.start, true );
 		if( idx < 0 ) idx = Math.max( 0, -(idx + 2) );
-		
-		g2.setColor( selected ? Color.white : Color.black );
-		
+				
 		for( ; idx < numStakes; idx++ ) {
 			final EnvSegmentStake	segm		= (EnvSegmentStake) env.get( idx, true );
 			final Span				segmSpan	= segm.getSpan();
@@ -291,11 +292,11 @@ whichRegion:
 			                 vscale2 * (1f - segm.getStopLevel() ) + hndlExtent );
 			g2.draw( envLine );
 			if( drawStart ) {
-				envKnob.setRect( envLine.getX1() - 2, envLine.getY1() - 2, 5, 5 );
+				envKnob.setRect( envLine.getX1() + envNegRad, envLine.getY1() + envNegRad, envKnobExtent, envKnobExtent );
 				g2.fill( envKnob );
 				drawStart = false;
 			}
-			envKnob.setRect( envLine.getX2() - 2, envLine.getY2() - 2, 5, 5 );
+			envKnob.setRect( envLine.getX2() + envNegRad, envLine.getY2() + envNegRad, envKnobExtent, envKnobExtent );
 			g2.fill( envKnob );
 		}
 	}

@@ -244,6 +244,8 @@ newLp:	for( int ch = 0; ch < newNumWaveTracks; ch++ ) {
 			tlp.add( mainView );
 		}
 	}
+	
+	public TimelinePanel getTimelinePanel() { return tlp; }
 
 // ------------------ TracksTable interface ------------------
 	

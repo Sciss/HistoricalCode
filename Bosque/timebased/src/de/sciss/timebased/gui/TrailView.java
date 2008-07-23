@@ -333,7 +333,7 @@ implements Trail.Listener, TimelineView.Listener, EventManager.Processor,
 	public void trailModified( Trail.Event e )
 	{
 		if( e.getAffectedSpan().touches( timelineVis )) {
-			triggerRedisplay();
+			triggerRedisplay(); // XXX could be a more efficient update rectangle
 		}
 	}
 

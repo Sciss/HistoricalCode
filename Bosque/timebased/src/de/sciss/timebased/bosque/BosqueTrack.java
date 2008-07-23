@@ -11,6 +11,7 @@ extends Track
 	private int			id;
 	private final Trail	trail;
 	private String		levelString;
+//	private Trail		liveTrail	= null;
 
 	public BosqueTrack( Trail trail, int id )
 	{
@@ -34,4 +35,8 @@ extends Track
 	}
 	
 	public String getLevelString() { return levelString; }
+	
+//	public void setLiveTrail( Trail t ) { liveTrail = t; }
+//	
+//	public Trail getLiveTrail() { return liveTrail; }
 }
