@@ -47,17 +47,20 @@ BosqueEnvRegionStake : BosqueRegionStake {
 	}
 
 	replaceStart { arg newStart;
-		var delta, spanNew, envNew, args;
+		var delta, spanNew, envNew, stake, args;
 
 		delta	= newStart - span.start;
 		spanNew	= Span( newStart, span.stop );
 
-//		if( newStart < span.start, {
-			envNew	= env.createEmptyCopy;
-			envNew.addAll( nil, env.getCuttedRange( Span( delta, env.span.stop ), true, Trail.kTouchSplit, delta.neg ));
-//		}, {
-//		
-//		});
+		envNew	= env.createEmptyCopy;
+		envNew.addAll( nil, env.getCuttedRange( Span( delta, env.span.stop ), true, Trail.kTouchSplit, delta.neg ));
+		if( newStart < span.start, {
+			stake = envNew.get( 0 );
+//			stake.postcs;
+			stake = BosqueEnvSegmentStake( Span( 0, stake.span.start ), stake.startLevel, stake.startLevel );
+//			stake.postcs;
+			envNew.add( nil, stake );
+		});
 		
 		args		= this.storeArgs;
 		args[ 0 ]	= spanNew;
@@ -69,11 +72,18 @@ BosqueEnvRegionStake : BosqueRegionStake {
 	}
 	
 	replaceStop { arg newStop;
-		var spanNew, envNew, args;
+		var delta, spanNew, envNew, stake, args;
 
+		delta	= newStop - span.stop;
 		spanNew	= Span( span.start, newStop );
+
 		envNew	= env.createEmptyCopy;
 		envNew.addAll( nil, env.getCuttedRange( Span( 0, spanNew.length ), true, Trail.kTouchSplit, 0 ));
+		if( newStop > span.stop, {
+			stake = envNew.get( envNew.numStakes - 1 );
+			stake = BosqueEnvSegmentStake( Span( stake.span.stop, stake.span.stop + delta ), stake.stopLevel, stake.stopLevel );
+			envNew.add( nil, stake );
+		});
 
 		args		= this.storeArgs;
 		args[ 0 ]	= spanNew;
