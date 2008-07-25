@@ -10,7 +10,7 @@
  *		14-Sep-06		a couple of bug fixes
  *		10-Aug-07		re-synced with java version (performable edits)
  *
- *	@version	0.14, 19-Jul-08
+ *	@version	0.14, 25-Jul-08
  *	@author	Hanns Holger Rutz
  *
  *	@todo	asCompileString
@@ -736,6 +736,13 @@ if( kDebug, {
 		var coll;
 
 		coll = byStart.if( collStakesByStart, collStakesByStop );
+		^coll.at( idx );
+	}
+
+	editGet { arg idx, byStart = true, ce;
+		var coll;
+		
+		coll = byStart.if({ this.prEditGetCollByStart( ce )}, { this.prEditGetCollByStop( ce )});
 		^coll.at( idx );
 	}
 	

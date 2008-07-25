@@ -160,6 +160,7 @@ Bosque : Object {
 		onSwingBoot.do({ arg x; x.value });
 		onSwingBoot = nil;
 		timelineEditor = BosqueTimelineEditor( this );
+		timelineEditor.init;
 		scsynth.doWhenBooted({
 			this.prAudioInit;
 			this.prMIDIInit;

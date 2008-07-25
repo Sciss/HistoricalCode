@@ -10,7 +10,8 @@ BosqueEnvTool {
 	var hndlExtent	= 13;
 
 	var doc, timelinePanel;
-	var pressedStake;
+	var pressedStake, dragHitIdx, dragValid = false, dragStarted = false;
+	var dragConstrainH, dragStartX, dragStartY, dragStartTrack;
 	
 	*new { arg doc, timelinePanel;
 		^super.new.prInitEnvTool( doc, timelinePanel );
@@ -29,7 +30,7 @@ BosqueEnvTool {
 		trackPos			= e.frame;
 		track			= e.track;
 		oldPressedStake	= pressedStake;
-		pressedStake		= e.stake;
+		pressedStake		= if( e.stake.isKindOf( BosqueEnvRegionStake ), e.stake );
 		if( pressedStake.isNil or: { pressedStake.span.containsPos( trackPos ).not }, { ^this });
 
 		level	= e.innerLevel.clip( 0, 1 );
@@ -76,6 +77,18 @@ BosqueEnvTool {
 //			doc.trail.prDispatchModification( this, modSpan );
 			doc.trail.modified( this, modSpan );
 //			"Yepp".postln;
+		}, {
+		
+			dragHitIdx	= e.hitIdx;
+			if( dragHitIdx >= 0, {
+//				dragHitStake	= env.get( hitIdx );
+				dragStartX	= e.x;
+				dragStartY	= e.y;
+				dragStartTrack= e.track;
+				dragStarted	= false;
+				dragValid		= true;
+				dragConstrainH = (dragHitIdx == 0) ||Ê(dragHitIdx == env.numStakes);
+			});
 		})});
 
 //		if( edit.notNil, {
@@ -85,10 +98,93 @@ BosqueEnvTool {
 	}
 
 	mouseDragged { arg e;
-		// nada
+		var dx, dy;
+
+		if( dragValid.not, { ^this });
+		
+		if( dragStarted.not, {
+			dx = e.x - dragStartX;
+			dy = e.y - dragStartY;
+			if( (dx.squared + dy.squared) > 16, {
+				dragStarted = true;
+//				jTrailView.setDrag( dx, dy, 0, 0 );
+//				jTrailView.setDragPainted( true );
+			});
+		}, {
+			if( dragConstrainH, { dy = 0 });
+//			jTrailView.setDrag( dx, dy, 0, 0 );	// XXX
+		});
 	}
 
 	mouseReleased { arg e;
-		// nada
+		var ce, env, modSpan, hitStake1, hitStake2, newStake1, newStake2, hitIdx;
+		var level, frame;
+		
+		dragValid = false;
+		if( dragStarted, {
+//			jTrailView.setDragPainted( false );
+			ce = JSyncCompoundEdit( "Edit Envelope" );
+			level = if( e.track.isNil || (e.track === dragStartTrack), {
+				e.innerLevel.clip( 0, 1 );
+			}, {Êif( doc.tracks.indexOf( e.track ) < doc.tracks.indexOf( dragStartTrack ), 1.0, 0.0 )});
+			frame = pressedStake.span.clip( e.frame ) - pressedStake.span.start;
+			env = pressedStake.env;
+			env.editBegin( ce );
+			if( dragHitIdx == 0, { // level contrained
+				hitStake1 = env.editGet( dragHitIdx, true, ce );
+				env.editRemove( this, hitStake1, ce );
+				newStake1 = hitStake1.replaceStartLevel( level );
+				env.editAdd( this, newStake1, ce );
+				modSpan = newStake1.span;
+			}, { if( dragHitIdx ==  env.numStakes, {
+				hitStake1 = env.editGet( dragHitIdx - 1, true, ce );
+				env.editRemove( this, hitStake1, ce );
+				newStake1 = hitStake1.replaceStopLevel( level );
+				env.editAdd( this, newStake1, ce );
+				modSpan = newStake1.span;
+			}, {
+				// to make it more simple, we perform a successive delete and
+				// insert point operation...
+				// delete:
+				hitStake1 = env.editGet( dragHitIdx - 1, true, ce );
+				hitStake2 = env.editGet( dragHitIdx, true, ce );
+				newStake1	 = hitStake1.replaceStopWithLevel( hitStake2.span.stop, hitStake2.stopLevel );
+				env.editRemoveAll( this, [ hitStake1, hitStake2 ], ce );
+				env.editAdd( this, newStake1, ce );
+				modSpan = Span( hitStake1.span.start, hitStake2.span.stop );
+				// insert:
+				hitIdx = env.editIndexOf( frame, true, ce ); // !! editIndexOf !!
+				if( hitIdx == 0, { 	// wooop, we hit another point
+					hitStake1 = env.editGet( hitIdx, true, ce );
+					env.editRemove( this, hitStake1, ce );
+					newStake1 = hitStake1.replaceStartLevel( level );
+					env.editAdd( this, newStake1, ce );
+					modSpan = modSpan.union( newStake1.span );
+				}, { if( hitIdx > 0, {	// wooop, we hit another point
+					hitStake1 = env.editGet( hitIdx - 1, true, ce );
+					hitStake2 = env.editGet( hitIdx, true, ce );
+					env.editRemoveAll( this, [ hitStake1, hitStake2 ], ce );
+					newStake1 = hitStake1.replaceStopLevel( level );
+					newStake2 = hitStake2.replaceStartLevel( level );
+					env.editAddAll( this, [ newStake1, newStake2 ], ce );
+					modSpan = modSpan.union( Span( newStake1.span.start, newStake2.span.stop ));
+				}, {
+//[ "Removed", hitStake1.span, hitStake2.span, "added", newStake1.span, "frame", frame, "hitIdx", hitIdx ].postcs;
+					hitStake1		= env.editGet( (hitIdx + 2).neg, true, ce );  // !!! editGet !!!
+//[ "New hit", hitStake1.span ].postcs;
+					Assertion({ hitStake1.span.containsPos( frame )});
+					newStake1		= hitStake1.replaceStopWithLevel( frame, level );
+					newStake2		= hitStake1.replaceStartWithLevel( frame, level );
+					env.editRemove( this, hitStake1, ce );
+					env.editAddAll( this, [ newStake1, newStake2 ], ce );
+					modSpan		= modSpan.union( hitStake1.span );
+				})});
+			})});
+			env.editEnd( ce );
+			doc.undoManager.addEdit( ce.performAndEnd );
+			modSpan = modSpan.shift( pressedStake.span.start );
+			doc.trail.modified( this, modSpan );
+			dragStarted = false;
+		});
 	}
 }

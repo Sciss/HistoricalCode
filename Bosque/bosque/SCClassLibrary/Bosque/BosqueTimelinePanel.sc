@@ -94,6 +94,11 @@ BosqueTimelinePanel {
 		
 		liveEnvPainter = JavaObject( "de.sciss.timebased.bosque.LiveEnvPainter", bosque.swing, jTrackPanel, jTimelinePanel, doc.timelineView );
 		
+		UpdateListener.newFor( bosque.timelineEditor, { arg upd, ed, tool;
+			jTimelinePanel.server.sendMsg( '/set', jTimelinePanel.id, \cursor, '[', '/new', "java.awt.Cursor",
+				switch( tool, \move, 0, \resize, 11, \env, 1, 0 ), ']' );
+		}, \tool );
+		
 		respTrailViewListener = ScissOSCPathResponder( bosque.swing.addr, [ '/trail', jTrailView.id, \mouse ], {
 			arg time, resp, msg;
 			var cmd, oscID, mouse, action, frame, level, innerLevel, hitIdx, trackIdx, stakeIdx, x, y, modifiers, button, clickCount;
@@ -101,7 +106,7 @@ BosqueTimelinePanel {
 			
 			#cmd, oscID, mouse, action, frame, level, innerLevel, hitIdx, trackIdx, stakeIdx, x, y, modifiers, button, clickCount = msg;
 			
-			e = Event( 13 );
+			e = Event( 16 );
 			e[ \x ] = x;
 			e[ \y ] = y;
 			e[ \clickCount ] = clickCount;
@@ -508,7 +513,7 @@ BosqueTimelinePanel {
 		dx = e.x - dragStartX;
 		dy = e.y - dragStartY;
 		if( dragStarted.not, {
-			if( sqrt( dx.squared + dy.squared ) > 4, {
+			if( (dx.squared + dy.squared) > 16, {
 				dragStarted = true;
 				dragConstrainH = false;
 				dragConstrainV = false;

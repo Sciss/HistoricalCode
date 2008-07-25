@@ -26,10 +26,10 @@ BosqueTimelineEditor : Object {
 		bosque	= argBosque ?? { Bosque.default };
 //		bosque.doWhenSwingBooted({ this.prMakeGUI });
 		doc		= bosque.session;
-		this.prMakeGUI;
+//		this.prMakeGUI;
 	}
 	
-	prMakeGUI {
+	init {
 		var view, view2, updAudioFiles, updTimeline, ggFileList, ggBusList;
 		var fntSmall, fntBig, flow;
 		var ggPlay, ggStop, updTransport, updDirty, updSelectedTracks, updTracks;
@@ -397,6 +397,7 @@ BosqueTimelineEditor : Object {
 			.items_([ "Move", "Resize", "Env" ])
 			.action_({ arg b;
 				panel.tool = [ \move, \resize, \env ][ b.value ];
+				this.changed( \tool, panel.tool );
 			});
 		
 //~ggScroll = ggScrollPane;
