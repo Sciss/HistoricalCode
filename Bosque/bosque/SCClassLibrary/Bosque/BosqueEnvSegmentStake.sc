@@ -4,7 +4,7 @@
  */
 
 /**
- *  @version	0.10, 06-Jul-08
+ *  @version	0.11, 25-Jul-08
  *  @author	Hanns Holger Rutz
  */
 BosqueEnvSegmentStake : Stake {
@@ -14,6 +14,12 @@ BosqueEnvSegmentStake : Stake {
 	var <shape;
 	var <curve;
 
+	classvar array; // for quick envAt calculations
+	
+	*initClass {
+		array = [ /* 0=startLevel */ 0, 1, -99, -99, /* 4=stopLevel */ 0, /* 5=stopTime */ 1.0, /* 6=shapeNumber */ 0, /* 7=curveValue */ 0 ];
+	}
+	
 	*new { arg span, startLevel, stopLevel, shape = 1, curve = 0.0;
 		^super.new( span ).prInitFESS( startLevel, stopLevel, shape, curve );
 	}
@@ -27,6 +33,18 @@ BosqueEnvSegmentStake : Stake {
 								span, startLevel, stopLevel, shape, curve );
 	}
 	
+	level { arg frame;
+//		("stake #" ++ idx ++ "; startLvl " ++ stake.startLevel ++ "; stopLvl " ++ stake.stopLevel).postln;
+		
+		array[ 0 ] = startLevel;
+		array[ 4 ] = stopLevel;
+//		array[ 5 ] = span.length;
+		array[ 6 ] = shape;
+		array[ 7 ] = curve;
+//		^array.envAt( max( frame, span.stop ) - span.start );
+		^array.envAt( ((frame - span.start) / span.length).clip( 0, 1 ));
+	}
+		
 	duplicate {
 		^this.class.new( *this.storeArgs );
 	}
@@ -38,15 +56,17 @@ BosqueEnvSegmentStake : Stake {
 	}
 
 	replaceStart { arg newStart;
-		var args = this.storeArgs;
-		args[ 0 ] = Span( newStart, span.stop );
-		^this.class.new( *args );
+//		var args = this.storeArgs;
+//		args[ 0 ] = Span( newStart, span.stop );
+//		^this.class.new( *args );
+		^this.replaceStartWithLevel( newStart, this.level( newStart ));
 	}
 	
 	replaceStop { arg newStop;
-		var args = this.storeArgs;
-		args[ 0 ] = Span( span.start, newStop );
-		^this.class.new( *args );
+//		var args = this.storeArgs;
+//		args[ 0 ] = Span( span.start, newStop );
+//		^this.class.new( *args );
+		^this.replaceStopWithLevel( newStop, this.level( newStop ));
 	}
 
 	replaceStartLevel { arg newLevel;
