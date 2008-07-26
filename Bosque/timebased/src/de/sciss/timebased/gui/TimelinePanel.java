@@ -382,9 +382,22 @@ implements TopPainter, TimelineView.Listener
 		//System.out.println( "play : " + playStartPos );
 		playRate		= rate;
 		playStartTime	= System.currentTimeMillis();
-		playTimer.setDelay( Math.min( (int) (1000 / (vpScale * timelineRate * playRate)), 33 ));
+		playTimer.setDelay( Math.min( (int) (1000 / (vpScale * timelineRate * Math.abs( playRate ))), 33 ));
 		isPlaying		= true;
 		playTimer.restart();
+	}
+	
+	public void setPlayRate( long startPos, double rate )
+	{
+		if( !isPlaying ) return;
+		
+		playStartPos	= startPos; // timelinePos;
+		//System.out.println( "rate : " + playStartPos );
+		playRate		= rate;
+		playStartTime	= System.currentTimeMillis();
+		playTimer.setDelay( Math.min( (int) (1000 / (vpScale * timelineRate * Math.abs( playRate ))), 33 ));
+//		isPlaying		= true;
+//		playTimer.restart();
 	}
 	
 	public void stop()
@@ -409,7 +422,7 @@ implements TopPainter, TimelineView.Listener
 	
 		if( !timelineVis.isEmpty() ) {
 			vpScale			= (float) vpRecentRect.width / (float) Math.max( 1, timelineVis.getLength() ); // - 1;
-			playTimer.setDelay( Math.min( (int) (1000 / (vpScale * timelineRate * playRate)), 33 ));
+			playTimer.setDelay( Math.min( (int) (1000 / (vpScale * timelineRate * Math.abs( playRate ))), 33 ));
 			vpPosition		= (int) ((timelinePos - timelineVis.getStart()) * vpScale + 0.5f);
 			vpPositionRect.setBounds( vpPosition, 0, 1, vpRecentRect.height );
 			if( !timelineSel.isEmpty() ) {
@@ -570,7 +583,7 @@ implements TopPainter, TimelineView.Listener
 		final Timeline tl = e.getView().getTimeline();
 		timelineRate				= tl.getRate();
 //		timelineSpan				= tl.getSpan();
-		playTimer.setDelay( Math.min( (int) (1000 / (vpScale * timelineRate * playRate)), 33 ));
+		playTimer.setDelay( Math.min( (int) (1000 / (vpScale * timelineRate * Math.abs( playRate ))), 33 ));
 // EEE
 //		updateAFDGadget();
 //		updateOverviews( false, true );
