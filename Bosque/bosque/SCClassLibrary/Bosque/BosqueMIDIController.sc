@@ -5,11 +5,12 @@
 /**
  *	This class assumes the anatomy of a BCF2000 controller.
  *
- *	@version	0.11, 23-Jul-08
+ *	@version	0.12, 26-Jul-08
  */
 BosqueMIDIController {
 	classvar <>numFaders = 8;
-	classvar <>period = 0.05; // update period (during transport performance) in seconds
+	classvar <>smoothing = 0.01;
+	classvar <>period    = 0.05; // update period (during transport performance) in seconds
 	
 	var bosque, doc, <in, <out;
 	var follow, write;
@@ -170,7 +171,7 @@ BosqueMIDIController {
 	}
 	
 	prWriteStop { arg chan;
-		var stake, newStake, segm, lastSegm;
+		var stake, newStake, segm, newEnv, lastSegm;
 		write[ chan ] = false;
 		if( liveTracks[ chan ].notNil, {
 			liveTracks[ chan ].liveReplc = nil;
@@ -182,11 +183,108 @@ BosqueMIDIController {
 			if( stake.env.numStakes > 1, {
 				lastSegm = stake.env.get( stake.env.numStakes - 1 );
 				stake.env.remove( nil, lastSegm );
-//				stake.dirtyDirtyRegionStop( lastSegm.span.start + stake.span.start );
-				newStake = stake.replaceStop( lastSegm.span.start + stake.span.start );
-//				stake.dispose;
+//				newStake = stake.replaceStop( lastSegm.span.start + stake.span.start );
+				newEnv = BosqueTrail.new;
+				newEnv.addAll( nil, this.prSmooth( stake.env.getAll ));
+				newStake = BosqueEnvRegionStake( Span( stake.span.start, lastSegm.span.start + stake.span.start ),
+					stake.name, stake.track, stake.colr, stake.fadeIn, stake.fadeOut, stake.gain, newEnv );
+				this.prSmooth( stake.env.getAll, smoothing );
 				bosque.timelineEditor.editAddEnvStake( newStake );
 			});
 		});
+	}
+	
+	/**
+	 *	Smoothing by successively replacing
+	 *	data with a regression line until
+	 *	a threshold residual is exceeded.
+	 *	("least squares").
+	 *
+	 *	http://de.wikipedia.org/wiki/Regressionsanalyse#Berechnung_der_Regressionsgeraden
+	 *
+	 *	So y_est[i] = a + bx[i]
+	 *	where b := sum( (x[i] - x_mean)*(y[i] - y_mean)) / sum( (x[i] - x_mean).squared )
+	 *	and a := y_mean - b*x_mean
+	 *
+	 *	and e[i] := y[i] - y_est[i] <= max_error
+	 *
+	 *	Note that all env segments are considered to have line shapes!
+	 */
+//	prSmooth { arg coll, maxErr = 0.01;
+//		var off, sumx, sumy, b, meanx, meany, dx, dy, sumNom, sumDenom, x, y, n, yEst;
+//		var aTest, bTest, nSub, collRes;
+//		
+//		off  = 0;
+//		x    = coll.collect({ arg segm; segm.span.start }).add( coll.last.span.stop );
+//		y    = coll.collect({ arg segm; segm.startLevel }).add( coll.last.stopLevel );
+//		n    = x.size;
+//		while({ off < n }, {
+//			nSub = 0;
+//			sumx = 0.0;
+//			sumy = 0.0;
+//			block { arg break;
+//				(off .. (n - 1)).do({ arg i, k;
+//					sumx     = sumx + x[ i ];
+//					sumy     = sumy + y[ i ];
+//					meanx    = sumx / (k + 1);
+//					meany    = sumy / (k + 1);
+//					sumNum   = 0.0;
+//					sumDenom = 0.0;
+//					(off .. i).do({ arg j;
+//						dx       = x[ j ] - meanx;
+//						dy       = y[ j ] - meany;
+//						sumNum   = sumNom + (dx * dy);
+//						sumDenom = sumDenom + dx.squared;
+//					});
+//					bTest = sumNum / sumDenom;
+//					aTest = meany - (bTest * meanx);
+//					
+//					(off .. i).do({ arg j;
+//						yEst = aTest + (bTest * x[ j ]);
+//						if( abs( y[ j ] - yEst ) > maxErr, break );
+//					});
+//		
+//					a = aTest;
+//					b = bTest;
+//					nSub = nSub + 1;
+//				});
+//			};
+//			collRes = collRes.add( BosqueEnvSegmentStake( span, startLevel, stopLevel ));
+//			off = off + nSub;
+//		});
+//	}
+
+	prSmooth { arg coll, maxErr = 0.01;
+		var off, b, dx, dy, x, y, n, yEst;
+		var bTest, nSub, collRes, y0, x0, i;
+		
+		off  = 0;
+		x    = coll.collect({ arg segm; segm.span.start }).add( coll.last.span.stop );
+		y    = coll.collect({ arg segm; segm.startLevel }).add( coll.last.stopLevel );
+		n    = x.size;
+		while({ off < (n - 1)}, {
+			nSub = 0;
+			block { arg break;
+				x0 = x[ off ];
+				y0 = y[ off ];
+				b  = 0;
+				i  = off + 1;
+				while({ i < n }, {
+					bTest = (y[ i ] - y0) / (x[ i ] - x0);
+					(off .. i).do({ arg j;
+						yEst = y0 + (bTest * (x[ j ] - x0));
+						if( abs( y[ j ] - yEst ) > maxErr, break );
+					});
+		
+					b    = bTest;
+					nSub = nSub + 1;
+					i = i + 1;
+				});
+			};
+			collRes = collRes.add( BosqueEnvSegmentStake(
+				Span( x0, x[ off + nSub ]), y0, y[ off + nSub ]));
+			off = off + nSub;
+		});
+		^collRes;
 	}
 }
