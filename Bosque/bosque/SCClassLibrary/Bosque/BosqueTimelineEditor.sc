@@ -318,7 +318,7 @@ BosqueTimelineEditor : Object {
 
 		vx = vx + vw + 4; vw = 80;
 		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
-			.items_([ "Timeline", "--------", "Insert Span...", "Clear Span", "Remove Span", "--------", "Split Objects", "Insert Env", "Insert Func", "Change Gain" ])
+			.items_([ "Timeline", "--------", "Insert Span...", "Clear Span", "Remove Span", "--------", "Split Objects", "Glue Objects", "--------", "Insert Env", "Insert Func", "Change Gain" ])
 			.action_({ arg b; var value = b.value;
 				b.value = 0;
 				switch( value - 2,
@@ -326,9 +326,10 @@ BosqueTimelineEditor : Object {
 				1, { this.prTimelineClearSpan( doc )},
 				2, { this.prTimelineRemoveSpan( doc )},
 				4, { this.prTimelineSplitObjects( doc )},
-				5, { this.prTimelineInsertEnv( doc )},
-				6, { this.prTimelineInsertFunc( doc )},
-				7, { this.prTimelineChangeGain( doc )}
+				5, { this.prTimelineGlueObjects( doc )},
+				7, { this.prTimelineInsertEnv( doc )},
+				8, { this.prTimelineInsertFunc( doc )},
+				9, { this.prTimelineChangeGain( doc )}
 				);
 			});
 		
@@ -840,6 +841,53 @@ BosqueTimelineEditor : Object {
 		doc.undoManager.addEdit( ce.performAndEnd );
 	}
 	
+	prTimelineGlueObjects { arg doc;
+		var pos, ce, sel, flt, env, coll, firstSegm, lastSegm, newSpan, offset, firstReg, didBegin = false, newReg, collNewRegs;
+		
+		pos	= doc.timelineView.cursor.position;
+		sel	= doc.selectedRegions.getAll.select({ arg stake; stake.isKindOf( BosqueEnvRegionStake )});
+		doc.tracks.do({ arg track;
+			flt = sel.select({ arg x; x.track === track });
+			if( flt.size >= 2, {
+				if( didBegin.not, {
+					ce = JSyncCompoundEdit( "Glue Objects" );
+					doc.trail.editBegin( ce );
+					didBegin = true;
+				});
+				flt		= flt.sort({ arg a, b; a.span.start <= b.span.start });
+				newSpan	= nil;
+				flt.do({ arg stake; newSpan = stake.span.union( newSpan )});
+				firstReg	= flt.first;
+				offset	= firstReg.span.start;
+				env		= firstReg.env.duplicate;
+				lastSegm	= env.get( env.numStakes - 1 );
+//("Doing track " ++ track.name ++ " --> offset is " ++ offset ++ "; newSpan is " ++ newSpan.asCompileString).postln;
+				flt.copyToEnd( 1 ).do({ arg stake;
+					coll = Trail.getCuttedRange( stake.env.getAll, stake.env.span, true, Trail.kTouchNone, stake.span.start - offset );
+					firstSegm = coll.at( 0 );
+					if( lastSegm.span.stop < firstSegm.span.start, {
+						env.add( nil, BosqueEnvSegmentStake( Span( lastSegm.span.stop, firstSegm.span.start ),
+							lastSegm.stopLevel, firstSegm.startLevel ));
+					});
+					env.addAll( nil, coll );
+					lastSegm = firstSegm;
+				});
+				doc.trail.editRemoveAll( this, flt, ce );
+				ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, flt, false ));
+				newReg = BosqueEnvRegionStake( newSpan, firstReg.name, track, firstReg.colr, firstReg.fadeIn,
+					flt.last.fadeOut, firstReg.gain, env );
+				collNewRegs = collNewRegs.add( newReg );
+				doc.trail.editAdd( this, newReg, ce );
+			});
+		});
+
+		if( didBegin, {
+			doc.trail.editEnd( ce );
+			ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, collNewRegs, false ));
+			doc.undoManager.addEdit( ce.performAndEnd );
+		});
+	}
+
 	prTimelineInsertFunc { arg doc;
 		var span, track, ce, name, stake, clearSpan, trail;
 		
