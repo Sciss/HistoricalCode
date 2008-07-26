@@ -180,6 +180,19 @@ Bosque : Object {
 		^this.default.session.markers.getAll.detect({ arg m; m.name == name });
 	}
 	
+	/**
+	 *	@param	pos	either a position (frame) or a MarkerStake as returned
+	 *				by the mark method, or a Symbol that is a marker's name
+	 */ 
+	*jump { arg pos;
+		if( pos.isKindOf( Symbol ), {
+			pos = this.mark( pos ).pos;
+		}, { if( pos.isKindOf( MarkerStake ), {
+			pos = pos.pos;
+		})});
+		this.default.session.editPosition( this, pos );
+	}
+	
 	bootScSynth {
 		var o;
 		

@@ -215,7 +215,11 @@ BosqueTimelinePanel {
 //				jTimelinePanel.setPosition( param1 );
 				jTimelinePanel.play( param1, param2 );
 				routLevelStrings = this.prStartRoutLevelStrings;
-			});
+			},
+			\rate, {
+				jTimelinePanel.setPlayRate( param1, param2 );
+			}
+			);
 		});
 
 		updTracks = UpdateListener.newFor( doc.tracks, { arg upd, sc, what ... coll;

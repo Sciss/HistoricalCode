@@ -98,7 +98,7 @@ BosqueEnvTool {
 	}
 
 	mouseDragged { arg e;
-		var dx, dy;
+		var dx, dy, level;
 
 		if( dragValid.not, { ^this });
 		
@@ -113,6 +113,13 @@ BosqueEnvTool {
 		}, {
 			if( dragConstrainH, { dy = 0 });
 //			jTrailView.setDrag( dx, dy, 0, 0 );	// XXX
+		});
+		
+		if( dragStarted, {
+			level = if( e.track.isNil || (e.track === dragStartTrack), {
+				e.innerLevel.clip( 0, 1 );
+			}, {Êif( doc.tracks.indexOf( e.track ) < doc.tracks.indexOf( dragStartTrack ), 1.0, 0.0 )});
+			dragStartTrack.displayLevel( if( dragStartTrack.ctrlSpec.isNil, level, {ÊdragStartTrack.ctrlSpec.map( level )}));
 		});
 	}
 

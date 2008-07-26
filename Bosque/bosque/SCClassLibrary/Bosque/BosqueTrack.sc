@@ -51,9 +51,12 @@ BosqueTrack {
 //	}
 
 	updateLevelString { arg frame;
-		var mapped, newStr;
+		this.displayLevel( this.map( frame ));
+	}
+	
+	displayLevel { arg mapped;
+		var newStr;
 		
-		mapped = this.map( frame );
 		if( mapped.notNil, {
 			if( ctrlSpec.notNil, {
 				newStr = mapped.round( 0.01 ).asString ++ ctrlSpec.units;

@@ -1,7 +1,7 @@
 /**
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
  *
- *	@version	0.17, 19-Jul-08
+ *	@version	0.18, 26-Jul-08
  */
 BosqueTransport : Object {
 	var <doc;
@@ -11,6 +11,8 @@ BosqueTransport : Object {
 	var playRate, playRate2, playStartPos, playStartTime;
 	var loop;
 	var loopUsed	= false;
+//	var funcClpse;
+	var clpsePoint;
 	
 	*new { arg doc;
 		^super.new.prInit( doc );
@@ -18,6 +20,8 @@ BosqueTransport : Object {
 	
 	prInit { arg argDoc;
 		doc = argDoc;
+		clpseStop = Collapse({ this.prCollapse });
+//		funcClpse = {Êthis.prCollapse };
 		UpdateListener.newFor( doc.timelineView, { arg upd, timelineView, what, what2;
 			var pos, wasPaused;
 			
@@ -33,7 +37,7 @@ BosqueTransport : Object {
 				\changed, {
 					what2.postln;
 					switch( what2,
-					\span, { this.prMakeCollapse },
+					\span, { this.prUpdateCollapse },
 					\rate, {
 						this.stop( setPosition: true );
 						this.play( pos );
@@ -46,37 +50,99 @@ BosqueTransport : Object {
 	
 	loop_ { arg span;
 		loop = span;
-		if( running, { this.prMakeCollapse });
+		if( running, { this.prUpdateCollapse });
 	}
 	
 	play { arg pos, rate = 1;
 		if( running, { ^this });
 		
 		pos			= pos ?? { doc.timelineView.cursor.position };
-		if( pos >= doc.timeline.span.stop, { pos = doc.timeline.span.start });
+		if( rate >= 0, {
+			if( pos >= doc.timeline.span.stop, { pos = doc.timeline.span.start });
+		}, {
+			if( pos <= 0, { pos = doc.timeline.span.stop });
+		});
 		playStartTime	= thisThread.seconds;
 		playStartPos	= pos;
 		playRate		= rate;
 		playRate2		= playRate * doc.timeline.rate;
 		running		= true;
 		paused		= false;
-		this.prMakeCollapse;
+		this.prUpdateCollapse( pos );
 		this.changed( \play, pos, rate );
 	}
-
-	prMakeCollapse {
-		var f, pos, dur;
-		if( clpseStop.notNil, { clpseStop.cancel; clpseStop = nil });
-		pos		= this.currentFrame;
-		loopUsed	= loop.notNil and: { pos < loop.stop };
+	
+	rate { ^playRate }
+	
+	rate_ { arg newRate;
+		var pos;
+	
+//		newRate = newRate.max( 0.0 );
+		if( running.not || (newRate == playRate), { ^this });
+		
+		pos			= this.currentFrame;
+//		if( pos >= doc.timeline.span.stop, { pos = doc.timeline.span.start });
+		playStartTime	= thisThread.seconds;
+		playStartPos	= pos;
+		playRate		= newRate;
+		playRate2		= playRate * doc.timeline.rate;
+		running		= true;
+		paused		= false;
+		this.prUpdateCollapse( pos );
+		this.changed( \rate, pos, newRate );
+	}
+	
+	prCollapse {
+//		[ "STOP!", loopUsed ].postln;
+//		clpseStop = nil;
+		this.stop;
 		if( loopUsed, {
-			f	= { this.stop; this.play( loop.start, playRate )};
-			dur	= (loop.stop - pos) / playRate2;
-		}, {
-			f = { this.stop };
-			dur	= (doc.timeline.span.stop - pos) / playRate2;
+			this.play( if( playRate >= 0, loop.start, loop.stop ), playRate );
 		});
-		clpseStop = Collapse( f, dur, SystemClock ).defer;
+	}
+
+//	prMakeCollapse { arg pos;
+//		var dur;
+//		pos = pos ?? {Êthis.currentFrame };
+//		if( clpseStop.notNil, { clpseStop.cancel; clpseStop = nil });
+//		dur		= this.prCalcCollapseDur( pos );
+//		clpseStop	= Collapse( funcClpse, dur, SystemClock ).defer;
+//	}
+
+	prCalcCollapsePoint { arg pos;
+//		var dur;
+		if( playRate2 >= 0, {
+			loopUsed	= loop.notNil and: { pos < loop.stop };
+		}, {
+			loopUsed	= loop.notNil and: { pos > loop.start };
+		});
+		if( loopUsed, {
+			if( playRate2 >= 0, {
+				clpsePoint = loop.stop;
+//				dur	= (loop.stop - pos) / playRate2;
+			}, {
+				clpsePoint = loop.start;
+//				dur	= (pos - loop.start) / playRate2.neg;
+			});
+		}, {
+			if( playRate2 >= 0, {
+				clpsePoint = doc.timeline.span.stop;
+//				dur	= (doc.timeline.span.stop - pos) / playRate2;
+			}, {
+				clpsePoint = doc.timeline.span.start;
+//				dur	= (pos - doc.timeline.span.start - pos) / playRate2.neg;
+			});
+		});
+//		("collapse dur = " ++ dur).postln;
+//		^dur;
+	}
+
+	prUpdateCollapse { arg pos;
+		var dur;
+		pos = pos ?? {Êthis.currentFrame };
+//		if( clpseStop.isNil, { ^this.prMakeCollapse( pos )});
+		this.prCalcCollapsePoint( pos );
+//		clpseStop.rescheduleWith( dur );
 	}
 	
 	stop { arg setPosition = true;
@@ -84,7 +150,8 @@ BosqueTransport : Object {
 
 		if( running.not, { ^this });
 
-		if( clpseStop.notNil, { clpseStop.cancel; clpseStop = nil });
+//		if( clpseStop.notNil, { clpseStop.cancel; clpseStop = nil });
+//		if( clpseStop.started, { clpseStop.cancel });
 		pos 			= this.currentFrame;
 		running		= false;
 		paused		= false;
@@ -95,7 +162,8 @@ BosqueTransport : Object {
 	pause {
 		if( running.not || paused, { ^this });
 		
-		if( clpseStop.notNil, { clpseStop.cancel; clpseStop = nil });
+//		if( clpseStop.notNil, { clpseStop.cancel; clpseStop = nil });
+//		if( clpseStop.started, { clpseStop.cancel });
 		playStartPos 	= this.currentFrame;
 		playStartTime	= thisThread.seconds;
 		paused		= true;
@@ -109,7 +177,7 @@ BosqueTransport : Object {
 		pos			= pos ? playStartPos;
 		playStartPos 	= pos;
 		playStartTime	= thisThread.seconds;
-		this.prMakeCollapse;
+		this.prUpdateCollapse( pos );
 		this.changed( \resume, pos, playRate );
 	}
 	
@@ -117,8 +185,25 @@ BosqueTransport : Object {
 	isPaused  { ^paused }
 	
 	currentFrame {
+		var frame;
 		if( running, {
-			^(playStartPos + ((thisThread.seconds - playStartTime) * playRate2).asInteger).min( doc.timeline.span.stop );
+			frame = playStartPos + ((thisThread.seconds - playStartTime) * playRate2).asInteger;
+			if( playRate2 >= 0, {
+				if( frame >= clpsePoint, {
+					clpseStop.instantaneous;
+					^clpsePoint;
+				}, {
+					^frame;
+				});
+			}, {
+				if( frame <= clpsePoint, {
+					clpseStop.instantaneous;
+					^clpsePoint;
+				}, {
+					^frame;
+				});
+			});
+//			^doc.timeline.span.clip( playStartPos + ((thisThread.seconds - playStartTime) * playRate2).asInteger )
 		}, {
 			^doc.timelineView.cursor.position;
 		});
