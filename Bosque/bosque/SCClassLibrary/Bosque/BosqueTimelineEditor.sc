@@ -862,15 +862,15 @@ BosqueTimelineEditor : Object {
 				env		= firstReg.env.duplicate;
 				lastSegm	= env.get( env.numStakes - 1 );
 //("Doing track " ++ track.name ++ " --> offset is " ++ offset ++ "; newSpan is " ++ newSpan.asCompileString).postln;
-				flt.copyToEnd( 1 ).do({ arg stake;
-					coll = Trail.getCuttedRange( stake.env.getAll, stake.env.span, true, Trail.kTouchNone, stake.span.start - offset );
+				flt.copyToEnd( 1 ).do({ arg reg;
+					coll = Trail.getCuttedRange( reg.env.getAll, reg.env.span, true, Trail.kTouchNone, reg.span.start - offset );
 					firstSegm = coll.at( 0 );
 					if( lastSegm.span.stop < firstSegm.span.start, {
 						env.add( nil, BosqueEnvSegmentStake( Span( lastSegm.span.stop, firstSegm.span.start ),
 							lastSegm.stopLevel, firstSegm.startLevel ));
 					});
 					env.addAll( nil, coll );
-					lastSegm = firstSegm;
+					lastSegm = coll.last;
 				});
 				doc.trail.editRemoveAll( this, flt, ce );
 				ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, flt, false ));
