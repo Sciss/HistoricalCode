@@ -487,7 +487,7 @@ BosqueTimelineEditor : Object {
 			});
 		
 		ggPlayPos = JSCStaticText( view, Rect( 0, 0, 160, 40 )).background_( Color.black )
-			.stringColor_( Color.yellow ).align_( \center ).font_( JFont( "Eurostile", 24, 1 )); // .string_( "00:00:00.000" );
+			.stringColor_( Color.yellow ).align_( \center ).font_( JFont( "Andale Mono", 22, 1 )); // .string_( "00:00:00.000" );
 		fPlayPosStr = { arg frame; ScissUtil.toTimeString( frame / doc.timeline.rate )};
 		updTimeline = UpdateListener.newFor( doc.timelineView, { arg upd, timelineView, what, what2;
 			if( taskPlayPos.isPlaying.not and: { (what === \positioned) or: { (what === \changed) && (what2 === \rate) }}, {

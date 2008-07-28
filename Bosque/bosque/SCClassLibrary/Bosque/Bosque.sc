@@ -64,6 +64,8 @@ Bosque : Object {
 	var <master, <app;
 	var <timelineEditor;
 	
+	var didInitAudio = false;
+	
 	*initClass {
 //		Class.initClassTree( SwingOSC );
 //		default = this.new;
@@ -163,6 +165,7 @@ Bosque : Object {
 		timelineEditor.init;
 		scsynth.doWhenBooted({
 			this.prAudioInit;
+			didInitAudio = true;
 			this.prMIDIInit;
 			onScSynthBoot.do({ arg x; x.value });
 			onScSynthBoot = nil;
@@ -212,9 +215,9 @@ Bosque : Object {
 	}
 
 	doWhenScSynthBooted { arg onComplete;
-//		if( scsynth.serverRunning, onComplete, {
+		if( scsynth.serverRunning && didInitAudio, onComplete, {
 			onScSynthBoot = onScSynthBoot.add( onComplete );
-//		});
+		});
 	}
 	
 	prAudioInit {
@@ -502,7 +505,7 @@ if( createCC, {
 		
 		bosque = this.new;
 //		timelineEditor = BosqueTimelineEditor( this );
-		bosque.bootScSynth;
+		if( Bosque.soundCard.notNil, { bosque.bootScSynth });
 //		bosque.scsynth.makeWindow;
 //		this.allGUI;
 	}
