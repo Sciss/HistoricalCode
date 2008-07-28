@@ -1,0 +1,16 @@
+
+	.doTimeline({ arg tl; tl.rate_(44100).span_(Span(0, 2646000))})
+	.doTimelineView({ arg tlv; tlv.span_(Span(0, 2646000)).doCursor({ arg csr; csr.position_(195877)}).doSelection({ arg sel; sel.span_(Span(195877, 497992))})})
+	.doAudioFiles({ arg af; af.addAll(this,
+	[  ])})
+	.doBusConfigs({ arg b; b.addAll(this,
+	[  ])})
+	.doTracks({ arg tr; tr.addAll(this,
+	[ BosqueTrack(-1).name_('Markers'), BosqueTrack(0).name_('Track_1') ])})
+	.doTrail({ arg tr; tr.rate_(44100).addAll(this,
+	[ BosqueEnvRegionStake(Span(195877, 497992), "Env", BosqueTrack(0).name_('Track_1'), Color(0.0, 0.0, 0.6, 1.0), BosqueFade('lin', 0, 0), BosqueFade('lin', 0, 0), 1.0, BosqueTrail(1).rate_(nil).addAll(this,
+	[ BosqueEnvSegmentStake(Span(0, 89639), 0.0, 0.57090908288956, 1, 0.0), BosqueEnvSegmentStake(Span(89639, 126158), 0.57090908288956, 0.79272729158401, 1, 0.0), BosqueEnvSegmentStake(Span(126158, 195877), 0.79272729158401, 0.58181822299957, 1, 0.0), BosqueEnvSegmentStake(Span(195877, 302115), 0.58181822299957, 0.0, 1, 0.0) ])) ])})
+	.doVolEnv({ arg tr; tr.rate_(44100).addAll(this,
+	[  ])})
+	.doMarkers({ arg m; m.rate_(nil).addAll(this,
+	[  ])})
