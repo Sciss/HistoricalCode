@@ -36,6 +36,7 @@ BosqueTimelineEditor : Object {
 		var vx, vw, clpseYZoom, ggTabColl, updBusConfigs, ggBusMatrix, ggBusGain, ggBusApply, busSelCol, busSelRow, busConn;
 		var ggPlayPos, taskPlayPos, fTaskPlayPos, fPlayPosStr, ggTrackList, ggVolume, updVolume, clpseVolume;
 		var scrB = JSCWindow.screenBounds;
+		var mg;
 		
 		winTimeline = JSCWindow( "Timeline", Rect( 410, 134, scrB.width - 580, scrB.height - 180 )).userCanClose_( false );
 //		ScissUtil.positionOnScreen( winTimeline, 0.333, 0.333 );
@@ -317,23 +318,35 @@ BosqueTimelineEditor : Object {
 //			});
 
 		vx = vx + vw + 4; vw = 80;
-		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
-			.items_([ "Timeline", "--------", "Insert Span...", "Clear Span", "Remove Span", "--------", "Split Objects", "Glue Objects", "--------", "Insert Env", "Insert Func", "Change Gain" ])
-			.action_({ arg b; var value = b.value;
-				b.value = 0;
-				switch( value - 2,
-				0, { this.prTimelineInsertSpan( doc )},
-				1, { this.prTimelineClearSpan( doc )},
-				2, { this.prTimelineRemoveSpan( doc )},
-				4, { this.prTimelineSplitObjects( doc )},
-				5, { this.prTimelineGlueObjects( doc )},
-				7, { this.prTimelineInsertEnv( doc )},
-				8, { this.prTimelineInsertFunc( doc )},
-				9, { this.prTimelineChangeGain( doc )}
-				);
-			});
+//		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
+//			.items_([ "Timeline", "--------", "Insert Span...", "Clear Span", "Remove Span", "--------", "Split Objects", "Glue Objects", "--------", "Insert Env", "Insert Func", "Change Gain" ])
+//			.action_({ arg b; var value = b.value;
+//				b.value = 0;
+//				switch( value - 2,
+//				0, { this.prTimelineInsertSpan( doc )},
+//				1, { this.prTimelineClearSpan( doc )},
+//				2, { this.prTimelineRemoveSpan( doc )},
+//				4, { this.prTimelineSplitObjects( doc )},
+//				5, { this.prTimelineGlueObjects( doc )},
+//				7, { this.prTimelineInsertEnv( doc )},
+//				8, { this.prTimelineInsertFunc( doc )},
+//				9, { this.prTimelineChangeGain( doc )}
+//				);
+//			});
+			
+		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Timeline", 1 );
+		JSCMenuItem( mg, "Insert Span" ).setShortCut( "E", 0x05 ).action_({ this.prTimelineInsertSpan( doc )});
+		JSCMenuItem( mg, "Clear Span" ).setShortCut( "DELETE", 0x04 ).action_({ this.prTimelineClearSpan( doc )});
+		JSCMenuItem( mg, "Remove Span" ).setShortCut( "DELETE", 0x00 ).action_({ this.prTimelineRemoveSpan( doc )});
+		JSCMenuSeparator( mg );
+		JSCMenuItem( mg, "Split Objects" ).setShortCut( "X", 0x02 ).action_({ this.prTimelineSplitObjects( doc )});
+		JSCMenuItem( mg, "Glue Objects" ).setShortCut( "Y", 0x02 ).action_({ this.prTimelineGlueObjects( doc )});
+		JSCMenuSeparator( mg );
+		JSCMenuItem( mg, "Insert Enc" ).setShortCut( "E", 0x02 ).action_({ this.prTimelineInsertEnv( doc )});
+		JSCMenuItem( mg, "Insert Func" ).setShortCut( "F", 0x02 ).action_({ this.prTimelineInsertFunc( doc )});
+		JSCMenuItem( mg, "Change Gain" ).setShortCut( "G", 0x02 ).action_({ this.prTimelineChangeGain( doc )});
 		
-		vx = vx + vw + 4; vw = 80;
+//		vx = vx + vw + 4; vw = 80;
 		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
 			.items_([ "Edit", "--------", "Undo", "Redo", "--------", "Cut", "Copy", "Paste", "Delete" ])
 			.action_({ arg b; var value = b.value;
