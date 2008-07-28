@@ -36,7 +36,7 @@ BosqueTimelineEditor : Object {
 		var vx, vw, clpseYZoom, ggTabColl, updBusConfigs, ggBusMatrix, ggBusGain, ggBusApply, busSelCol, busSelRow, busConn;
 		var ggPlayPos, taskPlayPos, fTaskPlayPos, fPlayPosStr, ggTrackList, ggVolume, updVolume, clpseVolume;
 		var scrB = JSCWindow.screenBounds;
-		var mg;
+		var mg, ggToolName;
 		
 		winTimeline = JSCWindow( "Timeline", Rect( 410, 134, scrB.width - 580, scrB.height - 180 )).userCanClose_( false );
 //		ScissUtil.positionOnScreen( winTimeline, 0.333, 0.333 );
@@ -250,11 +250,17 @@ BosqueTimelineEditor : Object {
 		ggTrackList = JSCListView( view, Rect( 0, 24, 240, 340 )).resize_( 5 )
 			.allowsDeselection_( true )
 //			.value_( nil )
-			.beginDragAction_({ arg b;
-				doc.tracks[ b.value ? -1 ];
+			.beginDragAction_({ arg b, trackOff;
+				trackOff = block { arg break; doc.tracks.do({ arg t, i; if( t.trackID >= 0, { break.value( i )})}); nil };
+				if( b.value >= 0, {
+					doc.tracks[ b.value + trackOff ];
+				});
 			})
-			.action_({ arg b; var t, ce;
-				t = doc.tracks[ b.value ? -1 ];
+			.action_({ arg b; var t, ce, trackOff;
+				trackOff = block { arg break; doc.tracks.do({ arg t, i; if( t.trackID >= 0, { break.value( i )})}); nil };
+				t = if( b.value >= 0, {
+					doc.tracks[ b.value + trackOff ];
+				});
 				ce = JSyncCompoundEdit.new;
 				ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedTracks, doc.selectedTracks.getAll, false ));
 				ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedTracks, [ t ], false));
@@ -267,9 +273,14 @@ BosqueTimelineEditor : Object {
 //				ggBusList.valueAction = obj.size - 1;
 			});
 		});
-		updSelectedTracks = UpdateListener.newFor( doc.selectedTracks, { arg upd, sc, what ... coll;
+		updSelectedTracks = UpdateListener.newFor( doc.selectedTracks, { arg upd, sc, what ... coll; var trackOff, idx;
 			if( (what === \add) or: { what === \remove }, {
-				ggTrackList.value = if( doc.selectedTracks.notNil, { doc.tracks.indexOf( doc.selectedTracks.detect({ arg x; x.trackID >= 0 }))});
+				trackOff = block { arg break; doc.tracks.do({ arg t, i; if( t.trackID >= 0, { break.value( i )})}); nil };
+				ggTrackList.value = if( doc.selectedTracks.notNil, {
+					idx = doc.tracks.indexOf( doc.selectedTracks.detect({ arg x; x.trackID >= 0 }));
+					if( idx.notNil, {Êidx = idx - trackOff });
+					idx;
+				});
 			});
 		});
 		ggTrackList.onClose = { updTracks.remove; updSelectedTracks.remove };
@@ -287,24 +298,41 @@ BosqueTimelineEditor : Object {
 //		BosqueTimelineScroll( doc, view, Rect( 0, view.bounds.height - 16, view.bounds.width - 16, 16 ));
 
 		vx = 1; vw = 80;
-		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
-			.items_([ "File", "--------", "New", "Open...", "Append...", "--------", "Save", "Save As..." ])
-			.action_({ arg b; var value = b.value;
-				b.value = 0;
-				switch( value - 2,
-				0, { this.prFileNew( doc )},
-				1, { this.prFileOpen( doc )},
-				2, { this.prFileAppend( doc )},
-				4, { if( doc.isDirty, {
-					if( doc.path.notNil, {
-						this.prFileSave( doc, doc.path );
-					}, {
-						this.prFileSaveAs( doc );
-					});
-				})},
-				5, { this.prFileSaveAs( doc )}
-				);
+//		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
+//			.items_([ "File", "--------", "New", "Open...", "Append...", "--------", "Save", "Save As..." ])
+//			.action_({ arg b; var value = b.value;
+//				b.value = 0;
+//				switch( value - 2,
+//				0, { this.prFileNew( doc )},
+//				1, { this.prFileOpen( doc )},
+//				2, { this.prFileAppend( doc )},
+//				4, { if( doc.isDirty, {
+//					if( doc.path.notNil, {
+//						this.prFileSave( doc, doc.path );
+//					}, {
+//						this.prFileSaveAs( doc );
+//					});
+//				})},
+//				5, { this.prFileSaveAs( doc )}
+//				);
+//			});
+
+		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "File", 1 );
+		JSCMenuItem( mg, "New" ).action_({ this.prFileNew( doc )});
+		JSCMenuItem( mg, "Open..." ).setShortCut( "O", 0x04 ).action_({ this.prFileOpen( doc )});
+		JSCMenuItem( mg, "Append..." ).action_({ this.prFileAppend( doc )});
+		JSCMenuSeparator( mg );
+		JSCMenuItem( mg, "Save" ).setShortCut( "S", 0x04 ).action_({
+			if( doc.isDirty, {
+				if( doc.path.notNil, {
+					this.prFileSave( doc, doc.path );
+				}, {
+					this.prFileSaveAs( doc );
+				});
 			});
+		});
+		JSCMenuSeparator( mg );
+		JSCMenuItem( mg, "Save As..." ).setShortCut( "S", 0x05 ).action_({ this.prFileSaveAs( doc )});
 
 //		vx = vx + vw + 4; vw = 80;
 //		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
@@ -317,7 +345,7 @@ BosqueTimelineEditor : Object {
 //				);
 //			});
 
-		vx = vx + vw + 4; vw = 80;
+//		vx = vx + vw + 4; vw = 80;
 //		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
 //			.items_([ "Timeline", "--------", "Insert Span...", "Clear Span", "Remove Span", "--------", "Split Objects", "Glue Objects", "--------", "Insert Env", "Insert Func", "Change Gain" ])
 //			.action_({ arg b; var value = b.value;
@@ -334,32 +362,42 @@ BosqueTimelineEditor : Object {
 //				);
 //			});
 			
-		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Timeline", 1 );
+		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Edit", 2 );
+		JSCMenuItem( mg, "Undo" ).setShortCut( "Z", 0x04 ).action_({ this.prEditUndo( doc )});
+		JSCMenuItem( mg, "Redo" ).setShortCut( "Z", 0x05 ).action_({ this.prEditRedo( doc )});
+		JSCMenuSeparator( mg );
+		JSCMenuItem( mg, "Cut" ).setShortCut( "X", 0x04 ).action_({ this.prEditCut( doc )});
+		JSCMenuItem( mg, "Copy" ).setShortCut( "C", 0x04 ).action_({ this.prEditCopy( doc )});
+		JSCMenuItem( mg, "Paste" ).setShortCut( "V", 0x04 ).action_({ this.prEditPaste( doc )});
+		JSCMenuItem( mg, "Delete" ).setShortCut( "DELETE", 0x00 ).action_({ this.prEditDelete( doc )});
+//		JSCMenuSeparator( mg );
+		
+//		vx = vx + vw + 4; vw = 80;
+//		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
+//			.items_([ "Edit", "--------", "Undo", "Redo", "--------", "Cut", "Copy", "Paste", "Delete" ])
+//			.action_({ arg b; var value = b.value;
+//				b.value = 0;
+//				switch( value - 2,
+//				0, { this.prEditUndo( doc )},
+//				1, { this.prEditRedo( doc )},
+//				3, { this.prEditCut( doc )},
+//				4, { this.prEditCopy( doc )},
+//				5, { this.prEditPaste( doc )},
+//				6, { this.prEditDelete( doc )}
+//				);
+//			});
+
+		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Timeline", 3 );
 		JSCMenuItem( mg, "Insert Span" ).setShortCut( "E", 0x05 ).action_({ this.prTimelineInsertSpan( doc )});
 		JSCMenuItem( mg, "Clear Span" ).setShortCut( "DELETE", 0x04 ).action_({ this.prTimelineClearSpan( doc )});
-		JSCMenuItem( mg, "Remove Span" ).setShortCut( "DELETE", 0x00 ).action_({ this.prTimelineRemoveSpan( doc )});
+		JSCMenuItem( mg, "Remove Span" ).setShortCut( "DELETE", 0x05 ).action_({ this.prTimelineRemoveSpan( doc )});
 		JSCMenuSeparator( mg );
 		JSCMenuItem( mg, "Split Objects" ).setShortCut( "X", 0x02 ).action_({ this.prTimelineSplitObjects( doc )});
 		JSCMenuItem( mg, "Glue Objects" ).setShortCut( "Y", 0x02 ).action_({ this.prTimelineGlueObjects( doc )});
 		JSCMenuSeparator( mg );
 		JSCMenuItem( mg, "Insert Enc" ).setShortCut( "E", 0x02 ).action_({ this.prTimelineInsertEnv( doc )});
 		JSCMenuItem( mg, "Insert Func" ).setShortCut( "F", 0x02 ).action_({ this.prTimelineInsertFunc( doc )});
-		JSCMenuItem( mg, "Change Gain" ).setShortCut( "G", 0x02 ).action_({ this.prTimelineChangeGain( doc )});
-		
-//		vx = vx + vw + 4; vw = 80;
-		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
-			.items_([ "Edit", "--------", "Undo", "Redo", "--------", "Cut", "Copy", "Paste", "Delete" ])
-			.action_({ arg b; var value = b.value;
-				b.value = 0;
-				switch( value - 2,
-				0, { this.prEditUndo( doc )},
-				1, { this.prEditRedo( doc )},
-				3, { this.prEditCut( doc )},
-				4, { this.prEditCopy( doc )},
-				5, { this.prEditPaste( doc )},
-				6, { this.prEditDelete( doc )}
-				);
-			});
+		JSCMenuItem( mg, "Change Gain" ).action_({ this.prTimelineChangeGain( doc )}); // .setShortCut( "G", 0x02 )
 			
 		vx = vx + vw + 4; vw = 80;
 		JSCDragSink( view, Rect( vx, 1, vw, 16 ))
@@ -405,14 +443,15 @@ BosqueTimelineEditor : Object {
 		});
 
 		vx = vx + vw + 4; vw = 40;
-		JSCStaticText( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).align_( \right ).string_( "Tool:" );
-		vx = vx + vw + 4; vw = 80;
-		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
-			.items_([ "Move", "Resize", "Env" ])
-			.action_({ arg b;
-				panel.tool = [ \move, \resize, \env ][ b.value ];
-				this.changed( \tool, panel.tool );
-			});
+		ggToolName = JSCStaticText( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).string_( "move" );
+		UpdateListener.newFor( this, { arg upd, obj, tool;
+			ggToolName.string = tool.asString;
+		}, \tool );
+
+		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Tool", 4 );
+		JSCMenuItem( mg, "Move" ).setShortCut( "1", 0x04 ).action_({ panel.tool = \move; this.changed( \tool, panel.tool )});
+		JSCMenuItem( mg, "Resize" ).setShortCut( "2", 0x04 ).action_({ panel.tool = \resize; this.changed( \tool, panel.tool )});
+		JSCMenuItem( mg, "Env" ).setShortCut( "3", 0x04 ).action_({ panel.tool = \env; this.changed( \tool, panel.tool )});
 		
 //~ggScroll = ggScrollPane;
 //~ggCompo = view2;
