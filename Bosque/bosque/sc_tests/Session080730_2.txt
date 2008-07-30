@@ -2,7 +2,7 @@
 	.doTimeline({ arg tl; tl.rate_(44100).span_(Span(0, 31072179))})
 	.doTimelineView({ arg tlv; tlv.span_(Span(0, 26323524)).doCursor({ arg csr; csr.position_(12142013)}).doSelection({ arg sel; sel.span_(Span(12187428, 23879432))})})
 	.doAudioFiles({ arg af; af.addAll(this,
-	[ BosqueAudioFile("/Users/rutz/Desktop/audio_work/VaultMix.aif"), BosqueAudioFile("/Users/rutz/Desktop/audio_work/CrosshatchCutLCutRsmp.aif"), BosqueAudioFile("/Users/rutz/Desktop/audio_work/LthMlBRt2HlbConLthMl'bShftEQCut.aif"), BosqueAudioFile("/Users/rutz/Library/Application Support/SuperCollider/ping/markov/old/WrkSh'vRsmpConWorkShopCt17Mix.aif") ])})
+	[ BosqueAudioFile("/Users/rutz/Desktop/audio_work/VaultMix.aif"), BosqueAudioFile("/Users/rutz/Desktop/audio_work/CrosshatchCutLCutRsmp.aif"), BosqueAudioFile("/Users/rutz/Desktop/audio_work/LthMlBRt2HlbConLthMl'bShftEQCut.aif"), BosqueAudioFile("/Users/rutz/Desktop/audio_work/WrkSh'vRsmpConWorkShopCt17Mix.aif") ])})
 	.doBusConfigs({ arg b; b.addAll(this,
 	[ BosqueBusConfig(0, 2, 0).name_('Silent'), BosqueBusConfig(1, 1, 0).name_('Silent2'), BosqueBusConfig(3, 2, 2).name_('Stereo1').connections_([ [ 1.0, 0 ], [ 0, 1.0 ] ]), BosqueBusConfig(4, 5, 5).name_('Fuenf').connections_([ [ 1.0, 0, 0, 0, 0 ], [ 0, 1.0, 0, 0, 0 ], [ 0, 0, 1.0, 0, 0 ], [ 0, 0, 0, 1.0, 0 ], [ 0, 0, 0, 0, 1.0 ] ]), BosqueBusConfig(2, 1, 8).name_('Mono1').connections_([ [ 0, 0, 0, 0, 0, 1.0, 0, 0 ] ]), BosqueBusConfig(5, 1, 8).name_('Mono2').connections_([ [ 0, 0, 0, 0, 0, 0, 0.0, 1.0 ] ]) ])})
 	.doTracks({ arg tr; tr.addAll(this,
