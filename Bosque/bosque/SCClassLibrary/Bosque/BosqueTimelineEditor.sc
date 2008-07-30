@@ -6,7 +6,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.28, 23-Jul-08
+ *	@version	0.29, 30-Jul-08
  */
 BosqueTimelineEditor : Object {
 	var <bosque;
@@ -40,9 +40,9 @@ BosqueTimelineEditor : Object {
 		
 		winTimeline = JSCWindow( "Timeline", Rect( 410, 134, scrB.width - 580, scrB.height - 180 )).userCanClose_( false );
 //		ScissUtil.positionOnScreen( winTimeline, 0.333, 0.333 );
-		winCollections = JSCWindow( "Collections", Rect( winTimeline.bounds.right + 10, winTimeline.bounds.bottom - 100, 240, 390 )).userCanClose_( false );
-		winMenu = JSCWindow( "Menu", Rect( winTimeline.bounds.right + 4, winTimeline.bounds.top + winTimeline.bounds.height - 200, 128, 200 ), resizable: false ).userCanClose_( false );
-		winTransport = JSCWindow( "Transport", Rect( winTimeline.bounds.left, winTimeline.bounds.top - 106, 344, 80 ), resizable: false ).userCanClose_( false ); // .alwaysOnTop_( true );
+		winCollections = JSCWindow( "Collections", Rect( winTimeline.bounds.right + 10, winTimeline.bounds.bottom - 100, 240, 390 )).userCanClose_( false ).alwaysOnTop_( true );
+		winMenu = JSCWindow( "Menu", Rect( winTimeline.bounds.right + 4, winTimeline.bounds.top + winTimeline.bounds.height - 200, 128, 200 ), resizable: false ).alwaysOnTop_( true ).userCanClose_( false );
+		winTransport = JSCWindow( "Transport", Rect( winTimeline.bounds.left, winTimeline.bounds.top - 106, 344, 80 ), resizable: false ).alwaysOnTop_( true ).userCanClose_( false ); // .alwaysOnTop_( true );
 		observer = BosqueObserver.new;
 //		view = JSCVLayoutView( winCollections, winCollections.view.bounds ).resize_( 5 );
 
@@ -612,15 +612,16 @@ BosqueTimelineEditor : Object {
 			});
 			
 		JSCPopUpMenu( view, Rect( 0, 0, 40, 20 ))
-			.items_([ "Action", "--------", "All GUI", "Audio Rec.", "OSC Mem Play", "OSC Rec" ])
+			.items_([ "Action", "--------", "All GUI", "Audio Rec.", "OSC Mem Play", "OSC Rec", "Fullbody" ])
 			.canFocus_( false )
 			.action_({ arg b; var value = b.value;
 				b.value = 0;
 				switch( value - 2,
 				0, { Bosque.allGUI },
 				1, { Bosque.recorderGUI },
-				2, { BosqueOSCMemory.new.synced_( true ).makeGUI },
-				3, { this.prOSCRec }
+				2, { BosqueOSCMemory.new.addr_( NetAddr.localAddr ).synced_( true ).makeGUI },
+				3, { this.prOSCRec },
+				4, { EGMFullbodyTracker.start; ~egm_visualizer = EGMFullbodyVisualizer.new }
 				);
 			});
 			
@@ -676,7 +677,11 @@ BosqueTimelineEditor : Object {
 					fPath = path.splitext.first ++ "Func.rtf";
 					if( File.exists( fPath ), {
 						("Opening func file '" ++fPath++"'...").postln;
-						{ Document.open( fPath ).text.interpret }.defer;
+						{ var doc = Document.open( fPath );
+						  { doc.text.interpret }.fork( AppClock )
+						}.defer;
+					}, {
+						("\nFunc file '" ++fPath++"' not found!").postln;
 					});
 				} { arg error;
 					error.reportError;

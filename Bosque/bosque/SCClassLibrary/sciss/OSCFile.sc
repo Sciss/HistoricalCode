@@ -5,7 +5,7 @@
  *	Class dependancies: ScissPlus (+UnixFILE), FileNetAddr
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.11, 28-Aug-07
+ *	@version	0.13, 30-Jul-08
  */
 OSCFile {
 	var <packets;
@@ -29,7 +29,7 @@ OSCFile {
 	}
 	
 	// note: offset is re rate=1.0
-	play { arg rate = 1.0, offset = 0.0, dispatcher;
+	play { arg rate = 1.0, offset = 0.0, dispatcher, addr;
 		var nextTime, lastTime, idx, p;
 		^fork {
 			dispatcher	= dispatcher ?? { thisProcess };
@@ -41,9 +41,9 @@ OSCFile {
 					nextTime = p[0] / rate;
 					(nextTime - lastTime).wait;
 					lastTime = nextTime;
-					dispatcher.recvOSCbundle( lastTime, nil, *(p.drop(1)) );
+					dispatcher.recvOSCbundle( lastTime, addr, *(p.drop(1)) );
 				}, {
-					dispatcher.recvOSCmessage( lastTime, nil, p );
+					dispatcher.recvOSCmessage( lastTime, addr, p );
 				});
 				idx = idx + 1;
 			});
@@ -57,7 +57,26 @@ OSCFile {
 
 	// index of packet whose time >= t
 	indexOfTime { arg t;
-		^block { arg break; packets.do({ arg p, idx; if( p[0].isFloat and: { p[0] >= t }, { break.value( idx )})}); nil };
+		var index, pt;
+		var low	= 0;
+		var high	= packets.size - 1;
+		
+//		^block { arg break; packets.do({ arg p, idx; if( p[0].isFloat and: { p[0] >= t }, { break.value( idx )})}); nil };
+
+		while({ 
+			index  = (high + low) div: 2;
+			low   <= high;
+		}, {
+			pt = packets.at( index )[0];
+			if( pt == t, { ^index });
+			if( pt < t, {
+				low = index + 1;
+			}, {
+				high = index - 1;
+			});
+		});
+//		^(low.neg - 1);
+		^low;
 	}
 	
 	findMessage { arg cmd, startIndex = 0, stopIndex;

@@ -25,7 +25,7 @@ BosqueObserver {
 		var ggBusConfig, ggCtrlSpec;
 		var ggFuncEventName, ggFuncModTrack, ggFuncPosition;
 		
-		window = JSCWindow( "Observer", Rect( 0, 0, 254, 248 ), resizable: false ).userCanClose_( false ); // .alwaysOnTop_( true );
+		window = JSCWindow( "Observer", Rect( 0, 0, 254, 248 ), resizable: false ).userCanClose_( false ).alwaysOnTop_( true ); // .alwaysOnTop_( true );
 		ScissUtil.positionOnScreen( window, 0.75, 0.75 );
 		
 		ggTab = JSCTabbedPane( window, window.view.bounds );

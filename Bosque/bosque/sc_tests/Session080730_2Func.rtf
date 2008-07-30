@@ -1,0 +1,391 @@
+{\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf480
+{\fonttbl\f0\fnil\fcharset77 Monaco;}
+{\colortbl;\red255\green255\blue255;\red191\green0\blue0;\red96\green96\blue96;\red0\green0\blue191;
+\red0\green115\blue0;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+
+\f0\fs18 \cf2 // last mod: 30-Jul-08, revision 2\cf0 \
+\
+~audioDir = \cf3 "/Users/rutz/Desktop/audio_work"\cf0 ;\
+\
+\cf2 ////////////////////////////// T1 Func\cf0 \
+\
+~t1func = \cf4 Environment\cf0 ( know: \cf4 true\cf0  );\
+~t1func.playToBundle = \{ \cf4 arg\cf0  ev, stake, bndl, player, durSecs, frameOffset, busIndex, numChannels, group, position;\
+	ev.opDiff		= \cf4 EGM_diff\cf0 .new;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	ev.opMean		= \cf4 EGM_mean\cf0 ( 10 );	\cf2 // 5 \cf0 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 	ev.opUnwrap	= \cf4 EGM_unwrap\cf0 .new;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	ev.opRotTrig	= \cf4 EGM_thresh\cf0 ( 15, 2 );\
+	ev.opTrig2	= \cf4 EGM_thresh1T\cf0 ( 0, 0, 12 );\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 	player.makeFuncDur( stake, durSecs, group );\
+	player.makeFuncFullbody( stake );\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	ev.bang		= \{ \cf4 Synth\cf0 .grain( \cf5 \\egm_tsend\cf0 , [ \cf5 \\i_in\cf0 , busIndex, \cf5 \\i_out\cf0 , ~verbBus, \cf5 \\i_dur\cf0 , 0.2 ], group, \cf5 \\addAfter\cf0  )\};\
+	\cf4 true\cf0 ;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 \};\
+~t1func.fullbody = \{ \cf4 arg\cf0  ev, emsg;\
+	\cf4 var\cf0  rotSpeed, lhandDist;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf2 //	[ ev, emsg ].postln;\cf0 \
+if( emsg.notNil, \{	\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	lhandDist = emsg.hdist( \cf5 \\lhand\cf0 , \cf5 \\head\cf0  ) / 10;\
+	rotSpeed = ev.opMean.( ev.opDiff.( ev.opUnwrap.( emsg.rota( \cf5 \\lhumerus\cf0 , \cf5 \\head\cf0  )))) * 25 * 180 / pi;\
+	if( ev.opTrig2.( (ev.opRotTrig.( rotSpeed.abs ) && (lhandDist > 45)).binaryValue ), \{\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf2 //		if( ~egm_visualizer.notNil, \{ ~egm_visualizer.trig = true \});\cf0 \
+		ev.bang.value;\
+	\});\
+\});\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 \};\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf2 ////////////////////////////// T2 Func\cf0 \
+\
+~t2func = \cf4 Environment\cf0 ( know: \cf4 true\cf0  );\
+~t2func.playToBundle = \{ \cf4 arg\cf0  ev, stake, bndl, player, durSecs, frameOffset, busIndex, numChannels, group, position;\
+	player.makeFuncDur( stake, durSecs, group );\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	ev.gain		= stake.gain;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 	ev.synthAmp = player.makeFuncSynth( stake, \cf5 \\egm_ampflt\cf0  ++ numChannels, [ \cf5 \\i_bus\cf0 , busIndex ]);\
+	player.makeFuncFullbody( stake );\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	\cf4 true\cf0 ;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 \};\
+~t2func.fullbody = \{ \cf4 arg\cf0  ev, emsg;\
+	\cf4 var\cf0  footElev, amp;\
+	footElev = max( emsg.t( \cf5 \\lfoot\cf0  )[ 2 ], emsg.t( \cf5 \\rfoot\cf0  )[ 2 ]) / 10;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf2 //	if( ~egm_visualizer.notNil, \{ ~egm_visualizer.text = "Foot-Elev: " ++ footElev.asInteger.asString \});\cf0 \
+	amp = footElev.linlin( 0, 100, -48, 6 ).dbamp * ev.gain;\
+	if( ev.synthAmp.isPlaying, \{ ev.synthAmp.set( \cf5 \\amp\cf0 , amp )\});\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 \};\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf2 ////////////////////////////// T3 Func\cf0 \
+\
+~t3func = \cf4 Environment\cf0 ( know: \cf4 true\cf0  );\
+~t3func.playToBundle = \{ \cf4 arg\cf0  ev, stake, bndl, player, durSecs, frameOffset, busIndex, numChannels, group, position;\
+	player.makeFuncDur( stake, durSecs, group );\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	ev.gain		= stake.gain;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 	ev.synthAmp = player.makeFuncSynth( stake, \cf5 \\egm_dlyampflt\cf0  ++ numChannels, [ \cf5 \\i_bus\cf0 , busIndex ]);\
+	player.makeFuncFullbody( stake );\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	\cf4 true\cf0 ;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 \};\
+~t3func.fullbody = \{ \cf4 arg\cf0  ev, emsg;\
+	\cf4 var\cf0  volume, amp;\
+	volume = emsg.boundingVolume;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf2 //	if( ~egm_visualizer.notNil, \{ ~egm_visualizer.text = "Volume: " ++ volume.round( 0.001 ).asString \});\cf0 \
+	amp = volume.linlin( 0.20, 0.5, 0, -48 ).dbamp * ev.gain;\
+	if( ev.synthAmp.isPlaying, \{ ev.synthAmp.set( \cf5 \\amp\cf0 , amp )\});\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 \};\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf2 ////////////////////////////// T4 Func\cf0 \
+\
+~t4func = \cf4 Environment\cf0 ( know: \cf4 true\cf0  );\
+~t4func.playToBundle = \{ \cf4 arg\cf0  ev, stake, bndl, player, durSecs, frameOffset, busIndex, numChannels, group, position;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	ev.opTrig	= \cf4 EGM_thresh1IT\cf0 ( 90, 60, 12 );\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 	player.makeFuncDur( stake, durSecs, group );\
+	player.makeFuncFullbody( stake );\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	ev.bang = \{ \cf4 arg\cf0  ev, chan = 0; \cf4 Synth\cf0 .grain( \cf5 \\egm_tautosend\cf0 , [ \cf5 \\i_in\cf0 , busIndex, \cf5 \\i_out\cf0 , \cf4 Bosque\cf0 .default.masterBus.index + chan, \cf5 \\i_dur\cf0 , exprand( 1.0, 4.0 )], \cf4 Bosque\cf0 .default.masterGroup, \cf5 \\addBefore\cf0  )\};\
+	\cf4 true\cf0 ;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 \};\
+~t4func.fullbody = \{ \cf4 arg\cf0  ev, emsg;\
+	\cf4 var\cf0  larmAng, rarmAng, llegAng, rlegAng, angs, ang, chan;\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	larmAng = emsg.angleDeg( \cf5 \\lradius\cf0 , \cf5 \\lhumerus\cf0 , \cf5 \\lradius\cf0 , \cf5 \\lhand\cf0  );\
+	rarmAng = emsg.angleDeg( \cf5 \\rradius\cf0 , \cf5 \\rhumerus\cf0 , \cf5 \\rradius\cf0 , \cf5 \\rhand\cf0  );\
+	llegAng = emsg.angleDeg( \cf5 \\ltibia\cf0 , \cf5 \\lfemur\cf0 , \cf5 \\ltibia\cf0 , \cf5 \\lfoot\cf0  );\
+	rlegAng = emsg.angleDeg( \cf5 \\rtibia\cf0 , \cf5 \\rfemur\cf0 , \cf5 \\rtibia\cf0 , \cf5 \\rfoot\cf0  );\
+\
+	if( ~egm_visualizer.notNil, \{ ~egm_visualizer.text = \cf3 "LArm: "\cf0  ++ larmAng.asInteger.asString ++ \cf3 "\'a1 ; "\cf0  ++ \cf3 "RArm: "\cf0  ++ rarmAng.asInteger.asString ++ \cf3 "\'a1 ; "\cf0  ++ \cf3 "LLeg: "\cf0  ++ llegAng.asInteger.asString ++ \cf3 "\'a1 ; "\cf0  ++ \cf3 "RLeg: "\cf0  ++ rlegAng.asInteger.asString ++ \cf3 "\'a1 "\cf0  \});\
+	\
+	angs = [ larmAng, rarmAng, llegAng, rlegAng ];\
+	ang = angs.minItem;\
+	if( ev.opTrig.( ang ), \{\
+		chan = (angs.indexOf( ang ) << 1) + 0.5.coin.binaryValue;\
+		ev.bang.value( chan );\
+	\});\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 \};\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf2 ////////////////////////////// Lala Func\cf0 \
+\
+~lalafunc = \cf4 Environment\cf0 ( know: \cf4 true\cf0  );\
+~lalafunc.path = ~audioDir +/+ \cf3 "Lala1Trigs.aif"\cf0 ;\
+~lalafunc.numCh = 5;\
+~lalafunc.marks = \cf4 ScissUtil\cf0 .readMarkersFromAIFF( ~lalafunc.path ).collect( \cf4 _\cf0 .pos );\
+~lalafunc.markDurs = ~lalafunc.marks.slide( 2, 1 ).clump( 2 ).collect(\{ \cf4 arg\cf0  x; x[1] - x[0] \});\
+~lalafunc.playToBundle = \{ \cf4 arg\cf0  ev, stake, bndl, player, durSecs, frameOffset, busIndex, numChannels, group, position;\
+\cf2 //	ev.opDiff		= EGM_diff.new;\cf0 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf2 //	ev.opTrig		= EGM_thresh1T( 40, 20, 12 );\cf0 \
+	ev.opTrig		= \cf4 EGM_thresh1T\cf0 ( 25, 10, 12 );\
+	ev.group		= group;\
+	ev.bus		= busIndex;\
+	ev.gain		= stake.gain;\
+	if( numChannels != ev.numCh, \{\
+		(\cf3 "~lalafunc modTrack : numChannels should be "\cf0  ++ ev.numCh ++ \cf3 ", but is "\cf0  ++ numChannels).warn;\
+	\});\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 	player.makeFuncDur( stake, durSecs, group );\
+	player.makeFuncFullbody( stake );\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	\cf4 true\cf0 ;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 \};\
+~lalafunc.fullbody = \{ \cf4 arg\cf0  ev, emsg;\
+	\cf4 var\cf0  headBent, footElev, synth, buf, idx, dur, startF;\
+	\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf2 //	footElev = max( emsg.t( \\lfoot )[ 2 ], emsg.t( \\rfoot )[ 2 ]) / 10;\cf0 \
+	headBent = emsg.bentDeg( \cf5 \\thorax\cf0 , \cf5 \\head\cf0  );\
+	if( ev.opTrig.( headBent ), \{\
+		idx = ev.markDurs.size.rand;\
+		dur = (ev.markDurs[ idx ] - 128) / s.sampleRate;\
+		startF = ev.marks[ idx ];\
+		synth = \cf4 Synth\cf0 .basicNew( \cf5 \\egm_diskdur\cf0  ++ ev.numCh, s );\
+		synth.register;\
+\cf2 //		("FOOT : " ++ idx ++ "; dur = " ++ dur ++ "; synth = " ++ synth.nodeID ++ "; path = " ++ ev.path ).postln;\cf0 \
+		\cf4 UpdateListener\cf0 .newFor( synth, \{ \cf4 arg\cf0  upd, synth;\
+			buf.close; buf.free;\
+			upd.remove;\
+		\}, \cf5 \\n_end\cf0  );\
+		buf = \cf4 Buffer\cf0 .cueSoundFile( s, ev.path, startF, ev.numCh, completionMessage: \{ \cf4 arg\cf0  b; \cf2 /* "HALLLO".postln; */\cf0  synth.newMsg( ev.group, [ \cf5 \\i_buf\cf0 , b, \cf5 \\i_bus\cf0 , 0 \cf2 /* ev.bus */\cf0 , \cf5 \\i_dur\cf0 , dur, \cf5 \\amp\cf0 , ev.gain ])\});\
+\cf2 //		~gaga = buf;\cf0 \
+	\});\
+\};\
+\
+\cf2 ////////////////////////////// Ach Func\cf0 \
+\
+~achfunc = \cf4 Environment\cf0 ( know: \cf4 true\cf0  );\
+~achfunc.numCh = min( \cf4 Bosque\cf0 .default.masterBus.numChannels, 8 );\
+~achfunc.playToBundle = \{ \cf4 arg\cf0  ev, stake, bndl, player, durSecs, frameOffset, busIndex, numChannels, group, position;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	ev.group		= group;\
+	ev.bus		= busIndex;\
+	ev.gain		= stake.gain;\
+	ev.opMean		= \cf4 EGM_mean\cf0 ( 10 );	\cf2 // 5 \cf0 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 	player.makeFuncDur( stake, durSecs, group );\
+	ev.synthAch = player.makeFuncSynth( stake, \cf5 \\egm_achilles\cf0  ++ ~achfunc.numCh, [ \cf5 \\in\cf0 , \cf4 Bosque\cf0 .default.masterBus, \cf5 \\out\cf0 , \cf4 Bosque\cf0 .default.masterBus, \cf5 \\aBuf\cf0 , ev.buffer, \cf5 \\amp\cf0 , ev.gain ], \cf4 Bosque\cf0 .default.mixGroup, \cf5 \\addAfter\cf0  );\
+	player.makeFuncFullbody( stake );\
+	ev.buffer.zero;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	\cf4 true\cf0 ;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 \};\
+~achfunc.fullbody = \{ \cf4 arg\cf0  ev, emsg;\
+	\cf4 var\cf0  asymm, rate, writeAmt, humDiff \cf2 /* clavDiff */\cf0 ; \cf2 // WARNING: lclavicle === rclavicle\cf0 \
+	\
+	asymm = emsg.asymmetry;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	writeAmt = ev.opMean.( asymm ).linlin( 50, 400, 0, 1 );\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf2 //	clavDiff = emsg.vdist( \\rclavicle, \\lclavicle ).abs;\cf0 \
+	humDiff = emsg.vdist( \cf5 \\lhumerus\cf0 , \cf5 \\rhumerus\cf0  ).abs;\
+	rate = humDiff.linexp( 50, 150, 0.5, 1 );\
+\cf2 //	if( ~egm_visualizer.notNil, \{ ~egm_visualizer.text = "Asymm: " ++ asymm.asInteger.asString ++ "    HumDist: " ++ (humDiff / 10).round( 0.1 ).asString ++ " cm   -> writeAmt " ++ writeAmt.round( 0.01 ).asString ++ " ; rate " ++ rate.round( 0.01 ).asString \});\cf0 \
+	if( ev.synthAch.isPlaying, \{ ev.synthAch.set( \cf5 \\writeAmt\cf0 , writeAmt, \cf5 \\rate\cf0 , rate )\});\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 \};\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf2 ////////////////////////////// Gen Func\cf0 \
+\
+~genfunc = \cf4 Environment\cf0 ( know: \cf4 true\cf0  );\
+~genfunc.numCh = min( \cf4 Bosque\cf0 .default.masterBus.numChannels, 8 );\
+~genfunc.playToBundle = \{ \cf4 arg\cf0  ev, stake, bndl, player, durSecs, frameOffset, busIndex, numChannels, group, position;\
+	\cf4 var\cf0  synthDur;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf2 //	ev.opTrig		= EGM_thresh1IT( 40, 20, 12 );\cf0 \
+	ev.opTrig		= \cf4 EGM_thresh1IT\cf0 ( 60, 40, 12 );\
+	ev.group		= group;\
+	ev.bus		= busIndex;\
+	ev.gain		= stake.gain;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 	synthDur		= player.makeFuncDur( stake, durSecs, group );\
+	\cf4 UpdateListener\cf0 .newFor( synthDur, \{ \cf4 arg\cf0  upd, synth;\
+		if( ev.synthGen.notNil, \{\
+			ev.synthGen.release;\
+			ev.synthGen = \cf4 nil\cf0 ;\
+		\});\
+		upd.remove;\
+	\}, \cf5 \\n_end\cf0  );\
+	player.makeFuncFullbody( stake );\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 	\cf4 true\cf0 ;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 \};\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf2 //~genfunc.stopToBundle = \{ arg ev;\cf0 \
+\cf2 //	if( ev.synthGen.notNil, \{\cf0 \
+\cf2 //		ev.synthGen.release;\cf0 \
+\cf2 //		ev.synthGen = nil;\cf0 \
+\cf2 //	\});\cf0 \
+\cf2 //\};\cf0 \
+~genfunc.fullbody = \{ \cf4 arg\cf0  ev, emsg;\
+	\cf4 var\cf0  handsDist, synth, amt, height;\
+	\
+	handsDist = emsg.dist( \cf5 \\lhand\cf0 , \cf5 \\rhand\cf0  ) / 10;\
+	height = emsg.boundingHeight;\
+	amt = height.linlin( 0.5, 2.0, 1.0, 0.0 );\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf2 //	if( ~egm_visualizer.notNil, \{ ~egm_visualizer.text = "Hands: " ++ handsDist.round( 0.1 ).asString ++ " cm ;     height = " ++ height ++ " m ;  amt = " ++ amt ++ ";  onOff = " ++ ev.synthGen.notNil \});\cf0 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 	\
+	if( ev.opTrig.( handsDist ), \{\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 		if( ~egm_visualizer.notNil, \{ ~egm_visualizer.trig = \cf4 true\cf0  \});\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 		if( ev.synthGen.notNil, \{	\cf2 // turn it off\cf0 \
+			ev.synthGen.release( exprand( 1.0, 4.0 ));\
+			ev.synthGen = \cf4 nil\cf0 ;\
+		\}, \{						\cf2 // turn it on\cf0 \
+			synth = \cf4 Synth\cf0 ( \cf5 \\egm_gendy\cf0  ++ ev.numCh, [ \cf5 \\bus\cf0 , \cf4 Bosque\cf0 .default.masterBus, \cf5 \\amount\cf0 , amt, \cf5 \\i_atk\cf0 , exprand( 0.1, 1.0 )], \cf4 Bosque\cf0 .default.masterGroup, \cf5 \\addBefore\cf0  );\
+			synth.register;\
+			\cf4 UpdateListener\cf0 .newFor( synth, \{ \cf4 arg\cf0  upd, synth;\
+				if( ev.synthGen == synth, \{\
+					ev.synthGen = \cf4 nil\cf0 ;\
+				\});\
+				upd.remove;\
+			\}, \cf5 \\n_end\cf0  );\
+			ev.synthGen = synth;\
+		\});\
+	\});\
+	if( ev.synthGen.notNil and: \{ ev.synthGen.isPlaying \}, \{ ev.synthGen.set( \cf5 \\amount\cf0 , amt )\});\
+\};\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf2 /////////////////////////// Synth Defs\cf0 \
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf2 // (\cf0 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf4 SynthDef\cf0 ( \cf5 \\egm_verb\cf0 , \{ \cf4 arg\cf0  in, out1, out2;\
+	\cf4 var\cf0  verb;\
+	verb = \cf4 GVerb\cf0 .ar( \cf4 In\cf0 .ar( in ));\
+	\cf4 Out\cf0 .ar( out1, verb[0] );\
+	\cf4 Out\cf0 .ar( out2, verb[1] );\
+\}).send( s );\
+\
+\cf4 SynthDef\cf0 ( \cf5 \\egm_tsend\cf0 , \{ \cf4 arg\cf0  i_in, i_out, i_dur = 0.2, i_atk = 0.005;\
+	\cf4 var\cf0  line, atk;\
+	line = \cf4 Line\cf0 .ar( 1.0, 0.0, i_dur, doneAction: 2 );\
+	atk = \cf4 Line\cf0 .ar( dur: i_atk );\
+	\cf4 Out\cf0 .ar( i_out, \cf4 In\cf0 .ar( i_in ) * line * atk );\
+\}).send( s );\
+\
+\cf4 SynthDef\cf0 ( \cf5 \\egm_tautosend\cf0 , \{ \cf4 arg\cf0  i_in, i_out, i_dur = 1.0, i_boost = 2, i_atk = 0.005;\
+	\cf4 var\cf0  line, atk, gate, inp;\
+	line = \cf4 Line\cf0 .ar( 1.0, 0.0, i_dur, doneAction: 2 );\
+	atk = \cf4 Line\cf0 .ar( dur: i_atk );\
+	inp = \cf4 In\cf0 .ar( i_in );\
+	\cf4 Out\cf0 .ar( i_out, \cf4 LeakDC\cf0 .ar( \cf4 Gate\cf0 .ar( inp * atk, (line * i_boost) - inp.abs )));\
+\}).send( s );\
+\
+(1..8).do(\{ \cf4 arg\cf0  numCh;\
+	\cf4 SynthDef\cf0 ( \cf5 \\egm_ampflt\cf0  ++ numCh, \{ \cf4 arg\cf0  i_bus, amp = 0;\
+		\cf4 ReplaceOut\cf0 .ar( i_bus, \cf4 In\cf0 .ar( i_bus, numCh ) * \cf4 LagUD\cf0 .kr( amp, 0.02, 2.0 ));\
+	\}).send( s );\
+\
+	\cf4 SynthDef\cf0 ( \cf5 \\egm_dlyampflt\cf0  ++ numCh, \{ \cf4 arg\cf0  i_bus, amp = 0;\
+		\cf4 ReplaceOut\cf0 .ar( i_bus, \cf4 In\cf0 .ar( i_bus, numCh ) * \cf4 LagUD\cf0 .kr( \cf4 DelayN\cf0 .kr( amp, 3, 3 ), 0.02, 2.0 ));\
+	\}).send( s );\
+	\
+	\cf4 SynthDef\cf0 ( \cf5 \\egm_diskdur\cf0  ++ numCh, \{ \cf4 arg\cf0  i_bus, i_buf, i_dur, amp = 1.0;\
+		\cf4 Line\cf0 .kr( dur: i_dur, doneAction: 2 );\
+		\cf4 Out\cf0 .ar( i_bus, \cf4 DiskIn\cf0 .ar( numCh, i_buf ) * amp );\
+	\}).send( s );\
+	\
+	\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf0 	\cf4 SynthDef\cf0 ( \cf5 \\egm_achilles\cf0  ++ numCh, \{\
+		\cf4 arg\cf0  in, out, aBuf, rate = 1.0, writeAmt = 0.0, amp = 1.0;\
+\
+		\cf4 var\cf0  inp, writeRate, readRate, readPhasor, read;\
+		\cf4 var\cf0  numFrames, writePhasor, old, wet, dry;\
+\
+		inp			= \cf4 In\cf0 .ar( in, numCh );\
+		numFrames		= \cf4 BufFrames\cf0 .kr( aBuf );\
+		writeRate 	= \cf4 BufRateScale\cf0 .kr( aBuf );\
+		readRate	 	= writeRate * rate;\
+		readPhasor	= \cf4 Phasor\cf0 .ar( 0, readRate, 0, numFrames );\
+		read			= \cf4 BufRd\cf0 .ar( numCh, aBuf, readPhasor, 0, 4 );\
+		writePhasor	= \cf4 Phasor\cf0 .ar( 0, writeRate, 0, numFrames );\
+		old			= \cf4 BufRd\cf0 .ar( numCh, aBuf, writePhasor, 0, 1 );\
+		wet			= \cf4 SinOsc\cf0 .ar( 0, ((readPhasor - writePhasor).abs / numFrames * pi) );\
+		dry			= 1 - wet.squared;\
+		wet			= 1 - (1 - wet).squared;\
+		\cf4 BufWr\cf0 .ar( (old * dry) + (inp * writeAmt * wet), aBuf, writePhasor );\
+		\
+		\cf4 Out\cf0 .ar( out, (read * amp).asArray.scramble );\
+	\}, [ \cf4 nil\cf0 , \cf4 nil\cf0 , \cf4 nil\cf0 , 0.1, 0.1, 0.1 ]).send( s );\
+	\
+	\cf4 SynthDef\cf0 ( \cf5 \\egm_gendy\cf0  ++ numCh, \{ \cf4 arg\cf0  bus, amount, i_atk, gate = 1;\
+		\cf4 var\cf0  ins, outs, laggo, minFreq, scale, env;\
+		\
+		env		= \cf4 EnvGen\cf0 .kr( \cf4 Env\cf0 .asr( i_atk, 1.0, 1.0, \cf5 \\sin\cf0  ), gate, doneAction: 2 );\
+		ins		= \cf4 In\cf0 .ar( bus, numCh );\
+		laggo	= \cf4 Lag\cf0 .kr( amount );\
+		minFreq	= laggo * 69 + 12;\
+		scale	= laggo * 13 + 0.146;\
+		outs		= \cf4 Gendy1\cf0 .ar( 2, 3, 1, 1,\
+					minfreq: minFreq, maxfreq: minFreq * 8,\
+					ampscale: scale, durscale: scale,\
+					initCPs: 7, mul: ins );\
+		outs		= \cf4 Compander\cf0 .ar( outs, outs, 0.7, 1, 0.1, 0.001, 0.02 );\
+		\cf4 XOut\cf0 .ar( bus, env, outs.asArray.scramble );\
+	\}).send( s );\
+	\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 \});\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf2 // )\cf0 \
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf2 /////////////////////////// Buffers\cf0 \
+\
+~achfunc.buffer = \cf4 Buffer\cf0 .alloc( s, s.sampleRate.asInteger, ~achfunc.numCh );\
+\
+\cf2 /////////////////////////// Busses\cf0 \
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 \
+if( ~verbBus.isNil, \{\
+	~verbBus = \cf4 Bus\cf0 .audio( s, 1 );\
+\});\
+\
+\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
+\cf2 /////////////////////////// Static Synths\cf0 \
+\
+s.sync;\
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardeftab560\ql\qnatural\pardirnatural
+\cf0 \
+if( ~verbSynth.isNil, \{\
+	~verbSynth = \cf4 Synth\cf0 ( \cf5 \\egm_verb\cf0 , [ \cf5 \\in\cf0 , ~verbBus, \cf5 \\out1\cf0 , \cf4 Bosque\cf0 .default.masterBus.index + 0, \cf5 \\out2\cf0 , \cf4 Bosque\cf0 .default.masterBus.index + 1 ], \cf4 Bosque\cf0 .default.postFilterGroup, \cf5 \\addAfter\cf0  );\
+\});\
+}

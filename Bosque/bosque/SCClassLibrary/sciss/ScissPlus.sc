@@ -6,7 +6,7 @@
  *		04-Feb-08 - not overwriting Main:recvOSCmessage any more
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.18, 01-Mar-08
+ *	@version	0.19, 26-Jul-08
  */
 
 /**

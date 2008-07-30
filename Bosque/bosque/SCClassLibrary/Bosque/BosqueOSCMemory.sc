@@ -2,7 +2,7 @@
  *	(C)opyright 2007-2008 Hanns Holger Rutz. All rights reserved.
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.13, 22-May-08
+ *	@version	0.14, 29-Jul-08
  */
 BosqueOSCMemory {
 	var win;
@@ -10,6 +10,7 @@ BosqueOSCMemory {
 	var <synced = false;
 	var <offset = 0.0;
 	var osc, rout, doc, updTransport;
+	var <>addr;
 	
 	var oscs, paths, oscIdx = 0;
 
@@ -237,7 +238,7 @@ BosqueOSCMemory {
 			this.changed( \path, path );
 		});
 		if( osc.notNil, {
-			rout = osc.play( offset: pos - (osc.startTime ? 0) );
+			rout = osc.play( offset: pos - (osc.startTime ? 0), addr: addr );
 			this.changed( \play, pos );
 		});
 	}

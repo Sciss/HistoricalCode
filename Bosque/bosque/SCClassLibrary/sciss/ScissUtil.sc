@@ -4,7 +4,7 @@
  *
  *	Class dependancies: TypeSafe
  *
- *	@version	0.19, 15-May-08
+ *	@version	0.20, 29-Jul-08
  *	@author	Hanns Holger Rutz
  */
 ScissUtil
@@ -160,7 +160,7 @@ ScissUtil
 		});
 	}
 
-	*trackIncomingOSC {
+	*trackIncomingOSC { arg printTime = true;
 		var funcOSC;
 //		~trackIncomingOSC = Updater( Main, { arg obj, what, time, replyAddr, msg;
 //			if( what === \osc and: { msg.first !== 'status.reply' }, {
@@ -169,7 +169,7 @@ ScissUtil
 //		});
 		funcOSC = { arg time, replyAddr, msg;
 			if( msg.first !== 'status.reply', {
-				("r: " ++ msg).postln;
+				("r: " ++ if( printTime, { time.round( 0.0001 ).asString ++ " " }, "" ) ++ msg).postln;
 			});
 		};
 		if( ~trackIncomingOSC.isKindOf( Event ), {

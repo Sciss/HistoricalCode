@@ -1,7 +1,10 @@
-/**
+/*
  *	(C)opyright 2007-2008 by Hanns Holger Rutz. All rights reserved.
- *
- *	@version	0.21, 23-Jul-08
+ */
+ 
+/**
+ *	@author	Hanns Holger Rutz
+ *	@version	0.22, 30-Jul-08
  */
 BosqueAudioPlayer : Object {
 	var <doc;
@@ -128,6 +131,15 @@ BosqueAudioPlayer : Object {
 			[ stake, synth, "makeDur" ].postln;
 		});
 		^synth;
+	}
+	
+	makeFuncFullbody { arg stake, name = \fullbody;
+		var fFullbody, event;
+		event = stake.event;
+		fFullbody = event[ name ];
+		event.upd = event.upd.add( UpdateListener.newFor( EGMFullbodyTracker, { arg upd, track, msg;
+			fFullbody.value( event, msg );
+		}, \msg ));
 	}
 	
 	freeFuncSynths { arg stake, bndl;
