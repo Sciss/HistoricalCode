@@ -1,0 +1,15 @@
+
+	.doTimeline({ arg tl; tl.rate_(44100).span_(Span(0, 21168000))})
+	.doTimelineView({ arg tlv; tlv.span_(Span(4196415, 14780415)).doCursor({ arg csr; csr.position_(0)}).doSelection({ arg sel; sel.span_(Span(0, 9880170))})})
+	.doAudioFiles({ arg af; af.addAll(this,
+	[ BosqueAudioFile("/Users/rutz/Desktop/audio_work/CrosshatchCutLCutRsmp.aif") ])})
+	.doBusConfigs({ arg b; b.addAll(this,
+	[ BosqueBusConfig(0, 1, 6).name_('PadBus').connections_([ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ]) ])})
+	.doTracks({ arg tr; tr.addAll(this,
+	[ BosqueTrack(-1).name_('Markers'), BosqueTrack(0).name_('Track_1'), BosqueTrack(1).name_('Track_2').busConfig_(BosqueBusConfig(0, 1, 6).name_('PadBus').connections_([ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ])), BosqueTrack(2).name_('Track_3'), BosqueTrack(3).name_('Track_4') ])})
+	.doTrail({ arg tr; tr.rate_(44100).addAll(this,
+	[ BosqueFuncRegionStake(Span(0, 9880170), 'T2Func', BosqueTrack(2).name_('Track_3'), Color(0.6, 0.0, 0.0, 1.0), BosqueFade('lin', 0, 0), BosqueFade('lin', 0, 0), 1.0, "~t2func", BosqueTrack(1).name_('Track_2').busConfig_(BosqueBusConfig(0, 1, 6).name_('PadBus').connections_([ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ])), 'pre'), BosqueFuncRegionStake(Span(18031, 9632605), 'LalaFunc', BosqueTrack(0).name_('Track_1'), Color(0.6, 0.0, 0.0, 1.0), BosqueFade('lin', 0, 0), BosqueFade('lin', 0, 0), 1.4125375446228, "~lalafunc", nil, 'pre'), BosqueAudioRegionStake(Span(92958, 4921648), "CrosshatchCutLCutRsmp", BosqueTrack(1).name_('Track_2').busConfig_(BosqueBusConfig(0, 1, 6).name_('PadBus').connections_([ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ])), Color(0.0, 0.6, 0.0, 1.0), BosqueFade('lin', 0, 0), BosqueFade('lin', 0, 0), 1.6788040181226, 0, BosqueAudioFile("/Users/rutz/Desktop/audio_work/CrosshatchCutLCutRsmp.aif")), BosqueAudioRegionStake(Span(4926805, 9755495), "CrosshatchCutLCutRsmp", BosqueTrack(1).name_('Track_2').busConfig_(BosqueBusConfig(0, 1, 6).name_('PadBus').connections_([ [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 ] ])), Color(0.0, 0.6, 0.0, 1.0), BosqueFade('lin', 0, 0), BosqueFade('lin', 0, 0), 1.6788040181226, 0, BosqueAudioFile("/Users/rutz/Desktop/audio_work/CrosshatchCutLCutRsmp.aif")) ])})
+	.doVolEnv({ arg tr; tr.rate_(44100).addAll(this,
+	[  ])})
+	.doMarkers({ arg m; m.rate_(nil).addAll(this,
+	[  ])})
