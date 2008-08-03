@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.16, 23-Jul-08
+ *	@version	0.17, 03-Aug-08
  */
 BosqueSession : Object {
 	var <bosque;
@@ -65,7 +65,7 @@ BosqueSession : Object {
 	}
 	
 	init {
-		audioFiles		= BosqueSessionCollection.new;
+		audioFiles		= BosqueSessionCollection( hasJava: false );
 		timeline			= BosqueTimeline( 44100 );
 		timelineView		= BosqueTimelineView( timeline );
 		transport			= BosqueTransport( this );
@@ -76,7 +76,7 @@ BosqueSession : Object {
 		audioPlayer		= BosqueAudioPlayer( this );
 		tracks			= BosqueSessionCollection.new;
 		selectedTracks	= BosqueSessionCollection( false );
-		busConfigs		= BosqueSessionCollection.new;
+		busConfigs		= BosqueSessionCollection( hasJava: false );
 		markers			= BosqueTrail.new;
 		markerTrack		= BosqueTrack( -1, markers ).name_( \Markers );
 		tracks.add( nil, markerTrack );
