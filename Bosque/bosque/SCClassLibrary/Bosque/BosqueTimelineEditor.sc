@@ -923,7 +923,7 @@ BosqueTimelineEditor : Object {
 	}
 	
 	prTimelineGlueObjects { arg doc;
-		var pos, ce, sel, flt, env, coll, firstSegm, lastSegm, newSpan, offset, firstReg, didBegin = false, newReg, collNewRegs;
+		var pos, ce, sel, flt, env, coll, firstSegm, lastSegm, newSpan, offset, firstReg, didBegin = false, newReg, collNewRegs, cutSpan;
 		
 		pos	= doc.timelineView.cursor.position;
 		sel	= doc.selectedRegions.getAll.select({ arg stake; stake.isKindOf( BosqueEnvRegionStake )});
@@ -944,14 +944,21 @@ BosqueTimelineEditor : Object {
 				lastSegm	= env.get( env.numStakes - 1 );
 //("Doing track " ++ track.name ++ " --> offset is " ++ offset ++ "; newSpan is " ++ newSpan.asCompileString).postln;
 				flt.copyToEnd( 1 ).do({ arg reg;
-					coll = Trail.getCuttedRange( reg.env.getAll, reg.env.span, true, Trail.kTouchNone, reg.span.start - offset );
-					firstSegm = coll.at( 0 );
-					if( lastSegm.span.stop < firstSegm.span.start, {
-						env.add( nil, BosqueEnvSegmentStake( Span( lastSegm.span.stop, firstSegm.span.start ),
-							lastSegm.stopLevel, firstSegm.startLevel ));
+					cutSpan = if( reg.span.start == (lastSegm.span.stop + offset), {
+						reg.env.span.replaceStart( reg.env.get( 0 ).span.stop );
+					}, {
+						reg.env.span;
 					});
-					env.addAll( nil, coll );
-					lastSegm = coll.last;
+					if( cutSpan.isEmpty.not, {
+						coll = Trail.getCuttedRange( reg.env.getAll, cutSpan, true, Trail.kTouchNone, reg.span.start - offset );
+						firstSegm = coll.at( 0 );
+						if( lastSegm.span.stop < firstSegm.span.start, {
+							env.add( nil, BosqueEnvSegmentStake( Span( lastSegm.span.stop, firstSegm.span.start ),
+								lastSegm.stopLevel, firstSegm.startLevel ));
+						});
+						env.addAll( nil, coll );
+						lastSegm = coll.last;
+					});
 				});
 				doc.trail.editRemoveAll( this, flt, ce );
 				ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, flt, false ));
