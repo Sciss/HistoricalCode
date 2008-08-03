@@ -636,16 +636,16 @@ BosqueTimelineEditor : Object {
 			});
 			
 		JSCPopUpMenu( view, Rect( 0, 0, 40, 20 ))
-			.items_([ "Action", "--------", "All GUI", "Audio Rec.", "OSC Mem Play", "OSC Rec", "Fullbody" ])
+			.items_([ "Action", "--------", /* "All GUI",*/ "Audio Rec.", "OSC Mem Play", "OSC Rec", "Fullbody" ])
 			.canFocus_( false )
 			.action_({ arg b; var value = b.value;
 				b.value = 0;
 				switch( value - 2,
-				0, { Bosque.allGUI },
-				1, { Bosque.recorderGUI },
-				2, { BosqueOSCMemory.new.addr_( NetAddr.localAddr ).synced_( true ).makeGUI },
-				3, { BosqueOSCRecorder.new.synced_( true ).makeGUI },
-				4, { EGMFullbodyTracker.start; ~egm_visualizer = EGMFullbodyVisualizer.new }
+//				0, { Bosque.allGUI },
+				0, { Bosque.recorderGUI },
+				1, { BosqueOSCMemory.new.addr_( NetAddr.localAddr ).synced_( true ).makeGUI },
+				2, { BosqueOSCRecorder.new.synced_( true ).makeGUI },
+				3, { EGMFullbodyTracker.start; ~egm_visualizer = EGMFullbodyVisualizer.new }
 				);
 			});
 			

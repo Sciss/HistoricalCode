@@ -424,106 +424,106 @@ if( createCC, {
 		^e;
 	}
 	
-	*allGUI {
-		this.dancerGUI;
-		this.fieldGUI;
-		this.trackGUI;
-	}
-	
-	*dancerGUI {
-		var w, c, r, v, colors;
-
-		w = GUI.window.new( "dancer", Rect( 40, 380, 360, 150 ), resizable: false );
-		w.view.background = Color.black;
-		colors = Array.fill( 64, { arg i; Color.hsv( i / 96, 1, 1 )});
-		v = GUI.envelopeView.new( w, w.view.bounds )
-			.canFocus_( false )
-			.editable_( false )
-			.thumbSize_( 6 )
-			.fillColor_( Color.white );
-		c = Collapse({ arg msg; var cmd, x, y, value, colr;
-			#cmd, x, y, value = msg;
-			if( x.notNil, {  // cz ...................
-				v.value_([[ x ], [ 1 - y ]]);
-				colr = colors[ ((1 - value.clip(0,1)) * colors.size).asInteger ] ? Color.black;
-				v.setFillColor( 0, colr );
-			});
-		} , 0.05, AppClock );
-		r = OSCresponderNode( nil, '/dancer', { arg time, resp, msg;
-			c.instantaneous( msg );
-		}).add;
-		w.onClose = { c.cancel; r.remove };
-		w.front;
-	}
-
-	*fieldGUI {
-		var w, c, r, v, colors;
-
-		w = GUI.window.new( "fields", Rect( 40, 210, 360, 150 ), resizable: false );
-		w.view.background = Color.black;
-		colors = Array.fill( 64, { arg i; Color.hsv( i / 96, 1, 1 )});
-		v = GUI.envelopeView.new( w, w.view.bounds )
-			.canFocus_( false )
-			.editable_( false )
-			.thumbSize_( 30 );
-		c = Collapse({ arg msg; var x, y, c; // , num = 0;
-			x = Array( 6 );
-			y = Array( 6 );
-			c = Array( 6 );
-			msg.drop(1).pairsDo({ arg field, value, idx;
-				if( value > 0, {
-					x.add( (field % 12) / 11 );
-					y.add( 1 - (field.div( 12 ) / 4) );
-	//				num = num + 1;
-					c.add( colors[ ((1 - value.clip(0,1)) * colors.size).asInteger ] ? Color.black );
-				});
-			});
-	//		num.postln;
-			v.value_([ x, y ]);
-			c.do({ arg col, i; v.setFillColor( i, col )});
-		} , 0.05, AppClock );
-		r = OSCresponderNode( nil, '/field', { arg time, resp, msg;
-			c.instantaneous( msg );
-		}).add;
-		w.onClose = { c.cancel; r.remove };
-		w.front;
-	}
-	
-	*trackGUI {
-		var w, c, r, v, colors;
-
-		w = GUI.window.new( "track", Rect( 40, 40, 360,150 ), resizable: false );
-		w.view.background = Color.black;
-		colors = Array.fill( 64, { arg i; Color.hsv( i / 96, 1, 1 )});
-		v = GUI.envelopeView.new( w, w.view.bounds )
-			.canFocus_( false )
-			.editable_( false )
-			.thumbSize_( 6 )
-			.fillColor_( Color.white );
-		c = Collapse({ arg msg; var x, y, c; // , num = 0;
-			x = Array( 6 );
-			y = Array( 6 );
-			c = Array( 6 );
-			msg.drop(1).tripletsDo({ arg xval, yval, value, idx;
-				if( (xval > 0) or: { yval > 0 }, {
+//	*allGUI {
+//		this.dancerGUI;
+//		this.fieldGUI;
+//		this.trackGUI;
+//	}
+//	
+//	*dancerGUI {
+//		var w, c, r, v, colors;
+//
+//		w = GUI.window.new( "dancer", Rect( 40, 380, 360, 150 ), resizable: false );
+//		w.view.background = Color.black;
+//		colors = Array.fill( 64, { arg i; Color.hsv( i / 96, 1, 1 )});
+//		v = GUI.envelopeView.new( w, w.view.bounds )
+//			.canFocus_( false )
+//			.editable_( false )
+//			.thumbSize_( 6 )
+//			.fillColor_( Color.white );
+//		c = Collapse({ arg msg; var cmd, x, y, value, colr;
+//			#cmd, x, y, value = msg;
+//			if( x.notNil, {  // cz ...................
+//				v.value_([[ x ], [ 1 - y ]]);
+//				colr = colors[ ((1 - value.clip(0,1)) * colors.size).asInteger ] ? Color.black;
+//				v.setFillColor( 0, colr );
+//			});
+//		} , 0.05, AppClock );
+//		r = OSCresponderNode( nil, '/dancer', { arg time, resp, msg;
+//			c.instantaneous( msg );
+//		}).add;
+//		w.onClose = { c.cancel; r.remove };
+//		w.front;
+//	}
+//
+//	*fieldGUI {
+//		var w, c, r, v, colors;
+//
+//		w = GUI.window.new( "fields", Rect( 40, 210, 360, 150 ), resizable: false );
+//		w.view.background = Color.black;
+//		colors = Array.fill( 64, { arg i; Color.hsv( i / 96, 1, 1 )});
+//		v = GUI.envelopeView.new( w, w.view.bounds )
+//			.canFocus_( false )
+//			.editable_( false )
+//			.thumbSize_( 30 );
+//		c = Collapse({ arg msg; var x, y, c; // , num = 0;
+//			x = Array( 6 );
+//			y = Array( 6 );
+//			c = Array( 6 );
+//			msg.drop(1).pairsDo({ arg field, value, idx;
+//				if( value > 0, {
 //					x.add( (field % 12) / 11 );
 //					y.add( 1 - (field.div( 12 ) / 4) );
-					x.add( xval );
-					y.add( 1 - yval );
-	//				num = num + 1;
-					c.add( colors[ ((1 - value.clip(0,1)) * colors.size).asInteger ]);
-				});
-			});
-	//		num.postln;
-			v.value_([ x, y ]);
-			c.do({ arg col, i; v.setFillColor( i, col )});
-		} , 0.05, AppClock );
-		r = OSCresponderNode( nil, '/track', { arg time, resp, msg;
-			c.instantaneous( msg );
-		}).add;
-		w.onClose = { c.cancel; r.remove };
-		w.front;
-	}
+//	//				num = num + 1;
+//					c.add( colors[ ((1 - value.clip(0,1)) * colors.size).asInteger ] ? Color.black );
+//				});
+//			});
+//	//		num.postln;
+//			v.value_([ x, y ]);
+//			c.do({ arg col, i; v.setFillColor( i, col )});
+//		} , 0.05, AppClock );
+//		r = OSCresponderNode( nil, '/field', { arg time, resp, msg;
+//			c.instantaneous( msg );
+//		}).add;
+//		w.onClose = { c.cancel; r.remove };
+//		w.front;
+//	}
+//	
+//	*trackGUI {
+//		var w, c, r, v, colors;
+//
+//		w = GUI.window.new( "track", Rect( 40, 40, 360,150 ), resizable: false );
+//		w.view.background = Color.black;
+//		colors = Array.fill( 64, { arg i; Color.hsv( i / 96, 1, 1 )});
+//		v = GUI.envelopeView.new( w, w.view.bounds )
+//			.canFocus_( false )
+//			.editable_( false )
+//			.thumbSize_( 6 )
+//			.fillColor_( Color.white );
+//		c = Collapse({ arg msg; var x, y, c; // , num = 0;
+//			x = Array( 6 );
+//			y = Array( 6 );
+//			c = Array( 6 );
+//			msg.drop(1).tripletsDo({ arg xval, yval, value, idx;
+//				if( (xval > 0) or: { yval > 0 }, {
+////					x.add( (field % 12) / 11 );
+////					y.add( 1 - (field.div( 12 ) / 4) );
+//					x.add( xval );
+//					y.add( 1 - yval );
+//	//				num = num + 1;
+//					c.add( colors[ ((1 - value.clip(0,1)) * colors.size).asInteger ]);
+//				});
+//			});
+//	//		num.postln;
+//			v.value_([ x, y ]);
+//			c.do({ arg col, i; v.setFillColor( i, col )});
+//		} , 0.05, AppClock );
+//		r = OSCresponderNode( nil, '/track', { arg time, resp, msg;
+//			c.instantaneous( msg );
+//		}).add;
+//		w.onClose = { c.cancel; r.remove };
+//		w.front;
+//	}
 
 	*launch {
 		var bosque;
