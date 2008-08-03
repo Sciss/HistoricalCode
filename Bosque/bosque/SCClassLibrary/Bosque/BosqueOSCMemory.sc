@@ -2,7 +2,7 @@
  *	(C)opyright 2007-2008 Hanns Holger Rutz. All rights reserved.
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.14, 29-Jul-08
+ *	@version	0.15, 03-Aug-08
  */
 BosqueOSCMemory {
 	var win;
@@ -30,7 +30,7 @@ BosqueOSCMemory {
 		fntSmall	= JFont( "Lucida Grande", 10 );
 		fntBig	= JFont( "Helvetica", 20 );
 
-		win = JSCWindow( "OSC Memory", Rect( 0, 0, 380, 130 ));
+		win = JSCWindow( "OSC Memory", Rect( 0, 0, 380, 130 ), resizable: false );
 		ScissUtil.positionOnScreen( win, 0.5, 0.75 );
 		view = win.view;
 		view.decorator = flow = FlowLayout( view.bounds );
@@ -89,14 +89,14 @@ BosqueOSCMemory {
 
 		ggSync = JSCButton( view, Rect( 0, 0, 34, 34 )).canFocus_( false )
 			.font_( fntBig )
-			.states_([[ "" ++ 0xE2.asAscii ++ 0x86.asAscii ++ 0x82.asAscii ]]) // Triangle pointing to the right
+			.states_([[ "" ++ 0xE2.asAscii ++ 0x86.asAscii ++ 0x82.asAscii ] ++ if( synced, [ Color.white, Color.blue ])])
 			.action_({ arg b;
 				this.synced = this.synced.not;
 			});
 		
 		ggPlay = JSCButton( view, Rect( 0, 0, 34, 34 )).canFocus_( false )
 			.font_( fntBig )
-			.states_([[ "" ++ 0xE2.asAscii ++ 0x96.asAscii ++ 0xB6.asAscii ]]) // Triangle pointing to the right
+			.states_([[ "" ++ 0xE2.asAscii ++ 0x96.asAscii ++ 0xB6.asAscii ] ++ if( rout.notNil, [ Color.white, Color.blue ])])
 			.action_({ arg b;
 				this.play( this.offset );
 			});

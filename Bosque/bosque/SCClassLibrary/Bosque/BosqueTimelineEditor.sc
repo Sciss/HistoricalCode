@@ -6,7 +6,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.29, 30-Jul-08
+ *	@version	0.31, 03-Aug-08
  */
 BosqueTimelineEditor : Object {
 	var <bosque;
@@ -319,10 +319,10 @@ BosqueTimelineEditor : Object {
 
 		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "File", 1 );
 		JSCMenuItem( mg, "New" ).action_({ this.prFileNew( doc )});
-		JSCMenuItem( mg, "Open..." ).setShortCut( "O", 0x04 ).action_({ this.prFileOpen( doc )});
+		JSCMenuItem( mg, "Open..." ).shortcut_( "meta O" ).action_({ this.prFileOpen( doc )});
 		JSCMenuItem( mg, "Append..." ).action_({ this.prFileAppend( doc )});
 		JSCMenuSeparator( mg );
-		JSCMenuItem( mg, "Save" ).setShortCut( "S", 0x04 ).action_({
+		JSCMenuItem( mg, "Save" ).shortcut_( "meta S" ).action_({
 			if( doc.isDirty, {
 				if( doc.path.notNil, {
 					this.prFileSave( doc, doc.path );
@@ -332,7 +332,7 @@ BosqueTimelineEditor : Object {
 			});
 		});
 		JSCMenuSeparator( mg );
-		JSCMenuItem( mg, "Save As..." ).setShortCut( "S", 0x05 ).action_({ this.prFileSaveAs( doc )});
+		JSCMenuItem( mg, "Save As..." ).shortcut_( "shift S" ).action_({ this.prFileSaveAs( doc )});
 
 //		vx = vx + vw + 4; vw = 80;
 //		JSCPopUpMenu( view, Rect( vx, 1, vw, 16 )).font_( fntSmall ).canFocus_( false )
@@ -363,13 +363,13 @@ BosqueTimelineEditor : Object {
 //			});
 			
 		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Edit", 2 );
-		JSCMenuItem( mg, "Undo" ).setShortCut( "Z", 0x04 ).action_({ this.prEditUndo( doc )});
-		JSCMenuItem( mg, "Redo" ).setShortCut( "Z", 0x05 ).action_({ this.prEditRedo( doc )});
+		JSCMenuItem( mg, "Undo" ).shortcut_( "meta Z" ).action_({ this.prEditUndo( doc )});
+		JSCMenuItem( mg, "Redo" ).shortcut_( "meta shift Z" ).action_({ this.prEditRedo( doc )});
 		JSCMenuSeparator( mg );
-		JSCMenuItem( mg, "Cut" ).setShortCut( "X", 0x04 ).action_({ this.prEditCut( doc )});
-		JSCMenuItem( mg, "Copy" ).setShortCut( "C", 0x04 ).action_({ this.prEditCopy( doc )});
-		JSCMenuItem( mg, "Paste" ).setShortCut( "V", 0x04 ).action_({ this.prEditPaste( doc )});
-		JSCMenuItem( mg, "Delete" ).setShortCut( "DELETE", 0x00 ).action_({ this.prEditDelete( doc )});
+		JSCMenuItem( mg, "Cut" ).shortcut_( "meta X" ).action_({ this.prEditCut( doc )});
+		JSCMenuItem( mg, "Copy" ).shortcut_( "meta C" ).action_({ this.prEditCopy( doc )});
+		JSCMenuItem( mg, "Paste" ).shortcut_( "meta V" ).action_({ this.prEditPaste( doc )});
+		JSCMenuItem( mg, "Delete" ).shortcut_( "BACK_SLASH" ).action_({ this.prEditDelete( doc )});
 //		JSCMenuSeparator( mg );
 		
 //		vx = vx + vw + 4; vw = 80;
@@ -388,16 +388,16 @@ BosqueTimelineEditor : Object {
 //			});
 
 		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Timeline", 3 );
-		JSCMenuItem( mg, "Insert Span" ).setShortCut( "E", 0x05 ).action_({ this.prTimelineInsertSpan( doc )});
-		JSCMenuItem( mg, "Clear Span" ).setShortCut( "DELETE", 0x04 ).action_({ this.prTimelineClearSpan( doc )});
-		JSCMenuItem( mg, "Remove Span" ).setShortCut( "DELETE", 0x05 ).action_({ this.prTimelineRemoveSpan( doc )});
+		JSCMenuItem( mg, "Insert Span" ).shortcut_( "meta shift E" ).action_({ this.prTimelineInsertSpan( doc )});
+		JSCMenuItem( mg, "Clear Span" ).shortcut_( "meta BACK_SLASH" ).action_({ this.prTimelineClearSpan( doc )});
+		JSCMenuItem( mg, "Remove Span" ).shortcut_( "meta shift BACK_SLASH" ).action_({ this.prTimelineRemoveSpan( doc )});
 		JSCMenuSeparator( mg );
-		JSCMenuItem( mg, "Split Objects" ).setShortCut( "X", 0x02 ).action_({ this.prTimelineSplitObjects( doc )});
-		JSCMenuItem( mg, "Glue Objects" ).setShortCut( "Y", 0x02 ).action_({ this.prTimelineGlueObjects( doc )});
+		JSCMenuItem( mg, "Split Objects" ).shortcut_( "meta2 X" ).action_({ this.prTimelineSplitObjects( doc )});
+		JSCMenuItem( mg, "Glue Objects" ).shortcut_( "meta2 Y" ).action_({ this.prTimelineGlueObjects( doc )});
 		JSCMenuSeparator( mg );
-		JSCMenuItem( mg, "Insert Enc" ).setShortCut( "E", 0x02 ).action_({ this.prTimelineInsertEnv( doc )});
-		JSCMenuItem( mg, "Insert Func" ).setShortCut( "F", 0x02 ).action_({ this.prTimelineInsertFunc( doc )});
-		JSCMenuItem( mg, "Change Gain" ).action_({ this.prTimelineChangeGain( doc )}); // .setShortCut( "G", 0x02 )
+		JSCMenuItem( mg, "Insert Enc" ).shortcut_( "meta2 E" ).action_({ this.prTimelineInsertEnv( doc )});
+		JSCMenuItem( mg, "Insert Func" ).shortcut_( "meta2 F" ).action_({ this.prTimelineInsertFunc( doc )});
+		JSCMenuItem( mg, "Change Gain" ).action_({ this.prTimelineChangeGain( doc )}); // .shortcut_( "meta2 G" )
 			
 		vx = vx + vw + 4; vw = 80;
 		JSCDragSink( view, Rect( vx, 1, vw, 16 ))
@@ -449,9 +449,9 @@ BosqueTimelineEditor : Object {
 		}, \tool );
 
 		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Tool", 4 );
-		JSCMenuItem( mg, "Move" ).setShortCut( "1", 0x04 ).action_({ panel.tool = \move; this.changed( \tool, panel.tool )});
-		JSCMenuItem( mg, "Resize" ).setShortCut( "2", 0x04 ).action_({ panel.tool = \resize; this.changed( \tool, panel.tool )});
-		JSCMenuItem( mg, "Env" ).setShortCut( "3", 0x04 ).action_({ panel.tool = \env; this.changed( \tool, panel.tool )});
+		JSCMenuItem( mg, "Move" ).shortcut_( "meta 1" ).action_({ panel.tool = \move; this.changed( \tool, panel.tool )});
+		JSCMenuItem( mg, "Resize" ).shortcut_( "meta 2" ).action_({ panel.tool = \resize; this.changed( \tool, panel.tool )});
+		JSCMenuItem( mg, "Env" ).shortcut_( "meta 3" ).action_({ panel.tool = \env; this.changed( \tool, panel.tool )});
 		
 //~ggScroll = ggScrollPane;
 //~ggCompo = view2;
@@ -620,7 +620,7 @@ BosqueTimelineEditor : Object {
 				0, { Bosque.allGUI },
 				1, { Bosque.recorderGUI },
 				2, { BosqueOSCMemory.new.addr_( NetAddr.localAddr ).synced_( true ).makeGUI },
-				3, { this.prOSCRec },
+				3, { BosqueOSCRecorder.new.synced_( true ).makeGUI },
 				4, { EGMFullbodyTracker.start; ~egm_visualizer = EGMFullbodyVisualizer.new }
 				);
 			});
@@ -1349,64 +1349,64 @@ name = af.name.asSymbol;
 		}.fork( SwingOSC.clock );
 	}
 	
-	prOSCRec {
-		if( ~updTransp.notNil, {
-			"WARNING: OSC-Rec already running. killing previous one!".warn;
-			~updTransp.remove;
-			if( ~oscRec.notNil, {
-				try {
-					~oscRec.closeFile;
-				} { arg error;
-					error.reportError;
-				};
-				~oscRec = nil;
-			});
-		});
-	
-		~oscName = "Durchlauf"; // "Magma";
-		~oscRecOffset = nil;
-		~updTransp = UpdateListener.newFor( Bosque.default.session.transport, { arg upd, transport, what, param1;
-try {
-			switch( what,
-			\play, {
-				~oscRec = FileNetAddr.openWrite( "/Users/rutz/Desktop/Bosque2/osc/"++~oscName++Date.getDate.stamp++".osc" );
-				~oscRecOffset = (param1 / Bosque.default.session.timeline.rate) - thisThread.seconds;
-					("--- OSC REC START (" ++ ~oscRecOffset ++ ")").postln;
-			},
-			\stop, {
-				if( ~oscRec.notNil, {
-					~oscRecOffset = nil;
-					"--- OSC REC DONE".postln;
-					~oscRec.closeFile;
-					~oscRec = nil;
-				});
-			},
-			\resume, {
-				try {
-					upd.update( transport, \stop );
-					upd.update( transport, \play, param1 );
-				} { arg error;
-					error.reportError;
-				};
-			});
-} { arg error;
-	error.reportError;
-};
-		});
-		~updOSC = UpdateListener.newFor( Main, { arg upd, obj, what, time, replyAddr, msg;
-try {
-			if( ~oscRecOffset.notNil and: { msg[0] === '/dancer' or: { (msg[0] === '/field') or: { msg[0] === '/track' }}}, {
-	//			~oscRec.sendMsg( *msg );
-	//			~oscRec.sendBundle( time, msg );
-				~oscRec.sendBundle( thisThread.seconds + ~oscRecOffset, msg );
-			});
-} { arg error;
-	error.reportError;
-};
-		});
-		
-		"\n---- OSC Recorder ready.".postln;
-	}
+//	prOSCRec {
+//		if( ~updTransp.notNil, {
+//			"WARNING: OSC-Rec already running. killing previous one!".warn;
+//			~updTransp.remove;
+//			if( ~oscRec.notNil, {
+//				try {
+//					~oscRec.closeFile;
+//				} { arg error;
+//					error.reportError;
+//				};
+//				~oscRec = nil;
+//			});
+//		});
+//	
+//		~oscName = "Durchlauf"; // "Magma";
+//		~oscRecOffset = nil;
+//		~updTransp = UpdateListener.newFor( Bosque.default.session.transport, { arg upd, transport, what, param1;
+//try {
+//			switch( what,
+//			\play, {
+//				~oscRec = FileNetAddr.openWrite( "/Users/rutz/Desktop/Bosque2/osc/"++~oscName++Date.getDate.stamp++".osc" );
+//				~oscRecOffset = (param1 / Bosque.default.session.timeline.rate) - thisThread.seconds;
+//					("--- OSC REC START (" ++ ~oscRecOffset ++ ")").postln;
+//			},
+//			\stop, {
+//				if( ~oscRec.notNil, {
+//					~oscRecOffset = nil;
+//					"--- OSC REC DONE".postln;
+//					~oscRec.closeFile;
+//					~oscRec = nil;
+//				});
+//			},
+//			\resume, {
+//				try {
+//					upd.update( transport, \stop );
+//					upd.update( transport, \play, param1 );
+//				} { arg error;
+//					error.reportError;
+//				};
+//			});
+//} { arg error;
+//	error.reportError;
+//};
+//		});
+//		~updOSC = UpdateListener.newFor( Main, { arg upd, obj, what, time, replyAddr, msg;
+//try {
+//			if( ~oscRecOffset.notNil and: { msg[0] === '/dancer' or: { (msg[0] === '/field') or: { msg[0] === '/track' }}}, {
+//	//			~oscRec.sendMsg( *msg );
+//	//			~oscRec.sendBundle( time, msg );
+//				~oscRec.sendBundle( thisThread.seconds + ~oscRecOffset, msg );
+//			});
+//} { arg error;
+//	error.reportError;
+//};
+//		});
+//		
+//		"\n---- OSC Recorder ready.".postln;
+//	}
 
 	showMessageDialog { arg title, text, type = \info;
 		bosque.swing.sendMsg( '/method', "javax.swing.JOptionPane", \showMessageDialog, '[', '/ref', \null, ']', text, title, [ \error, \info, \warn, \question ].indexOf( type ) ? -1 );

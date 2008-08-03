@@ -1,11 +1,11 @@
 /**
- *	(C)opyright 2006-2007 Hanns Holger Rutz. All rights reserved.
+ *	(C)opyright 2006-2008 Hanns Holger Rutz. All rights reserved.
  *	Distributed under the GNU General Public License (GPL).
  *
  *	Class dependancies: ScissPlus (+UnixFILE), FileNetAddr
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.13, 30-Jul-08
+ *	@version	0.14, 03-Aug-08
  */
 OSCFile {
 	var <packets;
@@ -41,9 +41,11 @@ OSCFile {
 					nextTime = p[0] / rate;
 					(nextTime - lastTime).wait;
 					lastTime = nextTime;
-					dispatcher.recvOSCbundle( lastTime, addr, *(p.drop(1)) );
+//					dispatcher.recvOSCbundle( lastTime, addr, *(p.drop(1)) );
+					dispatcher.recvOSCbundle( SystemClock.seconds, addr, *(p.drop(1)) );
 				}, {
-					dispatcher.recvOSCmessage( lastTime, addr, p );
+//					dispatcher.recvOSCmessage( lastTime, addr, p );
+					dispatcher.recvOSCmessage( SystemClock.seconds, addr, p );
 				});
 				idx = idx + 1;
 			});
