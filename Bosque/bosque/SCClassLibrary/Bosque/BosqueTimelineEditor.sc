@@ -945,12 +945,17 @@ BosqueTimelineEditor : Object {
 //("Doing track " ++ track.name ++ " --> offset is " ++ offset ++ "; newSpan is " ++ newSpan.asCompileString).postln;
 				flt.copyToEnd( 1 ).do({ arg reg;
 					cutSpan = if( reg.span.start == (lastSegm.span.stop + offset), {
-						reg.env.span.replaceStart( reg.env.get( 0 ).span.stop );
+						if( reg.env.numStakes > 1, {
+							reg.env.span.replaceStart( reg.env.get( 0 ).span.stop );
+						}, {
+							reg.env.span.replaceStart( (reg.env.get( 0 ).span.start + reg.env.get( 0 ).span.stop + 1) >> 1 );
+						});
 					}, {
 						reg.env.span;
 					});
+//[ "cutSpan", cutSpan ].postcs;
 					if( cutSpan.isEmpty.not, {
-						coll = Trail.getCuttedRange( reg.env.getAll, cutSpan, true, Trail.kTouchNone, reg.span.start - offset );
+						coll = Trail.getCuttedRange( reg.env.getAll, cutSpan, true, Trail.kTouchSplit, reg.span.start - offset );
 						firstSegm = coll.at( 0 );
 						if( lastSegm.span.stop < firstSegm.span.start, {
 							env.add( nil, BosqueEnvSegmentStake( Span( lastSegm.span.stop, firstSegm.span.start ),
