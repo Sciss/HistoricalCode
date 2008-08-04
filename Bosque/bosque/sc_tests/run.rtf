@@ -1,25 +1,26 @@
 {\rtf1\mac\ansicpg10000\cocoartf824\cocoasubrtf480
 {\fonttbl\f0\fnil\fcharset77 Monaco;}
-{\colortbl;\red255\green255\blue255;\red191\green0\blue0;\red0\green0\blue0;\red0\green0\blue191;
-\red96\green96\blue96;}
+{\colortbl;\red255\green255\blue255;\red191\green0\blue0;\red0\green0\blue191;\red96\green96\blue96;
+}
 \deftab560
 \pard\pardeftab560\ql\qnatural
 
-\f0\fs18 \cf2 // (\cf3 \
-\cf4 Bosque\cf3 .soundCard			= \cf0 "Fireface 400 (D1F)"\cf3 ; \cf2 // "Built-in Audio";\cf3 \
-\cf4 Bosque\cf3 .numInputBusChannels	= 8;\
-\cf4 Bosque\cf3 .numOutputBusChannels	= 8;\
-\cf4 Bosque\cf3 .workDir			= \cf5 "~/Bosque/"\cf3 .standardizePath; \cf2 // ! waveform cache goes here !\cf3 \
-\cf4 Bosque\cf3 .masterBusNumChannels	= 8;		\cf2 // the size of the master bus\cf3 \
-\cf4 Bosque\cf3 .masterChanMap		= [ 0, 1, 2, 3, 4, 5, 6, 7 ];  \cf2 // define the master channel indices\cf3 \
-\cf2 // location of the timebased library\cf3 \
-\cf4 Bosque\cf3 .timeBasedJar		= \cf4 nil\cf3 ; \cf2 // "file:///Users/rutz/Documents/workspace/TimeBased/TimeBased.jar";\cf3 \
-\cf2 // Bosque.createSynthDefs;\cf3 \
-\cf2 // )\cf3 \
+\f0\fs18 \cf2 // (\cf0 \
+\cf3 Bosque\cf0 .soundCard			= "Fireface 400 (D1F)"; \cf2 // "Built-in Audio";\cf0 \
+\cf3 Bosque\cf0 .numInputBusChannels	= 8;\
+\cf3 Bosque\cf0 .numOutputBusChannels	= 8;\
+\cf3 Bosque\cf0 .workDir			= \cf4 "~/Bosque/"\cf0 .standardizePath; \cf2 // ! waveform cache goes here !\cf0 \
+\cf3 Bosque\cf0 .masterBusNumChannels	= 8;		\cf2 // the size of the master bus\cf0 \
+\cf3 Bosque\cf0 .masterChanMap		= [ 0, 1, 2, 3, 4, 5, 6, 7 ];  \cf2 // define the master channel indices\cf0 \
+\cf2 // location of the timebased library\cf0 \
+\cf3 Bosque\cf0 .timeBasedJar		= \cf3 nil\cf0 ; \cf2 // "file:///Users/rutz/Documents/workspace/TimeBased/TimeBased.jar";\cf0 \
+\cf2 // Bosque.createSynthDefs;\cf0 \
+\cf2 // Bosque.createSynthDefs( true );\cf0 \
+\cf2 // )\cf0 \
 \
-\cf2 // ----- launch the app -----\cf3 \
-\cf4 SwingOSC\cf3 .default.waitForBoot(\{\
-	\cf4 SwingOSC\cf3 .default.protEnsureApplication;\
-	\cf4 Bosque\cf3 .launch;\
+\cf2 // ----- launch the app -----\cf0 \
+\cf3 SwingOSC\cf0 .default.waitForBoot(\{\
+	\cf3 SwingOSC\cf0 .default.protEnsureApplication;\
+	\cf3 Bosque\cf0 .launch;\
 \});\
 }

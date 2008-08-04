@@ -272,8 +272,14 @@ Bosque : Object {
 		this.changed( \micGain, micGain );
 	}
 	
-	*createSynthDefs {
-		(1..masterBusNumChannels).do({ arg numChannels;
+	*createSynthDefs { arg debug = false;
+		var mbc = masterBusNumChannels;
+		if( mbc.isNil, {
+			"Meta_Bosque:createSynthDefs - masterBusNumChannels is nil".warn;
+			mbc = 8;
+		});
+	
+		(1..mbc).do({ arg numChannels;
 			SynthDef( \bosqueDiskIn ++ numChannels, { arg out, i_bufNum, i_dur, i_fadeIn, i_fadeOut, amp = 1;
 				var env;
 				env = EnvGen.kr( Env.linen( i_fadeIn, i_dur - (i_fadeIn + i_fadeOut), i_fadeOut, 1.0, \lin ), doneAction: 2 ) * amp;
@@ -282,10 +288,10 @@ Bosque : Object {
 			}).writeDefFile;
 		});
 		
-		SynthDef( \bosqueMaster ++ masterBusNumChannels, { arg bus = 0, amp = 1, volBus;
+		SynthDef( \bosqueMaster ++ mbc, { arg bus = 0, amp = 1, volBus;
 			//            1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
-			amp = amp * [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.3, 1.3, 1.3, 1.3, 1.2, 1.2 ].keep( masterBusNumChannels );
-			ReplaceOut.ar( bus, Limiter.ar( In.ar( bus, masterBusNumChannels ) * amp * In.kr( volBus ), 0.99 ));
+			amp = amp * [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.3, 1.3, 1.3, 1.3, 1.2, 1.2 ].keep( mbc );
+			ReplaceOut.ar( bus, Limiter.ar( In.ar( bus, mbc ) * amp * In.kr( volBus ), 0.99 ));
 		}, [ nil, 0.1, nil ]).writeDefFile;
 
 		SynthDef( \bosqueRoute1, { arg inBus, outBus;
@@ -303,6 +309,69 @@ Bosque : Object {
 		SynthDef( \bosqueXEnvWrite, { arg bus, start, end, dur;
 			Out.kr( bus, XLine.kr( start, end, dur, doneAction: 2 ));
 		}).writeDefFile;
+
+		[ \DbFaderWarpP, \DbFaderWarpN, \ExponentialWarp, \LinearWarp, \FaderWarpP, \FaderWarpN, \CurveWarp, \SineWarp, \CosineWarp ].do({ arg warp;
+		  SynthDef( "bosqueEnv" ++ warp, { arg i_bufNum, out, i_off = 0, i_atk = 0.001, i_dur,
+			specMin = 0.0, specMax = 1.0, specCurve = 0.0;
+			var segmFrames, val, inp, line, warped, specGrow, specA, specB, sig;
+			
+			Line.kr( dur: i_dur, doneAction: 2 );
+			val		= Dbufrd( i_bufNum, Dseries( i_off, 2, inf ));
+			segmFrames = Dbufrd( i_bufNum, Dseries( i_off + 1, 2, inf ));
+	//		val	 	= DemandEnvGen.ar( val, dur );
+			val	 	= DemandEnvGen.kr( val, segmFrames, timeScale: SampleDur.ir );
+			
+			warped	= switch( warp,
+			\DbFaderWarpP, {
+//				(val.squared * (specMax - specMin) + specMin.dbamp).ampdb;
+//				(val * val * (specMax.dbamp - specMin.dbamp) + (pow( 10.0, specMin * 0.05))).ampdb;
+				(val * val * (specMax.dbamp - specMin.dbamp) + specMin.dbamp).ampdb;
+			},
+			\DbFaderWarpN, {
+				((1 - (1 - val).squared) * (specMax.dbamp - specMin.dbamp) + specMin.dbamp).ampdb;
+			},
+			\ExponentialWarp, {
+				((specMax / specMin) ** val) * specMin;
+			},
+			\LinearWarp, {
+				val * (specMax - specMin) + specMin;
+			},
+			\FaderWarpP, {
+				val.squared * (specMax - specMin) + specMin;
+			},
+			\FaderWarpN, {
+				(1 - (1 - val).squared) * (specMax - specMin) + specMin;
+			},
+			\CurveWarp, {
+				specGrow	= exp( specCurve );
+				specA	= (specMax - specMin) / (1.0 - specGrow);
+				specB	= specMin + specA;
+				specB - (specA * pow( specGrow, val ));
+			},
+			\SineWarp, {
+				sin( 0.5pi * val ) * (specMax - specMin) + specMin;
+			},
+			\CosineWarp, {
+				(0.5 - (cos( pi * val ) * 0.5)) * (specMax - specMin) + specMin;
+			}, {
+				Assertion( false, warp.asString );
+			});
+
+			inp		= In.kr( out );
+			line		= Line.kr( 0, 1, i_atk );
+			sig		= (warped * line) + (inp * (1 - line));
+
+if( debug, {
+	warped.poll( 10, "warped" );
+	sig.poll( 10, "sig" );
+	line.poll( 10, "line" );
+	inp.poll( 10, "inp" );
+});
+
+			Out.kr( out, sig );
+	//		XOut.kr( i_outbus, Line.kr( 0, 1, 0.1 ), val );
+		  }).writeDefFile( overwrite: true );
+		});
 	}
 	
 	prMIDIInit {

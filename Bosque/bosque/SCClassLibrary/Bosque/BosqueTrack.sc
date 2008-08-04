@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.15, 23-Jul-08
+ *	@version	0.16, 04-Aug-08
  */
 BosqueTrack {
 	var <trackID;
@@ -41,6 +41,7 @@ BosqueTrack {
 	var <name;
 	var <trail;
 	var <ctrlSpec;
+	var <ctrlBusIndex;
 	
 	// level display
 	var lvlStr;
@@ -155,6 +156,11 @@ BosqueTrack {
 		this.changed( \ctrlSpec, spec );
 	}
 
+	ctrlBusIndex_ { arg idx;
+		ctrlBusIndex = idx;
+		this.changed( \ctrlBusIndex, idx );
+	}
+
 	name_ { arg str;
 		name = str;
 		java.setName( name );
@@ -179,6 +185,11 @@ BosqueTrack {
 	editCtrlSpec { arg source, spec, ce;
 		var oldSpec = ctrlSpec;
 		ce.addPerform( BosqueFunctionEdit({ this.ctrlSpec = spec }, { this.ctrlSpec = oldSpec }, "Change Track Spec", true ));
+	}
+
+	editCtrlBusIndex { arg source, idx, ce;
+		var oldIdx = ctrlBusIndex;
+		ce.addPerform( BosqueFunctionEdit({ this.ctrlBusIndex = idx }, { this.ctrlBusIndex = oldIdx }, "Change Track Control Bus", true ));
 	}
 
 	editRename { arg source, newName, ce;
@@ -217,6 +228,11 @@ BosqueTrack {
 		if( ctrlSpec.notNil, {
 			stream << ".ctrlSpec_(";
 			ctrlSpec.storeOn( stream );
+			stream << ")";
+		});
+		if( ctrlBusIndex.notNil, {
+			stream << ".ctrlBusIndex_(";
+			ctrlBusIndex.storeOn( stream );
 			stream << ")";
 		});
 	}

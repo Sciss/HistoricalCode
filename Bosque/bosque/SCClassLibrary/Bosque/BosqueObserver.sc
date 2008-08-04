@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.15, 23-Jul-08
+ *	@version	0.16, 04-Aug-08
  */
 BosqueObserver {
 	var <bosque;
@@ -49,7 +49,7 @@ BosqueObserver {
 	prMakeGUI {
 		var stake, fntSmall, updRegionSel, view, flow, ggStakeName, ggColor, ggColorChooser, ggFadeIn, ggFadeOut, ggGain, fRegionUpdate, selNum = -1, nan;
 		var track, ggTab, ggTrackName, updTrackSel, fTrackUpdate, ggTrackMute;
-		var ggBusConfig, ggCtrlSpec;
+		var ggBusConfig, ggCtrlSpec, ggCtrlBusIndex;
 		var ggFuncEventName, ggFuncModTrack, ggFuncPosition;
 		
 		window = JSCWindow( "Observer", Rect( 0, 0, 254, 248 ), resizable: false ).userCanClose_( false ).alwaysOnTop_( true ); // .alwaysOnTop_( true );
@@ -242,6 +242,23 @@ BosqueObserver {
 			});
 		flow.nextLine;
 
+		JSCStaticText( view, Rect( 0, 0, 60, 20 )).font_( fntSmall ).align_( \right ).string_( "Ctrl Bus:" );
+		ggCtrlBusIndex = JSCDragSink( view, Rect( 0, 0, 160, 20 )).font_( fntSmall )
+			.canReceiveDragHandler_({ arg b;
+				JSCView.currentDrag.isKindOf( Integer ) or: { JSCView.currentDrag.isKindOf( Bus ) and: {Ê(JSCView.currentDrag.rate === \control) and: { JSCView.currentDrag.numChannels == 1 }}};
+			})
+			.action_({ arg b; var ctrl = b.object.asUGenInput, ce;
+				if( track.notNil, {
+					b.object = ctrl.asString;
+					ce		= JSyncCompoundEdit( "Change Track Control Bus" );
+					doc.selectedTracks.select({ arg x; x.trackID >= 0 }).do({ arg x; x.editCtrlBusIndex( this, ctrl, ce )});
+					doc.undoManager.addEdit( ce.performEdit.end );
+				}, {
+					b.object = "";
+				});
+			});
+		flow.nextLine;
+
 		ggTrackMute = JSCCheckBox( view, Rect( 0, 0, 60, 20 )).font_( fntSmall ).string_( "Mute" )
 			.action_({ arg b; var ce, value;
 				value	= b.value;
@@ -256,18 +273,20 @@ BosqueObserver {
 			
 			if( newSelNum != selNum and: { ((newSelNum > 1) && (selNum > 1)).not }, {
 				if( newSelNum == 0, {
-					track			= nil;
-					ggTrackName.string	= "";
-					ggTrackMute.value	= false;
-					ggBusConfig.object	= "";
-					ggCtrlSpec.object	= "";
+					track				= nil;
+					ggTrackName.string		= "";
+					ggTrackMute.value		= false;
+					ggBusConfig.object		= "";
+					ggCtrlSpec.object		= "";
+					ggCtrlBusIndex.object	= "";
 				}, {
-					track			= doc.selectedTracks.detect({ arg x; x.trackID >= 0 });
-//					ggTrackName.string	= "Track " ++ (doc.tracks.indexOf( track )+1); // track.name.asString;
-					ggTrackName.string	= track.name;
-					ggTrackMute.value	= track.muted;
-					ggBusConfig.object	= track.busConfig.notNil.if({ track.busConfig.name }, "" );
-					ggCtrlSpec.object	= track.ctrlSpec.notNil.if({ track.ctrlSpec.storeArgs }, "" );
+					track				= doc.selectedTracks.detect({ arg x; x.trackID >= 0 });
+//					ggTrackName.string		= "Track " ++ (doc.tracks.indexOf( track )+1); // track.name.asString;
+					ggTrackName.string		= track.name;
+					ggTrackMute.value		= track.muted;
+					ggBusConfig.object		= track.busConfig.notNil.if({ track.busConfig.name }, "" );
+					ggCtrlSpec.object		= track.ctrlSpec.notNil.if({ track.ctrlSpec.storeArgs }, "" );
+					ggCtrlBusIndex.object	= track.ctrlBusIndex.notNil.if({ track.ctrlBusIndex.asString }, "" );
 				});
 				ggTrackMute.enabled	= sth;
 			});

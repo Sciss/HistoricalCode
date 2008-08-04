@@ -28,12 +28,13 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.11, 25-Jul-08
+ *	@version	0.12, 04-Aug-08
  */
 BosqueEnvRegionStake : BosqueRegionStake {
 //	var <java;
 //	var playing	= false;
 	var <env;		// a BosqueTrail whose stakes are instances of BosqueEnvSegmentStake
+	var synth;	// for audio player
 	
 	*new { arg span, name, track, colr, fadeIn, fadeOut, gain = 1.0, env;
 		^super.new( span, name, track, colr ?? { Color.blue( 0.6 )}, fadeIn, fadeOut, gain ).prInitFERS( env );
@@ -126,11 +127,59 @@ BosqueEnvRegionStake : BosqueRegionStake {
 //	}
 
 	playToBundle { arg bndl, player, frameOffset = 0;
-		// XXX
+		var s, stake, idx, segmFrames, numSegm, durSecs, buffer, data, spec, warpName, defName;
+		
+		if( track.ctrlBusIndex.isNil, { ^this });
+		
+		idx = env.indexOfPos( frameOffset );
+		if( idx < 0, { idx = (idx + 2).neg });
+		stake = env.get( idx );
+		if( stake.isNil, { ("BosqueEnvRegionStake:playToBundle: for frameOffset " ++ frameOffset ++ " stake index is negative!").warn; ^nil });
+		numSegm		= env.numStakes - idx;
+		s			= player.scsynth;
+		durSecs		= max( 0, (env.span.stop - frameOffset) / s.sampleRate );
+		buffer		= Buffer( s, (numSegm << 1) + 3, 1 );
+		data			= Signal( buffer.numFrames );
+		data.add( stake.level( frameOffset ));
+//		idx			= idx + 1;
+		while({ idx < env.numStakes }, {
+			stake	= env.get( idx );
+			segmFrames = stake.span.stop - frameOffset;
+			data.add( segmFrames );
+			data.add( stake.stopLevel );
+			frameOffset = stake.span.stop;
+			idx		= idx + 1;
+		});
+		data.add( s.sampleRate.asInteger );
+		data.add( stake.stopLevel );
+		
+		bndl.addPrepare( buffer.allocMsg );
+		bndl.add( buffer.setnMsg( 0, data ));
+		
+//~buf = buffer;
+//buffer.setnMsg( 0, data ).postcs;
+//~data = data;
+		
+		spec			= track.ctrlSpec.asSpec;
+		warpName		= spec.warp.class.name.asString;
+		defName		= "bosqueEnv" ++ if( warpName.endsWith( "FaderWarp" ), {ÊwarpName ++ spec.range.isPositive.if( "P", "N" )}, warpName );
+		synth		= Synth.basicNew( defName, player.scsynth );
+		bndl.add( synth.newMsg( player.diskGroup, [ \i_bufNum, buffer.bufnum, \i_dur, durSecs, \out, track.ctrlBusIndex, \specMin, spec.minval,
+			\specMax, spec.maxval, \specCurve, if( spec.warp.respondsTo( \curve ), { spec.warp.curve }, 0.0 )]));
+		player.nw.register( synth );
+		UpdateListener.newFor( synth, { arg upd, obj, what;
+			if( what === \n_end, {
+				upd.remove;
+//				buffer.close;
+				buffer.free;
+//				("n_end : " ++ synth.nodeID).postln;
+				synth = nil;
+			});
+		});
 	}
 	
 	isPlaying {
-		^false; // XXX
+		^synth.notNil;
 	}
 	
 	protRemoved {
