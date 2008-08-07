@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.22, 30-Jul-08
+ *	@version	0.23, 08-Aug-08
  */
 BosqueAudioPlayer : Object {
 	var <doc;

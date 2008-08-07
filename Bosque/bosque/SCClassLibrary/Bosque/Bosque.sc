@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.27, 19-Jul-08
+ *	@version	0.28, 06-Aug-08
  */
 Bosque : Object {
 	classvar <>default;
@@ -191,11 +191,13 @@ Bosque : Object {
 		timelineEditor = BosqueTimelineEditor( this );
 		timelineEditor.init;
 		scsynth.doWhenBooted({
-			this.prAudioInit;
-			didInitAudio = true;
-			this.prMIDIInit;
-			onScSynthBoot.do({ arg x; x.value });
-			onScSynthBoot = nil;
+			{
+				this.prAudioInit;
+				didInitAudio = true;
+				this.prMIDIInit;
+				onScSynthBoot.do({ arg x; x.value });
+				onScSynthBoot = nil;
+			}.fork( AppClock );
 		}, inf );
 				
 	  }, inf ); // swing.doWhenBooted
@@ -248,6 +250,9 @@ Bosque : Object {
 	}
 	
 	prAudioInit {
+		this.prSendSynthDefs;
+		scsynth.sync;
+		
 		masterGroup		= Group( scsynth );
 		masterBus			= Bus.audio( scsynth, masterBusNumChannels );
 		masterSynth		= Synth.head( masterGroup, \bosqueMaster ++ masterBus.numChannels, [ \bus, masterBus.index, \amp, masterVolume ] );
@@ -273,6 +278,10 @@ Bosque : Object {
 	}
 	
 	*createSynthDefs { arg debug = false;
+		"Meta_Bosque:createSynthDefs - this method is not used any more!".warn;
+	}
+	
+	prSendSynthDefs {
 		var mbc = masterBusNumChannels;
 		if( mbc.isNil, {
 			"Meta_Bosque:createSynthDefs - masterBusNumChannels is nil".warn;
@@ -285,33 +294,33 @@ Bosque : Object {
 				env = EnvGen.kr( Env.linen( i_fadeIn, i_dur - (i_fadeIn + i_fadeOut), i_fadeOut, 1.0, \lin ), doneAction: 2 ) * amp;
 				Out.ar( out, DiskIn.ar( numChannels, i_bufNum ) * env );
 //				OffsetOut.ar( out, DiskIn.ar( numChannels, i_bufNum ) * env );
-			}).writeDefFile;
+			}).send( scsynth );
 		});
 		
 		SynthDef( \bosqueMaster ++ mbc, { arg bus = 0, amp = 1, volBus;
 			//            1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
 			amp = amp * [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.3, 1.3, 1.3, 1.3, 1.2, 1.2 ].keep( mbc );
 			ReplaceOut.ar( bus, Limiter.ar( In.ar( bus, mbc ) * amp * In.kr( volBus ), 0.99 ));
-		}, [ nil, 0.1, nil ]).writeDefFile;
+		}, [ nil, 0.1, nil ]).send( scsynth );
 
 		SynthDef( \bosqueRoute1, { arg inBus, outBus;
 			Out.ar( outBus, In.ar( inBus ));
-		}).writeDefFile;
+		}).send( scsynth );
 
 		SynthDef( \bosqueDur, { arg dur;
 			Line.kr( dur: dur, doneAction: 2 );
-		}).writeDefFile;
+		}).send( scsynth );
 		
 		SynthDef( \bosqueEnvWrite, { arg bus, start, end, dur;
 			Out.kr( bus, Line.kr( start, end, dur, doneAction: 2 ));
-		}).writeDefFile;
+		}).send( scsynth );
 
 		SynthDef( \bosqueXEnvWrite, { arg bus, start, end, dur;
 			Out.kr( bus, XLine.kr( start, end, dur, doneAction: 2 ));
-		}).writeDefFile;
+		}).send( scsynth );
 
 		[ \DbFaderWarpP, \DbFaderWarpN, \ExponentialWarp, \LinearWarp, \FaderWarpP, \FaderWarpN, \CurveWarp, \SineWarp, \CosineWarp ].do({ arg warp;
-		  SynthDef( "bosqueEnv" ++ warp, { arg i_bufNum, out, i_off = 0, i_atk = 0.001, i_dur,
+		  SynthDef( "bosqueEnv" ++ warp, { arg i_bufNum, out, i_off = 0, i_atk = 0.0, i_dur,
 			specMin = 0.0, specMax = 1.0, specCurve = 0.0;
 			var segmFrames, val, inp, line, warped, specGrow, specA, specB, sig;
 			
@@ -361,16 +370,16 @@ Bosque : Object {
 			line		= Line.kr( 0, 1, i_atk );
 			sig		= (warped * line) + (inp * (1 - line));
 
-if( debug, {
-	warped.poll( 10, "warped" );
-	sig.poll( 10, "sig" );
-	line.poll( 10, "line" );
-	inp.poll( 10, "inp" );
-});
+//if( debug, {
+//	warped.poll( 10, "warped" );
+//	sig.poll( 10, "sig" );
+//	line.poll( 10, "line" );
+//	inp.poll( 10, "inp" );
+//});
 
 			Out.kr( out, sig );
 	//		XOut.kr( i_outbus, Line.kr( 0, 1, 0.1 ), val );
-		  }).writeDefFile( overwrite: true );
+		  }).send( scsynth );
 		});
 	}
 	

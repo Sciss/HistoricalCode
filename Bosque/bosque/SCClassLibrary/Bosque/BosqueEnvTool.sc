@@ -75,7 +75,7 @@ BosqueEnvTool {
 				env.editEnd( ce );
 				doc.undoManager.addEdit( ce.performAndEnd );
 				modSpan		= newStake1.span.shift( pressedStake.span.start );
-				doc.trail.modified( this, modSpan );
+//				doc.trail.modified( this, modSpan );
 			});
 			
 		}, { if( (e.clickCount == 2) and: { oldPressedStake === pressedStake }, {
@@ -97,10 +97,7 @@ BosqueEnvTool {
 			env.editEnd( ce );
 			doc.undoManager.addEdit( ce.performAndEnd );
 			modSpan		= hitStake1.span.shift( pressedStake.span.start );
-//			modSpan.postcs;
-//			doc.trail.prDispatchModification( this, modSpan );
-			doc.trail.modified( this, modSpan );
-//			"Yepp".postln;
+//			doc.trail.modified( this, modSpan );
 		}, {
 		
 			dragHitIdx	= e.hitIdx;
@@ -214,7 +211,7 @@ BosqueEnvTool {
 			env.editEnd( ce );
 			doc.undoManager.addEdit( ce.performAndEnd );
 			modSpan = modSpan.shift( pressedStake.span.start );
-			doc.trail.modified( this, modSpan );
+//			doc.trail.modified( this, modSpan );
 			dragStarted = false;
 		});
 	}

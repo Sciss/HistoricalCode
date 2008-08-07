@@ -39,6 +39,9 @@
 BosqueTrail : Trail {
 	var <bosque;
 	var <java;
+	var updStakes;
+	
+	var <>undoMgr;
 	
 	*new { arg touchMode = kTouchSplit;
 		^super.new( touchMode ).prInitBosqueTrail;
@@ -47,6 +50,7 @@ BosqueTrail : Trail {
 	prInitBosqueTrail {
 		bosque	= Bosque.default;
 		java		= JavaObject( "de.sciss.timebased.RegionTrail", bosque.swing );
+		this.prPostInit;
  	}
  	
  	createEmptyCopy {
@@ -60,6 +64,23 @@ BosqueTrail : Trail {
  	prInitDirect { arg argJava;
 		bosque	= Bosque.default;
 		java		= argJava;
+		this.prPostInit;
+ 	}
+ 	
+ 	prPostInit {
+		updStakes = UpdateListener({ arg upd, stake, span; var edit;
+			if( undoMgr.notNil, {
+//				[ "newDispatch", span ].postln;
+				edit = BosqueTrailEdit.newDispatch( this, span );
+//				[ "newDispatch EDIT" ].postln;
+				edit.performEdit;
+//				[ "newDispatch PERFORM" ].postln;
+				undoMgr.addEdit( edit );
+//				[ "newDispatch ADDED" ].postln;
+			}, {
+				this.modified( stake, span );
+			});
+		}, \modified );
  	}
  	
  	duplicate {
@@ -68,20 +89,29 @@ BosqueTrail : Trail {
  		newTJ = java.duplicate__;
  		newT = this.class.prNew( touchMode, newTJ );
 		newT.prEditGetCollByStart.addAll( collStakesByStart );
+		collStakesByStart.do({ arg stake; newT.protStakeAdded( stake )});
 		newT.prEditGetCollByStop.addAll( collStakesByStop );
 		^newT;
  	}
 
 	clear { arg source;
+//		collStakesByStart.do({ arg stake; updStakes.removeFrom( stake )});
 		java.clear( this.prJavaSource( source ));
 		^super.clear( source );
 	}
 	
 	dispose {
+		updStakes.remove;
 		java.dispose;
 		java.destroy;
 		^super.dispose;
 	}
+
+//	getCuttedTrail { arg span, touchMode, shiftVirtual = 0;
+//		var trail;
+//		trail = super.getCuttedTrail( span, touchMode, shiftVirtual );
+//		trail.prEditGetCollByStart.do({ arg stake; trail.updStakes.addTo( stake )});
+//	}
 	
 	getAllAudioStakes { arg af;
 		^this.getAll.select({ arg stake; stake.isKindOf( BosqueAudioRegionStake ) and:
@@ -136,18 +166,21 @@ BosqueTrail : Trail {
 		^super.editRemoveAll( source, stakes, ce );
 	}
 	
-	modified { arg source, span;
-		this.prDispatchModification( source, span );
-		java.modified( java, span );
+//	modified { arg source, span;
+//		this.prDispatchModification( source, span );
+//		java.modified( java, span );
+//	}
+
+	protStakeAdded { arg stake;
+		updStakes.addTo( stake );
 	}
 
-	prSortRemoveStake { arg stake, ce;
-		super.prSortRemoveStake( stake, ce );
-		if( ce.isNil, {
-			stake.protRemoved;	// to kill playing audio regions
-		});
+	protStakeRemoved { arg stake;
+		updStakes.removeFrom( stake );
+		stake.protRemoved;	// to kill playing audio regions
 	}
 
+	
 	protTrailEdit { arg stakes, span, cmd;
 		^BosqueTrailEdit( this, stakes, span, cmd );
 	}
@@ -172,6 +205,11 @@ BosqueTrail : Trail {
 BosqueTrailEdit : TrailEdit {
 	performEdit {
 		^super.performEdit;
+	}
+
+	protDispatchModification {
+		trail.prDispatchModification( trail, span );
+		trail.java.modified( trail.java, span );
 	}
 	
 	prAddAll {

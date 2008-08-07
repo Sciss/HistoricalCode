@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.17, 03-Aug-08
+ *	@version	0.18, 08-Aug-08
  */
 BosqueSession : Object {
 	var <bosque;
@@ -69,9 +69,9 @@ BosqueSession : Object {
 		timeline			= BosqueTimeline( 44100 );
 		timelineView		= BosqueTimelineView( timeline );
 		transport			= BosqueTransport( this );
-		trail			= BosqueTrail.new.rate_( timeline.rate );
-		volEnv			= Trail.new.rate_( timeline.rate );
 		undoManager		= ScissUndoManager.new;
+		trail			= BosqueTrail.new.rate_( timeline.rate ).undoMgr_( undoManager );
+		volEnv			= Trail.new.rate_( timeline.rate );
 		selectedRegions	= BosqueSessionCollection( false );
 		audioPlayer		= BosqueAudioPlayer( this );
 		tracks			= BosqueSessionCollection.new;

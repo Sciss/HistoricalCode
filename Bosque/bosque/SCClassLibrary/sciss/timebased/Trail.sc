@@ -10,7 +10,7 @@
  *		14-Sep-06		a couple of bug fixes
  *		10-Aug-07		re-synced with java version (performable edits)
  *
- *	@version	0.14, 25-Jul-08
+ *	@version	0.15, 08-Aug-08
  *	@author	Hanns Holger Rutz
  *
  *	@todo	asCompileString
@@ -99,6 +99,7 @@ Trail {
 		while({ collStakesByStart.isEmpty.not }, {
 			stake = collStakesByStart.removeAt( 0 );
 			stake.setTrail( nil );
+			this.protStakeRemoved( stake );
 		});
 		collStakesByStop.clear;
 
@@ -632,13 +633,17 @@ if( kDebug, {
 		
 //		trail.setRate( this.getRate() );
 
-		trail.collStakesByStart.addAll( stakes );
+		trail.prEditGetCollByStart.addAll( stakes );
+		stakes.do({ arg stake; this.protStakeAdded( stake )});
 //		Collections.sort( stakes, startComparator );
 		stakes.sort( stopComparator );
-		trail.collStakesByStop.addAll( stakes );
+		trail.prEditGetCollByStop.addAll( stakes );
 	
 		^trail;
 	}
+	
+	protStakeAdded {Êarg stake; }
+	protStakeRemoved { arg stake; }
 	
 	// XXX could use this.class.new ...
 	protCreateEmptyCopy {
@@ -1152,6 +1157,7 @@ if( kDebug, {
 		collByStop.insert( idx, stake );
 		
 		stake.trail = this;	// ???
+		if( ce.isNil, { this.protStakeAdded( stake )});
 	}
 	
 	prSortRemoveStake { arg stake, ce;
@@ -1173,6 +1179,7 @@ if( kDebug, {
 		if( idx >= 0, { collByStop.removeAt( idx )});
 
 //		stake.trail = nil;
+		if( ce.isNil, { this.protStakeRemoved( stake )});
 	}
 	
 	addListener { arg listener;
@@ -1329,6 +1336,10 @@ if( span.isNil, {
 });
 	}
 
+	isSignificant {
+		^(cmd != kEditDispatch);
+	}
+
 	prAddAll {
 		stakes.do({ arg stake;
 			trail.prSortAddStake( stake, nil );
@@ -1378,8 +1389,14 @@ if( span.isNil, {
 			this.prRemoveAll;
 		},
 		kEditDispatch, {
-			trail.prDispatchModification( trail, span );
+//			"---------------1".postln;
+			this.protDispatchModification;
+//			"---------------2".postln;
 		});
+	}
+	
+	protDispatchModification {
+		trail.prDispatchModification( trail, span );
 	}
 	
 	die	{

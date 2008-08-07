@@ -56,6 +56,17 @@ BosqueEnvRegionStake : BosqueRegionStake {
 		env	= argEnv ?? { this.prCreateDefaultEnv };
 		java		= JavaObject( "de.sciss.timebased.bosque.EnvRegionStake", Bosque.default.swing,
 							span, name, track, colr, fadeIn, fadeOut, gain, env );
+		env.addListener( this );
+	}
+	
+	trailModified { arg e;
+//		if( trail.notNil, {
+//			TrailEdit.newDispatch( trail, e.getAffectedSpan.shift( span.start )).perform;
+//		});
+		this.changed( \modified, e.getAffectedSpan.shift( span.start ));
+		if( synth.notNil, {
+			synth.free; synth = nil;
+		});
 	}
 	
 //	replaceTrack { arg newTrack;
@@ -165,7 +176,7 @@ BosqueEnvRegionStake : BosqueRegionStake {
 		defName		= "bosqueEnv" ++ if( warpName.endsWith( "FaderWarp" ), {ÊwarpName ++ spec.range.isPositive.if( "P", "N" )}, warpName );
 		synth		= Synth.basicNew( defName, player.scsynth );
 		bndl.add( synth.newMsg( player.diskGroup, [ \i_bufNum, buffer.bufnum, \i_dur, durSecs, \out, track.ctrlBusIndex, \specMin, spec.minval,
-			\specMax, spec.maxval, \specCurve, if( spec.warp.respondsTo( \curve ), { spec.warp.curve }, 0.0 )]));
+			\specMax, spec.maxval, \specCurve, if( spec.warp.respondsTo( \curve ), { spec.warp.curve }, 0.0 ), \i_atk, if( frameOffset > 0, 0.1, 0.0 )]));
 		player.nw.register( synth );
 		UpdateListener.newFor( synth, { arg upd, obj, what;
 			if( what === \n_end, {
@@ -183,7 +194,10 @@ BosqueEnvRegionStake : BosqueRegionStake {
 	}
 	
 	protRemoved {
-		// XXX
+		if( synth.notNil, {
+			synth.server.sendBundle( BosqueAudioPlayer.bufferLatency + BosqueAudioPlayer.transportDelta, synth.freeMsg );
+			synth = nil;
+		});
 	}
 	
 	prCreateDefaultEnv {
