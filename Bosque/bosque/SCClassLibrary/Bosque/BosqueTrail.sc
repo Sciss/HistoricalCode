@@ -78,7 +78,9 @@ BosqueTrail : Trail {
 				undoMgr.addEdit( edit );
 //				[ "newDispatch ADDED" ].postln;
 			}, {
-				this.modified( stake, span );
+//				this.modified( stake, span );
+				this.prDispatchModification( this, span );
+				java.modified( java, span );
 			});
 		}, \modified );
  	}
