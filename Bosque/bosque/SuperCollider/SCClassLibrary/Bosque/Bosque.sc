@@ -40,9 +40,12 @@ Bosque : Object {
 	classvar <>numInputBusChannels;
 	classvar <>numOutputBusChannels;
 	classvar <>workDir;
-	classvar <>masterBusNumChannels;
+	classvar <>masterBusNumChannels	= 8;
 	classvar <>masterChanMap;	// an array of channel indices; array size must equal masterBusNumChannels!
 	classvar <>timeBasedJar;
+
+	classvar	<>midiInDev			= "BCF2000"; // "BCR2000"; // : Port 1";
+	classvar	<>midiOutDev			= "BCF2000"; // "BCR2000"; // : Port 1";
 
 	// -------------------------------------------
 
@@ -62,16 +65,23 @@ Bosque : Object {
 	var <clipBoard;
 	var <cacheManager;
 	
+	var <midiOut;	// a MIDIOut
+	var <midiIn;	// a MIDIEndPoint
+
+	var <master;
+//	var <app;
+	var <timelineEditor;
+	
+	var didInitAudio = false;
+
+	// ---------- remainders from Forest project ----------
+
 	classvar <numFieldsH			= 12;
 	classvar <numFieldsV			= 5;
 	classvar <numFields			= 60;	// # of neon bulbs
 	classvar <numTracks			= 6;
 	classvar <tedMicChannel			= 7;
 
-	classvar <>config				= 0; 	// 0 = Q3, 1 = Viehhalle
-	
-	classvar	<>midiOutDev			= "BCF2000"; // "BCR2000"; // : Port 1";
-	classvar	<>midiInDev			= "BCF2000"; // "BCR2000"; // : Port 1";
 	classvar <>createCC			= false;
 
 	var <chris;
@@ -80,23 +90,15 @@ Bosque : Object {
 	// event objects
 	var <trackDancer, <trackTrack, <trackField, <trackBang;
 	var <trackCurrentDancer, <trackCurrentTrack, <trackCurrentField;
-	
+
 	var <>speedBoost	= 1.0;
 	var <micGain		= 1.0;
-	
-	var <subwChannel;
-	
-	var <midiOut;	// a MIDIOut
-	var <midiIn;	// a MIDIEndPoint
-
-	var <master, <app;
-	var <timelineEditor;
-	
-	var didInitAudio = false;
-	
+		
 	*initClass {
 //		Class.initClassTree( SwingOSC );
 //		default = this.new;
+		workDir		= "~/Bosque/".absolutePath;
+		timeBasedJar	= "file:" ++ thisProcess.platform.userExtensionDir +/+ "TimeBased.jar";
 	}
 	
 	*new {
@@ -108,17 +110,22 @@ Bosque : Object {
 
 		swing		= SwingOSC.default;
 		scsynth		= Server.default; // Server( \bosque, VerboseNetAddr( "127.0.0.1", 57001 )); // Server.default;
-	  swing.doWhenBooted({
+	  swing.waitForBoot({
 
+		if( timeBasedJar.notNil, {
+			swing.addClasses( timeBasedJar );
+		});
+
+		swing.protEnsureApplication;
 		master			= JavaObject( "de.sciss.timebased.net.Master", swing );
-		app				= JavaObject( "de.sciss.timebased.Main", swing );
+//		app				= JavaObject( "de.sciss.timebased.Main", swing );
 
 //		soundCard				= [ "Fireface 800 (393)", "Fireface 800 (EB1)" ][ config ]; // "Mobile I/O 2882 [2600]"
 //		numInputBusChannels	= [ 10, 10 ][ config ];
 //		numOutputBusChannels	= [ 20, 20 ][ config ];
 //		masterChanMap			= [[ 0, 1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 16, 17, 18, 19 ],
 //							   [ 3, 2, 1, 0, 7, 6, 5, 4, 12, 13, 15, 14, 17, 16, 18, 19 ]][ config ];
-		subwChannel			= [ 14, 14 ][ config ];
+//		subwChannel			= [ 14, 14 ][ config ];
 
 		// MIO:				   [ 0, 1, 2, 3, 4, 5, 6, 7, 10, 11, 12, 13, 14, 15 ]
 	
@@ -183,7 +190,6 @@ Bosque : Object {
 		UpdateListener.newFor( session.transport, { arg upd, transport, what; if( what === \play, {("% play ("++thisThread.seconds++")").postln; })});
 		
 //		swing.updateClasses( "file:///Users/rutz/Documents/workspace/TimeBased/TimeBased.jar" );
-		if( timeBasedJar.notNil, { swing.addClasses( timeBasedJar )});
 		cacheManager = JavaObject( "de.sciss.io.CacheManager", swing );
 		cacheManager.setFolderAndCapacity( workDir ++ "cache", 300 );
 		cacheManager.setActive( true );
@@ -229,11 +235,11 @@ Bosque : Object {
 	bootScSynth {
 		var o;
 		
-		o					= scsynth.options;
-		o.device				= soundCard;
-		o.numInputBusChannels	= numInputBusChannels;
-		o.numOutputBusChannels	= numOutputBusChannels;
-		o.numAudioBusChannels	= 512; // !!!
+		o = scsynth.options;
+		if( soundCard.notNil, { o.device = soundCard });
+		if( numInputBusChannels.notNil, { o.numInputBusChannels = numInputBusChannels });
+		if( numOutputBusChannels.notNil, {Êo.numOutputBusChannels = numOutputBusChannels });
+		o.numAudioBusChannels	= o.numAudioBusChannels.max( 512 ); // !!!
 		
 		scsynth.boot;
 	}
@@ -256,6 +262,11 @@ Bosque : Object {
 		
 		masterGroup		= Group( scsynth );
 		masterBus			= Bus.audio( scsynth, masterBusNumChannels );
+		masterChanMap		= masterChanMap ?? { (0..(masterBusNumChannels-1)) };
+		if( masterChanMap.size != msaterBusNumChannels, {
+			("Bosque : channel mismatch! masterBusNumChannels is " ++ masterBusNumChannels ++
+				" but masterChanMap.size is " ++ masterChanMap.size).warn;
+		});
 		masterSynth		= Synth.head( masterGroup, \bosqueMaster ++ masterBus.numChannels, [ \bus, masterBus.index, \amp, masterVolume ] );
 		masterChanMap.do({ arg outputIdx, inputIdx;
 			Synth.tail( masterGroup, \bosqueRoute1, [ \inBus, masterBus.index + inputIdx, \outBus, outputIdx ]);
@@ -300,7 +311,7 @@ Bosque : Object {
 		
 		SynthDef( \bosqueMaster ++ mbc, { arg bus = 0, amp = 1, volBus;
 			//            1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16
-			amp = amp * [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.3, 1.3, 1.3, 1.3, 1.2, 1.2 ].keep( mbc );
+//			amp = amp * [ 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 1.3, 1.3, 1.3, 1.3, 1.2, 1.2 ].keep( mbc );
 			ReplaceOut.ar( bus, Limiter.ar( In.ar( bus, mbc ) * amp * In.kr( volBus ), 0.99 ));
 		}, [ nil, 0.1, nil ]).send( scsynth );
 
@@ -607,8 +618,6 @@ if( createCC, {
 	*launch {
 		var bosque;
 		
-		this.prAddSwingClasses;
-		
 		bosque = this.new;
 //		timelineEditor = BosqueTimelineEditor( this );
 		if( Bosque.soundCard.notNil, { bosque.bootScSynth });
@@ -616,91 +625,6 @@ if( createCC, {
 //		this.allGUI;
 	}
 
-	*writePrefs {
-		var f, dict;
-		
-		dict = IdentityDictionary.new;
-		dict.put( \config, config );
-		try {
-			f = File( workDir ++ "prefs.txt", "w" );
-			dict.storeOn( f );
-			f.close;
-		} {
-			arg error; error.postln;
-		};
-	}
-
-	*readPrefs {
-		var f, dict;
-		
-		try {
-			f = File( workDir ++ "prefs.txt", "r" );
-			dict = f.readAllString.interpret;
-			f.close;
-			config = dict[ \config ];
-		} {
-			arg error; error.reportError;
-		};
-	}
-
-	*guiLaunch {
-		var win, flow, ggLaunch, ggCountDown, ggStopCount, rCount;
-		
-		this.readPrefs;
-		
-		win = GUI.window.new( "Phonolithikum", Rect( 0, 0, 400, 100 ), resizable: false );
-		ScissUtil.positionOnScreen( win );
-		flow	= FlowLayout( win.view.bounds );
-		win.view.decorator = flow;
-		
-		ggLaunch = GUI.button.new( win, Rect( 0, 0, 80, 30 ));
-		ggLaunch.states = [[ "Launch" ]];
-		ggLaunch.action = {
-			this.launch;
-			win.close;
-		};
-		
-		ggCountDown = GUI.staticText.new( win, Rect( 0, 0, 40, 30 ));
-		
-		ggStopCount = GUI.button.new( win, Rect( 0, 0, 120, 30 ));
-		ggStopCount.states = [[ "Stop Countdown" ]];
-		ggStopCount.action = {
-			rCount.stop;
-			win.close;
-		};
-		
-		win.onClose	= {
-			rCount.stop;
-		};
-		
-		rCount = Routine.run({
-			10.do({ arg i;
-				ggCountDown.string = (10 - i).asString;
-				1.0.wait;
-			});
-//			ggLaunch.valueAction_( 0 );
-			ggLaunch.doAction;
-		}, clock: AppClock );
-
-		flow.nextLine;
-		flow.shift( 0, 12 );
-		
-		GUI.staticText.new( win, Rect( 0, 0, 40, 30 )).string_( "Config:" );
-		GUI.button.new( win, Rect( 0, 0, 120, 30 ))
-			.states_([[ "Q3" ], [ "Viehhalle" ]])
-			.value_( config )
-			.action_({ arg b;
-				config = b.value;
-				this.writePrefs;
-			});
-
-		// hmmmm, needs to be called twice because of
-		// some bug. so once here, then again in the launch ....
-		this.prAddSwingClasses;
-		
-		win.front;
-	}
-	
 	*recorderGUI {
 		var rec, f;
 		f = Bosque.default;
@@ -709,9 +633,5 @@ if( createCC, {
 		rec.channelOffset	= f.masterBus.index;
 		rec.folder		= Bosque.workDir ++ "rec/";
 		rec.makeWindow;
-	}
-
-	*prAddSwingClasses {
-		SwingOSC.default.addClasses( "file:///Users/rutz/Documents/workspace/TimeBased/TimeBased.jar" );
 	}
 }

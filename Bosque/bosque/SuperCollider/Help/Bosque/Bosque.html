@@ -7,137 +7,76 @@
 <meta name="Generator" content="Cocoa HTML Writer">
 <meta name="CocoaVersion" content="824.48">
 <style type="text/css">
-p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue; color: #000000}
-p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000; min-height: 12.0px}
-p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; color: #000000}
-p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; color: #000000; min-height: 16.0px}
-p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
-p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #bf0000; min-height: 12.0px}
-p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #bf0000}
-p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #000000}
-p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #606060}
-p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #0000bf}
-span.s1 {color: #0000bf}
-span.s2 {color: #606060}
-span.s3 {color: #bf0000}
-span.s4 {color: #000000}
-span.Apple-tab-span {white-space:pre}
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #6b3d2c; min-height: 12.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {text-decoration: underline ; color: #001fe8}
+span.s2 {font: 13.0px Monaco; color: #193ba4}
+span.s3 {color: #1142e6}
+span.s4 {text-decoration: underline ; color: #0f3ed7}
+span.s5 {color: #083aec}
 </style>
 </head>
 <body>
 <p class="p1">Bosque</p>
 <p class="p2"><br></p>
-<p class="p3">Bosque is an application built on top of SuperCollider and SwingOSC. It is a successor of the software used for the "Forest 2" project during the Weimar TanzMedienAkademie 2007 ("bosque" = Spanish for forest). Version 0.29 is the result of a visit at the IEM graz in July 2009 for the EGM (embodied generative music) project.</p>
+<p class="p3">Bosque is an application built on top of SuperCollider and SwingOSC. It is a successor of the software used for the "Forest 2" project during the Weimar TanzMedienAkademie 2007 ("bosque" = Spanish for forest). Version 0.29 is the result of a visit at the IEM Graz in July 2009 for the EGM (embodied generative music) project.</p>
 <p class="p4"><br></p>
 <p class="p3">Bosque is basically a multi-track editor that allows you to place regions in a timeline and playback that timeline. Regions can be audio files, breakpoint functions (envelopes) or SuperCollider code fragments. The timeline and transport can be programmatically controlled via SuperCollider. The editor's display window is a custom Java component accessed via the SwingOSC framework.</p>
 <p class="p4"><br></p>
 <p class="p3">The following help files are available:</p>
 <p class="p4"><br></p>
-<p class="p3">Bosque_Installation - which files are needed and where they go</p>
-<p class="p3">Bosque_Configuration - how to set up and launch the application</p>
-<p class="p5">Bosque_Editing - basic tutorial for the timeline editor</p>
-<p class="p6"><br></p>
-<p class="p6"><br></p>
-<p class="p7">// ----- prerequisites -----</p>
-<p class="p7">// a SwingOSC server (v0.60) needs to be running</p>
-<p class="p8"><span class="s1">SwingOSC</span>.default.boot;</p>
-<p class="p2"><br></p>
-<p class="p7">// !!! SuperCollider:<span class="Apple-converted-space"> </span></p>
-<p class="p7">// due to a recent fix for the Line UGen, SVN rev. 7712 or higher must be used !!!</p>
-<p class="p2"><br></p>
-<p class="p7">// ----- define the hardware setup -----</p>
-<p class="p7">// you see, these are not saved with the sessions</p>
-<p class="p8">(</p>
-<p class="p8"><span class="s1">Bosque</span>.soundCard<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s2">"Built-in Audio"</span>;</p>
-<p class="p8"><span class="s1">Bosque</span>.numInputBusChannels<span class="Apple-tab-span">	</span>= 8;</p>
-<p class="p8"><span class="s1">Bosque</span>.numOutputBusChannels<span class="Apple-tab-span">	</span>= 8;</p>
-<p class="p8"><span class="s1">Bosque</span>.workDir<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s2">"~/Bosque/"</span>.standardizePath; <span class="s3">// ! waveform cache goes here !</span></p>
-<p class="p7"><span class="s1">Bosque</span><span class="s4">.masterBusNumChannels<span class="Apple-tab-span">	</span>= 8;<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>// the size of the master bus</p>
-<p class="p8"><span class="s1">Bosque</span>.masterChanMap<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= [ 0, 1, 2, 3, 4, 5, 6, 7 ];<span class="Apple-converted-space">  </span><span class="s3">// define the master channel indices</span></p>
-<p class="p7">// location of the timebased library</p>
-<p class="p9"><span class="s1">Bosque</span><span class="s4">.timeBasedJar<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= </span>"file:///Users/rutz/Documents/workspace/TimeBased/TimeBased.jar"<span class="s4">;</span></p>
-<p class="p8"><span class="s1">Bosque</span>.createSynthDefs;</p>
-<p class="p8">)</p>
-<p class="p2"><br></p>
-<p class="p7">// ----- launch the app -----</p>
-<p class="p8"><span class="s1">Bosque</span>.launch;</p>
-<p class="p2"><br></p>
-<p class="p7">// ----- creating a basic session in the GUI -----</p>
-<p class="p7">// creating some time span</p>
-<p class="p10"><span class="s4">• </span>Timeline<span class="s4"> </span>Window<span class="s4"> -&gt; </span>Timeline<span class="s4"> </span>Menu<span class="s4"> -&gt; </span>Insert<span class="s4"> </span>Span<span class="s4">...</span></p>
-<p class="p7">// creating some tracks</p>
-<p class="p8">• <span class="s1">Menu</span> <span class="s1">Window</span> -&gt; <span class="s1">Collections</span> - &gt; <span class="s1">Tracks</span> <span class="s1">Tab</span> -&gt; + (do <span class="s1">this</span> e.g. four times)</p>
-<p class="p7">// creating a mono-to-stereo and stereo-to-stereo output bus</p>
-<p class="p10"><span class="s4">• </span>Menu<span class="s4"> </span>Window<span class="s4"> -&gt; </span>Collections<span class="s4"> - &gt; </span>Busses<span class="s4"> </span>Tab<span class="s4"> -&gt; +</span></p>
-<p class="p8"><span class="Apple-tab-span">	</span>• name <span class="s1">this</span> bus <span class="s2">"Mono2Stereo"</span>, it shall have 1 input channel and 2 output channels</p>
-<p class="p8"><span class="Apple-tab-span">	</span>• in the grid view, route the input to both outputs, drag down the gain slider</p>
-<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">  </span>so they go out at -3 dB ; confirm by hitting the <span class="s2">"Apply"</span> button</p>
-<p class="p2"><span class="Apple-tab-span">	</span> <span class="Apple-converted-space"> </span></p>
-<p class="p8"><span class="Apple-tab-span">	</span>! Note: bus indices are logical, e.g. index 0 corresponds to the first</p>
-<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">  </span>master bus channel. <span class="s1">Which</span> hardware channel <span class="s1">this</span> is depends on masterChanMap !</p>
-<p class="p2"><span class="Apple-tab-span">	</span> <span class="Apple-converted-space"> </span></p>
-<p class="p10"><span class="s4">• </span>Menu<span class="s4"> </span>Window<span class="s4"> -&gt; </span>Collections<span class="s4"> - &gt; </span>Busses<span class="s4"> </span>Tab<span class="s4"> -&gt; +</span></p>
-<p class="p8"><span class="Apple-tab-span">	</span>• name <span class="s1">this</span> bus <span class="s2">"Stereo2Stereo"</span>, it shall have 2 input and 2 output channels</p>
-<p class="p8"><span class="Apple-tab-span">	</span>• in the grid view, route the first input to the first output, and the</p>
-<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">  </span>second input to the second output (a diagonal matrix)</p>
-<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">  </span>; confirm by hitting the <span class="s2">"Apply"</span> button</p>
-<p class="p7">// import some audio files</p>
-<p class="p10"><span class="s4">• </span>Menu<span class="s4"> </span>Window<span class="s4"> -&gt; </span>Collections<span class="s4"> - &gt; </span>Audio<span class="s4"> </span>Files<span class="s4"> </span>Tab<span class="s4"> -&gt; +</span></p>
-<p class="p8"><span class="Apple-tab-span">	</span>• select a mono audio file</p>
-<p class="p10"><span class="s4">• </span>Menu<span class="s4"> </span>Window<span class="s4"> -&gt; </span>Collections<span class="s4"> - &gt; </span>Audio<span class="s4"> </span>Files<span class="s4"> </span>Tab<span class="s4"> -&gt; +</span></p>
-<p class="p8"><span class="Apple-tab-span">	</span>• select a stereo audio file</p>
-<p class="p7">// place the audio files in the timeline</p>
-<p class="p8">• <span class="s1">In</span> the <span class="s1">Timeline</span> <span class="s1">Window</span> select the first track by clicking on its name (<span class="s2">"Track 1"</span>)</p>
-<p class="p8">• <span class="s1">Place</span> the timeline position pointer on the insertion spot by pressing the mouse</p>
-<p class="p8"><span class="Apple-converted-space">  </span>button over the timeline axis view (top part of the window) and moving the</p>
-<p class="p8"><span class="Apple-converted-space">  </span>mouse while keeping the button pressed</p>
-<p class="p8">• <span class="s1">In</span> the <span class="s1">Audio</span> <span class="s1">Files</span> <span class="s1">Tab</span> of the <span class="s1">Collections</span> <span class="s1">Window</span>, select the mono audio file</p>
-<p class="p8"><span class="Apple-converted-space">  </span>and choose <span class="s2">"Drop Region"</span> from the <span class="s1">Action</span> menu.</p>
-<p class="p8">• <span class="s1">Open</span> the <span class="s1">Observer</span> window by clicking on the <span class="s2">"Observer"</span> button in the <span class="s1">Menu</span> <span class="s1">Window</span>,</p>
-<p class="p8"><span class="Apple-converted-space">  </span>select the <span class="s2">"Track"</span> tab : we will need to assign a bus configuration to <span class="s1">this</span> track.</p>
-<p class="p8">• <span class="s1">Simultaneously</span> open the <span class="s1">Collections</span> window and go to the <span class="s2">"Busses"</span> tab. <span class="s1">Keep</span> the</p>
-<p class="p8"><span class="Apple-converted-space">  </span><span class="s1">Control</span> key pressed and press the mouse button over the <span class="s1">Mono2Stereo</span> entry. <span class="s1">Keep</span></p>
-<p class="p8"><span class="Apple-converted-space">  </span><span class="s1">The</span> mouse button pressed and move the move to the <span class="s2">"Bus Config"</span> drag-sink view in</p>
-<p class="p8"><span class="Apple-converted-space">  </span>the observer`s track tab. <span class="s1">The</span> drag-sink should now read <span class="s2">"Mono2Stereo"</span></p>
-<p class="p8">• <span class="s1">Repeat</span> the same for the stereo audio file and <span class="s2">"Track 2"</span>. <span class="s1">Assign</span> the <span class="s2">"Stereo2Stereo"</span></p>
-<p class="p8"><span class="Apple-converted-space">  </span>bus config to <span class="s1">this</span> second track in the same manner.</p>
-<p class="p7">// playback the result</p>
-<p class="p8">• <span class="s1">Locate</span> the <span class="s1">Transport</span> <span class="s1">Window</span> and press the play button. <span class="s1">You</span> should hear the two</p>
-<p class="p8"><span class="Apple-converted-space">  </span>tracks playing back the audio files on the defined busses.</p>
-<p class="p2"><span class="Apple-converted-space">  </span></p>
-<p class="p7">// ----- doing basic editing -----</p>
-<p class="p7">// splice a region</p>
-<p class="p8">• <span class="s1">Select</span> the region to splice in the timeline editor by pressing the mouse over the</p>
-<p class="p8"><span class="Apple-converted-space">  </span>region (the region becomes colour-inverted).</p>
-<p class="p8">• <span class="s1">Place</span> the timeline position (by dragging in the timeline axis) at the splice point</p>
-<p class="p8">• <span class="s1">Choose</span> <span class="s1">Timeline</span> -&gt; <span class="s1">Splice</span> <span class="s1">Objects</span> from the timeline editor`s menu bar</p>
-<p class="p8">• <span class="s1">To</span> create an overlap, drag the second splice to the next track and move it back</p>
-<p class="p8"><span class="Apple-converted-space">  </span>in time. <span class="s1">Don</span>`t forget to assign an appropriate bus config to <span class="s1">this</span> third track,</p>
-<p class="p8"><span class="Apple-converted-space">  </span>unless you have done do before.</p>
-<p class="p7">// shortening a region</p>
-<p class="p8">• <span class="s1">To</span> shorten the newly created splice, switch from the <span class="s2">"Move"</span> tool to the <span class="s2">"Resize"</span></p>
-<p class="p8"><span class="Apple-converted-space">  </span>tool in the toolbar of the timeline editor window. <span class="s1">To</span> truncate the region`s beginning,</p>
-<p class="p8"><span class="Apple-converted-space">  </span>locate the mouse near the beginning of region, to truncate the ending, locate the mouse</p>
-<p class="p8"><span class="Apple-converted-space">  </span>near the ending of region. <span class="s1">Press</span> the mouse button and move the mouse to adjust the</p>
-<p class="p8"><span class="Apple-converted-space">  </span>region bounds.</p>
-<p class="p7">// applying a fadein and gain change</p>
-<p class="p8">• <span class="s1">Select</span> the region to customize</p>
-<p class="p8">• <span class="s1">Select</span> the <span class="s2">"Regions"</span> tab in the observer window</p>
-<p class="p8">• <span class="s1">Enter</span> a fade-in or fade-out time in milliseconds; confirm changes by hitting return!</p>
-<p class="p8">• <span class="s1">Enter</span> a gain-correction in decibels; note how the waveform view reflects the new gain</p>
-<p class="p7">// renaming and colourizing a region</p>
-<p class="p8">• <span class="s1">In</span> the same <span class="s2">"Regions"</span> tab, you can alter the name and the colour of the region</p>
-<p class="p7">// cutting out a portion of the timeline</p>
-<p class="p8">• <span class="s1">Alt</span>+click in the timeline axis to clear the timeline selection and to the define</p>
-<p class="p8"><span class="Apple-converted-space">  </span>the selection start. <span class="s1">Shift</span>+click in the axis to make the timeline selection.</p>
-<p class="p8">• <span class="s1">Choose</span> <span class="s1">Timeline</span> -&gt; <span class="s1">Remove</span> <span class="s1">Span</span> from the timeline editors menu bar. <span class="s1">Try</span> <span class="s1">Edit</span> -&gt; <span class="s1">Undo</span> / <span class="s1">Redo</span></p>
-<p class="p8"><span class="Apple-converted-space">  </span>if you like.</p>
-<p class="p2"><br></p>
-<p class="p7">// ----- storing the session -----</p>
-<p class="p8">• <span class="s1">Don</span>`t forget to save the session from time to time: <span class="s1">In</span> the timeline editor window,</p>
-<p class="p8"><span class="Apple-converted-space">  </span>choose <span class="s1">File</span> -&gt; <span class="s1">Save</span> <span class="s1">As</span>... from the menu. <span class="s1">The</span> resulting file is in plain text</p>
-<p class="p8"><span class="Apple-converted-space">  </span>format, so you could open it in a text editor and do modfications (e.g. change</p>
-<p class="p8"><span class="Apple-converted-space">  </span>the folder where the soundfiles are to be found)</p>
-<p class="p2"><br></p>
+<p class="p3"><span class="s1"><a href="Bosque_Installation.html">Bosque_Installation</a></span> - which files are needed and where they go</p>
+<p class="p3"><span class="s1"><a href="Bosque_Configuration.html">Bosque_Configuration</a></span> - how to set up and launch the application</p>
+<p class="p3"><span class="s1"><a href="Bosque_Editing.html">Bosque_Editing</a></span> - basic tutorial for the timeline editor</p>
+<p class="p3"><span class="s1"><a href="Bosque_Audio.html">Bosque_Audio</a></span> - description of the audio engine</p>
+<p class="p5"><br></p>
+<p class="p5"><br></p>
+<p class="p6">Bosque Class</p>
+<p class="p7"><br></p>
+<p class="p3"><b>*launch</b></p>
+<p class="p4"><br></p>
+<p class="p3">Instantiates and launches the <span class="s2">Bosque</span> application. If no scsynth server has been booted, it will do this as well. The new <span class="s2">Bosque</span> instance is available through the <span class="s2">*default</span> method.</p>
+<p class="p7"><br></p>
+<p class="p3"><b>*default</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the default instance of <span class="s2">Bosque</span>. This class field is automatically set when Bosque is instantiated for the first time (using <span class="s2">*new</span> or <span class="s2">*launch</span>).</p>
+<p class="p4"><br></p>
+<p class="p3"><b>*version</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the version (<a href="SC://Float"><span class="s3">Float</span></a>) of the Bosque class library.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>*soundCard, *numInputBusChannels, *numOutputBusChannels, *workDir, *masterBusNumChannels, *masterChanMap, *timeBasedJar, *midiInDev, *midiOutDev</b></p>
+<p class="p4"><br></p>
+<p class="p3">These are covered in the <a href="Bosque_Configuration.html"><span class="s4">Bosque_Configuration</span></a> help file.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>swing</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="../../../../../workspace/SwingOSC/SuperCollider/Help/SwingOSC/SwingOSC.html"><span class="s3">SwingOSC</span></a> server used for the Bosque GUI.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>scsynth</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the scsynth <a href="SC://Server"><span class="s3">Server</span></a> used for the Bosque audio engine.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>session</b></p>
+<p class="p4"><br></p>
+<p class="p3">returns the current <a href="BosqueSession.html"><span class="s3">BosqueSession</span></a> document. Bosque is a single-document-application (SDA), so there is always exactly one document available.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>masterGroup, masterVolume, diskGroup, preFilterGroup, postFilterGroup, panGroup, mixGroup, masterBus</b></p>
+<p class="p4"><br></p>
+<p class="p3">These are covered in the <a href="Bosque_Audio.html"><span class="s5">Bosque_Audio</span></a> help file.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>timelineEditor</b></p>
+<p class="p8"><br></p>
+<p class="p3">returns an instance of <a href="BosqueTimelineEditor.html"><span class="s5">BosqueTimelineEditor</span></a>, the class resposible for setting up the main Bosque GUI.</p>
+<p class="p8"><br></p>
+<p class="p9">__________</p>
+<p class="p9">this file last modified: 17-aug-08</p>
 </body>
 </html>

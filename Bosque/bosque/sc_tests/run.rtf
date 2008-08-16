@@ -6,21 +6,21 @@
 \pard\pardeftab560\ql\qnatural
 
 \f0\fs18 \cf2 // (\cf0 \
+\pard\pardeftab560\ql\qnatural
 \cf3 Bosque\cf0 .soundCard			= "Fireface 400 (D1F)"; \cf2 // "Built-in Audio";\cf0 \
 \cf3 Bosque\cf0 .numInputBusChannels	= 8;\
 \cf3 Bosque\cf0 .numOutputBusChannels	= 8;\
 \cf3 Bosque\cf0 .workDir			= \cf4 "~/Bosque/"\cf0 .standardizePath; \cf2 // ! waveform cache goes here !\cf0 \
 \cf3 Bosque\cf0 .masterBusNumChannels	= 8;		\cf2 // the size of the master bus\cf0 \
 \cf3 Bosque\cf0 .masterChanMap		= [ 0, 1, 2, 3, 4, 5, 6, 7 ];  \cf2 // define the master channel indices\cf0 \
+\pard\pardeftab560\ql\qnatural
 \cf2 // location of the timebased library\cf0 \
+\pard\pardeftab560\ql\qnatural
 \cf3 Bosque\cf0 .timeBasedJar		= \cf3 nil\cf0 ; \cf2 // "file:///Users/rutz/Documents/workspace/TimeBased/TimeBased.jar";\cf0 \
-\cf2 // Bosque.createSynthDefs;\cf0 \
-\cf2 // Bosque.createSynthDefs( true );\cf0 \
+\pard\pardeftab560\ql\qnatural
 \cf2 // )\cf0 \
 \
 \cf2 // ----- launch the app -----\cf0 \
-\cf3 SwingOSC\cf0 .default.waitForBoot(\{\
-	\cf3 SwingOSC\cf0 .default.protEnsureApplication;\
-	\cf3 Bosque\cf0 .launch;\
-\});\
+\pard\pardeftab560\ql\qnatural
+\cf3 Bosque\cf0 .launch;\
 }
