@@ -28,10 +28,11 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.28, 06-Aug-08
+ *	@version	0.29, 16-Aug-08
  */
 Bosque : Object {
 	classvar <>default;
+	classvar <version	= 0.29;
 
 	// ------------- configure these -------------
 
