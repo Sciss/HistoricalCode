@@ -909,21 +909,31 @@ BosqueTimelineEditor : Object {
 		var timelineView, ce;
 		timelineView	= doc.timelineView;
 		if( timelineView.selection.span.length > 0, {
-			ce = JSyncCompoundEdit( "Clear Time Span" );
-			doc.editClearTimeSpan( this, timelineView.selection.span, ce );
-			doc.undoManager.addEdit( ce.performAndEnd );
+			this.clearSpan( doc, timelineView.selection.span );
 		});
 	}
-
+	
+	clearSpan { arg doc, span;
+		var ce,
+		ce = JSyncCompoundEdit( "Clear Time Span" );
+		doc.editClearTimeSpan( this, span, ce );
+		doc.undoManager.addEdit( ce.performAndEnd );
+	}
+	
 	prTimelineRemoveSpan { arg doc;
 		var timelineView, ce;
 		timelineView	= doc.timelineView;
 		if( timelineView.selection.span.length > 0, {
-			ce = JSyncCompoundEdit( "Remove Time Span" );
-			doc.editRemoveTimeSpan( this, timelineView.selection.span, ce );
-			ce.addPerform( BosqueTimelineViewEdit.select( this, timelineView, Span.new ));
-			doc.undoManager.addEdit( ce.performAndEnd );
+			this.removeSpan( doc, timelineView.selection.span );
 		});
+	}
+
+	removeSpan { arg doc, span;
+		var ce;
+		ce = JSyncCompoundEdit( "Remove Time Span" );
+		doc.editRemoveTimeSpan( this, span, ce );
+		ce.addPerform( BosqueTimelineViewEdit.select( this, timelineView, Span.new ));
+		doc.undoManager.addEdit( ce.performAndEnd );
 	}
 
 	prTimelineSplitObjects { arg doc;

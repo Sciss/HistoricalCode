@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.23, 08-Aug-08
+ *	@version	0.23, 17-Aug-08
  */
 BosqueAudioPlayer : Object {
 	var <doc;
@@ -37,8 +37,8 @@ BosqueAudioPlayer : Object {
 	var <scsynth, <nw, <sampleRate;
 	var <diskGroup;
 	
-	classvar <bufferLatency 	= 0.2;
-	classvar <transportDelta 	= 0.1;
+	classvar <>bufferLatency 	= 0.2;
+	classvar <>transportDelta 	= 0.1;
 	
 	var playStartPos;
 //	var playStartTime;
