@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.29, 16-Aug-08
+ *	@version	0.29, 17-Aug-08
  */
 Bosque : Object {
 	classvar <>default;
@@ -217,6 +217,35 @@ Bosque : Object {
 	*mark { arg name;
 		// very inefficient !!! XXX
 		^this.default.session.markers.getAll.detect({ arg m; m.name == name });
+	}
+	
+	*followCursor { arg func, rate = 30, offline = true;
+		var updTransp, updCsr, map, doc, rout, period;
+		period	= rate.reciprocal;
+		doc		= this.default.session;
+		map		= AnyMap.new;
+		updTransp	= UpdateListener.newFor( doc.transport, { arg upd, t, what, param;
+			if( (what === \play) or: {Êwhat === \resume }, {
+				rout = fork { inf.do({
+					func.value( t.currentFrame, true );
+					period.wait;
+				})};
+			}, { if( (what === \stop) or: { what === \pause }, {
+				rout.stop; rout = nil;
+			})});
+		});
+		if( offline, {
+			updCsr = UpdateListener.newFor( doc.timelineView.cursor, { arg upd, csr, pos;
+				func.value( pos, false );
+			}, \changed );
+		});
+		map.remove = { arg m;
+			rout.stop; rout = nil;
+			if( updTransp.notNil, { updTransp.remove; updTransp = nil });
+			if( updCsr.notNil, { updCsr.remove; updCsr = nil });
+			m;
+		};
+		^map;
 	}
 	
 	/**
