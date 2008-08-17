@@ -117,7 +117,7 @@ BosqueTrail : Trail {
 	
 	getAllAudioStakes { arg af;
 		^this.getAll.select({ arg stake; stake.isKindOf( BosqueAudioRegionStake ) and:
-			{ stake.faf == af }});
+			{ stake.audioFile == af }});
 	}
 
 	editInsertSpan { arg source, span, touchMode, ce;

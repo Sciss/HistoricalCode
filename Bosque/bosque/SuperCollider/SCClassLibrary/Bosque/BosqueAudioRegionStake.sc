@@ -28,24 +28,24 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.18, 23-Jul-08
+ *	@version	0.19, 18-Aug-08
  */
 BosqueAudioRegionStake : BosqueRegionStake {
-	var <faf;
+	var <audioFile;
 	var <fileStartFrame;
 	var synth;	// for audio player
 	
-	*new { arg span, name, track, colr, fadeIn, fadeOut, gain = 1.0, fileStartFrame = 0, faf;
-		^super.new( span, name, track, colr ?? { Color.green( 0.6 )}, fadeIn, fadeOut, gain ).prInitFARS( fileStartFrame, faf );
+	*new { arg span, name, track, colr, fadeIn, fadeOut, gain = 1.0, fileStartFrame = 0, audioFile;
+		^super.new( span, name, track, colr ?? { Color.green( 0.6 )}, fadeIn, fadeOut, gain ).prInitFARS( fileStartFrame, audioFile );
 	}
 
-	storeArgs { ^super.storeArgs ++ [ fileStartFrame, faf ]}
+	storeArgs { ^super.storeArgs ++ [ fileStartFrame, audioFile ]}
 	
-	prInitFARS { arg argFileStartFrame, argFAF;
+	prInitFARS { arg argFileStartFrame, argAudioFile;
 		fileStartFrame	= argFileStartFrame;
-		faf				= argFAF;
-		java				= JavaObject( "de.sciss.timebased.bosque.AudioRegionStake", faf.bosque.swing,
-							span, name, track, colr, fadeIn, fadeOut, gain, fileStartFrame, faf.view );
+		audioFile			= argAudioFile;
+		java				= JavaObject( "de.sciss.timebased.bosque.AudioRegionStake", audioFile.bosque.swing,
+							span, name, track, colr, fadeIn, fadeOut, gain, fileStartFrame, audioFile.view );
 //		java				= JavaObject( "de.sciss.timebased.RegionStake", faf.bosque.swing, span, name );
 	}
 
@@ -110,13 +110,13 @@ BosqueAudioRegionStake : BosqueRegionStake {
 		if( track.busConfig.isNil, { ^this });
 
 		s			= player.scsynth;
-		buffer 		= Buffer( s, 32768, faf.numChannels );
+		buffer 		= Buffer( s, 32768, audioFile.numChannels );
 // allocReadMsg doesn't allow leaveOpen !!!
 //		bndl.addPrepare( buffer.allocReadMsg( faf.path, fileStartFrame + frameOffset ));
 
 		bndl.addPrepare( buffer.allocMsg );
-		bndl.addPrepare( buffer.cueSoundFileMsg( faf.path, fileStartFrame + frameOffset ));
-		synth		= Synth.basicNew( faf.synthDefName, player.scsynth );
+		bndl.addPrepare( buffer.cueSoundFileMsg( audioFile.path, fileStartFrame + frameOffset ));
+		synth		= Synth.basicNew( audioFile.synthDefName, player.scsynth );
 //		(max( 0, span.length - frameOffset ) / s.sampleRate).postln;
 		durFrames		= max( 0, span.length - frameOffset );
 		durSecs		= durFrames / s.sampleRate;

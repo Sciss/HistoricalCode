@@ -853,6 +853,17 @@ BosqueTimelineEditor : Object {
 		doc.undoManager.addEdit( ce.performAndEnd );
 		^track;
 	}
+	
+	addMarker { arg doc, pos, name;
+		var ce, mark;
+		ce   = JSyncCompoundEdit( "Add Marker" );
+		mark = BosqueMarkerStake( pos, name );
+		doc.markers.editBegin( ce );
+		doc.markers.editAdd( bosque.master, mark, ce );
+		doc.markers.editEnd( ce );
+		doc.undoManager.addEdit( ce.performAndEnd );
+		^mark;
+	}
 		
 	editAddTrack { arg source, doc, ce;
 		var track, id, ids;
@@ -888,7 +899,7 @@ BosqueTimelineEditor : Object {
 	
 	prTimelineInsertSpan { arg doc;
 		this.queryStringDialog( "Insert Time", "Amount of seconds", "60.0", { arg result;
-			var span, ce;
+			var span;
 			result = (result.asFloat * doc.timeline.rate).asInteger;
 			if( (result > 0) and: { result < 1e9 }, {  // filter out +-inf!
 				span = Span( doc.timelineView.cursor.position, doc.timelineView.cursor.position + result );
@@ -906,25 +917,21 @@ BosqueTimelineEditor : Object {
 	}
 
 	prTimelineClearSpan { arg doc;
-		var timelineView, ce;
-		timelineView	= doc.timelineView;
-		if( timelineView.selection.span.length > 0, {
-			this.clearSpan( doc, timelineView.selection.span );
+		if( doc.timelineView.selection.span.length > 0, {
+			this.clearSpan( doc, doc.timelineView.selection.span );
 		});
 	}
 	
 	clearSpan { arg doc, span;
-		var ce,
+		var ce;
 		ce = JSyncCompoundEdit( "Clear Time Span" );
 		doc.editClearTimeSpan( this, span, ce );
 		doc.undoManager.addEdit( ce.performAndEnd );
 	}
 	
 	prTimelineRemoveSpan { arg doc;
-		var timelineView, ce;
-		timelineView	= doc.timelineView;
-		if( timelineView.selection.span.length > 0, {
-			this.removeSpan( doc, timelineView.selection.span );
+		if( doc.timelineView.selection.span.length > 0, {
+			this.removeSpan( doc, doc.timelineView.selection.span );
 		});
 	}
 
@@ -932,7 +939,7 @@ BosqueTimelineEditor : Object {
 		var ce;
 		ce = JSyncCompoundEdit( "Remove Time Span" );
 		doc.editRemoveTimeSpan( this, span, ce );
-		ce.addPerform( BosqueTimelineViewEdit.select( this, timelineView, Span.new ));
+		ce.addPerform( BosqueTimelineViewEdit.select( this, doc.timelineView, Span.new ));
 		doc.undoManager.addEdit( ce.performAndEnd );
 	}
 
@@ -1204,7 +1211,7 @@ name = af.name.asSymbol;
 		doc.trail.editRemoveAll( this, stakes, ce );
 		stakes = stakes.collect({ arg stake, i;
 			("Processing '" ++ stake.name ++ "' ("++(i+1)++"/"++stakes.size++")...").postln;
-			af 		= stake.faf;
+			af 		= stake.audioFile;
 			version	= 1;
 			split	= af.path.splitext;
 			ext		= if( split[1].notNil, { "." ++ split[1] }, "" );

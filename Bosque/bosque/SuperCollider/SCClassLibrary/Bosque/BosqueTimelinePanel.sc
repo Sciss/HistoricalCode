@@ -680,7 +680,7 @@ BosqueTimelinePanel {
 					}, {
 						newStop = (stake.span.stop + deltaTime).clip( stake.span.start + 1000, doc.timeline.span.length );
 						if( stake.isKindOf( BosqueAudioRegionStake ), {
-							newStop = newStop.min( stake.span.start + stake.faf.numFrames - stake.fileStartFrame );
+							newStop = newStop.min( stake.span.start + stake.audioFile.numFrames - stake.fileStartFrame );
 						});
 						if( newStop != stake.span.stop, {
 							oldFade	= stake.fadeOut;
