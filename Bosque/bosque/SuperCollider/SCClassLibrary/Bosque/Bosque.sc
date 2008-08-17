@@ -263,7 +263,7 @@ Bosque : Object {
 		masterGroup		= Group( scsynth );
 		masterBus			= Bus.audio( scsynth, masterBusNumChannels );
 		masterChanMap		= masterChanMap ?? { (0..(masterBusNumChannels-1)) };
-		if( masterChanMap.size != msaterBusNumChannels, {
+		if( masterChanMap.size != masterBusNumChannels, {
 			("Bosque : channel mismatch! masterBusNumChannels is " ++ masterBusNumChannels ++
 				" but masterChanMap.size is " ++ masterChanMap.size).warn;
 		});

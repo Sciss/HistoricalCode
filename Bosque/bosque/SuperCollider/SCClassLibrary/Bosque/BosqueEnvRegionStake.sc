@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.12, 04-Aug-08
+ *	@version	0.13, 17-Aug-08
  */
 BosqueEnvRegionStake : BosqueRegionStake {
 //	var <java;
@@ -53,7 +53,19 @@ BosqueEnvRegionStake : BosqueRegionStake {
 	storeArgs { ^super.storeArgs ++ [ env ]}
 	
 	prInitFERS { arg argEnv;
-		env	= argEnv ?? { this.prCreateDefaultEnv };
+		if( argEnv.notNil, {
+			if( argEnv.isKindOf( BosqueTrail ), {
+				env = argEnv;
+			}, { if( argEnv.isKindOf( Array ), {
+				env = this.prEnvFromArray( argEnv );
+			}, { if( argEnv.isKindOf( Env ), {
+				env = this.prEnvFromEnv( argEnv );
+			}, {
+				Error( "BosqueEnvRegionStake.new - Argument type mismatch : " ++ env ++ " is not a valid envelope" ).throw;
+			})})});
+		}, {
+			env = this.prCreateDefaultEnv;
+		});
 		java		= JavaObject( "de.sciss.timebased.bosque.EnvRegionStake", Bosque.default.swing,
 							span, name, track, colr, fadeIn, fadeOut, gain, env );
 		env.addListener( this );
@@ -198,6 +210,37 @@ BosqueEnvRegionStake : BosqueRegionStake {
 			synth.server.sendBundle( BosqueAudioPlayer.bufferLatency + BosqueAudioPlayer.transportDelta, synth.freeMsg );
 			synth = nil;
 		});
+	}
+	
+	// time / value pairs
+	prEnvFromArray { arg array;
+		var unlaced = array.unlace( 2 );
+		^this.prEnvFromTimesValues( *unlaced );
+	}
+	
+	prEnvFromEnv { arg env;
+		^this.prEnvFromTimesValues( ([ 0.0 ] ++ env.times).integrate, env.levels );
+	}
+	
+	prEnvFromTimesValues { arg times, levels;
+		var env, segm, off, segms, startTime, startLevel, stopTime, stopLevel;
+		times = times - times.first;
+		times = times * (span.length / times.last);
+		env = BosqueTrail.new;
+		segms = Array( times.size - 1 );
+		stopTime  = 0;
+		stopLevel = levels.first;
+		(1..(times.size-1)).do({ arg i;
+			startTime		= stopTime;
+			startLevel	= stopLevel;
+			stopTime		= times[ i ].asInteger;
+			stopLevel		= levels[ i ];
+			if( stopTime < startTime, { Error( "Illegal time values in envelope : " ++ stopTime ).throw });
+//			[ Span( startTime, stopTime - startTime ), startLevel, stopLevel ].postcs;
+			segms.add( BosqueEnvSegmentStake( Span( startTime, stopTime ), startLevel, stopLevel ));
+		});
+		env.addAll( nil, segms );
+		^env;
 	}
 	
 	prCreateDefaultEnv {

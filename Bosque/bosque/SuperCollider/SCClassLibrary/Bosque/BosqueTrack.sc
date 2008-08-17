@@ -164,6 +164,8 @@ BosqueTrack {
 	name_ { arg str;
 		name = str;
 		java.setName( name );
+	   // so.getMap().dispatchOwnerModification( source, SessionObject.OWNER_RENAMED, newName );
+		java.server.sendMsg( '/methodr', '[', '/method', java.id, \getMap, ']', \dispatchOwnerModification, -1, 0x1000, str );
 		this.changed( \name );
 	}
 	

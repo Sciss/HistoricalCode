@@ -30,7 +30,7 @@
  *	Class dependancies: ScissUtil, ScissPlus, BosqueBoxGrid
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.31, 03-Aug-08
+ *	@version	0.32, 17-Aug-08
  */
 BosqueTimelineEditor : Object {
 	var <bosque;
@@ -40,7 +40,7 @@ BosqueTimelineEditor : Object {
 	var <winTransport;
 	var <observer;
 	var <panel;
-	var doc;
+//	var doc;
 
 	*new { arg bosque;
 		^super.new.prInit( bosque );
@@ -49,7 +49,7 @@ BosqueTimelineEditor : Object {
 	prInit { arg argBosque;
 		bosque	= argBosque ?? { Bosque.default };
 //		bosque.doWhenSwingBooted({ this.prMakeGUI });
-		doc		= bosque.session;
+//		doc		= bosque.session;
 //		this.prMakeGUI;
 	}
 	
@@ -61,6 +61,7 @@ BosqueTimelineEditor : Object {
 		var ggPlayPos, taskPlayPos, fTaskPlayPos, fPlayPosStr, ggTrackList, ggVolume, updVolume, clpseVolume;
 		var scrB = JSCWindow.screenBounds;
 		var mg, ggToolName;
+		var doc = bosque.session;
 		
 		winTimeline = JSCWindow( "Timeline", Rect( 410, 134, scrB.width - 580, scrB.height - 180 )).userCanClose_( false );
 //		ScissUtil.positionOnScreen( winTimeline, 0.333, 0.333 );
@@ -262,7 +263,7 @@ BosqueTimelineEditor : Object {
 			.canFocus_( false )
 			.states_([[ "+" ]])
 			.action_({ arg b;
-				this.prTrackAdd( doc );
+				this.addTrack( doc );
 			});
 		JSCButton( view, Rect( 200, 2, 36, 20 )).resize_( 3 )
 			.canFocus_( false )
@@ -364,7 +365,7 @@ BosqueTimelineEditor : Object {
 //			.action_({ arg b; var value = b.value;
 //				b.value = 0;
 //				switch( value - 2,
-//				0, { this.prTrackAdd( doc )},
+//				0, { this.editAddTrack( doc )},
 //				1, { this.prTrackRemove( doc )}
 //				);
 //			});
@@ -845,19 +846,26 @@ BosqueTimelineEditor : Object {
 //		doc.undoManager.addEdit( ce.performAndEnd );
 //	}
 
-	prTrackAdd { arg doc;
-		var ce, track, id, ids;
+	addTrack { arg doc;
+		var track, ce;
+		ce = JSyncCompoundEdit( "Insert Track" );
+		track = this.editAddTrack( this, doc, ce );
+		doc.undoManager.addEdit( ce.performAndEnd );
+		^track;
+	}
 		
-		ce		= JSyncCompoundEdit( "Insert Track" );
+	editAddTrack { arg source, doc, ce;
+		var track, id, ids;
+		
 		ids		= doc.tracks.collect({ arg track; track.trackID });
 		id		= 0;
 		while({ ids.indexOf( id ).notNil }, { id = id + 1 });
 		track	= BosqueTrack( id, doc.trail ).name_( doc.tracks.createUniqueName( "Track_%", id + 1 ));
-		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedTracks, doc.selectedTracks.getAll, false ));
+		ce.addPerform( BosqueEditRemoveSessionObjects( source, doc.selectedTracks, doc.selectedTracks.getAll, false ));
 //		doc.trackMap[ id ] = track;
-		ce.addPerform( BosqueEditAddSessionObjects( this, doc.tracks, [ track ], true )); // ( .onDeath_({ arg edit; track.dispose }););
-		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedTracks, [ track ], false ));
-		doc.undoManager.addEdit( ce.performAndEnd );
+		ce.addPerform( BosqueEditAddSessionObjects( source, doc.tracks, [ track ], true )); // ( .onDeath_({ arg edit; track.dispose }););
+		ce.addPerform( BosqueEditAddSessionObjects( source, doc.selectedTracks, [ track ], false ));
+		^track;
 	}
 
 	prTrackRemove { arg doc;
@@ -880,17 +888,21 @@ BosqueTimelineEditor : Object {
 	
 	prTimelineInsertSpan { arg doc;
 		this.queryStringDialog( "Insert Time", "Amount of seconds", "60.0", { arg result;
-			var timelineView, span, ce;
-			timelineView	= doc.timelineView;
-			result	= (result.asFloat * doc.timeline.rate).asInteger;
+			var span, ce;
+			result = (result.asFloat * doc.timeline.rate).asInteger;
 			if( (result > 0) and: { result < 1e9 }, {  // filter out +-inf!
-				ce = JSyncCompoundEdit( "Insert Time Span" );
-				span = Span( timelineView.cursor.position, timelineView.cursor.position + result );
-				doc.editInsertTimeSpan( this, span, ce );
-				ce.addPerform( BosqueTimelineViewEdit.select( this, timelineView, span ));
-				doc.undoManager.addEdit( ce.performAndEnd );
+				span = Span( doc.timelineView.cursor.position, doc.timelineView.cursor.position + result );
+				this.insertSpan( doc, span );
 			});
 		});
+	}
+	
+	insertSpan { arg doc, span;
+		var ce;
+		ce = JSyncCompoundEdit( "Insert Time Span" );
+		doc.editInsertTimeSpan( this, span, ce );
+		ce.addPerform( BosqueTimelineViewEdit.select( this, doc.timelineView, span ));
+		doc.undoManager.addEdit( ce.performAndEnd );
 	}
 
 	prTimelineClearSpan { arg doc;
@@ -1024,10 +1036,10 @@ BosqueTimelineEditor : Object {
 		// therefore we force the name to be a String here !!!
 		stake = BosqueEnvRegionStake( span, name.asString, track );
 		
-		this.editAddEnvStake( stake );
+		this.addEnvStake( stake );
 	}
 	
-	editAddEnvStake { arg stake;
+	addEnvStake { arg doc, stake;
 		var clearSpan, ce, span, trail;
 		
 		span		= stake.span;
