@@ -10,22 +10,132 @@
 p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
 p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
 p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
-p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
-p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
-p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
-p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0024b5}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #0000ff}
+span.s2 {font: 13.0px Monaco; color: #0024b5}
+span.s3 {font: 14.0px Helvetica Neue; color: #000000}
+span.Apple-tab-span {white-space:pre}
 </style>
 </head>
 <body>
 <p class="p1">BosqueFuncRegionStake</p>
 <p class="p2"><br></p>
+<p class="p3">A stake whose purpose is to execute arbitrary SuperCollider code during realtime playback. This is done by specifying the name of a function object (typically an instance of <a href="SC://Event"><span class="s1">Event</span></a> or <span class="s2">AnyMap</span>) in the <span class="s2">eventName</span> field. The name is looked up the the current <a href="SC://Environment"><span class="s1">Environment</span></a> and should begin with a tilde character <span class="s2">~</span>.</p>
+<p class="p4"><br></p>
+<p class="p3">Furthermore to easy the organization of the function object, an additonal <a href="BosqueTrack.html"><span class="s1">BosqueTrack</span></a> can be associated with the stake through the <span class="s2">modTrack</span> field. For example, a <span class="s2">BosqueFuncRegionStake</span> may be used to modulate or filter the sound coming from <a href="BosqueAudioRegionStake.html"><span class="s1">BosqueAudioRegionStake</span></a> objects placed on a neighbouring track. In that case, the neighbouring track can be placed in the <span class="s2">modTrack</span> field so that the function object can look up the track more easily.</p>
+<p class="p4"><br></p>
+<p class="p3">Another field, <span class="s2">position</span>, specifies the position in the <a href="SC://Group"><span class="s1">Group</span></a> hierarchy at which the function object should insert custom <a href="SC://Synth"><span class="s1">Synth</span></a>s (e.g. pre- or post-panorama).</p>
+<p class="p5"><br></p>
+<p class="p3"><b>eventName</b></p>
+<p class="p4"><br></p>
+<p class="p3">The name (<a href="SC://String"><span class="s1">String</span></a>) of an <a href="SC://Environment"><span class="s1">Environment</span></a> variable holding the function object (whose properties are described in the next section).</p>
+<p class="p4"><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>modTrack</b></p>
+<p class="p4"><br></p>
+<p class="p3">An instance of <a href="BosqueTrack.html"><span class="s1">BosqueTrack</span></a> (or <span class="s2">nil</span>) that can be used by the function object as a reference track.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>position</b></p>
+<p class="p4"><br></p>
+<p class="p3">A <a href="SC://Symbol"><span class="s1">Symbol</span></a> indicating whether <a href="SC://Synth"><span class="s1">Synth</span></a>s produced by the function object should be placed pre- or post-panorama (i.e. before or after the routing done by the track's <a href="BosqueBusConfig.html"><span class="s1">BosqueBusConfig</span></a>). Accordingly, the <span class="s2">numChannels</span> argument passed into the <span class="s2">playToBundle</span> call on the function object corresponds either to the bus-configs <span class="s2">numInputs</span> (for <span class="s2">position === \pre</span>) or <span class="s2">numOutputs</span> (for <span class="s2">position === \post)</span>. The same happens with the <span class="s2">group</span> argument.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p6">The function object</p>
+<p class="p4"><br></p>
+<p class="p3">The object stored in the <a href="SC://Environment"><span class="s1">Environment</span></a> under the name <span class="s2">eventName</span> should respond at least to the two message <span class="s2">playToBundle</span> and <span class="s2">stopToBundle</span> which are forwarded by the <span class="s2">BosqueFuncRegionStake</span> from the <a href="BosqueAudioPlayer.html"><span class="s1">BosqueAudioPlayer</span></a>.</p>
+<p class="p4"><br></p>
+<p class="p3">Whenever the realtime playback position advances to a <span class="s2">BosqueFuncRegionStake</span>, the <a href="BosqueAudioPlayer.html"><span class="s1">BosqueAudioPlayer</span></a> will call <span class="s2">playToBundle</span> on that stake. In this moment, the stake will <b><i>interpret</i></b> the <span class="s2">eventName</span> and when the result is not <span class="s2">nil</span>, it will invoke <span class="s2">playToBundle</span> on that object (which we call "function object" here). A lot of arguments are passed in with this call:</p>
+<p class="p4"><br></p>
+<p class="p7"><span class="Apple-tab-span">	</span>funcObj.playToBundle( &lt;(BosqueFuncRegionStake) stake&gt;, &lt;(OSCBundle) bndl&gt;,</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">                      </span>&lt;(BosqueAudioPlayer) player&gt;, &lt;(Float) durSecs&gt;, &lt;(Integer) frameOffset&gt;,</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">                      </span>&lt;(Integer) busIndex&gt;, &lt;(Integer) numChannels&gt;, &lt;(Group) group&gt;,</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">                      </span>&lt;(Symbol) position&gt; );</p>
+<p class="p8"><br></p>
+<p class="p7"><span class="s3">- </span>stake<span class="s3"> is the </span>BosqueFuncRegionStake<span class="s3"> itself.</span></p>
+<p class="p3">- <span class="s2">bndl</span> can be used to add messages, such as <span class="s2">Synth</span> creations, so they are scheduled at the right time</p>
+<p class="p3">- <span class="s2">player</span> provides a lot of useful methods (see next section)</p>
+<p class="p3">- <span class="s2">durSecs</span> is the remaining duration of the stake. If the stake is entered regularly by the transport, this equals <span class="s2">stake.span.length / doc.timeline.rate</span>. However, when the transport is started in the <b><i>middle</i></b> of the stake, this will correspond to the remaining time till the end of the stake.</p>
+<p class="p3">- <span class="s2">frameOffset</span> similarily is zero if the stake is entered regularly by the transport, but provides the offset into the stake in sample frames, if the transport was started in the middle of the stake.</p>
+<p class="p3">- <span class="s2">busIndex</span> corresponds to the input bus (for <span class="s2">position === \pre</span>) or output bus (for <span class="s2">position === \post</span>) of the <span class="s2">modTrack</span>'s bus config, and is <span class="s2">nil</span> if no mod-track has been specified.</p>
+<p class="p3">- <span class="s2">numChannels</span> is the number of channels of the bus referred to by <span class="s2">busIndex</span></p>
+<p class="p3">- <span class="s2">group</span> is the <a href="SC://Group"><span class="s1">Group</span></a> in which <a href="SC://Synth"><span class="s1">Synth</span></a>s should be played</p>
+<p class="p3">- <span class="s2">position</span> is copied from the stake's <span class="s2">position</span> field and indicates whether the stake is pre- or post-panorama.</p>
+<p class="p8"><br></p>
+<p class="p3">Typically, the <span class="s2">playToBundle</span> method of the function object will call some of the methods of the audio player (see next section) such as <span class="s2">makeFuncDur</span> to create a synth that terminates after <span class="s2">durSecs</span> and notifies the player that the stake has finished playing (so it will be re-spawned if entered again by the transport).</p>
+<p class="p4"><br></p>
+<p class="p3">The second method to be implemented by the function object is <span class="s2">stopToBundle</span> which is called with the following arguments:</p>
+<p class="p4"><br></p>
+<p class="p7"><span class="Apple-tab-span">	</span>funcObj.stopToBundle( &lt;(BosqueFuncRegionStake) stake&gt;, &lt;(OSCBundle) bndl&gt;,</p>
+<p class="p7"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">                      </span>&lt;(BosqueAudioPlayer) player&gt; )</p>
+<p class="p8"><br></p>
+<p class="p3">This is called for example, if the transport is stopped while the stake is playing. Typically this is a no-op for most function objects, as the processes spawned by the audio player's utility methods are independantly shut down (e.g. all <a href="SC://Synth"><span class="s1">Synth</span></a>s are freed, all <a href="SC://Routine"><span class="s1">Routine</span></a>s are stopped, all <a href="../../../../../workspace/SwingOSC/SuperCollider/Help/SwingOSC/UpdateListener.html"><span class="s1">UpdateListener</span></a>s are removed).</p>
+<p class="p4"><br></p>
+<p class="p8"><br></p>
+<p class="p6">Audio player utility methods</p>
+<p class="p8"><br></p>
+<p class="p3"><b>scsynth</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="SC://Server"><span class="s1">Server</span></a> instance used by the audio player, e.g. the one that should be used to spawn synths.</p>
+<p class="p4"><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>doc</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="BosqueSession.html"><span class="s1">BosqueSession</span></a> used by the audio player.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>sampleRate</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the nominal sample rate (<a href="SC://Float"><span class="s1">Float</span></a>) at which the server is running.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addFuncUpd( &lt;(Stake) stake&gt;, &lt;(UpdateListener) upd&gt; )</b></p>
+<p class="p4"><br></p>
 <p class="p3">XXX</p>
 <p class="p4"><br></p>
-<p class="p3"><b>*XXX</b></p>
-<p class="p5"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>funcPreviousBus( &lt;(Stake) stake&gt; )</b></p>
+<p class="p4"><br></p>
 <p class="p3">XXX</p>
-<p class="p6"><br></p>
-<p class="p7">__________</p>
-<p class="p7">this file last modified: 17-aug-08</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>makeFuncSynth( &lt;(Stake) stake&gt;, &lt;(Symbol) defName&gt;, &lt;(Collection) args&gt;, &lt;target&gt;, &lt;(Symbol) addAction = \addToHead )</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>makeFuncDur( &lt;(Stake) stake&gt;, &lt;(Float) dur&gt;, &lt;(Group) group&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>makeFuncFullbody( &lt;(Stake) stake&gt;, &lt;(Symbol) name = \fullbody&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>makeFuncControlBus( &lt;(Stake) stake&gt;, &lt;(Integer) numChannels = 1&gt;, &lt;(Symbol) name = \cbus )</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>makeFuncRout( &lt;(Stake) stake&gt;, &lt;(Function) func&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>makeFuncBang( &lt;(Stake) stake&gt;, &lt;(Symbol) trig = \trig&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p9">__________</p>
+<p class="p9">this file last modified: 18-aug-08</p>
 </body>
 </html>
