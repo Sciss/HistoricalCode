@@ -34,23 +34,25 @@
  *	getAllAudioStakes.
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.16, 23-Jul-08
+ *	@version	0.17, 18-Aug-08
  */
 BosqueTrail : Trail {
 	var <bosque;
 	var <java;
 	var updStakes;
 	
+	var debugUpd = false;
+	
 	var <>undoMgr;
 	
-	*new { arg touchMode = kTouchSplit;
-		^super.new( touchMode ).prInitBosqueTrail;
+	*new { arg touchMode = kTouchSplit, upd = true;
+		^super.new( touchMode ).prInitBosqueTrail( upd );
 	}
 	
-	prInitBosqueTrail {
+	prInitBosqueTrail { arg upd;
 		bosque	= Bosque.default;
 		java		= JavaObject( "de.sciss.timebased.RegionTrail", bosque.swing );
-		this.prPostInit;
+		this.prPostInit( upd );
  	}
  	
  	createEmptyCopy {
@@ -67,22 +69,24 @@ BosqueTrail : Trail {
 		this.prPostInit;
  	}
  	
- 	prPostInit {
-		updStakes = UpdateListener({ arg upd, stake, span; var edit;
-			if( undoMgr.notNil, {
-//				[ "newDispatch", span ].postln;
-				edit = BosqueTrailEdit.newDispatch( this, span );
-//				[ "newDispatch EDIT" ].postln;
-				edit.performEdit;
-//				[ "newDispatch PERFORM" ].postln;
-				undoMgr.addEdit( edit );
-//				[ "newDispatch ADDED" ].postln;
-			}, {
-//				this.modified( stake, span );
-				this.prDispatchModification( this, span );
-				java.modified( java, span );
-			});
-		}, \modified );
+ 	prPostInit { arg upd;
+ 		if( upd, {
+			updStakes = UpdateListener({ arg upd, stake, span; var edit;
+				if( undoMgr.notNil, {
+//					[ "newDispatch", span ].postln;
+					edit = BosqueTrailEdit.newDispatch( this, span );
+//					[ "newDispatch EDIT" ].postln;
+					edit.performEdit;
+//					[ "newDispatch PERFORM" ].postln;
+					undoMgr.addEdit( edit );
+//					[ "newDispatch ADDED" ].postln;
+				}, {
+//					this.modified( stake, span );
+					this.prDispatchModification( this, span );
+					java.modified( java, span );
+				});
+			}, \modified );
+		});
  	}
  	
  	duplicate {
@@ -174,12 +178,18 @@ BosqueTrail : Trail {
 //	}
 
 	protStakeAdded {Êarg stake;
-		updStakes.addTo( stake );
+		if( updStakes.notNil, {
+			if( debugUpd, { ("protStakeAdded( " ++ stake ++ " )").postln });
+			updStakes.addTo( stake );
+		});
 	}
 
 	protStakeRemoved {Êarg stake;
-		updStakes.removeFrom( stake );
-		stake.protRemoved;	// to kill playing audio regions
+		if( updStakes.notNil, {
+			if( debugUpd, { ("protStakeRemoved( " ++ stake ++ " )").postln });
+			updStakes.removeFrom( stake );
+			stake.protRemoved;	// to kill playing audio regions
+		});
 	}
 
 	

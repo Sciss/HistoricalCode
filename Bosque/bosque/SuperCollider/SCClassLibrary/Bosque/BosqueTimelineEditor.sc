@@ -1053,7 +1053,7 @@ BosqueTimelineEditor : Object {
 		// therefore we force the name to be a String here !!!
 		stake = BosqueEnvRegionStake( span, name.asString, track );
 		
-		this.addEnvStake( stake );
+		this.addEnvStake( doc, stake );
 	}
 	
 	addEnvStake { arg doc, stake;

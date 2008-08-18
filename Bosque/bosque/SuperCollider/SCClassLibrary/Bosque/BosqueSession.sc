@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.18, 08-Aug-08
+ *	@version	0.19, 18-Aug-08
  */
 BosqueSession : Object {
 	var <bosque;
@@ -51,7 +51,7 @@ BosqueSession : Object {
 	var <audioPlayer;
 	var dirty = false;
 	
-	var <path, <name;
+	var <path, <name = "Untitled";
 	
 	var trails;
 
@@ -77,7 +77,7 @@ BosqueSession : Object {
 		tracks			= BosqueSessionCollection.new;
 		selectedTracks	= BosqueSessionCollection( false );
 		busConfigs		= BosqueSessionCollection( hasJava: false );
-		markers			= BosqueTrail.new;
+		markers			= BosqueTrail( upd: false );
 		markerTrack		= BosqueTrack( -1, markers ).name_( \Markers );
 		tracks.add( nil, markerTrack );
 //		selectedBusConfigs	= BosqueSessionCollection.new;
