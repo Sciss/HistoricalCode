@@ -59,14 +59,14 @@ BosqueTrail : Trail {
  		^this.class.new( touchMode );
  	}
  	
- 	*prNew {Êarg touchMode, java;
- 		^super.new( touchMode ).prInitDirect( java );
+ 	*prNew {Êarg touchMode, java, upd;
+ 		^super.new( touchMode ).prInitDirect( java, upd );
  	}
  	
- 	prInitDirect { arg argJava;
+ 	prInitDirect { arg argJava, upd;
 		bosque	= Bosque.default;
 		java		= argJava;
-		this.prPostInit;
+		this.prPostInit( upd );
  	}
  	
  	prPostInit { arg upd;
@@ -93,7 +93,7 @@ BosqueTrail : Trail {
  		var newTJ, newT;
 
  		newTJ = java.duplicate__;
- 		newT = this.class.prNew( touchMode, newTJ );
+ 		newT = this.class.prNew( touchMode, newTJ, updStakes.notNil );
 		newT.prEditGetCollByStart.addAll( collStakesByStart );
 		collStakesByStart.do({ arg stake; newT.protStakeAdded( stake )});
 		newT.prEditGetCollByStop.addAll( collStakesByStop );
