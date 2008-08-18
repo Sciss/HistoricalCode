@@ -52,7 +52,7 @@ import de.sciss.timebased.timeline.TimelineView;
 
 /**
  *  @author		Hanns Holger Rutz
- *  @version	0.12, 18-Jul-08
+ *  @version	0.13, 18-Aug-08
  */
 public class TimelinePanel
 extends ComponentHost
@@ -92,7 +92,7 @@ implements TopPainter, TimelineView.Listener
 
 	private final TimelineAxis					timeAxis;
 	private final MarkerAxis					markAxis;
-	private Track								markerTrack				= null;
+//	private Track								markerTrack				= null;
 	private Trail								markerTrail				= null;
 	private final Trail.Listener				markerListener;
 
@@ -246,7 +246,7 @@ implements TopPainter, TimelineView.Listener
 	public void setMarkerTrack( Track t )
 	{
 		final Trail mt = (t != null) ? t.getTrail() : null;
-		markerTrack	= t;
+//		markerTrack	= t;
 		if( markerTrail != null ) {
 			markerTrail.removeListener( markerListener );
 		}
@@ -547,10 +547,10 @@ implements TopPainter, TimelineView.Listener
 		vpSelectionColors.add( colrSelection );
 		if( selectedTracks == null ) return;
 		
-		if( markerTrack != null ) {
-			vpSelections.add( markAxis.getBounds() );
-			vpSelectionColors.add( selectedTracks.contains( markerTrack ) ? colrSelection : colrSelection2 );
-		}
+//		if( markerTrack != null ) {
+//			vpSelections.add( markAxis.getBounds() );
+//			vpSelectionColors.add( selectedTracks.contains( markerTrack ) ? colrSelection : colrSelection2 );
+//		}
 
 		for( int i = 0; i < activeTracks.size(); i++ ) {
 			t	= (Track) activeTracks.get( i );

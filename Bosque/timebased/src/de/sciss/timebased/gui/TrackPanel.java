@@ -1,3 +1,31 @@
+/*
+ *  TrackPanel.java
+ *  TimeBased
+ *
+ *  Copyright (c) 2004-2008 Hanns Holger Rutz. All rights reserved.
+ *
+ *	This software is free software; you can redistribute it and/or
+ *	modify it under the terms of the GNU General Public License
+ *	as published by the Free Software Foundation; either
+ *	version 2, june 1991 of the License, or (at your option) any later version.
+ *
+ *	This software is distributed in the hope that it will be useful,
+ *	but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *	General Public License for more details.
+ *
+ *	You should have received a copy of the GNU General Public
+ *	License (gpl.txt) along with this software; if not, write to the Free Software
+ *	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ *
+ *
+ *  Changelog:
+ */
+
 package de.sciss.timebased.gui;
 
 import java.awt.BorderLayout;
@@ -19,6 +47,10 @@ import de.sciss.timebased.session.MutableSessionCollection;
 import de.sciss.timebased.session.SessionCollection;
 import de.sciss.timebased.session.Track;
 
+/**
+ *	@author		Hanns Holger Rutz
+ * 	@version	0.11, 18-Aug-08	
+ */
 public class TrackPanel
 extends JPanel
 implements TracksTable
@@ -61,6 +93,7 @@ implements TracksTable
 		markTrackHeader		= new TrackRowHeader(); //  doc.markerTrack, doc.getTracks(), doc.getMutableSelectedTracks() );
 		markTrackHeader.setPreferredSize( new Dimension( 63, markAxis.getPreferredSize().height ));	// XXX
 		markTrackHeader.setMaximumSize( new Dimension( 128, markAxis.getMaximumSize().height ));		// XXX
+		
 		if( !markAxis.isVisible() ) markTrackHeader.setVisible( false );
 //			markAxis.startListening();
 //		} else {
@@ -129,8 +162,13 @@ implements TracksTable
 	{
 		if( (activeTracks != null) && (markerTrack != null) ) {
 			markTrackHeader.setTrack( markerTrack, activeTracks, selectedTracks );
+			// this should not be a special case XXX
+			collTrackHeaders.add( markTrackHeader );
+			mapTrackHeaders.put( markerTrack, markTrackHeader );
 		} else {
 			markTrackHeader.setTrack( null, null, null );
+			collTrackHeaders.remove( markTrackHeader );
+			mapTrackHeaders.remove( markerTrack );
 		}
 	}
 	
@@ -143,6 +181,7 @@ implements TracksTable
 		Track				t;
 //		Axis				chanRuler;
 //		PeakMeter			chanMeter;
+		boolean				revalidate	= false;
 
 		newNumWaveTracks	= activeTracks.size(); // EEE doc.getDisplayDescr().channels;
 		oldNumWaveTracks	= collTrackHeaders.size();
@@ -173,19 +212,23 @@ implements TracksTable
 				trackRowHead.dispose();
 //				chanMeter.dispose();
 //				chanRuler.dispose();
+				revalidate = true;
 			}
 		}
 		// next look for newly added transmitters and create editors for them
 
-//		System.out.println( "now oldNumWaveTracks = " + oldNumWaveTracks + "; collChannelHeaders.size = " + collChannelHeaders.size() );
+//System.out.println( "now oldNumWaveTracks = " + oldNumWaveTracks + "; collTrackHeaders.size = " + collTrackHeaders.size() + "; newNumWaveTracks = " + newNumWaveTracks );
 		
 // EEE
 newLp:	for( int ch = 0; ch < newNumWaveTracks; ch++ ) {
+		
 			t = (Track) activeTracks.get( ch );
+//System.out.println( "checking track " + t + " (" + t.getName() + ")" );
 			for( int ch2 = 0; ch2 < oldNumWaveTracks; ch2++ ) {
 				trackRowHead = collTrackHeaders.get( ch2 );
 				if( trackRowHead.getTrack() == t ) continue newLp;
 			}
+//System.out.println( "...gonna add row header" );
 			
 //			chanHead = new TransmitterRowHeader( t, doc.getTracks(), doc.getMutableSelectedTracks(), doc.getUndoManager() );
 //			trackRowHead = new TrackRowHeader();
@@ -194,7 +237,9 @@ newLp:	for( int ch = 0; ch < newNumWaveTracks; ch++ ) {
 			trackRowHead.setEditor( tracksEditor );
 			collTrackHeaders.add( trackRowHead );
 			mapTrackHeaders.put( t, trackRowHead );
-			trackHeaderPanel.add( trackRowHead, ch );
+			trackHeaderPanel.add( trackRowHead, ch - 1 ); // XXX tricky! -1 because of marker track
+			
+			revalidate = true;
 
 //			chanMeter = new PeakMeter();
 //			collChannelMeters.add( chanMeter );
@@ -205,6 +250,11 @@ newLp:	for( int ch = 0; ch < newNumWaveTracks; ch++ ) {
 //			rulersPanel.add( chanRuler, ch );
 		}
 
+		if( revalidate ) {
+//System.out.println( "revalidate" );
+			revalidate();
+			repaint();
+		}
 		updateOverviews( /* false, */ true );
 	}
 	
@@ -274,9 +324,13 @@ newLp:	for( int ch = 0; ch < newNumWaveTracks; ch++ ) {
 		r.x = 0;
 		if( mainView != null ) {
 			r.width = mainView.getWidth();
+			if( t == markerTrack ) {	// XXX stupid special handling
+				r.y -= mainView.getY();
+			}
 		} else {
 			r.width = 0;
 		}
+		
 //		r.x    += r.width - (mainView != null ? mainView.getX() : 0);
 //		r.width = getWidth() - r.x;
 //		r.y	   += trackHeaderPanel.getY();
