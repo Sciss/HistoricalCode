@@ -116,6 +116,22 @@ BosqueAudioPlayer : Object {
 		});
 	}
 
+	funcFadeIn { arg stake, dur, frameOffset;
+		var durFrames, fadeFrames, fadeInSecs, fadeOutSecs;
+		
+		durFrames		= max( 0, stake.span.length - frameOffset );
+		fadeFrames	= if( frameOffset == 0, { min( durFrames, stake.fadeIn.numFrames )}, 0 );  // XXX a little bit cheesy!
+		^(fadeFrames / scsynth.sampleRate);
+	}
+
+	funcFadeOut { arg stake, dur, frameOffset;
+		var durFrames, fadeFrames;
+		
+		durFrames		= max( 0, stake.span.length - frameOffset );
+		fadeFrames	= if( frameOffset == 0, { min( durFrames, stake.fadeIn.numFrames )}, 0 );  // XXX a little bit cheesy!
+		^min( durFrames - fadeFrames, stake.fadeOut.numFrames ) / scsynth.sampleRate;
+	}
+
 //	makeFuncSynthWithBufRead { arg stake, defName, args, target, addAction = \addToTail;
 //		var synth, event = stake.event;
 //		synth = Synth.basicNew( defName /* ? \bosqueDur */, scsynth );

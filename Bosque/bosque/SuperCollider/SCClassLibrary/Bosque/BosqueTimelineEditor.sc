@@ -1124,14 +1124,29 @@ BosqueTimelineEditor : Object {
 			});
 		});
 	}
+	
+	addAudioFile { arg doc, path;
+		var ce, af;
+
+		ce = JSyncCompoundEdit( "Add Audio File" );
+		af = this.editAddAudioFile( this, doc, ce, path );
+		if( ce.isSignificant, { doc.undoManager.addEdit( ce.performAndEnd )});
+		^af;
+	}
+	
+	editAddAudioFile { arg source, doc, ce, path;
+		var af;
+		af = BosqueAudioFile( path );  // may return existing object!!!
+		if( doc.audioFiles.includes( af ).not, {
+			ce.addPerform( BosqueEditAddSessionObjects( source, doc.audioFiles, [ af ]));
+		});
+		^af;
+	}
 
 	prAudioFileAdd { arg doc, path, ce, onComplete, onFailure;
 		var af;
 		try {
-			af = BosqueAudioFile( path );  // may return existing object!!!
-			if( doc.audioFiles.includes( af ).not, {
-				ce.addPerform( BosqueEditAddSessionObjects( this, doc.audioFiles, [ af ]));
-			});
+			af = this.editAddAudioFile( path );
 			onComplete.value( af );
 		} { arg error;
 //			error.reportError;
