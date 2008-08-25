@@ -30,7 +30,7 @@
  *	Class dependancies: ScissUtil, ScissPlus, BosqueBoxGrid
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.32, 17-Aug-08
+ *	@version	0.33, 25-Aug-08
  */
 BosqueTimelineEditor : Object {
 	var <bosque;
@@ -846,10 +846,40 @@ BosqueTimelineEditor : Object {
 //		doc.undoManager.addEdit( ce.performAndEnd );
 //	}
 
-	addTrack { arg doc;
+	replaceStake { arg doc, oldStake, newStake, editName;
+		var ce, selected;
+		editName	= editName ? "Modify Stake";
+		ce		= JSyncCompoundEdit( editName );
+		selected	= doc.selectedRegions.includes( oldStake );
+		if( selected, {
+			ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, [ oldStake ], false ));
+		});
+		doc.trail.editBegin( ce );
+		doc.trail.editRemove( this, oldStake, ce );
+		doc.trail.editAdd( this, newStake, ce );
+		doc.trail.editEnd( ce );
+		if( selected, {
+			ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, [ newStake ], false ));
+		});
+		doc.undoManager.addEdit( ce.performEdit.end );
+	}
+	
+	addStake { arg doc, stake, select = true;
+		var ce;
+		ce = JSyncCompoundEdit( "Add Stake" );
+		doc.trail.editBegin( ce );
+		doc.trail.editAdd( this, stake, ce );
+		doc.trail.editEnd( ce );
+		if( select, {
+			ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, [ stake ], false ));
+		});
+		doc.undoManager.addEdit( ce.performEdit.end );
+	}
+	
+	addTrack { arg doc, name;
 		var track, ce;
 		ce = JSyncCompoundEdit( "Insert Track" );
-		track = this.editAddTrack( this, doc, ce );
+		track = this.editAddTrack( this, doc, ce, name );
 		doc.undoManager.addEdit( ce.performAndEnd );
 		^track;
 	}
@@ -865,13 +895,14 @@ BosqueTimelineEditor : Object {
 		^mark;
 	}
 		
-	editAddTrack { arg source, doc, ce;
+	editAddTrack { arg source, doc, ce, name;
 		var track, id, ids;
 		
 		ids		= doc.tracks.collect({ arg track; track.trackID });
 		id		= 0;
 		while({ ids.indexOf( id ).notNil }, { id = id + 1 });
-		track	= BosqueTrack( id, doc.trail ).name_( doc.tracks.createUniqueName( "Track_%", id + 1 ));
+		name		= name ?? { doc.tracks.createUniqueName( "Track_%", id + 1 )};
+		track	= BosqueTrack( id, doc.trail ).name_( name );
 		ce.addPerform( BosqueEditRemoveSessionObjects( source, doc.selectedTracks, doc.selectedTracks.getAll, false ));
 //		doc.trackMap[ id ] = track;
 		ce.addPerform( BosqueEditAddSessionObjects( source, doc.tracks, [ track ], true )); // ( .onDeath_({ arg edit; track.dispose }););
@@ -1372,8 +1403,8 @@ name = af.name.asSymbol;
 
 	prBusAddDlg { arg doc;
 		{
-			var result, jOptionPane, jName, jNumInputs, jNumOutputs, numInputs, numOutputs, jLayout, jPanel, jLab3, jLab1, jLab2;
-			var id, ids, cfg, ce, name;
+			var result, jOptionPane, jName, jNumInputs, jNumOutputs, numInputs, numOutputs,
+			    jLayout, jPanel, jLab3, jLab1, jLab2, name, ids, id;
 			
 			ids			= doc.busConfigs.collect({ arg b; b.busCfgID });
 			id			= 0;
@@ -1400,18 +1431,30 @@ name = af.name.asSymbol;
 				name			= jName.getText_;
 				numInputs		= jNumInputs.getText_.asInteger;
 				numOutputs	= jNumOutputs.getText_.asInteger;
-				ids			= doc.busConfigs.collect({ arg b; b.busCfgID });
-				id			= 0;
-				while({ ids.indexOf( id ).notNil }, { id = id + 1 });
-				ce			= JSyncCompoundEdit( "Add Bus" );
-				cfg			= BosqueBusConfig( id, numInputs, numOutputs ).name_( name );
-//				ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedTracks, doc.selectedTracks.getAll, false ));
-				ce.addPerform( BosqueEditAddSessionObjects( this, doc.busConfigs, [ cfg ], true ));
-//				ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedTracks, [ track ], false ));
-				doc.undoManager.addEdit( ce.performAndEnd );
+				this.addBusConfig( doc, numInputs, numOutputs, name );
 			});
 			jNumInputs.destroy; jNumOutputs.destroy; jLab1.destroy; jLab2.destroy; jPanel.destroy; jLayout.destroy;
 		}.fork( SwingOSC.clock );
+	}
+	
+	addBusConfig { arg doc, numInputs, numOutputs, name;
+		var cfg, ce;
+		ce = JSyncCompoundEdit( "Add Bus" );
+		cfg = this.editAddBusConfig( this, doc, ce, numInputs, numOutputs, name );
+		doc.undoManager.addEdit( ce.performAndEnd );
+		^cfg;
+	}
+	
+	editAddBusConfig { arg source, doc, ce, numInputs, numOutputs, name;
+		var id, ids, cfg;
+		
+		ids			= doc.busConfigs.collect({ arg b; b.busCfgID });
+		id			= 0;
+		while({ ids.indexOf( id ).notNil }, { id = id + 1 });
+		name			= name ?? { ("Bus " ++ (id + 1)).asSymbol };
+		cfg			= BosqueBusConfig( id, numInputs, numOutputs ).name_( name );
+		ce.addPerform( BosqueEditAddSessionObjects( source, doc.busConfigs, [ cfg ], true ));
+		^cfg;
 	}
 	
 //	prOSCRec {

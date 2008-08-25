@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.14, 23-Jul-08
+ *	@version	0.15, 25-Aug-08
  */
 BosqueFuncRegionStake : BosqueRegionStake {
 	var <eventName;
@@ -83,7 +83,8 @@ BosqueFuncRegionStake : BosqueRegionStake {
 			event		= eventName.interpret;
 //			("event = " ++ event).postln;
 			if( event.isNil, { ^this });
-			event.player	= player;
+//			event.player	= player;
+			player.initEvent( event );
 			durFrames		= max( 0, span.length - frameOffset );
 			durSecs		= durFrames / player.scsynth.sampleRate;
 			
@@ -130,7 +131,9 @@ BosqueFuncRegionStake : BosqueRegionStake {
 			bndl = OSCBundle.new;
 			try {
 				player = event.player;
-				event.stopToBundle( this, bndl, player );
+				if( event.respondsTo( \stopToBundle ), {
+					event.stopToBundle( this, bndl, player );
+				});
 				player.freeFuncSynths( this, bndl );
 				bndl.send( player.scsynth, BosqueAudioPlayer.bufferLatency + BosqueAudioPlayer.transportDelta );
 			} { arg error;

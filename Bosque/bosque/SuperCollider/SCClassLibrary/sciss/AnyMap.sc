@@ -27,7 +27,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.10, 17-Aug-07
+ *	@version	0.11, 25-Aug-08
  */
 AnyMap {
 	var <dict, nilRef;
@@ -51,7 +51,17 @@ AnyMap {
 		if( value.isNil, {
 			DoesNotUnderstandError( this, key ).throw;
 		});
-		^if( value !== nilRef, value );
+		if( value === nilRef, { ^nil });
+		^value;
+	}
+	
+	respondsTo { arg aSymbol;
+		if( aSymbol.isSetter, { ^true });
+		^switch( aSymbol,
+		\put, true,
+		\at, true,
+		\dict, true,
+		{ dict.includesKey( aSymbol )});
 	}
 	
 	doesNotUnderstand { arg selector ... args;

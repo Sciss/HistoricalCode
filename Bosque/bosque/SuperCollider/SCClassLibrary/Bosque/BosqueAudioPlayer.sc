@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.23, 17-Aug-08
+ *	@version	0.24, 25-Aug-08
  */
 BosqueAudioPlayer : Object {
 	var <doc;
@@ -83,6 +83,15 @@ BosqueAudioPlayer : Object {
 	}
 	
 	// ---------- func region support ----------
+
+	initEvent { arg event;
+		event.player		= this;
+		event.upd			= nil;
+		event.synths		= nil;
+		event.rout		= nil;
+		event.busses		= nil;
+	}
+	
 	makeFuncSynth { arg stake, defName, args, target, addAction = \addToHead;
 		var synth, event = stake.event;
 		synth = Synth.basicNew( defName /* ? \bosqueDur */, scsynth );
@@ -90,23 +99,21 @@ BosqueAudioPlayer : Object {
 //			args = args ++ [ \dur, dur ];
 //		});
 		bndl.add( synth.newMsg( target ?? { stake.group }, args, addAction ));
-//		if( dur.notNil, {
-			nw.register( synth );
-//			UpdateListener.newFor( synth, { arg upd, obj, what;
-//				if( what === \n_end, {
-//					event.synths = event.synths.remove( synth );
-//					event.changed( \playing, false );
-//					if( debugFunc, {
-//						[ stake, synth, "n_end" ].postln;
-//					});
-//				});
-//			});
-//		});
+		this.addFuncSynth( stake, synth );
+		^synth;
+	}
+	
+	addFuncSynth { arg stake, synth;
+		var event = stake.event;
+		nw.register( synth );
+		UpdateListener.newFor( synth, { arg upd, obj;
+			upd.remove;
+			event.synths.remove( synth );
+		}, \n_end );
 		event.synths = event.synths.add( synth );
 		if( debugFunc, {
 			[ stake, synth, "makeSynth" ].postln;
 		});
-		^synth;
 	}
 
 //	makeFuncSynthWithBufRead { arg stake, defName, args, target, addAction = \addToTail;
@@ -132,6 +139,10 @@ BosqueAudioPlayer : Object {
 
 	addFuncUpd { arg stake, upd;
 		var event = stake.event;
+		this.prAddFuncUpd( event, upd );
+	}
+	
+	prAddFuncUpd { arg event, upd;
 		event.upd = event.upd.add( upd );
 	}
 
@@ -139,17 +150,12 @@ BosqueAudioPlayer : Object {
 		var synth, event = stake.event;
 		synth = Synth.basicNew( \bosqueDur, scsynth );
 		bndl.add( synth.newMsg( group, [ \dur, dur ]));
-		nw.register( synth );
-		event.upd = event.upd.add( UpdateListener.newFor( synth, { arg upd, obj, what;
-			if( what === \n_end, {
-				event.synths.remove( synth );
-				this.freeFuncSynths( stake );
-//				event.changed( \playing, false );
-//				if( debugFunc, {
-//					[ stake, synth, "n_end" ].postln;
-//				});
-			});
-		}));
+		nw.register( synth, true );
+		UpdateListener.newFor( synth, { arg upd, obj;
+			upd.remove;
+			event.synths.remove( synth );
+			this.freeFuncSynths( stake );
+		}, \n_end );
 		event.synths = event.synths.add( synth );
 		if( debugFunc, {
 			[ stake, synth, "makeDur" ].postln;
@@ -161,7 +167,7 @@ BosqueAudioPlayer : Object {
 		var fFullbody, event;
 		event = stake.event;
 		fFullbody = event[ name ];
-		event.upd = event.upd.add( UpdateListener.newFor( EGMFullbodyTracker, { arg upd, track, msg;
+		this.prAddFuncUpd( event, UpdateListener.newFor( EGMFullbodyTracker, { arg upd, track, msg;
 			fFullbody.value( event, msg );
 		}, \msg ));
 	}
@@ -227,7 +233,7 @@ BosqueAudioPlayer : Object {
 		}
 		);
 		if( oUpd.notNil, {
-			event.upd = event.upd.add( UpdateListener.newFor( oUpd, fUpd ));
+			this.prAddFuncUpd( event, UpdateListener.newFor( oUpd, fUpd ));
 		}, {
 			TypeSafe.methodWarn( thisMethod, "Unknown type '" ++ type ++ "'" );
 		});
@@ -236,7 +242,7 @@ BosqueAudioPlayer : Object {
 	makeFuncField { arg stake, matrix = \matrix;
 		var event = stake.event, fMatrix;
 		fMatrix = event[ matrix ];
-		event.upd = event.upd.add( UpdateListener.newFor( bosque.trackField, { arg upd, obj ... values;
+		this.prAddFuncUpd( event, UpdateListener.newFor( bosque.trackField, { arg upd, obj ... values;
 			// due to Object -> change, we'll get values == [ nil ] in some cases!!!
 			if( values[0].notNil, { fMatrix.value( values )}, fMatrix );
 		}));
@@ -359,7 +365,7 @@ BosqueAudioPlayer : Object {
 		}
 		);
 		if( oUpd.notNil, {
-			event.upd = event.upd.add( UpdateListener.newFor( oUpd, fUpd ));
+			this.prAddFuncUpd( event, UpdateListener.newFor( oUpd, fUpd ));
 		}, {
 			TypeSafe.methodWarn( thisMethod, "Unknown type '" ++ type ++ "'" );
 		});
@@ -375,7 +381,7 @@ BosqueAudioPlayer : Object {
 
 	makeFuncBang { arg stake, trig = \trig;
 		var event = stake.event;
-		event.upd = event.upd.add( UpdateListener.newFor( bosque.trackBang, event[ trig ]));
+		this.prAddFuncUpd( event, UpdateListener.newFor( bosque.trackBang, event[ trig ]));
 		if( debugFunc, {
 			[ stake, "makeFuncBang" ].postln;
 		});

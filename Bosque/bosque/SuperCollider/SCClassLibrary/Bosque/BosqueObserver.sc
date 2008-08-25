@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.16, 04-Aug-08
+ *	@version	0.17, 25-Aug-08
  */
 BosqueObserver {
 	var <bosque;
@@ -306,7 +306,7 @@ BosqueObserver {
 	
 	prModify { arg setter, value;
 		var ce, sel;
-		ce = JSyncCompoundEdit.new;
+		ce = JSyncCompoundEdit( "Modify Stakes" );
 		sel = doc.selectedRegions.getAll;
 		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, sel, false ));
 		doc.trail.editBegin( ce );

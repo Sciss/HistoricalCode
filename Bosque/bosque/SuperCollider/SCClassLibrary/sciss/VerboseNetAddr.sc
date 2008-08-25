@@ -2,7 +2,7 @@
  *	(C)opyright 2006-2008 Hanns Holger Rutz. All rights reserved.
  *	Distributed under the GNU General Public License (GPL).
  *
- *	@version	0.13, 23-May-08
+ *	@version	0.15, 24-Aug-08
  *	@author	Hanns Holger Rutz
  */
 VerboseNetAddr : NetAddr {
@@ -20,10 +20,20 @@ VerboseNetAddr : NetAddr {
 		^super.new( *args ).prInitVerboseNetAddr;
 	}
 	
+	*wrap { arg addr;
+		^this.new( addr.hostname, addr.port );
+	}
+	
 	prInitVerboseNetAddr {
 		notThese			= IdentitySet[ '/status', 'status.reply' ];
 		upd				= { arg time, replyAddr, msg;
-			if( notThese.includes( msg.first.asSymbol ).not, {
+//			if( (replyAddr.hostname == this.hostname) and: { (replyAddr.port == this.port) and:
+//			    { notThese.includes( msg.first.asSymbol ).not }}, {
+//				("r: " ++ msg).postln;
+//			});
+//			if( (replyAddr.socket == this.socket) and: ... ) // doesn't work (still prints all incoming messages)
+			if( (replyAddr.port == this.port) and:
+			    { notThese.includes( msg.first.asSymbol ).not }, {
 				("r: " ++ msg).postln;
 			});
 		};
@@ -39,7 +49,7 @@ VerboseNetAddr : NetAddr {
 			];
 //			humanStrings.size.postln;
 		});
-		this.dumpIncoming	= true;
+		this.dumpIncoming = true;
 	}
 	
 	dumpIncoming_ { arg bool;
@@ -74,7 +84,7 @@ VerboseNetAddr : NetAddr {
 	}
 	
 	prDump { arg prefix, argList;
-		argList = argList.collect({ arg item; if( item.class === Int8Array, "DATA", item ); });
+		argList = argList.collect({ arg item; if( item.class === Int8Array, "DATA", item )});
 		if( humanReadable and: { argList.first.isInteger }, {
 			argList[ 0 ] = argList.first.asString ++ " (" ++ humanStrings[ argList.first ] ++ ")";
 		});

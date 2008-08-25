@@ -4,7 +4,7 @@
  *
  *	Class dependancies: TypeSafe
  *
- *	@version	0.20, 29-Jul-08
+ *	@version	0.22, 19-Aug-08
  *	@author	Hanns Holger Rutz
  */
 ScissUtil
@@ -17,38 +17,41 @@ ScissUtil
 	}
 
 	*speakerTest { arg numChannels = 8, channelOffset = 0, volume = 0.1;
-		var s, w, b, t, x, d;
+		var s, w, b, fTask, fStop, synth, d, rout;
 	
-		s = Server.local;
-		w = SCWindow( "Pink Noise", Rect( 40, 200, 250, 64 ));
+		s = Server.default;
+		
+		fStop = {
+			rout.stop; rout = nil;
+			synth.free; synth = nil;
+		};
+		w = GUI.window.new( "Pink Noise", Rect( 40, 200, 250, 64 ));
 		w.view.decorator = FlowLayout( w.view.bounds );
-		b = SCButton( w, Rect( 0, 0, 100, 30 ));
+		b = GUI.button.new( w, Rect( 0, 0, 100, 30 ));
 		b.states = [["Play", Color.black, Color.white ], ["Stop", Color.white, Color.red]];
-		d = SCStaticText( w, Rect( 0, 0, 100, 30 ));
-		t = Task({
+		d = GUI.staticText.new( w, Rect( 0, 0, 100, 30 ));
+		fTask = {
 			numChannels.do({ arg i;
 				var ch = i + channelOffset;
 				{ d.string = "Channel " ++ (ch + 1); }.defer;
-				x = Synth.new( \speakerTest, [ \ch, ch, \volume, volume ], s.asTarget, \addToTail );
+				synth = Synth.new( \speakerTest, [ \ch, ch, \vol, volume ], s.asTarget, \addToTail );
 				0.5.wait;
-				x.free;
+				synth.free;
 				0.2.wait;
 			});
 			{ b.value = 0; d.string = ""; }.defer;
-		});
+		};
 		b.action = {
 			if( b.value == 1, {
-				t.reset;
-				t.play;
-			}, {
-				t.stop;
-			})
+				rout = fTask.fork;
+			}, fStop );
 		};
 		s.waitForBoot({
 			SynthDef( \speakerTest, { arg ch, vol = 0.1;
-				Out.ar( ch, PinkNoise.ar );
+				Out.ar( ch, PinkNoise.ar( vol ));
 			}).send( s );
 		});
+		w.onClose = fStop;
 		w.front;
 	}
 
@@ -236,6 +239,94 @@ ScissUtil
 			try { f.close };
 		};
 		^markers;
+	}
+		
+	
+	*fixEmptyAIFF { arg path;
+		var f, totalLen, len, magic, isAIFC, chunkLen, numChannels, bitsPerSample, numEssentials,
+		    formLengthOffset, commSmpNumOffset, ssndLengthOffset, bytesPerFrame, numFrames;
+		
+		f = File( path, "rb+" );
+		if( f.isOpen.not, {
+			Error( "Could not open file '" ++ path ++ "'" ).throw;
+		});
+	
+		protect {
+			totalLen = f.length;
+			magic = f.getInt32;
+			if( magic != 0x464F524D, { Error( "File does not begin with FORM magic (" ++ magic ++ ")" ).throw });
+			formLengthOffset = f.pos;
+			f.getInt32;
+			len		= totalLen - 12;  // use the file length instead of the chunk len
+			magic 	= f.getInt32;
+			isAIFC   = magic == 0x41494643;
+			if( (magic != 0x41494646) && isAIFC.not, {
+				Error( "Format is not AIFF or AIFC" ).throw;
+			});
+					
+			chunkLen	= 0;
+			numEssentials = 2;
+			while({ (numEssentials > 0) && (len > 0) }, {
+				if( chunkLen != 0, { f.seek( chunkLen, 1 )});   // skip to next chunk
+				
+				magic	= f.getInt32;
+				chunkLen	= (f.getInt32 + 1) & 0xFFFFFFFE;
+				len		= len - (chunkLen + 8);
+	//			[ "magic", magic ].postln;
+				switch( magic,
+				0x434F4D4D, { // 'COMM'
+					numChannels		= f.getInt16;
+					commSmpNumOffset	= f.pos;	// offset for # of frames
+					f.getInt32; // ignore # of frames
+					bitsPerSample		= f.getInt16;
+					f.getInt32; f.getInt32; f.getInt16; // skip sample rate
+					chunkLen = chunkLen - 18;
+					
+					if( isAIFC, {
+						switch( f.getInt32,
+						0x4E4F4E45, { }, // NONE_MAGIC
+						0x696E3136, {ÊbitsPerSample = 16 }, // in16_MAGIC
+						0x696E3234, {ÊbitsPerSample = 24 }, // in24_MAGIC
+						0x696E3332, { bitsPerSample = 32 }, // in32_MAGIC
+						0x666C3332, { bitsPerSample = 32 }, // fl32_MAGIC
+						0x464C3332, { bitsPerSample = 32 }, // FL32_MAGIC
+						0x666C3634, {ÊbitsPerSample = 64 }, // fl64_MAGIC
+						0x464C3634, {ÊbitsPerSample = 64 }, // FL64_MAGIC
+						0x736F7774, {ÊbitsPerSample = 16 }, // 'sowt' (16-bit PCM little endian)
+						{
+							Error( "Unknown AIFC compression" ).throw;
+						}
+						);
+						chunkLen = chunkLen - 4;
+					});
+					numEssentials = numEssentials - 1;
+				},
+				0x53534E44, { // 'SSND'
+				ssndLengthOffset = f.pos - 4;
+					numEssentials = numEssentials - 1;
+				});
+			});
+	
+			if( numEssentials > 0, {
+				Error( "Essential chunks (COMM, SSND) missing" ).throw;
+			});
+	
+			bytesPerFrame = (bitsPerSample >> 3) * numChannels;
+			numFrames = (totalLen - (ssndLengthOffset + 4)).div( bytesPerFrame );
+			"Detected AIFF file with % channels, % bits per sample, guessing % frames.\nFixing header...\n"
+				.postf( numChannels, bitsPerSample, numFrames );
+	
+			f.pos = formLengthOffset;
+			f.putInt32( totalLen - 8 );
+			f.pos = commSmpNumOffset;
+			f.putInt32( numFrames );
+			f.pos = ssndLengthOffset;
+			f.putInt32( totalLen - (ssndLengthOffset + 4) );
+			"Done.".postln;
+			
+		} { arg error;
+			try { f.close };
+		};
 	}
 	
 	*forkIfNeeded { arg func ... args;
