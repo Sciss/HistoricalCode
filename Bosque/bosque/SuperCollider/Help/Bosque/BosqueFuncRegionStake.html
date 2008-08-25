@@ -34,10 +34,11 @@ span.s8 {color: #ad1d13}
 span.s9 {color: #606060}
 span.s10 {font: 13.0px Monaco; color: #0019ba}
 span.s11 {color: #0022f8}
-span.s12 {color: #0000bf}
-span.s13 {color: #bf0000}
-span.s14 {color: #007300}
-span.s15 {color: #000000}
+span.s12 {font: 13.0px Monaco; color: #0000bf}
+span.s13 {color: #0000bf}
+span.s14 {color: #bf0000}
+span.s15 {color: #007300}
+span.s16 {color: #000000}
 span.Apple-tab-span {white-space:pre}
 </style>
 </head>
@@ -147,40 +148,44 @@ span.Apple-tab-span {white-space:pre}
 <p class="p4"><br></p>
 <p class="p3">Adds an <a href="../../../../../workspace/SwingOSC/SuperCollider/Help/SwingOSC/UpdateListener.html"><span class="s11">UpdateListener</span></a> to a playing stake. This <a href="../../../../../workspace/SwingOSC/SuperCollider/Help/SwingOSC/UpdateListener.html"><span class="s11">UpdateListener</span></a> is automatically removed when the stake stops playing.</p>
 <p class="p4"><br></p>
-<p class="p3">For brevity, in the following example we will just listen for <a href="SC://Server"><span class="s11">Server</span></a> status updates and use them to track the current CPU load. A balancing mechanism will add and remove <a href="SC://Synth"><span class="s11">Synth</span></a>s to achieve an extra CPU load of around 10%. To achieve that, we use the <span class="s10">addFuncSynth</span> method explained later. First we define the function object (using the <span class="s2">AnyMap</span> class):</p>
+<p class="p3">For brevity, in the following example we will just listen for <a href="SC://Server"><span class="s11">Server</span></a> status updates and use them to track the current CPU load. A balancing mechanism will add and remove <a href="SC://Synth"><span class="s11">Synth</span></a>s to achieve an extra CPU load of around 10%. To achieve that, we use the <span class="s10">addFuncSynth</span> and <span class="s12">makeFuncDur</span> methods explained later. First we define the function object (using the <span class="s2">AnyMap</span> class):</p>
 <p class="p4"><br></p>
 <p class="p11">(</p>
-<p class="p13"><span class="Apple-tab-span">	</span>~mapUpd = <span class="s12">AnyMap</span>.new;</p>
-<p class="p13"><span class="Apple-tab-span">	</span>~mapUpd.playToBundle = { <span class="s12">arg</span> map, stake, bndl, play, dur, off, bus, numChannels, group, pos;</p>
-<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s12">var</span> synths = [], initialCPU = play.scsynth.avgCPU;</p>
+<p class="p13"><span class="Apple-tab-span">	</span>~mapUpd = <span class="s13">AnyMap</span>.new;</p>
+<p class="p13"><span class="Apple-tab-span">	</span>~mapUpd.playToBundle = { <span class="s13">arg</span> map, stake, bndl, play, dur, off, bus, numChannels, group, pos;</p>
+<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s13">var</span> synths = [], initialCPU = play.scsynth.avgCPU;</p>
 <p class="p14"><br></p>
 <p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>play.makeFuncDur( stake, dur );</p>
-<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>play.addFuncUpd( stake, <span class="s12">UpdateListener</span>.newFor( play.scsynth, { <span class="s12">arg</span> upd, s;</p>
-<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s12">var</span> synth, newCPU = s.avgCPU;</p>
+<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>play.addFuncUpd( stake, <span class="s13">UpdateListener</span>.newFor( play.scsynth, { <span class="s13">arg</span> upd, s;</p>
+<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s13">var</span> synth, newCPU = s.avgCPU;</p>
 <p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>(<span class="s9">"CPU : "</span> ++ newCPU.round( 0.1 )).postln;</p>
 <p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>rrand( 7, 14 ).do({</p>
-<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( (newCPU - initialCPU) &lt; 10, { <span class="s13">// add a new synth</span></p>
-<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>synth = <span class="s12">Synth</span>( <span class="s14">\default</span>, [ <span class="s14">\amp</span>, 0.0, <span class="s14">\freq</span>, exprand( 200, 4000 )], group );</p>
+<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( (newCPU - initialCPU) &lt; 10, { <span class="s14">// add a new synth</span></p>
+<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>synth = <span class="s13">Synth</span>( <span class="s15">\default</span>, [ <span class="s15">\amp</span>, 0.0, <span class="s15">\freq</span>, exprand( 200, 4000 )], group );</p>
 <p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>play.addFuncSynth( stake, synth );</p>
 <p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>synths = synths.add( synth );</p>
-<p class="p15"><span class="s15"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, { </span>// kill a synth</p>
+<p class="p15"><span class="s16"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, { </span>// kill a synth</p>
 <p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>synth = synths.choose; synths.remove( synth );</p>
 <p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>synth.release;</p>
 <p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
 <p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
-<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( synths.size &gt; 0, { group.set( <span class="s14">\amp</span>, 0.5 / synths.size )});</p>
-<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, <span class="s14">\counts</span> ));</p>
-<p class="p15"><span class="s15"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span><span class="s12">true</span><span class="s15">; </span>// playToBundle was successfull</p>
+<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( synths.size &gt; 0, { group.set( <span class="s15">\amp</span>, 0.5 / synths.size )});</p>
+<p class="p13"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, <span class="s15">\counts</span> ));</p>
+<p class="p15"><span class="s16"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span><span class="s13">true</span><span class="s16">; </span>// playToBundle was successfull</p>
 <p class="p13"><span class="Apple-tab-span">	</span>};</p>
 <p class="p11">)</p>
 <p class="p12"><span class="Apple-tab-span">	</span></p>
+<p class="p15">// since Stakes are immutable objects, modifying a parameter such as the event name</p>
+<p class="p15">// means to create a duplicate version that incorporates the modification.</p>
+<p class="p15">// replaceEventName returns the new stake and we replace the old one by using</p>
+<p class="p15">// the editor's replaceStake method</p>
 <p class="p11">(</p>
 <p class="p11"><span class="Apple-tab-span">	</span>~oldStake = ~funcStake; ~funcStake = ~funcStake.replaceEventName( <span class="s9">"~mapUpd"</span> );</p>
 <p class="p11"><span class="Apple-tab-span">	</span>~editor.replaceStake( ~doc, ~oldStake, ~funcStake );</p>
 <p class="p11">)</p>
 <p class="p12"><br></p>
-<p class="p11"><span class="Apple-tab-span">	</span>s.aliveThreadPeriod = 0.7; s.startAliveThread;</p>
-<p class="p11"><span class="Apple-tab-span">	</span>~doc.transport.play( 0 );</p>
+<p class="p13"><span class="Apple-tab-span">	</span>s.aliveThreadPeriod = 0.7; s.startAliveThread; <span class="s14">// make sure the \counts come frequently</span></p>
+<p class="p13"><span class="Apple-tab-span">	</span>~doc.transport.play( 0 ); <span class="s14">// play from the beginning</span></p>
 <p class="p4"><br></p>
 <p class="p4"><br></p>
 <p class="p3"><b>addFuncSynth( &lt;(Stake) stake&gt;, &lt;(Synth) synth&gt; )</b></p>
