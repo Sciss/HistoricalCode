@@ -30,7 +30,7 @@
  *	Class dependancies: ScissUtil, ScissPlus, BosqueBoxGrid
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.33, 25-Aug-08
+ *	@version	0.34, 31-Aug-08
  */
 BosqueTimelineEditor : Object {
 	var <bosque;
@@ -865,16 +865,25 @@ BosqueTimelineEditor : Object {
 	}
 	
 	addStake { arg doc, stake, select = true;
-		var ce;
-		ce = JSyncCompoundEdit( "Add Stake" );
-		doc.trail.editBegin( ce );
-		doc.trail.editAdd( this, stake, ce );
-		doc.trail.editEnd( ce );
+		var clearSpan, ce, span, trail;
+		
+		span		= stake.span;
+		ce		= JSyncCompoundEdit( "Add Stake" );
+		clearSpan = Span( span.start, min( span.stop, doc.timeline.span.length ));
+		if( clearSpan.isEmpty.not, {
+			doc.editClearTimeSpan( this, clearSpan, ce, { arg stake2; stake2.track == stake.track });
+		});
+		trail = doc.trail;
+		trail.editBegin( ce );
+		trail.editAdd( this, stake, ce );
+		trail.editEnd( ce );
 		if( select, {
 			ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, [ stake ], false ));
 		});
-		doc.undoManager.addEdit( ce.performEdit.end );
+		doc.undoManager.addEdit( ce.performAndEnd );
+		stake.java.setRegionTrail( trail ); // XXX dirty dirty
 	}
+	
 	
 	addTrack { arg doc, name;
 		var track, ce;
@@ -1042,34 +1051,19 @@ BosqueTimelineEditor : Object {
 	}
 
 	prTimelineInsertFunc { arg doc;
-		var span, track, ce, name, stake, clearSpan, trail;
+		var span, track, name, stake;
 		
 		span 	= doc.timelineView.selection.span;
 		track	= doc.selectedTracks.detect({ arg x; x.trackID >= 0 });
 		if( span.isEmpty or: { track.isNil }, { ^this });
 
-//"\n N O T   Y E T   I M P L E M E N T E D\n".error;
-		ce		= JSyncCompoundEdit( "Add Func Region" );
 		name		= "Func";
-		trail	= doc.trail;
 		// In 2007: WARNING: Symbol -> asCompileString is broken, doesn't escape apostroph!!!!
 		// therefore we force the name to be a String here !!!
 		// In 2008: Apostroph is properly escaped, we stick to Symbol now!
 		stake	= BosqueFuncRegionStake( span, name.asSymbol, track );
-		clearSpan = Span( span.start, min( span.stop, doc.timeline.span.length ));
-		if( clearSpan.isEmpty.not, {
-			doc.editClearTimeSpan( this, clearSpan, ce, { arg stake; stake.track == track });
-		});
-// N.A.!
-//		if( span.stop > doc.timeline.span.length, {
-//			insertSpan = Span( doc.timeline.span.length, span.stop );
-//			doc.editInsertTimeSpan( this, insertSpan, ce );
-//		});
-		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, [ stake ], false ));
-		trail.editBegin( ce );
-		trail.editAdd( this, stake, ce );
-		trail.editEnd( ce );
-		doc.undoManager.addEdit( ce.performAndEnd );
+		
+		this.addStake( doc, stake );
 	}
 	
 	prTimelineInsertEnv { arg doc;
@@ -1084,25 +1078,7 @@ BosqueTimelineEditor : Object {
 		// therefore we force the name to be a String here !!!
 		stake = BosqueEnvRegionStake( span, name.asString, track );
 		
-		this.addEnvStake( doc, stake );
-	}
-	
-	addEnvStake { arg doc, stake;
-		var clearSpan, ce, span, trail;
-		
-		span		= stake.span;
-		ce		= JSyncCompoundEdit( "Add Env Region" );
-		clearSpan = Span( span.start, min( span.stop, doc.timeline.span.length ));
-		if( clearSpan.isEmpty.not, {
-			doc.editClearTimeSpan( this, clearSpan, ce, { arg stake2; stake2.track == stake.track });
-		});
-		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, [ stake ], false ));
-		trail = doc.trail;
-		trail.editBegin( ce );
-		trail.editAdd( this, stake, ce );
-		trail.editEnd( ce );
-		doc.undoManager.addEdit( ce.performAndEnd );
-		stake.java.setRegionTrail( trail ); // XXX dirty dirty
+		this.addStake( doc, stake );
 	}
 	
 	prTimelineChangeGain { arg doc;

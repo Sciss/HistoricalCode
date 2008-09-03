@@ -10,22 +10,76 @@
 p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
 p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
 p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
-p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
-p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
-p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
-p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #0000ff}
+span.s2 {color: #0000bf}
+span.Apple-tab-span {white-space:pre}
 </style>
 </head>
 <body>
 <p class="p1">BosqueTimelineEditor</p>
 <p class="p2"><br></p>
+<p class="p3">This class both represents the editor GUI windows of <a href="Bosque.html"><span class="s1">Bosque</span></a>, but also contains helper methods to programmatically modify a <a href="BosqueSession.html"><span class="s1">BosqueSession</span></a>.</p>
+<p class="p4"><br></p>
+<p class="p3">The GUI windows are described in a separate document, <a href="Bosque_Editing.html"><span class="s1">Bosque_Editing</span></a>.</p>
+<p class="p4"><br></p>
+<p class="p3">The editor instance can be accessed via</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor = <span class="s2">Bosque</span>.default.timelineEditor;</p>
+<p class="p6"><br></p>
+<p class="p3">Although Bosque currently uses a single-document-model, this may change in the future, and consquently most methods require that you explicitly pass in a <a href="BosqueSession.html"><span class="s1">BosqueSession</span></a> object.</p>
+<p class="p4"><br></p>
+<p class="p6"><br></p>
+<p class="p3"><b>replaceStake { arg doc, oldStake, newStake, editName;</b></p>
+<p class="p4"><br></p>
 <p class="p3">XXX</p>
 <p class="p4"><br></p>
-<p class="p3"><b>*XXX</b></p>
-<p class="p5"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addStake { arg doc, stake, select = true;</b></p>
+<p class="p4"><br></p>
 <p class="p3">XXX</p>
-<p class="p6"><br></p>
-<p class="p7">__________</p>
-<p class="p7">this file last modified: 17-aug-08</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addTrack { arg doc, name;</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addMarker { arg doc, pos, name;</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>insertSpan { arg doc, span;</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>clearSpan { arg doc, span;</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>removeSpan { arg doc, span;</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addAudioFile { arg doc, path;</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addBusConfig { arg doc, numInputs, numOutputs, name;</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p7"><br></p>
+<p class="p8">__________</p>
+<p class="p8">this file last modified: 31-aug-08</p>
 </body>
 </html>

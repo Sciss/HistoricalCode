@@ -15,28 +15,27 @@ p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
 p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
 p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
 p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; min-height: 17.0px}
-p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000}
-p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0000bf}
-p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
-p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
-span.s1 {color: #0d32ac}
-span.s2 {color: #1949e0}
-span.s3 {font: 13.0px Monaco; color: #0d32ac}
-span.s4 {font: 13.0px Monaco; color: #23429c}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0019ba}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #1337a8}
+span.s2 {color: #214fdb}
+span.s3 {font: 13.0px Monaco; color: #1337a8}
+span.s4 {font: 13.0px Monaco; color: #284599}
 span.s5 {font: 13.0px Monaco}
-span.s6 {color: #1142e6}
-span.s7 {font: 13.0px Monaco; color: #4c6724}
-span.s8 {color: #083aec}
-span.s9 {color: #062cb0}
-span.s10 {color: #45691f}
+span.s6 {color: #1949e0}
+span.s7 {font: 13.0px Monaco; color: #516528}
+span.s8 {color: #1142e6}
+span.s9 {color: #0d32ac}
+span.s10 {color: #4c6724}
 span.s11 {color: #606060}
-span.s12 {color: #0030f2}
-span.s13 {font: 13.0px Monaco; color: #062cb0}
-span.s14 {color: #0024b5}
-span.s15 {color: #0000bf}
-span.s16 {color: #007300}
+span.s12 {color: #083aec}
+span.s13 {font: 13.0px Monaco; color: #0d32ac}
+span.s14 {color: #062cb0}
+span.s15 {color: #0019ba}
+span.s16 {color: #2b6f11}
 span.s17 {color: #000000}
-span.s18 {color: #0019ba}
+span.s18 {color: #0024b5}
 span.Apple-tab-span {white-space:pre}
 </style>
 </head>
@@ -135,18 +134,18 @@ span.Apple-tab-span {white-space:pre}
 <p class="p3">Finally, an example is presented that maps an envelope region to the playback speed. First the creation of the envelope region:</p>
 <p class="p4"><br></p>
 <p class="p5">(</p>
-<p class="p9"><span class="Apple-tab-span">	</span>~doc<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s15">Bosque</span>.default.session;</p>
-<p class="p9"><span class="Apple-tab-span">	</span>~transp<span class="Apple-tab-span">	</span>= ~doc.transport;</p>
-<p class="p9"><span class="Apple-tab-span">	</span>~editor<span class="Apple-tab-span">	</span>= <span class="s15">Bosque</span>.default.timelineEditor;</p>
-<p class="p9"><span class="Apple-tab-span">	</span>~span<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s15">Span</span>( 0, 30 * 44100 );</p>
-<p class="p9"><span class="Apple-tab-span">	</span>~editor.insertSpan( ~doc, ~span );</p>
-<p class="p9"><span class="Apple-tab-span">	</span>~doc.editScroll( -1, ~span );</p>
-<p class="p9"><span class="Apple-tab-span">	</span>~track<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= ~editor.addTrack( ~doc, <span class="s16">\Speed</span> );</p>
-<p class="p10"><span class="s17"><span class="Apple-tab-span">	</span>~edit<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= </span>JSyncCompoundEdit<span class="s17">( </span><span class="s11">"Customize Track"</span><span class="s17"> );</span></p>
-<p class="p9"><span class="Apple-tab-span">	</span>~track.editCtrlSpec( -1, <span class="s15">ControlSpec</span>( 0.125, 4.0, <span class="s16">\exp</span>, units: <span class="s11">" x"</span> ), ~edit );</p>
-<p class="p9"><span class="Apple-tab-span">	</span>~doc.undoManager.addEdit( ~edit.performAndEnd );</p>
-<p class="p9"><span class="Apple-tab-span">	</span>~stake<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s15">BosqueEnvRegionStake</span>( ~span, <span class="s16">\Env</span>, ~track, env: [ 0, 0, 7, 1, 10, 0.6 ]);</p>
-<p class="p9"><span class="Apple-tab-span">	</span>~editor.addEnvStake( ~doc, ~stake );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s15">Bosque</span>.default.session;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~transp<span class="Apple-tab-span">	</span>= ~doc.transport;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor<span class="Apple-tab-span">	</span>= <span class="s15">Bosque</span>.default.timelineEditor;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~span<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s15">Span</span>( 0, 30 * 44100 );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor.insertSpan( ~doc, ~span );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.editScroll( -1, ~span );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~track<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= ~editor.addTrack( ~doc, <span class="s16">\Speed</span> );</p>
+<p class="p9"><span class="s17"><span class="Apple-tab-span">	</span>~edit<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= </span>JSyncCompoundEdit<span class="s17">( </span><span class="s11">"Customize Track"</span><span class="s17"> );</span></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~track.editCtrlSpec( -1, <span class="s15">ControlSpec</span>( 0.125, 4.0, <span class="s16">\exp</span>, units: <span class="s11">" x"</span> ), ~edit );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.undoManager.addEdit( ~edit.performAndEnd );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~stake<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s15">BosqueEnvRegionStake</span>( ~span, <span class="s16">\Env</span>, ~track, env: [ 0, 0, 7, 1, 10, 0.6 ]);</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor.addStake( ~doc, ~stake );</p>
 <p class="p5">)</p>
 <p class="p8"><br></p>
 <p class="p5">(</p>
@@ -160,8 +159,8 @@ span.Apple-tab-span {white-space:pre}
 <p class="p4"><br></p>
 <p class="p5"><span class="Apple-tab-span">	</span>~observer.remove;</p>
 <p class="p4"><br></p>
-<p class="p11"><br></p>
-<p class="p12">__________</p>
-<p class="p12">this file last modified: 25-aug-08</p>
+<p class="p10"><br></p>
+<p class="p11">__________</p>
+<p class="p11">this file last modified: 25-aug-08</p>
 </body>
 </html>
