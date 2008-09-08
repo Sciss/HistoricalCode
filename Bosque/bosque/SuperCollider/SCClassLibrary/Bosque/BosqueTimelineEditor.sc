@@ -30,7 +30,7 @@
  *	Class dependancies: ScissUtil, ScissPlus, BosqueBoxGrid
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.34, 31-Aug-08
+ *	@version	0.35, 08-Sep-08
  */
 BosqueTimelineEditor : Object {
 	var <bosque;
@@ -881,7 +881,7 @@ BosqueTimelineEditor : Object {
 			ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, [ stake ], false ));
 		});
 		doc.undoManager.addEdit( ce.performAndEnd );
-		stake.java.setRegionTrail( trail ); // XXX dirty dirty
+		if( stake.isKindOf( BosqueEnvRegionStake ), { stake.java.setRegionTrail( trail )}); // XXX dirty dirty
 	}
 	
 	
@@ -1106,7 +1106,8 @@ BosqueTimelineEditor : Object {
 
 		ce = JSyncCompoundEdit( "Add Audio File" );
 		af = this.editAddAudioFile( this, doc, ce, path );
-		if( ce.isSignificant, { doc.undoManager.addEdit( ce.performAndEnd )});
+//		if( ce.isSignificant, { doc.undoManager.addEdit( ce.performAndEnd )});
+		doc.undoManager.addEdit( ce.performAndEnd );
 		^af;
 	}
 	
@@ -1122,7 +1123,7 @@ BosqueTimelineEditor : Object {
 	prAudioFileAdd { arg doc, path, ce, onComplete, onFailure;
 		var af;
 		try {
-			af = this.editAddAudioFile( path );
+			af = this.editAddAudioFile( this, doc, ce, path );
 			onComplete.value( af );
 		} { arg error;
 //			error.reportError;

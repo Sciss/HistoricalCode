@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.19, 18-Aug-08
+ *	@version	0.20, 08-Sep-08
  */
 BosqueSession : Object {
 	var <bosque;
@@ -82,7 +82,7 @@ BosqueSession : Object {
 		tracks.add( nil, markerTrack );
 //		selectedBusConfigs	= BosqueSessionCollection.new;
 		
-		trails			= [ trail, volEnv ];
+		trails			= [ markers, trail, volEnv ];
 		
 		UpdateListener.newFor( undoManager, { arg upd, undo, what;
 			if( (what === \state) and: { undo.canUndo != dirty }, {
