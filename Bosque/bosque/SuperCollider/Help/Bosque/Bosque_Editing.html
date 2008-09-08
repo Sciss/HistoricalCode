@@ -19,8 +19,9 @@ p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 16.0px Times; min-height: 19.0px}
 p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000}
 p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #bf0000}
 p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
-p.p13 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-p.p14 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+p.p13 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0000ff}
+p.p14 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+p.p15 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
 span.s1 {color: #0030f2}
 span.s2 {font: 12.0px Helvetica}
 span.s3 {color: #0000bf}
@@ -28,6 +29,7 @@ span.s4 {color: #000000}
 span.s5 {font: 13.0px Monaco; color: #0000bf}
 span.s6 {color: #0000ff}
 span.s7 {font: 14.0px Helvetica Neue}
+span.s8 {color: #bf0000}
 span.Apple-tab-span {white-space:pre}
 </style>
 </head>
@@ -104,9 +106,23 @@ span.Apple-tab-span {white-space:pre}
 <p class="p4"><br></p>
 <p class="p3"><b>Tracks</b></p>
 <p class="p4"><b></b><br></p>
-<p class="p3">The visible portion can be moved with the scrollbar on the bottom of the window.</p>
+<p class="p3">The objects in a session are not only organized by their location on a timeline, but also by being part of a track (see also: <a href="BosqueTrack.html"><span class="s6">BosqueTrack</span></a>). When Bosque is launched, only the special marker track exists, other tracks onto which region boxes can be placed must first be created from the Collections window, by selecting the "Tracks" tab and pressing the "+" button. The tracks are reflected programmatically in</p>
 <p class="p4"><br></p>
-<p class="p3">XXX</p>
+<p class="p13"><span class="s4"><span class="Apple-tab-span">	</span>~doc.tracks; </span><span class="s8">// --&gt; <a href="BosqueSessionCollection.html"><span class="s6">BosqueSessionCollection</span></a></span></p>
+<p class="p4"><br></p>
+<p class="p3">A track has a name, an optional bus configuration (see <a href="BosqueBusConfig.html"><span class="s6">BosqueBusConfig</span></a>), an optional ControlSpec and Bus for k-rate envelopes. These properties are accessible in the "Track" tab of the Observer window.</p>
+<p class="p4"><br></p>
+<p class="p3">Tracks are used to visually organize the regions, but also to associate audio and control busses with them.<span class="Apple-converted-space"> </span></p>
+<p class="p4"><br></p>
+<p class="p3">Tracks can be selected and deselected. To select or deselect a track, Shift+Click on its name in the left side of the timeline window. Cmd+Click inverts the selection of all tracks. Alt+Click selects or deselects all tracks. Simply clicking on an unselected track will clear the selection and only select that track.</p>
+<p class="p4"><br></p>
+<p class="p3">The track selection is used</p>
+<p class="p3"><span class="Apple-tab-span">	</span>- for the menu items Timeline -&gt; Insert Env and Insert Func</p>
+<p class="p3"><span class="Apple-tab-span">	</span>- for dropping audio regions from the Collections window (see separate section)</p>
+<p class="p4"><br></p>
+<p class="p3">The track selection is reflected programmatically in</p>
+<p class="p4"><br></p>
+<p class="p13"><span class="s4"><span class="Apple-tab-span">	</span>~doc.selectedTracks; </span><span class="s8">// --&gt; <a href="BosqueSessionCollection.html"><span class="s6">BosqueSessionCollection</span></a></span></p>
 <p class="p4"><br></p>
 <p class="p4"><b></b><br></p>
 <p class="p3"><b>Stakes</b></p>
@@ -139,6 +155,11 @@ span.Apple-tab-span {white-space:pre}
 <p class="p3">XXX</p>
 <p class="p4"><br></p>
 <p class="p4"><b></b><br></p>
+<p class="p3"><b>Loading and Saving Sessions</b></p>
+<p class="p4"><br></p>
+<p class="p3">XXX</p>
+<p class="p4"><br></p>
+<p class="p4"><b></b><br></p>
 <p class="p6">The Transport Window</p>
 <p class="p5"><br></p>
 <p class="p3">XXX</p>
@@ -151,12 +172,12 @@ span.Apple-tab-span {white-space:pre}
 <p class="p3"><b>Regions</b></p>
 <p class="p4"><br></p>
 <p class="p7"><span class="s2"><img src="attachments/Bosque_Editing/shotObserverRegions.png" alt="attachments/Bosque_Editing/shotObserverRegions.png"></span></p>
-<p class="p13">XXX</p>
+<p class="p14">XXX</p>
 <p class="p8"><span class="s2"></span><br></p>
 <p class="p3"><b>Track</b></p>
 <p class="p8"><span class="s2"></span><br></p>
 <p class="p7"><span class="s2"><img src="attachments/Bosque_Editing/shotObserverTrack.png" alt="attachments/Bosque_Editing/shotObserverTrack.png"></span></p>
-<p class="p13">XXX</p>
+<p class="p14">XXX</p>
 <p class="p4"><br></p>
 <p class="p4"><br></p>
 <p class="p6">The Collections Window</p>
@@ -165,19 +186,19 @@ span.Apple-tab-span {white-space:pre}
 <p class="p4"><br></p>
 <p class="p3"><b>Audio Files</b></p>
 <p class="p7"><span class="s2"><img src="attachments/Bosque_Editing/shotCollAudioFiles.png" alt="attachments/Bosque_Editing/shotCollAudioFiles.png"></span></p>
-<p class="p13">XXX</p>
+<p class="p14">XXX</p>
 <p class="p4"><b></b><br></p>
 <p class="p3"><b>Busses</b></p>
 <p class="p7"><span class="s2"><img src="attachments/Bosque_Editing/shotCollBusses.png" alt="attachments/Bosque_Editing/shotCollBusses.png"></span></p>
-<p class="p13">XXX</p>
+<p class="p14">XXX</p>
 <p class="p4"><b></b><br></p>
 <p class="p3"><b>Tracks</b></p>
 <p class="p7"><span class="s2"><img src="attachments/Bosque_Editing/shotCollTracks.png" alt="attachments/Bosque_Editing/shotCollTracks.png"></span></p>
-<p class="p13">XXX</p>
+<p class="p14">XXX</p>
 <p class="p5"><br></p>
 <p class="p4"><br></p>
 <p class="p4"><br></p>
-<p class="p14">__________</p>
-<p class="p14">this file last modified: 08-sep-08</p>
+<p class="p15">__________</p>
+<p class="p15">this file last modified: 08-sep-08</p>
 </body>
 </html>
