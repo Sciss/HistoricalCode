@@ -673,7 +673,7 @@ BosqueTimelineEditor : Object {
 			if( flavor === \stakeList, {
 				track = doc.tracks.detect({ arg x; x.trackID >= 0 });
 				if( track.notNil, {
-					[ BosqueAudioRegionStake( Span( 0, afSpan.length ), af.name, track, fileStartFrame: afSpan.start, faf: af )];
+					[ BosqueAudioRegionStake( Span( 0, afSpan.length ), af.name, track, fileStartFrame: afSpan.start, audioFile: af )];
 				}, {
 					[];
 				});
@@ -1146,7 +1146,7 @@ name = af.name.asSymbol;
 			span = Span( pos, pos + af.numFrames );
 			// WARNING: Symbol -> asCompileString is broken, doesn't escape apostroph!!!!
 			// therefore we force the name to be a String here !!!
-			stake = BosqueAudioRegionStake( span, name.asString, track, faf: af );
+			stake = BosqueAudioRegionStake( span, name.asString, track, audioFile: af );
 			clearSpan = Span( span.start, min( span.stop, doc.timeline.span.length ));
 			if( clearSpan.isEmpty.not, {
 				doc.editClearTimeSpan( this, clearSpan, ce, { arg stake; stake.track == track });

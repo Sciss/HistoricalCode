@@ -46,15 +46,15 @@ BosqueAudioRegionStake : BosqueRegionStake {
 		audioFile			= argAudioFile;
 		java				= JavaObject( "de.sciss.timebased.bosque.AudioRegionStake", audioFile.bosque.swing,
 							span, name, track, colr, fadeIn, fadeOut, gain, fileStartFrame, audioFile.view );
-//		java				= JavaObject( "de.sciss.timebased.RegionStake", faf.bosque.swing, span, name );
+//		java				= JavaObject( "de.sciss.timebased.RegionStake", audioFile.bosque.swing, span, name );
 	}
 
 //	*newFrom { arg anotherRegion;
-//		^this.new( anotherRegion.getSpan, anotherRegion.name, anotherRegion.colr, anotherRegion.fadeIn, anotherRegion.fadeOut, anotherRegion.gain, anotherRegion.fileStartFrame, anotherRegion.faf );
+//		^this.new( anotherRegion.getSpan, anotherRegion.name, anotherRegion.colr, anotherRegion.fadeIn, anotherRegion.fadeOut, anotherRegion.gain, anotherRegion.fileStartFrame, anotherRegion.audioFile );
 //	}
 //
 //	duplicate {
-//		^this.class.new( this.getSpan, name, colr, fadeIn, fadeOut, gain, fileStartFrame, faf );
+//		^this.class.new( this.getSpan, name, colr, fadeIn, fadeOut, gain, fileStartFrame, audioFile );
 //	}
 //
 	replaceFile { arg newFile;
@@ -91,7 +91,7 @@ BosqueAudioRegionStake : BosqueRegionStake {
 	}
 
 //	shiftVirtual { arg delta;
-//		^this.class.new( this.getSpan.shift( delta ), name, colr, fadeIn, fadeOut, gain, fileStartFrame, faf );
+//		^this.class.new( this.getSpan.shift( delta ), name, colr, fadeIn, fadeOut, gain, fileStartFrame, audioFile );
 //	}
 
 //	asString {
@@ -112,7 +112,7 @@ BosqueAudioRegionStake : BosqueRegionStake {
 		s			= player.scsynth;
 		buffer 		= Buffer( s, 32768, audioFile.numChannels );
 // allocReadMsg doesn't allow leaveOpen !!!
-//		bndl.addPrepare( buffer.allocReadMsg( faf.path, fileStartFrame + frameOffset ));
+//		bndl.addPrepare( buffer.allocReadMsg( audioFile.path, fileStartFrame + frameOffset ));
 
 		bndl.addPrepare( buffer.allocMsg );
 		bndl.addPrepare( buffer.cueSoundFileMsg( audioFile.path, fileStartFrame + frameOffset ));
