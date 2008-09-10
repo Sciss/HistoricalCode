@@ -14,14 +14,12 @@ p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 
 p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
 p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
 p.p7 {margin: 0.0px 0.0px 0.0px 0.0px}
-p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; min-height: 14.0px}
-p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 16.0px Times; min-height: 19.0px}
-p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000}
-p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #bf0000}
-p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
-p.p13 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0000ff}
-p.p14 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
-p.p15 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 16.0px Times; min-height: 19.0px}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #bf0000}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0000ff}
+p.p13 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
 span.s1 {color: #0030f2}
 span.s2 {font: 12.0px Helvetica}
 span.s3 {color: #0000bf}
@@ -30,6 +28,7 @@ span.s5 {font: 13.0px Monaco; color: #0000bf}
 span.s6 {color: #0000ff}
 span.s7 {font: 14.0px Helvetica Neue}
 span.s8 {color: #bf0000}
+span.s9 {font: 13.0px Monaco; color: #606060}
 span.Apple-tab-span {white-space:pre}
 </style>
 </head>
@@ -44,7 +43,7 @@ span.Apple-tab-span {white-space:pre}
 <p class="p3">When Bosque is launched, a few windows appear in SwingOSC. There is a "menu" window which allows you to show and hide all the other windows. Closing the windows via the titlebar close button is disabled.</p>
 <p class="p4"><br></p>
 <p class="p7"><span class="s2"><img src="attachments/Bosque_Editing/shotMenu.png" alt="attachments/Bosque_Editing/shotMenu.png"></span></p>
-<p class="p8"><span class="s2"></span><br></p>
+<p class="p8"><br></p>
 <p class="p3">Furthermore the menu window has a drop down menu labelled "Action" which contains utility functions:</p>
 <p class="p4"><br></p>
 <p class="p3"><span class="Apple-tab-span">	</span><b>Audio Rec.</b> -- brings up a GUI for recording output from scsynth. The bus is already configured to record from Bosque's master bus.</p>
@@ -52,17 +51,17 @@ span.Apple-tab-span {white-space:pre}
 <p class="p3"><span class="Apple-tab-span">	</span><b>OSC Rec</b> -- brings up a GUI to record OSC data received by sclang. File names are automatically created inside the folder specified in the top of the window (again clicking on the ellipsis (...) brings up a folder chooser dialog). The key text field specifies a filter for incoming OSC messages. Only messages beginning with the key are recorded. If "Ignore Bundle Times" is checked, messages are written into the file with a timetag corresponding to the arrival time in sclang. The loop or infinity symbol button indicates whether the transport is slaved (button blue / active) or not (button grey / off) to the main bosque transport. When slaved, a new file is automatically recorded each time the main transport playback starts.</p>
 <p class="p3"><span class="Apple-tab-span">	</span><b>Fullbody</b> -- brings up a view of the EGM fullbody OSC data (3D skeleton broken up into three 2D views).</p>
 <p class="p4"><br></p>
-<p class="p9"><br></p>
+<p class="p8"><br></p>
 <p class="p6">The Timeline Window</p>
 <p class="p5"><br></p>
 <p class="p3">This is the main editing window for the bosque sessions. The timeline is shown with time on the horizontal axis and tracks on the vertical axis.</p>
 <p class="p5"><br></p>
 <p class="p7"><span class="s2"><img src="attachments/Bosque_Editing/shotTimeline.png" alt="attachments/Bosque_Editing/shotTimeline.png"></span></p>
-<p class="p8"><span class="s2"></span><br></p>
+<p class="p8"><br></p>
 <p class="p3">To begin editing a session, you will first need to insert some amount of time, by choosing the screenbar menu item Timeline -&gt; Insert Span and entering a duration in seconds. The timeline axis on the top part of the window shows the currently visible span, corresponding to<span class="Apple-converted-space"> </span></p>
 <p class="p4"><br></p>
-<p class="p10"><span class="Apple-tab-span">	</span>~doc = <span class="s3">Bosque</span>.default.session;</p>
-<p class="p11"><span class="s4"><span class="Apple-tab-span">	</span>~visiSpan = ~doc.timelineView.span; </span>// the visible span in the timeline window</p>
+<p class="p9"><span class="Apple-tab-span">	</span>~doc = <span class="s3">Bosque</span>.default.session;</p>
+<p class="p10"><span class="s4"><span class="Apple-tab-span">	</span>~visiSpan = ~doc.timelineView.span; </span>// the visible span in the timeline window</p>
 <p class="p4"><br></p>
 <p class="p3">Note that <span class="s5">Span</span> objects in <a href="Bosque.html"><span class="s6">Bosque</span></a> are always specified in sample frames (where the default sample rate is 44.1 kHz), whereas the GUI timeline axis shows time in (HH:)MM:SS(.millis).</p>
 <p class="p4"><br></p>
@@ -70,16 +69,19 @@ span.Apple-tab-span {white-space:pre}
 <p class="p4"><br></p>
 <p class="p3"><span class="Apple-tab-span">	</span><b>Ctrl+Cursor Left/Right</b> -- Zoom in/out</p>
 <p class="p3"><span class="Apple-tab-span">	</span><b>Cmd+Shift+Cursor Left</b> -- Zoom completely out</p>
+<p class="p4"><span class="Apple-tab-span">	</span></p>
+<p class="p11"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>BUG:<span class="Apple-tab-span">	</span>sometimes the keyboard shortcuts don't work. In that case hide and re-open the window by clicking</p>
+<p class="p11"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>twice on the "Timeline" button of the Menu window.</p>
 <p class="p4"><br></p>
 <p class="p3">The visible portion can be moved with the scrollbar on the bottom of the window.</p>
 <p class="p4"><br></p>
 <p class="p3">A red vertical line indicates the current timeline <b>cursor position</b>, corresponding to</p>
 <p class="p4"><br></p>
-<p class="p10"><span class="Apple-tab-span">	</span>~doc.timelineView.cursor.position;</p>
+<p class="p9"><span class="Apple-tab-span">	</span>~doc.timelineView.cursor.position;</p>
 <p class="p4"><br></p>
 <p class="p3">... when the transport is not running, or ...</p>
 <p class="p4"><span class="Apple-converted-space"> </span></p>
-<p class="p12"><span class="s7"><span class="Apple-converted-space"> </span></span><span class="Apple-tab-span">	</span>~doc.transport.currentFrame;</p>
+<p class="p9"><span class="s7"><span class="Apple-converted-space"> </span></span><span class="Apple-tab-span">	</span>~doc.transport.currentFrame;</p>
 <p class="p4"><br></p>
 <p class="p3">... when the transport is running.</p>
 <p class="p4"><br></p>
@@ -93,7 +95,7 @@ span.Apple-tab-span {white-space:pre}
 <p class="p4"><br></p>
 <p class="p3">A blue shaded rectangle indicates the current timeline selection, corresponding to</p>
 <p class="p4"><br></p>
-<p class="p12"><span class="Apple-tab-span">	</span>~doc.timelineView.selection.span;</p>
+<p class="p9"><span class="Apple-tab-span">	</span>~doc.timelineView.selection.span;</p>
 <p class="p4"><br></p>
 <p class="p3">A blue shaded rectangle indicates the current <b>timeline selection</b>. It can be altered by performing a Shift+Click inside the timeline axis. Alt+Click in the timeline axis clears the selection span. Stake and track selections are described in other sections of this text.</p>
 <p class="p4"><br></p>
@@ -105,14 +107,14 @@ span.Apple-tab-span {white-space:pre}
 <p class="p4"><br></p>
 <p class="p4"><br></p>
 <p class="p3"><b>Tracks</b></p>
-<p class="p4"><b></b><br></p>
+<p class="p4"><br></p>
 <p class="p3">The objects in a session are not only organized by their location on a timeline, but also by being part of a track (see also: <a href="BosqueTrack.html"><span class="s6">BosqueTrack</span></a>). When Bosque is launched, only the special marker track exists, other tracks onto which region boxes can be placed must first be created from the Collections window, by selecting the "Tracks" tab and pressing the "+" button. The tracks are reflected programmatically in</p>
 <p class="p4"><br></p>
-<p class="p13"><span class="s4"><span class="Apple-tab-span">	</span>~doc.tracks; </span><span class="s8">// --&gt; <a href="BosqueSessionCollection.html"><span class="s6">BosqueSessionCollection</span></a></span></p>
+<p class="p12"><span class="s4"><span class="Apple-tab-span">	</span>~doc.tracks; </span><span class="s8">// --&gt; <a href="BosqueSessionCollection.html"><span class="s6">BosqueSessionCollection</span></a></span></p>
 <p class="p4"><br></p>
-<p class="p3">A track has a name, an optional bus configuration (see <a href="BosqueBusConfig.html"><span class="s6">BosqueBusConfig</span></a>), an optional ControlSpec and Bus for k-rate envelopes. These properties are accessible in the "Track" tab of the Observer window.</p>
+<p class="p3">A track has a name, an optional bus configuration (see <a href="BosqueBusConfig.html"><span class="s6">BosqueBusConfig</span></a>), an optional <a href="SC://ControlSpec"><span class="s6">ControlSpec</span></a> and <a href="SC://Bus"><span class="s6">Bus</span></a> for k-rate envelopes. These properties are accessible in the "Track" tab of the Observer window.</p>
 <p class="p4"><br></p>
-<p class="p3">Tracks are used to visually organize the regions, but also to associate audio and control busses with them.<span class="Apple-converted-space"> </span></p>
+<p class="p3">Tracks are used to <i>visually organize</i> the regions, but also to <i>associate</i> audio and control <i>busses</i> with them.<span class="Apple-converted-space"> </span></p>
 <p class="p4"><br></p>
 <p class="p3">Tracks can be selected and deselected. To select or deselect a track, Shift+Click on its name in the left side of the timeline window. Cmd+Click inverts the selection of all tracks. Alt+Click selects or deselects all tracks. Simply clicking on an unselected track will clear the selection and only select that track.</p>
 <p class="p4"><br></p>
@@ -122,44 +124,69 @@ span.Apple-tab-span {white-space:pre}
 <p class="p4"><br></p>
 <p class="p3">The track selection is reflected programmatically in</p>
 <p class="p4"><br></p>
-<p class="p13"><span class="s4"><span class="Apple-tab-span">	</span>~doc.selectedTracks; </span><span class="s8">// --&gt; <a href="BosqueSessionCollection.html"><span class="s6">BosqueSessionCollection</span></a></span></p>
+<p class="p12"><span class="s4"><span class="Apple-tab-span">	</span>~doc.selectedTracks; </span><span class="s8">// --&gt; <a href="BosqueSessionCollection.html"><span class="s6">BosqueSessionCollection</span></a></span></p>
 <p class="p4"><br></p>
-<p class="p4"><b></b><br></p>
+<p class="p4"><br></p>
 <p class="p3"><b>Stakes</b></p>
 <p class="p4"><br></p>
-<p class="p3">XXX</p>
+<p class="p3">The regions placed in the timeline on tracks are called stakes in Bosque (with the common superclass being <a href="BosqueRegionStake.html"><span class="s6">BosqueRegionStake</span></a>). The region list or region organization structure is called trail (see <a href="BosqueTrail.html"><span class="s6">BosqueTrail</span></a>). In the GUI you don't see the trail directly, but the stakes are rendered as rectangular graphical objects in the tracks of the timeline.</p>
 <p class="p4"><br></p>
-<p class="p4"><b></b><br></p>
+<p class="p3">Two types of stakes can be generated ex nihilo: the functional object stakes (<a href="BosqueFuncRegionStake.html"><span class="s6">BosqueFuncRegionStake</span></a>) and the envelope (breakpoint function) stakes (<a href="BosqueEnvRegionStake.html"><span class="s6">BosqueEnvRegionStake</span></a>). To create them, make a timeline selection that covers the span of the stake to create, select a track on which the stake should be placed. Then choose Timeline -&gt; Insert Env or Timeline -&gt; Insert Func.</p>
+<p class="p4"><br></p>
+<p class="p3">A third type of stakes are audio region stakes (<a href="BosqueAudioRegionStake.html"><span class="s6">BosqueAudioRegionStake</span></a>). They are created by choosing an audio file from the "Audio Files" tab of the Collections window and choosing "Drop Region" from that tab's Action dropdown menu. Another way to create audio regions is to drop a region description string into the audio file drag sink and choosing Edit -&gt; Paste (see the section "Audio File Drag-Sink" for details).</p>
+<p class="p4"><br></p>
+<p class="p3">Stakes can be selected, deselected or moved with the "Move" timeline tool, their span's boundaries can be adjusted with the "Resize" timeline tool. Envelope regions can be edited with the "Env" timeline tool. See the "Mouse-Tools" section for details.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
 <p class="p3"><b>Markers</b></p>
 <p class="p4"><br></p>
-<p class="p3">XXX</p>
+<p class="p3">In fact, a forth type of stake is the marker stake (<a href="BosqueMarkerStake.html"><span class="s6">BosqueMarkerStake</span></a>). The markers have their own trail though and also appear separately on their own marker track in the GUI. Markers can be used to structure the timeline but also be read programmatically. To create a marker in the GUI, double click on the marker axis. To delete one, Alt+Click on it. To rename it or edit its position textually, double click on one. To move a marker, press the button over it and drag it to a new position.</p>
 <p class="p4"><br></p>
-<p class="p4"><b></b><br></p>
+<p class="p4"><br></p>
 <p class="p3"><b>Master Volume Envelope</b></p>
 <p class="p4"><br></p>
-<p class="p3">XXX</p>
+<p class="p3">The bottom part of the timeline window contains a special envelope view that controls the master volume of the audio player. Double-click to insert a breakpoint, Alt+click to remove one.</p>
 <p class="p4"><br></p>
-<p class="p4"><b></b><br></p>
+<p class="p11"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>BUG:<span class="Apple-tab-span">	</span>the view currently doesn't zoom and scroll along with the rest of the timeline.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
 <p class="p3"><b>Audio File Drag-Sink</b></p>
 <p class="p4"><br></p>
-<p class="p3">XXX</p>
+<p class="p3">The drag sink widget in the top left corner of the window is meant to be used along with the Eisenkraut sound file editor (<a href="http://www.sciss.de/eisenkraut/">www.sciss.de/eisenkraut</a>).<span class="Apple-converted-space"> </span></p>
 <p class="p4"><br></p>
-<p class="p4"><b></b><br></p>
+<p class="p3">To use a part of a sound file which is currently opened in Eisenkraut, select that part and make a drag-n-drop, by pressing the mouse over the drag source widget ( <span class="s2"><img src="attachments/Bosque_Editing/shotEisKDrag.png" alt="attachments/Bosque_Editing/shotEisKDrag.png"></span>), and dragging the mouse over the Bosque drag sink widget. The name of the sound file appears in the drag sink. Now move the timeline cursor to the preferred insertion point and choose Edit -&gt; Paste. Currently, the region is placed on the first track of the session, in a future version the currently selected track may be honored.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
 <p class="p3"><b>Mouse-Tools</b></p>
 <p class="p4"><br></p>
-<p class="p3">XXX</p>
+<p class="p3">The stakes can be edited using three different mouse tools: "Move", "Resize", and "Env". The currently selected tool is displayed right to the waveform zoom slider in the top part of the timeline window. To switch tools use the Tool menu or their keyboard equivalents (Cmd+1, Cmd+2, Cmd+3).</p>
 <p class="p4"><br></p>
-<p class="p4"><b></b><br></p>
+<p class="p3">The <b>"Move"</b> tool is used to select or deselect stakes and to move them around. To select a stake click on it. To deselect it, Shift+Click on a selected stake. To extend the selection, Shift+Click on another unselected stake. To clear the selection, click anywhere outside the stakes. To move the selected stakes around, press the button over a selected stake and start dragging the mouse around. To constrain motion horizontally or vertically, press the Shift key before starting the drag.</p>
+<p class="p4"><br></p>
+<p class="p3">The <b>"Resize"</b> tool is used to adjust the bounds of the selected stakes. You can also use it like the Move tool to select or deselect stakes. To adjust the left boundary of the stakes (span's start frame), press the mouse anywhere near the start inside a selected stake and start dragging. To adjust the right boundary of the stakes (span's stop frame), press the mouse anywhere near the stop inside a selected stake and start dragging.<span class="Apple-converted-space"> </span></p>
+<p class="p4"><br></p>
+<p class="p3">The <b>"Env"</b> tool is used to edit the envelope of an envelope stake. To add a breakpoint, Double-Click at the desired position inside the stake. To remove a point, Alt+Click on it. To move a point, press the mouse over it and start dragging.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
 <p class="p3"><b>Waveform Zoom</b></p>
 <p class="p4"><br></p>
-<p class="p3">XXX</p>
+<p class="p3">The slider in the top part of the timeline window can be used to adjust the "contrast" (or vertical zoom) of the audio region waveform display. Moving the slider to the right will increase the vertical zoom of all audio region waveforms, moving it left will do the opposite.</p>
 <p class="p4"><br></p>
-<p class="p4"><b></b><br></p>
+<p class="p3">Note that the waveforms are only displayed, if <span class="s5">BosqueAudioFile.overviews</span> is <span class="s5">true</span>.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
 <p class="p3"><b>Loading and Saving Sessions</b></p>
 <p class="p4"><br></p>
-<p class="p3">XXX</p>
+<p class="p3">The sessions can be stored and recalled in simple text files. This is acomplished by calling <span class="s5">asCompileString</span> on the session and <span class="s5">interpret</span> on the file contents. In the GUI, this corresponds to choosing File -&gt; Save and File -&gt; Open. If a session was not saved before, choosing File -&gt; Save will prompt you for a folder on the harddisk and a name. Although not necessary, it is recommended to use the file extension <span class="s9">".txt"</span>.</p>
 <p class="p4"><br></p>
-<p class="p4"><b></b><br></p>
+<p class="p3">After saving a session, the filename will appear in the timeline window's title bar. A bullet character • in front of the window title indicates that the session contains unsaved changes.</p>
+<p class="p4"><br></p>
+<p class="p3">To clear the session and start over, choose File -&gt; New.</p>
+<p class="p4"><br></p>
+<p class="p11"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>BUG:<span class="Apple-tab-span">	</span>there is some problems with some old settings surviving File -&gt; New, so at the moment it is recommended to kill and restart</p>
+<p class="p11"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>Bosque to start a new empty session.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
 <p class="p6">The Transport Window</p>
 <p class="p5"><br></p>
 <p class="p3">XXX</p>
@@ -172,12 +199,12 @@ span.Apple-tab-span {white-space:pre}
 <p class="p3"><b>Regions</b></p>
 <p class="p4"><br></p>
 <p class="p7"><span class="s2"><img src="attachments/Bosque_Editing/shotObserverRegions.png" alt="attachments/Bosque_Editing/shotObserverRegions.png"></span></p>
-<p class="p14">XXX</p>
-<p class="p8"><span class="s2"></span><br></p>
+<p class="p13">XXX</p>
+<p class="p8"><br></p>
 <p class="p3"><b>Track</b></p>
-<p class="p8"><span class="s2"></span><br></p>
+<p class="p8"><br></p>
 <p class="p7"><span class="s2"><img src="attachments/Bosque_Editing/shotObserverTrack.png" alt="attachments/Bosque_Editing/shotObserverTrack.png"></span></p>
-<p class="p14">XXX</p>
+<p class="p13">XXX</p>
 <p class="p4"><br></p>
 <p class="p4"><br></p>
 <p class="p6">The Collections Window</p>
@@ -186,19 +213,19 @@ span.Apple-tab-span {white-space:pre}
 <p class="p4"><br></p>
 <p class="p3"><b>Audio Files</b></p>
 <p class="p7"><span class="s2"><img src="attachments/Bosque_Editing/shotCollAudioFiles.png" alt="attachments/Bosque_Editing/shotCollAudioFiles.png"></span></p>
-<p class="p14">XXX</p>
-<p class="p4"><b></b><br></p>
+<p class="p13">XXX</p>
+<p class="p4"><br></p>
 <p class="p3"><b>Busses</b></p>
 <p class="p7"><span class="s2"><img src="attachments/Bosque_Editing/shotCollBusses.png" alt="attachments/Bosque_Editing/shotCollBusses.png"></span></p>
-<p class="p14">XXX</p>
-<p class="p4"><b></b><br></p>
+<p class="p13">XXX</p>
+<p class="p4"><br></p>
 <p class="p3"><b>Tracks</b></p>
 <p class="p7"><span class="s2"><img src="attachments/Bosque_Editing/shotCollTracks.png" alt="attachments/Bosque_Editing/shotCollTracks.png"></span></p>
-<p class="p14">XXX</p>
+<p class="p13">XXX</p>
 <p class="p5"><br></p>
 <p class="p4"><br></p>
 <p class="p4"><br></p>
-<p class="p15">__________</p>
-<p class="p15">this file last modified: 08-sep-08</p>
+<p class="p11">__________</p>
+<p class="p11">this file last modified: 08-sep-08</p>
 </body>
 </html>

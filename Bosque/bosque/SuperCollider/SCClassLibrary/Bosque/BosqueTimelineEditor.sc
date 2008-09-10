@@ -30,7 +30,7 @@
  *	Class dependancies: ScissUtil, ScissPlus, BosqueBoxGrid
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.35, 08-Sep-08
+ *	@version	0.35, 09-Sep-08
  */
 BosqueTimelineEditor : Object {
 	var <bosque;
@@ -420,7 +420,7 @@ BosqueTimelineEditor : Object {
 		JSCMenuItem( mg, "Split Objects" ).shortcut_( "meta2 X" ).action_({ this.prTimelineSplitObjects( doc )});
 		JSCMenuItem( mg, "Glue Objects" ).shortcut_( "meta2 Y" ).action_({ this.prTimelineGlueObjects( doc )});
 		JSCMenuSeparator( mg );
-		JSCMenuItem( mg, "Insert Enc" ).shortcut_( "meta2 E" ).action_({ this.prTimelineInsertEnv( doc )});
+		JSCMenuItem( mg, "Insert Env" ).shortcut_( "meta2 E" ).action_({ this.prTimelineInsertEnv( doc )});
 		JSCMenuItem( mg, "Insert Func" ).shortcut_( "meta2 F" ).action_({ this.prTimelineInsertFunc( doc )});
 		JSCMenuItem( mg, "Change Gain" ).action_({ this.prTimelineChangeGain( doc )}); // .shortcut_( "meta2 G" )
 			
