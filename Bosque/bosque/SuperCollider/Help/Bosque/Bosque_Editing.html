@@ -16,29 +16,29 @@ p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
 p.p7 {margin: 0.0px 0.0px 0.0px 0.0px}
 p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 16.0px Times; min-height: 19.0px}
 p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
-p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #ad1d13}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #9d281b}
 p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
-p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0022f8}
+p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0030f2}
 p.p13 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
-p.p14 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000}
-p.p15 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #bf0000; min-height: 17.0px}
-p.p16 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #bf0000}
-span.s1 {color: #083aec}
-span.s2 {color: #0000ff}
+p.p14 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #ad1d13; min-height: 17.0px}
+p.p15 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #ad1d13}
+span.s1 {color: #1142e6}
+span.s2 {color: #0022f8}
 span.s3 {font: 12.0px Helvetica}
-span.s4 {color: #0019ba}
+span.s4 {color: #0024b5}
 span.s5 {color: #000000}
-span.s6 {font: 13.0px Monaco; color: #0019ba}
-span.s7 {color: #0022f8}
+span.s6 {font: 13.0px Monaco; color: #0024b5}
+span.s7 {color: #0030f2}
 span.s8 {font: 14.0px Helvetica Neue}
-span.s9 {color: #ad1d13}
-span.s10 {text-decoration: underline ; color: #001fe8}
-span.s11 {font: 13.0px Monaco; color: #0000bf}
+span.s9 {color: #9d281b}
+span.s10 {text-decoration: underline ; color: #002ce2}
+span.s11 {font: 13.0px Monaco; color: #0019ba}
 span.s12 {font: 13.0px Monaco; color: #606060}
-span.s13 {color: #0000bf}
-span.s14 {color: #007300}
-span.s15 {color: #606060}
-span.s16 {color: #bf0000}
+span.s13 {font: 13.0px Monaco; color: #0000bf}
+span.s14 {color: #0019ba}
+span.s15 {color: #2b6f11}
+span.s16 {color: #606060}
+span.s17 {color: #ad1d13}
 span.Apple-tab-span {white-space:pre}
 </style>
 </head>
@@ -191,7 +191,10 @@ span.Apple-tab-span {white-space:pre}
 <p class="p4"><br></p>
 <p class="p3">After saving a session, the filename will appear in the timeline window's title bar. A bullet character • in front of the window title indicates that the session contains unsaved changes.</p>
 <p class="p4"><br></p>
-<p class="p3">XXX IMPORTANT FUNC FILE XXX</p>
+<p class="p3"><b>Important:</b> If a SuperCollider code file in RTF format having a related filename exists, it is automatically loaded and executed when you load a session. This way you can group all the code fragments for functional object regions in one file that is associated with your session. The filename for the code fragments should be the same as the session file (and be placed in the same folder), but ending with "Func.rtf", e.g.</p>
+<p class="p4"><br></p>
+<p class="p3"><span class="Apple-tab-span">	</span>Session file: <span class="s13">MySession.txt</span></p>
+<p class="p3"><span class="Apple-tab-span">	</span>Code fragment file: <span class="s13">MySessionFunc.rtf</span></p>
 <p class="p4"><br></p>
 <p class="p3">To clear the session and start over, choose File -&gt; New.</p>
 <p class="p4"><br></p>
@@ -231,15 +234,15 @@ span.Apple-tab-span {white-space:pre}
 <p class="p13"><br></p>
 <p class="p3">The name of the selected track is currently not editable (you can do this programmatically if desired). The next three parameters are modified by dropping appropriate objects on the drag sink widgets: The "Bus Config" should be a <a href="BosqueBusConfig.html"><span class="s2">BosqueBusConfig</span></a> object, defining the track's audio bus. Usually, you will go to the "Busses" tab of the Collections window, select a bus and make a drag (Ctrl+Press+Move mouse). For the "Ctrl Spec" you should have a <a href="SC://ControlSpec"><span class="s2">ControlSpec</span></a> object at hand. The easiest way to create one is to type it's spec in a SuperCollider <a href="SC://Document"><span class="s2">Document</span></a> window, select the text and start a drag – the text selection will automatically be evaluated by the Interpreter, and the resulting (ControlSpec) object can be dropped on the drag sink, e.g.</p>
 <p class="p4"><br></p>
-<p class="p14"><span class="Apple-tab-span">	</span><span class="s13">ControlSpec</span>( 30, 20000, <span class="s14">\exp</span>, 0.0, 1000, <span class="s15">" Hz"</span> ); <span class="s16">// &lt;-- select that and drag it</span></p>
-<p class="p15"><span class="Apple-tab-span">	</span></p>
+<p class="p9"><span class="Apple-tab-span">	</span><span class="s14">ControlSpec</span>( 30, 20000, <span class="s15">\exp</span>, 0.0, 1000, <span class="s16">" Hz"</span> ); <span class="s17">// &lt;-- select that and drag it</span></p>
+<p class="p14"><span class="Apple-tab-span">	</span></p>
 <p class="p3">The same is true for the "Ctrl Bus" parameter: The object here should be a monophonic k-rate Bus, e.g.</p>
 <p class="p4"><br></p>
-<p class="p14"><span class="Apple-tab-span">	</span><span class="s13">Bus</span>( <span class="s14">\control</span>, 100, 1, <span class="s13">Bosque</span>.default.scsynth );<span class="s5"> </span><span class="s16">// &lt;-- select that and drag it</span></p>
+<p class="p9"><span class="Apple-tab-span">	</span><span class="s14">Bus</span>( <span class="s15">\control</span>, 100, 1, <span class="s14">Bosque</span>.default.scsynth ); <span class="s17">// &lt;-- select that and drag it</span></p>
 <p class="p4"><br></p>
 <p class="p3">Alternatively (and much more simple) you can drop an Integer object (since the control bus needs to be monophonic anyways):</p>
 <p class="p4"><br></p>
-<p class="p16"><span class="s5"><span class="Apple-tab-span">	</span>101 </span>// &lt;-- select that and drag it</p>
+<p class="p15"><span class="s5"><span class="Apple-tab-span">	</span>101 </span>// &lt;-- select that and drag it</p>
 <p class="p4"><br></p>
 <p class="p3">The "Mute" switch can be used to tell the audio player not to playback stakes placed on that track.</p>
 <p class="p4"><br></p>
