@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.24, 25-Aug-08
+ *	@version	0.29, 14-Sep-08
  */
 BosqueAudioPlayer : Object {
 	var <doc;
@@ -191,7 +191,7 @@ BosqueAudioPlayer : Object {
 	freeFuncSynths { arg stake, bndl;
 		var selfBndl = bndl.isNil, event = stake.event;
 		if( event.isNil, { ^this });
-		if( selfBndl, { bndl = OSCBundle.new });
+		if( selfBndl, { bndl = MixedBundle.new });
 		event.upd.do({ arg upd; upd.remove });
 		event.upd = nil;
 		event.rout.do({ arg r; r.stop });
@@ -214,7 +214,7 @@ BosqueAudioPlayer : Object {
 		track = doc.tracks[ (doc.tracks.indexOf( stake.modTrack ) ? 0) - 1 ];
 		^if( track.notNil, { track.busConfig.bus });
 	}
-	
+		
 	funcTrackingSense { arg tv, sense = 0.5;
 		bosque.chris.sendMsg( '/tv', tv );
 		bosque.chris.sendMsg( '/sense', sense );
@@ -421,7 +421,7 @@ BosqueAudioPlayer : Object {
 			stakes	= doc.trail.editGetRange( span, filter: { arg stake; /*[ stake.isPlaying.not, stake.track.muted.not, stake.track.busConfig.notNil ].postln;*/ stake.isPlaying.not and: { stake.track.muted.not }});
 			if( debug, {[ "task loop", span, stakes.size ].postln });
 			stakes.do({ arg stake;
-				bndl = OSCBundle.new;
+				bndl = MixedBundle.new;
 //				funcStake = stake;
 //				protect {
 					stake.playToBundle( bndl, this, max( 0, start - stake.span.start ));

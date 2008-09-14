@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.15, 25-Aug-08
+ *	@version	0.29, 14-Sep-08
  */
 BosqueFuncRegionStake : BosqueRegionStake {
 	var <eventName;
@@ -128,7 +128,7 @@ BosqueFuncRegionStake : BosqueRegionStake {
 	protRemoved {
 		var bndl, player;
 		if( event.notNil, {
-			bndl = OSCBundle.new;
+			bndl = MixedBundle.new;
 			try {
 				player = event.player;
 				if( event.respondsTo( \stopToBundle ), {
