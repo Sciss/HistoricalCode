@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.20, 08-Sep-08
+ *	@version	0.29, 14-Sep-08
  */
 BosqueSession : Object {
 	var <bosque;
@@ -129,7 +129,7 @@ BosqueSession : Object {
 		stream << "})";
 		stream.nl; stream.tab;
 		stream << ".doTracks({ arg tr; tr";
-		tracks.storeModifiersOn( stream );
+		tracks.select({ arg t; t.trackID >= 0 }).storeModifiersOn( stream );
 		stream << "})";
 		stream.nl; stream.tab;
 		stream << ".doTrail({ arg tr; tr";

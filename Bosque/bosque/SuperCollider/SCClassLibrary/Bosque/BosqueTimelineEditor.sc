@@ -184,7 +184,7 @@ BosqueTimelineEditor : Object {
 				if( cfg.notNil, {
 					GUI.useID( \swing, {
 						bounds = b.bounds;
-						bounds = Rect( bounds.left + 34, bounds.bottom + 36 /* XXX ??? */, bounds.width - 30, 220 );
+						bounds = Rect( bounds.left + 34, bounds.bottom + 4, bounds.width - 30, 220 );
 						ggBusMatrix = BosqueBoxGrid( b.parent, bounds, columns: cfg.numOutputs, rows: cfg.numInputs );
 						ggBusMatrix.setFillColor_( observer.colors[0] );
 						ggBusMatrix.setTrailDrag_( true, false );

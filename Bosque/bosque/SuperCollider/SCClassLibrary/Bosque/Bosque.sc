@@ -46,6 +46,7 @@ Bosque : Object {
 
 	classvar	<>midiInDev			= "BCF2000"; // "BCR2000"; // : Port 1";
 	classvar	<>midiOutDev			= "BCF2000"; // "BCR2000"; // : Port 1";
+	classvar <>useMIDI				= true;
 
 	// -------------------------------------------
 
@@ -201,7 +202,7 @@ Bosque : Object {
 			{
 				this.prAudioInit;
 				didInitAudio = true;
-				this.prMIDIInit;
+				if( useMIDI, { this.prMIDIInit });
 				onScSynthBoot.do({ arg x; x.value });
 				onScSynthBoot = nil;
 			}.fork( AppClock );
