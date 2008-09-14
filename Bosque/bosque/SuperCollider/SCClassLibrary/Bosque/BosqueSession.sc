@@ -129,7 +129,11 @@ BosqueSession : Object {
 		stream << "})";
 		stream.nl; stream.tab;
 		stream << ".doTracks({ arg tr; tr";
-		tracks.select({ arg t; t.trackID >= 0 }).storeModifiersOn( stream );
+//		tracks.storeModifiersOn( stream );
+			stream << ".addAll(this,";
+			stream.nl; stream.tab;
+			tracks.getAll.asArray.select({ arg t; t.trackID >= 0 }).storeOn( stream );
+			stream << ")";
 		stream << "})";
 		stream.nl; stream.tab;
 		stream << ".doTrail({ arg tr; tr";
