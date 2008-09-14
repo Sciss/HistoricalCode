@@ -30,7 +30,7 @@
  *	Class dependancies: ScissUtil, ScissPlus, BosqueBoxGrid
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.35, 09-Sep-08
+ *	@version	0.35, 14-Sep-08
  */
 BosqueTimelineEditor : Object {
 	var <bosque;
@@ -56,7 +56,7 @@ BosqueTimelineEditor : Object {
 	init {
 		var view, view2, updAudioFiles, updTimeline, ggFileList, ggBusList;
 		var fntSmall, fntBig, flow;
-		var ggPlay, ggStop, updTransport, updDirty, updSelectedTracks, updTracks;
+		var ggPlay, ggStop, ggLoop, updTransport, updDirty, updSelectedTracks, updTracks;
 		var vx, vw, clpseYZoom, ggTabColl, updBusConfigs, ggBusMatrix, ggBusGain, ggBusApply, busSelCol, busSelRow, busConn;
 		var ggPlayPos, taskPlayPos, fTaskPlayPos, fPlayPosStr, ggTrackList, ggVolume, updVolume, clpseVolume;
 		var scrB = JSCWindow.screenBounds;
@@ -537,17 +537,25 @@ BosqueTimelineEditor : Object {
 				doc.transport.stop;
 			});
 		
-		JSCButton( view, Rect( 0, 0, 40, 40 )).canFocus_( false )
+		ggLoop = JSCButton( view, Rect( 0, 0, 40, 40 )).canFocus_( false )
 			.font_( fntBig )
-			.states_(([ "" ++ 0xE2.asAscii ++ 0x99.asAscii ++ 0xBB.asAscii ] ! 2).collect({ arg x, i; if( i == 0, x, {[ x.first, Color.white, Color.blue ]})}))  // Recycling
+			.states_([[ "" ++ 0xE2.asAscii ++ 0x99.asAscii ++ 0xBB.asAscii ]])  // Recycling
 			.action_({ arg b;
-				if( b.value == 0, {
-					doc.transport.loop = nil;
-				}, { if( doc.timelineView.selection.span.length >= doc.timeline.rate, {
-					doc.transport.loop = doc.timelineView.selection.span;
+				if( doc.transport.loop.isNil, {
+					if( doc.timelineView.selection.span.length >= doc.timeline.rate, {
+						doc.transport.loop = doc.timelineView.selection.span;
+					});
 				}, {
-					b.value = 0;
-				})});
+					doc.transport.loop = nil;
+				});
+//			
+//				if( b.value == 0, {
+//					doc.transport.loop = nil;
+//				}, { if( doc.timelineView.selection.span.length >= doc.timeline.rate, {
+//					doc.transport.loop = doc.timelineView.selection.span;
+//				}, {
+//					b.value = 0;
+//				})});
 			});
 		
 		ggPlayPos = JSCStaticText( view, Rect( 0, 0, 160, 40 )).background_( Color.black )
@@ -575,6 +583,13 @@ BosqueTimelineEditor : Object {
 			},
 			\resume, {
 				taskPlayPos.stop; taskPlayPos = fTaskPlayPos.fork( AppClock );
+			},
+			\loop, {
+				if( transport.loop.isNil, {
+					ggLoop.states = [[ ggLoop.states.first.first ]];
+				}, {
+					ggLoop.states = [[ ggLoop.states.first.first, Color.white, Color.blue ]];
+				});
 			});
 		});
 		
@@ -685,35 +700,39 @@ BosqueTimelineEditor : Object {
 	}
 	
 	prFileOpen { arg doc, ignoreDirty = false;
-		var f, text;
 		doc.transport.stop;
 		if( ignoreDirty.not and: { doc.isDirty }, {
 			this.prConfirmUnsaved( doc, { this.prFileOpen( doc, true )});
 		}, {
-			SwingDialog.getPaths({ arg result; var path = result.first, fPath;
-				this.prFileNew( doc, ignoreDirty: true );
-				try {
-					f = File( path, "r" );
-					text = "{ arg doc; doc" ++ f.readAllString ++ "}";
-					f.close;
-//					text.postln;
-					text.interpret.value( doc );
-					doc.path = path;
-					fPath = path.splitext.first ++ "Func.rtf";
-					if( File.exists( fPath ), {
-						("Opening func file '" ++fPath++"'...").postln;
-						{ var doc = Document.open( fPath );
-						  { doc.text.interpret }.fork( AppClock )
-						}.defer;
-					}, {
-						("\nFunc file '" ++fPath++"' not found!").postln;
-					});
-				} { arg error;
-					error.reportError;
-					this.showMessageDialog( "File Open", "Failed to load file\n" ++ path ++ "\n" ++ error.errorString,\error );
-				};
+			SwingDialog.getPaths({ arg result; var path = result.first;
+				this.openFile( doc, path );
 			}, nil, 1 );
 		});
+	}
+	
+	openFile { arg doc, path;
+		var f, fPath, text;
+		this.prFileNew( doc, ignoreDirty: true );
+		try {
+			f = File( path, "r" );
+			text = "{ arg doc; doc" ++ f.readAllString ++ "}";
+			f.close;
+//					text.postln;
+			text.interpret.value( doc );
+			doc.path = path;
+			fPath = path.splitext.first ++ "Func.rtf";
+			if( File.exists( fPath ), {
+				("Opening func file '" ++fPath++"'...").postln;
+				{ var doc = Document.open( fPath );
+				  { doc.text.interpret }.fork( AppClock )
+				}.defer;
+			}, {
+				("\nFunc file '" ++fPath++"' not found!").postln;
+			});
+		} { arg error;
+			error.reportError;
+			this.showMessageDialog( "File Open", "Failed to load file\n" ++ path ++ "\n" ++ error.errorString,\error );
+		};
 	}
 
 	prFileAppend { arg doc, ignoreDirty = false;

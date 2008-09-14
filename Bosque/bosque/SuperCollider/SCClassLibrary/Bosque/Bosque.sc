@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.29, 17-Aug-08
+ *	@version	0.29, 14-Sep-08
  */
 Bosque : Object {
 	classvar <>default;
@@ -205,6 +205,7 @@ Bosque : Object {
 				if( useMIDI, { this.prMIDIInit });
 				onScSynthBoot.do({ arg x; x.value });
 				onScSynthBoot = nil;
+				this.changed( \booted );
 			}.fork( AppClock );
 		}, inf );
 				

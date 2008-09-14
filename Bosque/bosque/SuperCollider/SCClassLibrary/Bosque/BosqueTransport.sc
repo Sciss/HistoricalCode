@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.18, 26-Jul-08
+ *	@version	0.29, 14-Sep-08
  */
 BosqueTransport : Object {
 	var <doc;
@@ -76,8 +76,11 @@ BosqueTransport : Object {
 	}
 	
 	loop_ { arg span;
-		loop = span;
-		if( running, { this.prUpdateCollapse });
+		if( loop != span, {
+			loop = span;
+			if( running, { this.prUpdateCollapse });
+			this.changed( \loop, loop );
+		});
 	}
 	
 	play { arg pos, rate = 1;
