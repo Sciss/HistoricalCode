@@ -94,6 +94,8 @@ AnyMap {
 	// ---- might produce name conflicts  ----
 		
 	rate { arg ... args; ^this.doesNotUnderstand( \rate, *args ); }
+	numChannels { arg ... args; ^this.doesNotUnderstand( \numChannels, *args ); }
+	
 	size { arg ... args; ^this.doesNotUnderstand( \size, *args ); }
 	do { arg ... args; ^this.doesNotUnderstand( \do, *args ); }
 	generate { arg ... args; ^this.doesNotUnderstand( \generate, *args ); }
