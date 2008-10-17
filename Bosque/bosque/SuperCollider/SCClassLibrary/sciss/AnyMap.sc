@@ -42,7 +42,13 @@ AnyMap {
 		^map;
 	}
 	
-	asCompileString { ^(this.class.name ++ ".newUsing( " ++ dict.asCompileString ++ " )") }
+//	asCompileString { ^(this.class.name ++ ".newUsing( " ++ dict.asCompileString ++ " )") }
+
+	storeParamsOn { arg stream;
+		stream << ".newUsing( ";
+		dict.storeOn( stream );
+		stream << " )";
+	}
 	
 	prInit {
 		dict		= IdentityDictionary.new;
