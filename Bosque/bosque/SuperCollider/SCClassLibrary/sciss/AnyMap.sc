@@ -27,7 +27,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.11, 25-Aug-08
+ *	@version	0.12, 17-Oct-08
  */
 AnyMap {
 	var <dict, nilRef;
@@ -35,6 +35,14 @@ AnyMap {
 	*new {
 		^super.new.prInit;
 	}
+	
+	*newUsing { arg dict;
+		var map = this.new;
+		map.dict.putAll( dict );
+		^map;
+	}
+	
+	asCompileString { ^(this.class.name ++ ".newUsing( " ++ dict.asCompileString ++ " )") }
 	
 	prInit {
 		dict		= IdentityDictionary.new;
@@ -79,6 +87,7 @@ AnyMap {
 	// ---- now override a couple of methods in Object that ----
 	// ---- might produce name conflicts  ----
 		
+	rate { arg ... args; ^this.doesNotUnderstand( \rate, *args ); }
 	size { arg ... args; ^this.doesNotUnderstand( \size, *args ); }
 	do { arg ... args; ^this.doesNotUnderstand( \do, *args ); }
 	generate { arg ... args; ^this.doesNotUnderstand( \generate, *args ); }
