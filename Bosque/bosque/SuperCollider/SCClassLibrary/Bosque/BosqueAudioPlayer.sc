@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.29, 14-Sep-08
+ *	@version	0.30, 26-Oct-08
  */
 BosqueAudioPlayer : Object {
 	var <doc;
@@ -140,7 +140,7 @@ BosqueAudioPlayer : Object {
 //		UpdateListener.newFor( synth, { arg upd, obj, what;
 //			if( what === \n_end, {
 //				event.synths = event.synths.remove( synth );
-//				event.changed( \playing, false );
+//				event.tryChanged( \playing, false );
 //				if( debugFunc, {
 //					[ stake, synth, "n_end" ].postln;
 //				});
@@ -203,7 +203,7 @@ BosqueAudioPlayer : Object {
 		});
 		event.busses.do({ arg bus; bus.free });
 		event.busses = nil;
-		event.changed( \playing, false );
+		event.tryChanged( \playing, false );
 		if( debugFunc, {
 			[ stake, "freeSynths" ].postln;
 		});

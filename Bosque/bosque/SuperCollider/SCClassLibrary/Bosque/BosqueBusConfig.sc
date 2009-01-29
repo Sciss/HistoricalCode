@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.14, 23-Jul-08
+ *	@version	0.15, 26-Oct-08
  */
 BosqueBusConfig {
 	var <busCfgID;
@@ -79,12 +79,12 @@ BosqueBusConfig {
 		if( bus.notNil, {
 			this.prCreateConnSynths;
 		});
-		this.changed( \connections );
+		this.tryChanged( \connections );
 	}
 	
 	name_ { arg symbol;
 		name = symbol.asSymbol;
-		this.changed( \name );
+		this.tryChanged( \name );
 	}
 	
 	// use with care!!!

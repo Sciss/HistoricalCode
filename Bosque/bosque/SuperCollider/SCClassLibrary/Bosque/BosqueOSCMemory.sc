@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.15, 03-Aug-08
+ *	@version	0.16, 26-Oct-08
  */
 BosqueOSCMemory {
 	var win;
@@ -190,7 +190,7 @@ BosqueOSCMemory {
 		this.stop;
 		osc			= OSCFile.read( str );	// may throw error
 		path			= str;
-		this.changed( \path, path );
+		this.tryChanged( \path, path );
 		this.offset	= if( synced, { osc.startTime }, 0.0 );
 	}
 	
@@ -202,7 +202,7 @@ BosqueOSCMemory {
 		path			= paths.first;
 		oscIdx		= 0;
 		osc			= oscs.first;
-		this.changed( \path, path );
+		this.tryChanged( \path, path );
 		this.offset	= 0.0;
 	}
 	
@@ -210,7 +210,7 @@ BosqueOSCMemory {
 		this.stop;
 		if( offset != value, {
 			offset = value;
-			this.changed( \offset, offset );
+			this.tryChanged( \offset, offset );
 		});
 	}
 	
@@ -242,7 +242,7 @@ BosqueOSCMemory {
 				});
 			});
 			synced = bool;
-			this.changed( \synced, synced );
+			this.tryChanged( \synced, synced );
 		});
 	}
 	
@@ -261,18 +261,18 @@ BosqueOSCMemory {
 			osc	= oscs[ oscIdx ];
 			path	= paths[ oscIdx ];
 			oscIdx = (oscIdx + 1) % oscs.size;
-			this.changed( \path, path );
+			this.tryChanged( \path, path );
 		});
 		if( osc.notNil, {
 			rout = osc.play( offset: pos - (osc.startTime ? 0), addr: addr );
-			this.changed( \play, pos );
+			this.tryChanged( \play, pos );
 		});
 	}
 
 	stop {
 		if( rout.notNil, {
 			rout.stop; rout = nil;
-			this.changed( \stop );
+			this.tryChanged( \stop );
 		});
 	}
 }

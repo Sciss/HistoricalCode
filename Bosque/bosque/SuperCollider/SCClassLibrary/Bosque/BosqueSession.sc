@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.29, 14-Sep-08
+ *	@version	0.30, 26-Oct-08
  */
 BosqueSession : Object {
 	var <bosque;
@@ -87,7 +87,7 @@ BosqueSession : Object {
 		UpdateListener.newFor( undoManager, { arg upd, undo, what;
 			if( (what === \state) and: { undo.canUndo != dirty }, {
 				dirty = undo.canUndo;
-				this.changed( \dirty, dirty );
+				this.tryChanged( \dirty, dirty );
 			});
 		});
 	}
@@ -107,7 +107,7 @@ BosqueSession : Object {
 	path_ { arg string;
 		path = string;
 		name = if( path.notNil, { path.basename.splitext.first }, "Untitled" );
-		this.changed( \path );
+		this.tryChanged( \path );
 	}
 	
 	storeModifiersOn { arg stream;

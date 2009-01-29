@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.13, 18-Jul-08
+ *	@version	0.14, 26-Oct-08
  */
 BosqueTimelineView : Object {
 	var <timeline;
@@ -64,17 +64,17 @@ BosqueTimelineView : Object {
 					Span( max( tlSpan.start, tlSpan.stop - span.length ), tlSpan. stop );
 				});
 				java.setSpan( java, span );
-				this.changed( \scrolled, span );
+				this.tryChanged( \scrolled, span );
 			});
-			this.changed( \changed, *rest );
+			this.tryChanged( \changed, *rest );
 		});
 		
 		updTLCL = UpdateListener.newFor( cursor, { arg upd, csr ... rest;
-			this.changed( \positioned, *rest );
+			this.tryChanged( \positioned, *rest );
 		}, \changed );
 		
 		updTLSL = UpdateListener.newFor( selection, { arg upd, sel ... rest;
-			this.changed( \selected, *rest );
+			this.tryChanged( \selected, *rest );
 		}, \changed );
 	}
 	
@@ -95,7 +95,7 @@ BosqueTimelineView : Object {
 	span_ {Êarg newSpan;
 		if( newSpan.equals( span ).not, {
 			span = newSpan;
-			this.changed( \scrolled, span );
+			this.tryChanged( \scrolled, span );
 			java.setSpan( java, span );
 		});
 	}

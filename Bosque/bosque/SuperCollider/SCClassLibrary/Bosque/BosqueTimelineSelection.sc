@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.10, 18-Jul-08
+ *	@version	0.11, 26-Oct-08
  */
 BosqueTimelineSelection : Object {
 	var <timeline;
@@ -65,7 +65,7 @@ BosqueTimelineSelection : Object {
 	span_ {Êarg newSpan;
 		if( newSpan.equals( span ).not, {
 			span = newSpan;
-			this.changed( \changed, span );
+			this.tryChanged( \changed, span );
 			java.setSpan( java, span );
 		});
 	}

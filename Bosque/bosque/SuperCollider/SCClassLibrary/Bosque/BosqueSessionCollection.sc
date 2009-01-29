@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.17, 23-Jul-08
+ *	@version	0.18, 26-Oct-08
  */
 BosqueSessionCollection : Object {
 //	var <bosque;
@@ -102,7 +102,7 @@ BosqueSessionCollection : Object {
 		coll = List.new;
 		if( java.notNil, { java.clear( master )});
 		if( mapNames.notNil, { mapNames.clear });
-		this.changed( \remove, *objects );
+		this.tryChanged( \remove, *objects );
 	}
 	
 	add { arg source, object;
@@ -115,7 +115,7 @@ BosqueSessionCollection : Object {
 		coll.add( object );
 		if( mapNames.notNil, { mapNames.put( object.name, object )});
 		if( java.notNil, { java.add( master, object )});
-		this.changed( \add, object );
+		this.tryChanged( \add, object );
 	}
 	
 	addAll { arg source, objects;
@@ -128,7 +128,7 @@ BosqueSessionCollection : Object {
 		coll.addAll( objects );
 		if( mapNames.notNil, { objects.do({ arg object; mapNames.put( object.name, object )})});
 		if( java.notNil, { java.addAll( master, objects.asList )});
-		this.changed( \add, *objects );
+		this.tryChanged( \add, *objects );
 	}
 
 	remove { arg source, object;
@@ -136,7 +136,7 @@ BosqueSessionCollection : Object {
 		if( coll.remove( object ).notNil, {
 			if( mapNames.notNil, { mapNames.removeAt( object.name )});
 			if( java.notNil, { java.remove( master, object )});
-			this.changed( \remove, object );
+			this.tryChanged( \remove, object );
 		});
 	}
 
@@ -145,7 +145,7 @@ BosqueSessionCollection : Object {
 		coll.removeAll( objects );
 		if( mapNames.notNil, { objects.do({ arg object; mapNames.removeAt( object.name )})});
 		if( java.notNil, { java.removeAll( master, objects.asList )});
-		this.changed( \remove, *objects );
+		this.tryChanged( \remove, *objects );
 	}
 		
 	size { ^coll.size }

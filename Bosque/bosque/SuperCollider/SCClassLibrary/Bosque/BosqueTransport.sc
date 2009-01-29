@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.29, 14-Sep-08
+ *	@version	0.30, 26-Oct-08
  */
 BosqueTransport : Object {
 	var <doc;
@@ -79,7 +79,7 @@ BosqueTransport : Object {
 		if( loop != span, {
 			loop = span;
 			if( running, { this.prUpdateCollapse });
-			this.changed( \loop, loop );
+			this.tryChanged( \loop, loop );
 		});
 	}
 	
@@ -99,7 +99,7 @@ BosqueTransport : Object {
 		running		= true;
 		paused		= false;
 		this.prUpdateCollapse( pos );
-		this.changed( \play, pos, rate );
+		this.tryChanged( \play, pos, rate );
 	}
 	
 	rate { ^playRate }
@@ -119,7 +119,7 @@ BosqueTransport : Object {
 		running		= true;
 		paused		= false;
 		this.prUpdateCollapse( pos );
-		this.changed( \rate, pos, newRate );
+		this.tryChanged( \rate, pos, newRate );
 	}
 	
 	prCollapse {
@@ -185,7 +185,7 @@ BosqueTransport : Object {
 		pos 			= this.currentFrame;
 		running		= false;
 		paused		= false;
-		this.changed( \stop );
+		this.tryChanged( \stop );
 		if( setPosition, { doc.editPosition( this, pos )});
 	}
 	
@@ -197,7 +197,7 @@ BosqueTransport : Object {
 		playStartPos 	= this.currentFrame;
 		playStartTime	= thisThread.seconds;
 		paused		= true;
-		this.changed( \pause );
+		this.tryChanged( \pause );
 	}
 	
 	resume { arg pos;
@@ -208,7 +208,7 @@ BosqueTransport : Object {
 		playStartPos 	= pos;
 		playStartTime	= thisThread.seconds;
 		this.prUpdateCollapse( pos );
-		this.changed( \resume, pos, playRate );
+		this.tryChanged( \resume, pos, playRate );
 	}
 	
 	isRunning { ^running }

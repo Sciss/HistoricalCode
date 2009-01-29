@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.12, 18-Jul-08
+ *	@version	0.13, 26-Oct-08
  */
 BosqueTimeline : Object {
 	var <span;
@@ -60,7 +60,7 @@ BosqueTimeline : Object {
 	span_ { arg newSpan;
 		if( newSpan.equals( span ).not, {
 			span = newSpan;
-			this.changed( \span, span );
+			this.tryChanged( \span, span );
 			java.setSpan( java, span );
 		});
 	}
@@ -68,7 +68,7 @@ BosqueTimeline : Object {
 	rate_ { arg newRate;
 		if( newRate != rate, {
 			rate = newRate;
-			this.changed( \rate, rate );
+			this.tryChanged( \rate, rate );
 			java.setRate( java, rate );
 		});
 	}

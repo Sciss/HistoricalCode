@@ -30,7 +30,7 @@
  *	Class dependancies: ScissUtil, ScissPlus, BosqueBoxGrid
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.35, 14-Sep-08
+ *	@version	0.36, 26-Oct-08
  */
 BosqueTimelineEditor : Object {
 	var <bosque;
@@ -342,7 +342,7 @@ BosqueTimelineEditor : Object {
 //				);
 //			});
 
-		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "File", 1 );
+		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "File" );
 		JSCMenuItem( mg, "New" ).action_({ this.prFileNew( doc )});
 		JSCMenuItem( mg, "Open..." ).shortcut_( "meta O" ).action_({ this.prFileOpen( doc )});
 		JSCMenuItem( mg, "Append..." ).action_({ this.prFileAppend( doc )});
@@ -387,7 +387,7 @@ BosqueTimelineEditor : Object {
 //				);
 //			});
 			
-		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Edit", 2 );
+		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Edit" );
 		JSCMenuItem( mg, "Undo" ).shortcut_( "meta Z" ).action_({ this.prEditUndo( doc )});
 		JSCMenuItem( mg, "Redo" ).shortcut_( "meta shift Z" ).action_({ this.prEditRedo( doc )});
 		JSCMenuSeparator( mg );
@@ -412,7 +412,7 @@ BosqueTimelineEditor : Object {
 //				);
 //			});
 
-		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Timeline", 3 );
+		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Timeline" );
 		JSCMenuItem( mg, "Insert Span" ).shortcut_( "meta shift E" ).action_({ this.prTimelineInsertSpan( doc )});
 		JSCMenuItem( mg, "Clear Span" ).shortcut_( "meta BACK_SLASH" ).action_({ this.prTimelineClearSpan( doc )});
 		JSCMenuItem( mg, "Remove Span" ).shortcut_( "meta shift BACK_SLASH" ).action_({ this.prTimelineRemoveSpan( doc )});
@@ -473,10 +473,10 @@ BosqueTimelineEditor : Object {
 			ggToolName.string = tool.asString;
 		}, \tool );
 
-		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Tool", 4 );
-		JSCMenuItem( mg, "Move" ).shortcut_( "meta 1" ).action_({ panel.tool = \move; this.changed( \tool, panel.tool )});
-		JSCMenuItem( mg, "Resize" ).shortcut_( "meta 2" ).action_({ panel.tool = \resize; this.changed( \tool, panel.tool )});
-		JSCMenuItem( mg, "Env" ).shortcut_( "meta 3" ).action_({ panel.tool = \env; this.changed( \tool, panel.tool )});
+		mg = JSCMenuGroup( JSCMenuRoot( bosque.swing ), "Tool" );
+		JSCMenuItem( mg, "Move" ).shortcut_( "meta 1" ).action_({ panel.tool = \move; this.tryChanged( \tool, panel.tool )});
+		JSCMenuItem( mg, "Resize" ).shortcut_( "meta 2" ).action_({ panel.tool = \resize; this.tryChanged( \tool, panel.tool )});
+		JSCMenuItem( mg, "Env" ).shortcut_( "meta 3" ).action_({ panel.tool = \env; this.tryChanged( \tool, panel.tool )});
 		
 //~ggScroll = ggScrollPane;
 //~ggCompo = view2;
@@ -598,7 +598,7 @@ BosqueTimelineEditor : Object {
 			.font_( fntBig )
 			.states_([[ "" ++ 0xE2.asAscii ++ 0x9C.asAscii ++ 0xB6.asAscii ]])  // Solid star
 			.action_({ arg b;
-				bosque.trackBang.changed;
+				bosque.trackBang.tryChanged;
 			});
 			
 		flow.nextLine;

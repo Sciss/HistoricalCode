@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.11, 03-Aug-08
+ *	@version	0.12, 26-Oct-08
  */
 BosqueOSCRecorder {
 	var win;
@@ -59,7 +59,7 @@ BosqueOSCRecorder {
 				if( ignoreBundleTime, { time = SystemClock.seconds });
 				oscRec.sendBundle( time - recStartTime, msg );
 			});
-			this.changed( \msg, msg );
+			this.tryChanged( \msg, msg );
 		});
 	}
 	
@@ -277,7 +277,7 @@ BosqueOSCRecorder {
 	basePath_ { arg str;
 		this.stop;
 		basePath		= str;
-		this.changed( \basePath, basePath );
+		this.tryChanged( \basePath, basePath );
 //		this.offset	= if( synced, { osc.startTime }, 0.0 );
 	}
 	
@@ -285,19 +285,19 @@ BosqueOSCRecorder {
 		this.stop;
 		if( offset != value, {
 			offset = value;
-			this.changed( \offset, offset );
+			this.tryChanged( \offset, offset );
 		});
 	}
 	
 	oscKey_ {Êarg value;
 		oscKey = value;
-		this.changed( \oscKey, oscKey );
+		this.tryChanged( \oscKey, oscKey );
 	}
 	
 	ignoreBundleTime_ { arg bool;
 		if( bool != ignoreBundleTime, {
 			ignoreBundleTime = bool;
-			this.changed( \ignoreBundleTime, bool );
+			this.tryChanged( \ignoreBundleTime, bool );
 		});
 	}
 	
@@ -329,7 +329,7 @@ BosqueOSCRecorder {
 				});
 			});
 			synced = bool;
-			this.changed( \synced, synced );
+			this.tryChanged( \synced, synced );
 		});
 	}
 	
@@ -345,14 +345,14 @@ BosqueOSCRecorder {
 			this.stop;
 		});
 				
-		path = basePath +/+ (Date.getDate.stamp ++ ".osc");		this.changed( \path, path );
+		path = basePath +/+ (Date.getDate.stamp ++ ".osc");		this.tryChanged( \path, path );
 //		this.offset = pos;
 		recStartTime = SystemClock.seconds - pos;
 		oscRec = FileNetAddr.openWrite( path );
 		if( oscRec.file.isOpen, {
 			recording = true;
 			this.addFunc;
-			this.changed( \rec, pos );
+			this.tryChanged( \rec, pos );
 		}, {
 			oscRec = nil;
 			("BosqueOSCRecorder:rec - cannot open file '" ++ path ++ "'for writing").error;
@@ -367,7 +367,7 @@ BosqueOSCRecorder {
 			}Ê{
 				oscRec = nil;
 				recording = false;
-				this.changed( \stop );
+				this.tryChanged( \stop );
 			};
 		});
 	}

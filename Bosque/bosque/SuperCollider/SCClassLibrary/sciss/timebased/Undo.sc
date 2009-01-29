@@ -1,5 +1,5 @@
 /**
- *	(C)opyright 2006-2007 Hanns Holger Rutz. All rights reserved.
+ *	(C)opyright 2006-2008 Hanns Holger Rutz. All rights reserved.
  *	Distributed under the GNU General Public License (GPL).
  *
  *	Class dependancies:
@@ -7,7 +7,7 @@
  *	SuperCollider implementation of the java class
  *	javax.swing.undo.AbstractUndoableEdit
  *
- *	@version	0.12, 16-Aug-07
+ *	@version	0.13, 26-Oct-08
  *	@author	Hanns Holger Rutz
  */
 JAbstractUndoableEdit {	// abstract
@@ -608,7 +608,7 @@ ScissUndoManager : JUndoManager
 	}
 
 	prUpdateStates {
-		this.changed( \state );
+		this.tryChanged( \state );
 //		var text;
 //
 //		if( undoAction.isEnabled() != canUndo() ) {

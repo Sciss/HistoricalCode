@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.10, 18-Jul-08
+ *	@version	0.11, 26-Oct-08
  */
 BosqueTimelineCursor : Object {
 	var <timeline;
@@ -64,7 +64,7 @@ BosqueTimelineCursor : Object {
 	position_ {Êarg newPos;
 		if( newPos != position, {
 			position = newPos;
-			this.changed( \changed, position );
+			this.tryChanged( \changed, position );
 			java.setPosition( java, position );
 		});
 	}

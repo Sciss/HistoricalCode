@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.16, 04-Aug-08
+ *	@version	0.17, 26-Oct-08
  */
 BosqueTrack {
 	var <trackID;
@@ -142,23 +142,23 @@ BosqueTrack {
 //			if( mon.notNil, {
 //				this.prMonRun;
 //			});
-			this.changed( \muted, muted );
+			this.tryChanged( \muted, muted );
 		});
 	}
 	
 	busConfig_ { arg cfg;
 		busConfig = cfg;
-		this.changed( \busConfig, cfg );
+		this.tryChanged( \busConfig, cfg );
 	}
 	
 	ctrlSpec_ { arg spec;
 		ctrlSpec = spec;
-		this.changed( \ctrlSpec, spec );
+		this.tryChanged( \ctrlSpec, spec );
 	}
 
 	ctrlBusIndex_ { arg idx;
 		ctrlBusIndex = idx;
-		this.changed( \ctrlBusIndex, idx );
+		this.tryChanged( \ctrlBusIndex, idx );
 	}
 
 	name_ { arg str;
@@ -166,7 +166,7 @@ BosqueTrack {
 		java.setName( name );
 	   // so.getMap().dispatchOwnerModification( source, SessionObject.OWNER_RENAMED, newName );
 		java.server.sendMsg( '/methodr', '[', '/method', java.id, \getMap, ']', \dispatchOwnerModification, -1, 0x1000, str );
-		this.changed( \name );
+		this.tryChanged( \name );
 	}
 	
 	// use with care!!!

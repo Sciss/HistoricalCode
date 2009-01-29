@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.13, 17-Aug-08
+ *	@version	0.14, 26-Oct-08
  */
 BosqueEnvRegionStake : BosqueRegionStake {
 //	var <java;
@@ -75,7 +75,7 @@ BosqueEnvRegionStake : BosqueRegionStake {
 //		if( trail.notNil, {
 //			TrailEdit.newDispatch( trail, e.getAffectedSpan.shift( span.start )).perform;
 //		});
-		this.changed( \modified, e.getAffectedSpan.shift( span.start ));
+		this.tryChanged( \modified, e.getAffectedSpan.shift( span.start ));
 		if( synth.notNil, {
 			synth.free; synth = nil;
 		});

@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.29, 14-Sep-08
+ *	@version	0.30, 26-Oct-08
  */
 Bosque : Object {
 	classvar <>default;
@@ -149,7 +149,7 @@ Bosque : Object {
 					y		= y.clip( 0.0, 1.0 );
 					speed	= (speed * speedBoost).clip( 0.0, 1.0 );
 					trackCurrentDancer = [ x, y, speed ];
-					trackDancer.changed( x, y, speed );
+					trackDancer.tryChanged( x, y, speed );
 				});
 			});
 		}).add;
@@ -163,7 +163,7 @@ Bosque : Object {
 				});
 			});
 			trackCurrentTrack = values;
-			if( values.size >= 6, { trackTrack.changed( *values )});
+			if( values.size >= 6, { trackTrack.tryChanged( *values )});
 		}).add;
 
 		OSCresponderNode( nil, '/field', { arg time, resp, msg;
@@ -178,11 +178,11 @@ Bosque : Object {
 				});
 			});
 			trackCurrentField = values;
-//			if( values.size > 0, { trackField.changed( *values )});
+//			if( values.size > 0, { trackField.tryChanged( *values )});
 //			if( values.notNil, {
-				trackField.changed( *values );
+				trackField.tryChanged( *values );
 //			}, {
-//				trackField.changed;	// *values would produce [ nil ] ?!
+//				trackField.tryChanged;	// *values would produce [ nil ] ?!
 //			});
 		}).add;
 
@@ -205,7 +205,7 @@ Bosque : Object {
 				if( useMIDI, { this.prMIDIInit });
 				onScSynthBoot.do({ arg x; x.value });
 				onScSynthBoot = nil;
-				this.changed( \booted );
+				this.tryChanged( \booted );
 			}.fork( AppClock );
 		}, inf );
 				
@@ -312,12 +312,12 @@ Bosque : Object {
 	masterVolume_ { arg val;
 		masterVolume = val;
 		if( masterSynth.notNil, { masterSynth.set( \amp, masterVolume )});
-		this.changed( \masterVolume, masterVolume );
+		this.tryChanged( \masterVolume, masterVolume );
 	}
 	
 	micGain_ { arg val;
 		micGain = val;
-		this.changed( \micGain, micGain );
+		this.tryChanged( \micGain, micGain );
 	}
 	
 	*createSynthDefs { arg debug = false;
@@ -507,7 +507,7 @@ if( createCC, {
 
 		// cue resume
 		CCResponder( num: 91, value: 127, function: { arg src, ch, num, val;
-			trackBang.changed( \bang );
+			trackBang.tryChanged( \bang );
 //			if( magma5.synths.size > 0, {
 //				magma5.trig;
 //			});

@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.10, 31-Aug-07
+ *	@version	0.11, 26-Oct-08
  */
 BosqueMovieView {
 	var win, view;
@@ -121,14 +121,14 @@ BosqueMovieView {
 	path_ { arg str;
 		this.stop;
 		path			= str;
-		this.changed( \path, path );
+		this.tryChanged( \path, path );
 	}
 	
 	offset_ { arg value;
 		this.stop;
 		if( offset != value, {
 			offset = value;
-			this.changed( \offset, offset );
+			this.tryChanged( \offset, offset );
 		});
 	}
 	
@@ -172,7 +172,7 @@ BosqueMovieView {
 				doc	= nil;
 			});
 			synced = bool;
-			this.changed( \synced, synced );
+			this.tryChanged( \synced, synced );
 		});
 	}
 	
@@ -183,14 +183,14 @@ BosqueMovieView {
 	}
 
 	play { arg pos = 0;
-		this.changed( \play, pos );
+		this.tryChanged( \play, pos );
 	}
 
 	stop {
-		this.changed( \stop );
+		this.tryChanged( \stop );
 	}
 	
 	position_ { arg pos;
-		this.changed( \position, pos );
+		this.tryChanged( \position, pos );
 	}
 }
