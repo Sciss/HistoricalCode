@@ -61,7 +61,7 @@ BosqueTimelineCursor : Object {
 		stream << ")";
 	}
 	
-	position_ {Êarg newPos;
+	position_ { arg newPos;
 		if( newPos != position, {
 			position = newPos;
 			this.tryChanged( \changed, position );

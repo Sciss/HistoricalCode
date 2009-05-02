@@ -54,7 +54,7 @@ JAbstractUndoableEdit {	// abstract
 		^false;
 	}
 	
-	replaceEdit {Êarg anEdit;
+	replaceEdit { arg anEdit;
 		^false;
 	}
 
@@ -108,7 +108,7 @@ JCompoundEdit : JAbstractUndoableEdit {
 	/**
 	 *	Returns the last UndoableEdit in edits, or nil if edits is empty
 	 */
-	protLastEdit {Ê^if( edits.size > 0, { edits.last })}
+	protLastEdit { ^if( edits.size > 0, { edits.last })}
 	
 	/**
 	 *	Sends die to each subedit, in the reverse of the order that they were added
@@ -127,7 +127,7 @@ JCompoundEdit : JAbstractUndoableEdit {
 	addEdit { arg anEdit;
 		var last;
 		
-		if( inProgress.not, {Ê^false });
+		if( inProgress.not, { ^false });
 		
 		last = this.protLastEdit;
 		if( last.isNil, {
@@ -151,14 +151,14 @@ JCompoundEdit : JAbstractUndoableEdit {
 	 *	Returns false if isInProgress or if super returns false.
 	 */
 	canUndo {
-		^(this.isInProgress.not and: {Êsuper.canUndo });
+		^(this.isInProgress.not and: { super.canUndo });
 	}
 	
 	/**
 	 *	Returns false if isInProgress or if super returns false.
 	 */
 	canRedo {
-		^(this.isInProgress.not and: {Êsuper.canRedo });
+		^(this.isInProgress.not and: { super.canRedo });
 	}
 	
 	/**
@@ -172,7 +172,7 @@ JCompoundEdit : JAbstractUndoableEdit {
 	 */
 	isSignificant {
 		edits.do({ arg edit;
-			if( edit.isSignificant, {Ê^true })});
+			if( edit.isSignificant, { ^true })});
 		^false;
 	}
 	
@@ -181,7 +181,7 @@ JCompoundEdit : JAbstractUndoableEdit {
 	 */
 	presentationName {
 		var last = this.protLastEdit;
-		^if( last.notNil, {Êlast.presentationName }, {Êsuper.presentationName });
+		^if( last.notNil, { last.presentationName }, { super.presentationName });
 	}
 	
 	/**
@@ -189,7 +189,7 @@ JCompoundEdit : JAbstractUndoableEdit {
 	 */
 	undoPresentationName {
 		var last = this.protLastEdit;
-		^if( last.notNil, {Êlast.undoPresentationName }, {Êsuper.undoPresentationName });
+		^if( last.notNil, { last.undoPresentationName }, { super.undoPresentationName });
 	}
 
 	/**
@@ -197,7 +197,7 @@ JCompoundEdit : JAbstractUndoableEdit {
 	 */
 	redoPresentationName {
 		var last = this.protLastEdit;
-		^if( last.notNil, {Êedits.last.redoPresentationName }, {Êsuper.redoPresentationName });
+		^if( last.notNil, { edits.last.redoPresentationName }, { super.redoPresentationName });
 	}
 }
 
@@ -219,15 +219,15 @@ JUndoManager : JCompoundEdit {
 		var size, halfLimit, keepFrom, keepTo, delta;
 		
 		size = edits.size;
-		if( (limit < 0) or: {Êsize <= limit }, { ^this });
+		if( (limit < 0) or: { size <= limit }, { ^this });
 		
 		halfLimit	= limit.div(2);
 		keepFrom	= indexOfNextAdd - 1 - halfLimit;
 		keepTo	= indexOfNextAdd - 1 + halfLimit;
 		
-		if( (keepTo - keepFrom + 1) > limit, {ÊkeepFrom = keepFrom + 1 });
+		if( (keepTo - keepFrom + 1) > limit, { keepFrom = keepFrom + 1 });
 		if( keepFrom < 0, { keepTo = keepTo - keepFrom; keepFrom = 0 });
-		if( keepTo >= size, {Êdelta = size - keepTo - 1; keepTo = keepTo + delta; keepFrom = keepFrom + delta });
+		if( keepTo >= size, { delta = size - keepTo - 1; keepTo = keepTo + delta; keepFrom = keepFrom + delta });
 		
 		this.protTrimEdits( keepTo + 1, size - 1 );
 		this.protTrimEdits( 0, keepFrom - 1 );

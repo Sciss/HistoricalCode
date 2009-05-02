@@ -245,7 +245,7 @@ BosqueObserver {
 		JSCStaticText( view, Rect( 0, 0, 60, 20 )).font_( fntSmall ).align_( \right ).string_( "Ctrl Bus:" );
 		ggCtrlBusIndex = JSCDragSink( view, Rect( 0, 0, 160, 20 )).font_( fntSmall )
 			.canReceiveDragHandler_({ arg b;
-				JSCView.currentDrag.isKindOf( Integer ) or: { JSCView.currentDrag.isKindOf( Bus ) and: {Ê(JSCView.currentDrag.rate === \control) and: { JSCView.currentDrag.numChannels == 1 }}};
+				JSCView.currentDrag.isKindOf( Integer ) or: { JSCView.currentDrag.isKindOf( Bus ) and: { (JSCView.currentDrag.rate === \control) and: { JSCView.currentDrag.numChannels == 1 }}};
 			})
 			.action_({ arg b; var ctrl = b.object.asUGenInput, ce;
 				if( track.notNil, {
@@ -311,7 +311,7 @@ BosqueObserver {
 		ce.addPerform( BosqueEditRemoveSessionObjects( this, doc.selectedRegions, sel, false ));
 		doc.trail.editBegin( ce );
 		doc.trail.editRemoveAll( this, sel, ce );
-		sel = sel.collect({Êarg x; x.perform( setter, value )});
+		sel = sel.collect({ arg x; x.perform( setter, value )});
 		doc.trail.editAddAll( this, sel, ce );
 		doc.trail.editEnd( ce );
 		ce.addPerform( BosqueEditAddSessionObjects( this, doc.selectedRegions, sel, false ));

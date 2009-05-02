@@ -119,7 +119,7 @@ BosqueEnvSegmentStake : Stake {
 		^this.class.new( *args );
 	}
 	
-	replaceStopWithLevel {Êarg newStop, newLevel;
+	replaceStopWithLevel { arg newStop, newLevel;
 		var args = this.storeArgs;
 		args[ 0 ] = Span( span.start, newStop );
 		args[ 2 ] = newLevel;

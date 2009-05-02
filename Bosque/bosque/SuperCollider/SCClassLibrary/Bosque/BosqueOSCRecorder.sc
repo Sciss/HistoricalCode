@@ -289,7 +289,7 @@ BosqueOSCRecorder {
 		});
 	}
 	
-	oscKey_ {Êarg value;
+	oscKey_ { arg value;
 		oscKey = value;
 		this.tryChanged( \oscKey, oscKey );
 	}
@@ -364,7 +364,7 @@ BosqueOSCRecorder {
 		if( oscRec.notNil, {
 			protect {
 				oscRec.closeFile;
-			}Ê{
+			} {
 				oscRec = nil;
 				recording = false;
 				this.tryChanged( \stop );

@@ -122,12 +122,12 @@ Trail {
 
 	}
 	
-	prEditGetCollByStart {Êarg ce;
-		^if( ce.isNil or: {ÊcollEditByStart.isNil }, collStakesByStart, collEditByStart );
+	prEditGetCollByStart { arg ce;
+		^if( ce.isNil or: { collEditByStart.isNil }, collStakesByStart, collEditByStart );
 	}
 
-	prEditGetCollByStop {Êarg ce;
-		^if( ce.isNil or: {ÊcollEditByStop.isNil }, collStakesByStop, collEditByStop );
+	prEditGetCollByStop { arg ce;
+		^if( ce.isNil or: { collEditByStop.isNil }, collStakesByStop, collEditByStop );
 	}
 
 	getSpan {
@@ -153,7 +153,7 @@ Trail {
 		^coll.isEmpty.if( 0, { coll.last.span.stop });
 	}
 
-	editBegin {Êarg ce;
+	editBegin { arg ce;
 		if( currentEdit.notNil, { MethodError( "Concurrent editing", thisMethod ).throw });
 
 		currentEdit	= ce;
@@ -180,21 +180,21 @@ Trail {
 	}
 	
 	prEnsureEditCopy {
-		if( collEditByStart.isNil,Ê{
+		if( collEditByStart.isNil, {
 			collEditByStart	= collStakesByStart.copy;
 			collEditByStop	= collStakesByStop.copy;
 		});
 	}
 	
-	prBinarySearch {Êarg coll, newObject, function;
+	prBinarySearch { arg coll, newObject, function;
 		var index;
 		var low	= 0;
 		var high	= coll.size - 1;
 
 //var cnt=0;
 		
-//fork {Ê("coll "++coll++"; newObject "++newObject++"; function "++function).postln; };
-//if( true, {Ê^-1; });
+//fork { ("coll "++coll++"; newObject "++newObject++"; function "++function).postln; };
+//if( true, { ^-1; });
 		
 		while({ 
 			index  = (high + low) div: 2;
@@ -209,7 +209,7 @@ Trail {
 //("compare:  coll.at( "++index++" ) = "++coll.at( index ) ++ "; newObject = "++newObject).inform;
 //try {
 			switch( function.value( coll.at( index ), newObject ),
-			0,Ê{Ê^index; },
+			0, { ^index; },
 			-1, {
 				low = index + 1;
 			},
@@ -229,7 +229,7 @@ Trail {
 		^this.editGetRange( span, byStart );
 	}
 	
-	editGetRange {Êarg span, byStart = true, ce, filter = true;
+	editGetRange { arg span, byStart = true, ce, filter = true;
 		var collByStart, collByStop, collUntil, collFrom, collResult, idx;
 		
 		if( ce.isNil, {
@@ -291,7 +291,7 @@ Trail {
 		
 		collRange		= this.editGetRange( Span( start, totStop ), true, ce );
 		
-		if( collRange.isEmpty, {Ê^this; });
+		if( collRange.isEmpty, { ^this; });
 		
 		collToAdd		= List.new;
 		collToRemove	= List.new;
@@ -409,7 +409,7 @@ Trail {
 		totStop		= this.prEditGetStop( ce );
 		delta		= span.length.neg;
 		
-		if( (delta == 0) || (start > totStop), {Ê^this; });
+		if( (delta == 0) || (start > totStop), { ^this; });
 		
 		collRange		= this.editGetRange( Span( start, totStop ), true, ce );
 		
@@ -642,7 +642,7 @@ if( kDebug, {
 		^trail;
 	}
 	
-	protStakeAdded {Êarg stake; }
+	protStakeAdded { arg stake; }
 	protStakeRemoved { arg stake; }
 	
 	// XXX could use this.class.new ...
@@ -656,10 +656,10 @@ if( kDebug, {
 	// synonym
 	defaultTouchMode { ^touchMode }
 
-	*getCuttedRange {Êarg stakes, span, byStart = true, touchMode, shiftVirtual = 0;
+	*getCuttedRange { arg stakes, span, byStart = true, touchMode, shiftVirtual = 0;
 		var collResult, start, stop, shift, stake, stake2, stakeSpan;
 
-		if( stakes.isEmpty, {Ê^stakes; });
+		if( stakes.isEmpty, { ^stakes; });
 		
 		collResult		= List.new;
 		start			= span.start;
@@ -798,26 +798,26 @@ if( kDebug, {
 			idx2 = idx - 1;
 			while({ idx2 >= 0 }, {
 				stake2 = coll.at( idx2 );
-//				if( stake2.equals( stake ), {Ê^idx2; });
-				if( stake2 == stake, {Ê^idx2; });
+//				if( stake2.equals( stake ), { ^idx2; });
+				if( stake2 == stake, { ^idx2; });
 				idx2 = idx2 - 1;
 			});
 			idx2 = idx + 1;
 			while({ idx2 < coll.size }, {
 				stake2 = coll.at( idx2 );
-//				if( stake2.equals( stake ), {Ê^idx2; });
-				if( stake2 == stake, {Ê^idx2; });
+//				if( stake2.equals( stake ), { ^idx2; });
+				if( stake2 == stake, { ^idx2; });
 				idx2 = idx2 + 1;
 			});
 		});
 		^idx;
 	}
 
-	indexOfPos {Êarg pos, byStart = true;
+	indexOfPos { arg pos, byStart = true;
 		^this.editIndexOfPos( pos, byStart );
 	}
 
-	editIndexOfPos {Êarg pos, byStart = true, ce;
+	editIndexOfPos { arg pos, byStart = true, ce;
 		if( byStart, {
 			^this.prBinarySearch( this.prEditGetCollByStart( ce ), pos, startComparator );
 		}, {
@@ -834,7 +834,7 @@ if( kDebug, {
 	
 		if( idx < 0, {
 			idx = (idx + 2).neg;
-			if( idx < 0, {Ê^nil });
+			if( idx < 0, { ^nil });
 		});
 		
 		coll		= byStart.if({ this.prEditGetCollByStart( ce )}, { this.prEditGetCollByStop( ce )});
@@ -854,7 +854,7 @@ if( kDebug, {
 	}
 
 	// XXX needs testing
-	editFilterStakeAt {Êarg pos, ce, filter = true;
+	editFilterStakeAt { arg pos, ce, filter = true;
 		var coll, idx, lastStake, nextStake;
 
 		coll = this.editGetRange( Span( pos, pos ), true, ce, filter );
@@ -863,11 +863,11 @@ if( kDebug, {
 //		idx = this.prBinarySearch( coll, pos, startComparator );
 //		if( idx < 0, {
 //			idx = (idx + 2).neg;
-//			if( idx < 0, {Ê^nil });
+//			if( idx < 0, { ^nil });
 //		});
 //		
 //		lastStake	= coll.at( idx );
-//		if( filter.value( lastStake ).not, {ÊlastStake = nil });
+//		if( filter.value( lastStake ).not, { lastStake = nil });
 //		
 //		while({ idx > 0 }, {
 //			idx			= idx - 1;
@@ -950,7 +950,7 @@ if( kDebug, {
 		
 		if( idx < 0, {
 			idx = (idx + 1).neg;
-			if( idx > sizeM1, {Ê^-1; });
+			if( idx > sizeM1, { ^-1; });
 		});
 		
 		stake		= coll.at( idx );
@@ -999,9 +999,9 @@ if( kDebug, {
 		var span;
 	
 		if( kDebug, { ("editAddAll "++stakes.size).inform; });
-		if( stakes.size == 0, {Ê^this; });
+		if( stakes.size == 0, { ^this; });
 	
-		if( ce.notNil, {Êthis.prCheckEdit( ce )});
+		if( ce.notNil, { this.prCheckEdit( ce )});
 	
 		span = this.prAddAll( stakes, ce );
 
@@ -1074,7 +1074,7 @@ if( kDebug, {
 	editRemoveAll { arg source, stakes, ce;
 		var span;
 
-		if( stakes.size == 0, {Ê^this; });
+		if( stakes.size == 0, { ^this; });
 
 		span = this.prRemoveAll( stakes, ce );
 
@@ -1102,7 +1102,7 @@ if( kDebug, {
 	prRemoveAll { arg stakes, ce;
 		var start, stop, span;
 
-		if( stakes.size == 0, {Ê^nil });
+		if( stakes.size == 0, { ^nil });
 	
 // XXX BROKEN ON SC INTEL!!!!
 //		start	= inf.asInteger;	// XXX 32-bit only!!! Long.MAX_VALUE;
@@ -1114,10 +1114,10 @@ if( kDebug, {
 			this.prSortRemoveStake( stake, ce );
 			start	= min( start, stake.span.start );
 			stop		= max( stop, stake.span.stop );
-			if( ce.isNil, {Êstake.dispose });
+			if( ce.isNil, { stake.dispose });
 		});
 		span	= Span( start, stop );
-		if( ce.notNil, {Êce.addPerform( this.protTrailEdit( stakes, span, TrailEdit.kEditRemove ))});
+		if( ce.notNil, { ce.addPerform( this.protTrailEdit( stakes, span, TrailEdit.kEditRemove ))});
 
 		^span;
 	}
@@ -1133,7 +1133,7 @@ if( kDebug, {
 		collEditByStop.postcs;
 	}
 	
-	protAddIgnoreDependants {Êarg stake;
+	protAddIgnoreDependants { arg stake;
 		^this.prSortAddStake( stake, nil );
 	}
 
@@ -1314,11 +1314,11 @@ TrailEdit : JBasicUndoableEdit
 //	var		removed;
 	var		disposeWhenDying, <span;
 
-	*newDispatch {Êarg trail, span;
+	*newDispatch { arg trail, span;
 		^this.new( trail, nil, span, kEditDispatch, "editChangeTrail" );
 	}
 
-	*new {Êarg trail, stakes, span, cmd, key = "editChangeTrail";
+	*new { arg trail, stakes, span, cmd, key = "editChangeTrail";
 		^super.new.prInitTrailEdit( trail, stakes, span, cmd, key );
 	}
 	

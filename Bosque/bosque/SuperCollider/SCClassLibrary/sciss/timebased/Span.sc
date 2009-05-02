@@ -156,8 +156,8 @@ Span {
     }
     
      clip { arg position;
-     	if( start > position, {Ê^start });
-     	if( stop < position, {Ê^stop });
+     	if( start > position, { ^start });
+     	if( stop < position, { ^stop });
      	^position;
      }
     
@@ -220,7 +220,7 @@ Span {
 		^span1.union( span2 );
 	}
 
-	*intersection {Êarg span1, span2;
+	*intersection { arg span1, span2;
 		if( span1.isNil, { ^nil });
 		
 		^span1.intersection( span2 );

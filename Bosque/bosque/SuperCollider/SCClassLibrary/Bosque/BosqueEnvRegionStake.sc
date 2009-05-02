@@ -40,7 +40,7 @@ BosqueEnvRegionStake : BosqueRegionStake {
 		^super.new( span, name, track, colr ?? { Color.blue( 0.6 )}, fadeIn, fadeOut, gain ).prInitFERS( env );
 	}
 	
-	level {Êarg frame;
+	level { arg frame;
 		var idx, stake;
 		frame = (frame ?? { Bosque.default.session.transport.currentFrame }) - span.start;
 		idx   = env.indexOfPos( frame );
@@ -185,7 +185,7 @@ BosqueEnvRegionStake : BosqueRegionStake {
 		
 		spec			= track.ctrlSpec.asSpec;
 		warpName		= spec.warp.class.name.asString;
-		defName		= "bosqueEnv" ++ if( warpName.endsWith( "FaderWarp" ), {ÊwarpName ++ spec.range.isPositive.if( "P", "N" )}, warpName );
+		defName		= "bosqueEnv" ++ if( warpName.endsWith( "FaderWarp" ), { warpName ++ spec.range.isPositive.if( "P", "N" )}, warpName );
 		synth		= Synth.basicNew( defName, player.scsynth );
 		bndl.add( synth.newMsg( player.diskGroup, [ \i_bufNum, buffer.bufnum, \i_dur, durSecs, \out, track.ctrlBusIndex, \specMin, spec.minval,
 			\specMax, spec.maxval, \specCurve, if( spec.warp.respondsTo( \curve ), { spec.warp.curve }, 0.0 ), \i_atk, if( frameOffset > 0, 0.1, 0.0 )]));

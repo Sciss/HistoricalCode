@@ -92,7 +92,7 @@ BosqueTimelineView : Object {
 	doCursor { arg func; func.value( cursor )}
 	doSelection { arg func; func.value( selection )}
 
-	span_ {Êarg newSpan;
+	span_ { arg newSpan;
 		if( newSpan.equals( span ).not, {
 			span = newSpan;
 			this.tryChanged( \scrolled, span );

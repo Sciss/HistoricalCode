@@ -59,7 +59,7 @@ BosqueTrail : Trail {
  		^this.class.new( touchMode );
  	}
  	
- 	*prNew { arg touchMode, java, upd;
+ 	*prNew { arg touchMode, java, upd;
  		^super.new( touchMode ).prInitDirect( java, upd );
  	}
  	
@@ -172,19 +172,19 @@ BosqueTrail : Trail {
 		^super.editRemoveAll( source, stakes, ce );
 	}
 	
-//	modified { arg source, span;
+//	modified { arg source, span;
 //		this.prDispatchModification( source, span );
 //		java.modified( java, span );
 //	}
 
-	protStakeAdded { arg stake;
+	protStakeAdded { arg stake;
 		if( updStakes.notNil, {
 			if( debugUpd, { ("protStakeAdded( " ++ stake ++ " )").postln });
 			updStakes.addTo( stake );
 		});
 	}
 
-	protStakeRemoved { arg stake;
+	protStakeRemoved { arg stake;
 		if( updStakes.notNil, {
 			if( debugUpd, { ("protStakeRemoved( " ++ stake ++ " )").postln });
 			updStakes.removeFrom( stake );

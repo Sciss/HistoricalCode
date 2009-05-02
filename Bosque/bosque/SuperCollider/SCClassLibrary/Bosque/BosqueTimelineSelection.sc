@@ -62,7 +62,7 @@ BosqueTimelineSelection : Object {
 		stream << ")";
 	}
 	
-	span_ {Êarg newSpan;
+	span_ { arg newSpan;
 		if( newSpan.equals( span ).not, {
 			span = newSpan;
 			this.tryChanged( \changed, span );

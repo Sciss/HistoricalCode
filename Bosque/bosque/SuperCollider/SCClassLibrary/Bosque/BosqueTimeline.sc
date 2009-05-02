@@ -43,7 +43,7 @@ BosqueTimeline : Object {
 		var swing;
 		
 		rate			= argRate ? 1000.0;
-		span			= argSpan ??  {ÊSpan.new };
+		span			= argSpan ??  { Span.new };
 		swing		= Bosque.default.swing;
 		java			= JavaObject( "de.sciss.timebased.timeline.BasicTimeline", swing, rate, span );
 	}

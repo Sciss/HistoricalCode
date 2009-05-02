@@ -175,7 +175,7 @@ BosqueSessionCollection : Object {
 	
 	detect { arg function; ^coll.detect( function )}
 	
-	find { arg name;
+	find { arg name;
 		name = name.asSymbol;
 		if( mapNames.notNil, {
 			^mapNames.at( name );

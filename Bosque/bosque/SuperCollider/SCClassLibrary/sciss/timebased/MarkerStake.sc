@@ -12,7 +12,7 @@
 MarkerStake : Stake {
 	var <pos, <name;
 
-	*new {Êarg pos, name;
+	*new { arg pos, name;
 		^super.new( Span( pos, pos )).prInitMarkerStake( pos, name );
 	}
 
@@ -29,11 +29,11 @@ MarkerStake : Stake {
 		^this.class.newFrom( this );
 	}
 
-	replaceStart {Êarg newStart;
+	replaceStart { arg newStart;
 		^this.class.new( newStart, name );
 	}
 	
-	replaceStop {Êarg newStart;
+	replaceStop { arg newStart;
 		^this.class.new( newStart, name );
 	}
 	

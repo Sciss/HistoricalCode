@@ -48,7 +48,7 @@ BosqueTransport : Object {
 	prInit { arg argDoc;
 		doc = argDoc;
 		clpseStop = Collapse({ this.prCollapse });
-//		funcClpse = {Êthis.prCollapse };
+//		funcClpse = { this.prCollapse };
 		UpdateListener.newFor( doc.timelineView, { arg upd, timelineView, what, what2;
 			var pos, wasPaused;
 			
@@ -133,7 +133,7 @@ BosqueTransport : Object {
 
 //	prMakeCollapse { arg pos;
 //		var dur;
-//		pos = pos ?? {Êthis.currentFrame };
+//		pos = pos ?? { this.currentFrame };
 //		if( clpseStop.notNil, { clpseStop.cancel; clpseStop = nil });
 //		dur		= this.prCalcCollapseDur( pos );
 //		clpseStop	= Collapse( funcClpse, dur, SystemClock ).defer;
@@ -169,7 +169,7 @@ BosqueTransport : Object {
 
 	prUpdateCollapse { arg pos;
 		var dur;
-		pos = pos ?? {Êthis.currentFrame };
+		pos = pos ?? { this.currentFrame };
 //		if( clpseStop.isNil, { ^this.prMakeCollapse( pos )});
 		this.prCalcCollapsePoint( pos );
 //		clpseStop.rescheduleWith( dur );

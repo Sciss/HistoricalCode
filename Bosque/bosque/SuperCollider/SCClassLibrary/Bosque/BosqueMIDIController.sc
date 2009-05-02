@@ -97,7 +97,7 @@ BosqueMIDIController {
 			// fader LSB is 32 ... 32 + numFaders - 1;
 			CCResponder({ arg src, midiChan, num, value;
 				if( write[ chan ] and: { doc.transport.isRunning }, {
-					this.prWrite( chan, (value |Ê(faderMSBmem[ chan ] << 7)) / 0x3FFF );
+					this.prWrite( chan, (value | (faderMSBmem[ chan ] << 7)) / 0x3FFF );
 				});
 			}, in, 0, chan + 32 ); 
 		});

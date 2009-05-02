@@ -17,7 +17,7 @@ EventManager {
 	var	paused	= false;
 	var	collListeners, collQueue, runFunc, eventQueue;
 
-	*new {Êarg eventProcessor;
+	*new { arg eventProcessor;
 		^super.new.prInitEventManager( eventProcessor );
 	}
 
@@ -126,7 +126,7 @@ EventManager {
 		var i, o, invoke;
 
 //sync:	synchronized( this ) {
-		block {Êarg break;
+		block { arg break;
 			invoke  = paused.not;
 			i		= collQueue.size - 1;
 			if( i >= 0, {

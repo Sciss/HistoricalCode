@@ -303,7 +303,7 @@ BosqueTimelineEditor : Object {
 				trackOff = block { arg break; doc.tracks.do({ arg t, i; if( t.trackID >= 0, { break.value( i )})}); nil };
 				ggTrackList.value = if( doc.selectedTracks.notNil, {
 					idx = doc.tracks.indexOf( doc.selectedTracks.detect({ arg x; x.trackID >= 0 }));
-					if( idx.notNil, {Êidx = idx - trackOff });
+					if( idx.notNil, { idx = idx - trackOff });
 					idx;
 				});
 			});

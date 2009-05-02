@@ -32,8 +32,8 @@ TrailEvent : BasicEvent {
 	incorporate { arg oldEvent;
 		if( oldEvent.isKindOf( TrailEvent ) and:
 			{ this.getSource == oldEvent.getSource and:
-			{Êthis.getID == oldEvent.getID and:
-			{Êthis.getTrail == oldEvent.getTrail }}}, {
+			{ this.getID == oldEvent.getID and:
+			{ this.getTrail == oldEvent.getTrail }}}, {
 			
 			span	= Span.union( this.getAffectedSpan, oldEvent.getAffectedSpan );
 			^true;

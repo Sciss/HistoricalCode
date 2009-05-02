@@ -22,7 +22,7 @@ EGMFullbody {
 		^super.new.prInit( trackerMsg );
 	}
 	
-	prInit {Êarg argMsg;
+	prInit { arg argMsg;
 		msg = argMsg.copyToEnd( 2 );
 		if( msg.size != 102, {
 			("msg.size should be 102, but is " ++msg.size).warn;
@@ -71,7 +71,7 @@ EGMFullbody {
 		^msg[ i + 5 ];
 	}
 	
-	dist {Êarg name1, name2;
+	dist { arg name1, name2;
 		var t1, t2, dx, dy, dz;
 		t1 = this.t( name1 );
 		t2 = this.t( name2 );
@@ -81,7 +81,7 @@ EGMFullbody {
 		^sqrt( dx.squared + dy.squared + dz.squared );
 	}
 
-	hdist {Êarg name1, name2;
+	hdist { arg name1, name2;
 		var t1, t2, dx, dy;
 		t1 = this.t( name1 );
 		t2 = this.t( name2 );
@@ -90,7 +90,7 @@ EGMFullbody {
 		^sqrt( dx.squared + dy.squared );
 	}
 
-	vdist {Êarg name1, name2;
+	vdist { arg name1, name2;
 		var t1, t2, dz;
 		t1 = this.t( name1 );
 		t2 = this.t( name2 );
@@ -98,7 +98,7 @@ EGMFullbody {
 		^dz;
 	}
 	
-//	volume {Êarg name1, name2, name3;
+//	volume { arg name1, name2, name3;
 //	
 //	}
 

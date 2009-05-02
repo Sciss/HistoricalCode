@@ -227,7 +227,7 @@ Bosque : Object {
 		doc		= this.default.session;
 		map		= AnyMap.new;
 		updTransp	= UpdateListener.newFor( doc.transport, { arg upd, t, what, param;
-			if( (what === \play) or: {Êwhat === \resume }, {
+			if( (what === \play) or: { what === \resume }, {
 				rout = fork { inf.do({
 					func.value( t.currentFrame, true );
 					period.wait;
@@ -269,7 +269,7 @@ Bosque : Object {
 		o = scsynth.options;
 		if( soundCard.notNil, { o.device = soundCard });
 		if( numInputBusChannels.notNil, { o.numInputBusChannels = numInputBusChannels });
-		if( numOutputBusChannels.notNil, {Êo.numOutputBusChannels = numOutputBusChannels });
+		if( numOutputBusChannels.notNil, { o.numOutputBusChannels = numOutputBusChannels });
 		o.numAudioBusChannels	= o.numAudioBusChannels.max( 512 ); // !!!
 		
 		scsynth.boot;

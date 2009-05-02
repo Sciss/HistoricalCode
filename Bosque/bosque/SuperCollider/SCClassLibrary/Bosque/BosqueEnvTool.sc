@@ -108,7 +108,7 @@ BosqueEnvTool {
 				dragStartTrack= e.track;
 				dragStarted	= false;
 				dragValid		= true;
-				dragConstrainH = (dragHitIdx == 0) ||Ê(dragHitIdx == env.numStakes);
+				dragConstrainH = (dragHitIdx == 0) || (dragHitIdx == env.numStakes);
 			});
 		})});
 
@@ -139,8 +139,8 @@ BosqueEnvTool {
 		if( dragStarted, {
 			level = if( e.track.isNil || (e.track === dragStartTrack), {
 				e.innerLevel.clip( 0, 1 );
-			}, {Êif( doc.tracks.indexOf( e.track ) < doc.tracks.indexOf( dragStartTrack ), 1.0, 0.0 )});
-			dragStartTrack.displayLevel( if( dragStartTrack.ctrlSpec.isNil, level, {ÊdragStartTrack.ctrlSpec.map( level )}));
+			}, { if( doc.tracks.indexOf( e.track ) < doc.tracks.indexOf( dragStartTrack ), 1.0, 0.0 )});
+			dragStartTrack.displayLevel( if( dragStartTrack.ctrlSpec.isNil, level, { dragStartTrack.ctrlSpec.map( level )}));
 		});
 	}
 
@@ -154,7 +154,7 @@ BosqueEnvTool {
 			ce = JSyncCompoundEdit( "Edit Envelope" );
 			level = if( e.track.isNil || (e.track === dragStartTrack), {
 				e.innerLevel.clip( 0, 1 );
-			}, {Êif( doc.tracks.indexOf( e.track ) < doc.tracks.indexOf( dragStartTrack ), 1.0, 0.0 )});
+			}, { if( doc.tracks.indexOf( e.track ) < doc.tracks.indexOf( dragStartTrack ), 1.0, 0.0 )});
 			frame = pressedStake.span.clip( e.frame ) - pressedStake.span.start;
 			env = pressedStake.env;
 			env.editBegin( ce );

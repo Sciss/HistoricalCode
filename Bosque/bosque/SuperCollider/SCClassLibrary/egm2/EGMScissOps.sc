@@ -36,7 +36,7 @@ EGM_thresh {
 	var <>hiThresh, <>loThresh;
 	var crossed;
 	
-	*new {Êarg hiThresh = 0, loThresh = 0;
+	*new { arg hiThresh = 0, loThresh = 0;
 		^super.new.prInit( hiThresh, loThresh ).reset;
 	}
 	
@@ -91,7 +91,7 @@ EGM_thresh1T : EGM_thresh1 {
 	
 	// numFrames: minimum number of frames to occur between
 	// two triggers
-	*new {Êarg hiThresh = 0, loThresh = 0, numFrames = 1;
+	*new { arg hiThresh = 0, loThresh = 0, numFrames = 1;
 		// dirty: reset gets called twice
 		^super.new( hiThresh, loThresh ).prInit1T( numFrames ).reset;
 	}
