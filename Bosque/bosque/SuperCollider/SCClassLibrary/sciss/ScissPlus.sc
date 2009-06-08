@@ -1,12 +1,12 @@
 /*
- *	(C)opyright 2006-2008 Hanns Holger Rutz. All rights reserved.
+ *	(C)opyright 2006-2009 Hanns Holger Rutz. All rights reserved.
  *	Distributed under the GNU General Public License (GPL).
  *
  *	Changelog
  *		04-Feb-08 - not overwriting Main:recvOSCmessage any more
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.19, 26-Jul-08
+ *	@version	0.21, 26-Apr-09
  */
 
 /**
@@ -32,7 +32,7 @@
 //		action.value( this );
 //	}
 
-	asView { ^numberView; }
+	asView { ^numberView }
 }
 
 //+ JEZSlider {
@@ -160,10 +160,22 @@
 	}
 }
 
-+ Main {
-	run {
-		if( ScissUtil.runPath.notNil, {
-			ScissUtil.runPath.load;
+//+ Main {
+//	run {
+//		if( ScissUtil.runPath.notNil, {
+//			ScissUtil.runPath.load;
+//		});
+//	}
+//}
+
++ Object {
+	tryChanged { arg ... args;
+		dependantsDictionary.at( this ).copy.do({ arg item;
+			try {
+				item.update( this, *args );
+			} { arg e;
+				e.reportError;
+			};
 		});
 	}
 }

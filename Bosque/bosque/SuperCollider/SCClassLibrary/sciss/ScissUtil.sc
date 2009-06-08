@@ -1,19 +1,23 @@
 /**
- *	(C)opyright 2006-2008 Hanns Holger Rutz. All rights reserved.
+ *	(C)opyright 2006-2009 Hanns Holger Rutz. All rights reserved.
  *	Distributed under the GNU General Public License (GPL).
  *
  *	Class dependancies: TypeSafe
  *
- *	@version	0.22, 19-Aug-08
+ *	@version	0.25, 26-May-09
  *	@author	Hanns Holger Rutz
  */
 ScissUtil
 {
-	classvar <>runPath;
+//	classvar <>runPath;
 
 	// String:toUpper is missing!!
 	*stringToUpper { arg str;
 		^str.collect(_.toUpper);
+	}
+
+	*stringToLower { arg str;
+		^str.collect(_.toLower);
 	}
 
 	*speakerTest { arg numChannels = 8, channelOffset = 0, volume = 0.1;
@@ -285,14 +289,14 @@ ScissUtil
 					if( isAIFC, {
 						switch( f.getInt32,
 						0x4E4F4E45, { }, // NONE_MAGIC
-						0x696E3136, {ÊbitsPerSample = 16 }, // in16_MAGIC
-						0x696E3234, {ÊbitsPerSample = 24 }, // in24_MAGIC
+						0x696E3136, { bitsPerSample = 16 }, // in16_MAGIC
+						0x696E3234, { bitsPerSample = 24 }, // in24_MAGIC
 						0x696E3332, { bitsPerSample = 32 }, // in32_MAGIC
 						0x666C3332, { bitsPerSample = 32 }, // fl32_MAGIC
 						0x464C3332, { bitsPerSample = 32 }, // FL32_MAGIC
-						0x666C3634, {ÊbitsPerSample = 64 }, // fl64_MAGIC
-						0x464C3634, {ÊbitsPerSample = 64 }, // FL64_MAGIC
-						0x736F7774, {ÊbitsPerSample = 16 }, // 'sowt' (16-bit PCM little endian)
+						0x666C3634, { bitsPerSample = 64 }, // fl64_MAGIC
+						0x464C3634, { bitsPerSample = 64 }, // FL64_MAGIC
+						0x736F7774, { bitsPerSample = 16 }, // 'sowt' (16-bit PCM little endian)
 						{
 							Error( "Unknown AIFC compression" ).throw;
 						}
@@ -336,5 +340,48 @@ ScissUtil
 		}, {
 			^func.fork( *args );
 		});
+	}
+	
+	*fostexRenamingGUI {
+		var w, months, f;
+		months = [ "jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec" ];
+		f = { JSCView.currentDrag.asArray.select( _.isKindOf( PathName )).select({ arg p; "B[0-2][0-9]h[0-5][0-9]m[0-5][0-9]s[0-3][0-9][a-z][a-z][a-z][0-9][0-9][0-9][0-9].wav".matchRegexp( p.fileName )})};
+		w = JSCWindow( "Fostex FR-2 Renaming", Rect( 0, 0, 176, 76 ), resizable: false );
+		ScissUtil.positionOnScreen( w, 0.8, 0.2 );
+		JSCDragSink( w, Rect( 4, 4, 168, 68 ))
+			.string_( "Drop FR-2 named WAV files" )
+			.canReceiveDragHandler_({ f.value.notEmpty })
+			.action_({ arg view;
+				var paths, dir, file, cmd, oldPath, newPath, date, year, month, day, hour, minute, second, result;
+				paths = f.value;
+				view.string = "Processing % files...".format( paths.size );
+				paths.do({ arg p;
+					dir		= p.pathOnly;
+					file		= p.fileName;
+					oldPath	= p.fullPath;
+					newPath	= oldPath;
+					year		= file.copyRange( 15, 18 ).asInteger;
+					month	= months.detectIndex({ arg m; m == file.copyRange( 12, 14 )});
+					day		= file.copyRange( 10, 11 ).asInteger;
+					hour		= file.copyRange( 1, 2 ).asInteger;
+					minute	= file.copyRange( 4, 5 ).asInteger;
+					second	= file.copyRange( 7, 8 ).asInteger;
+					if( month.notNil, {
+						month	= month + 1;
+						date		= Date( year, month, day, hour, minute, second, 0, 0, 0 );
+						newPath	= dir +/+ "Rec%.wav".format( date.stamp );
+						cmd		= "mv % %".format( oldPath.escapeChar($ ), newPath.escapeChar($ ));
+						cmd.postln;
+						result	= cmd.systemCmd;
+						if( result != 0, {
+							"FAILED with result %!\n".postf( result );
+						});
+					}, {
+						("Filename includes illegal month:" + file).error;
+					});
+				});
+				view.string = "Renamed % files.".format( paths.size );
+			});
+		^w.front;
 	}
 }

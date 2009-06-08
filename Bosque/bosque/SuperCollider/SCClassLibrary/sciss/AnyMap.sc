@@ -55,7 +55,7 @@ AnyMap {
 		nilRef	= Object.new;
 	}
 	
-	put {Êarg key, value;
+	put { arg key, value;
 		dict.put( key, value ? nilRef );
 	}
 	

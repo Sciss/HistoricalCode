@@ -1,5 +1,5 @@
 /**
- *	(C)opyright 2006-2007 Hanns Holger Rutz. All rights reserved.
+ *	(C)opyright 2006-2008 Hanns Holger Rutz. All rights reserved.
  *	Distributed under the GNU General Public License (GPL).
  *
  *	Class dependancies: TypeSafe
@@ -9,8 +9,9 @@
  *	Changelog:
  *		30-Jun-06		added setTarget
  *		15-Aug-07		added support for OSCBundle
+ *		25-Jun-08		using thisProcess.platform.recordingsDir, and +/+
  *
- *	@version	0.13, 15-Aug-07
+ *	@version	0.16, 21-Apr-09
  *	@author	Hanns Holger Rutz
  *
  *	@todo	peak meter
@@ -21,7 +22,7 @@ SimpleRecorder {
 	var <server;
 	var buf, <node, <>headerFormat = "aiff", <>sampleFormat = "float"; 	var <channelOffset		= 0;
 	var <numChannels		= 2;
-	var <>folder			= "recordings/";
+	var <>folder; //		= "recordings/";
 	var window;
 	var <isPrepared		= false;
 	var recentPath		= nil;
@@ -45,7 +46,8 @@ SimpleRecorder {
 	}
 	
 	prInitRecorder { arg argServer;
-		server = server ?? Server.default;
+		server	= server ?? Server.default;
+		folder	= thisProcess.platform.recordingsDir
 	}
 
 	revealInFinder {
@@ -62,12 +64,12 @@ SimpleRecorder {
 	
 	channelOffset_ { arg off;
 		channelOffset = off;
-		this.changed( \channelOffset );
+		this.tryChanged( \channelOffset );
 	}
 
 	numChannels_ { arg num;
 		numChannels = num;
-		this.changed( \numChannels );
+		this.tryChanged( \numChannels );
 	}
 	
 	setTarget { arg group, addAction = \addToTail;
@@ -101,10 +103,10 @@ SimpleRecorder {
 			if( node.isNil, {
 				node = Synth( "simpleRecorder" ++ buf.numChannels,
 					[ \i_buf,  buf.bufnum, \i_bus, channelOffset ], target ?? { RootNode( server )}, targetAddAction );
-				this.changed( \started );
+				this.tryChanged( \started );
 			}, {
 				node.run( true );
-				this.changed( \resumed );
+				this.tryChanged( \resumed );
 			});
 			"Recording".postln;
 		});
@@ -134,7 +136,7 @@ SimpleRecorder {
 		if( node.notNil, {
 			node.run( false );
 			"Paused".postln;
-			this.changed( \paused );
+			this.tryChanged( \paused );
 		}, {
 			"Not Recording".warn;
 		});
@@ -150,7 +152,7 @@ SimpleRecorder {
 			buf.close({ arg buf; buf.free; });
 			buf = nil; 
 			isPrepared = false;
-			this.changed( \stopped );
+			this.tryChanged( \stopped );
 		}, {
 			"Not Recording".warn;
 		});
@@ -161,7 +163,7 @@ SimpleRecorder {
 		if( this.prepareToBundle( bundle, path ), {
 			CmdPeriod.add( this );
 			isPrepared = true;
-			this.changed( \prepared );
+			this.tryChanged( \prepared );
 			bundle.send( server );
 			^true;
 		}, {
@@ -172,7 +174,7 @@ SimpleRecorder {
 	prepareToBundle { arg bundle, path;
 		var def;
 		if( path.isNil, {
-			path = folder ++ "SC_" ++ Date.localtime.stamp ++ "." ++ headerSuffix[ headerFormat.asSymbol ];
+			path = folder +/+ "SC_" ++ Date.localtime.stamp ++ "." ++ headerSuffix[ headerFormat.asSymbol ];
 		});
 		if( isPrepared, {
 			TypeSafe.methodError( thisMethod, "Already armed or recording" );
@@ -212,7 +214,7 @@ SimpleRecorder {
 			buf = nil;
 		});
 		isPrepared = false;
-		this.changed( \cmdPeriod );
+		this.tryChanged( \cmdPeriod );
 		CmdPeriod.remove( this );
 	}
 	
@@ -224,7 +226,7 @@ SimpleRecorder {
 		
 		if( w.isNil, {
 			w = window		= GUI.window.new( "Recorder for Server '" ++ server.name.asString ++ "'",
-								Rect( 10, SCWindow.screenBounds.height - 96, 340, 46 ), resizable: false );
+								Rect( 10, GUI.window.screenBounds.height - 96, 340, 46 ), resizable: false );
 			w.view.decorator	= FlowLayout( w.view.bounds );
 		});
 
@@ -234,6 +236,7 @@ SimpleRecorder {
 				[ "record >", Color.red,   Color.gray( 0.1 )],
 				[ "stop []",  Color.black, Color.red ]
 			])
+//			.value_( if( node.isNil, { if( isPrepared, 1, 0 )}, 2 ))
 			.action_({ arg b;
 				case { b.value == 1 }
 				{
@@ -261,7 +264,7 @@ SimpleRecorder {
 			.align_( \right )
 			.object_( channelOffset )
 			.action_({ arg b;
-				this.channelOffset_( b.value );
+				this.channelOffset_( b.value.asInteger );
 			});
 			
 		GUI.staticText.new( w, Rect( 0, 0, 48, 24 ))
@@ -272,7 +275,7 @@ SimpleRecorder {
 			.align_( \right )
 			.object_( numChannels )
 			.action_({ arg b;
-				this.numChannels_( b.value );
+				this.numChannels_( b.value.asInteger );
 			});
 	
 		serverRunning = {
@@ -368,6 +371,14 @@ SimpleRecorder {
 				recTimerTask = Task( recTimerFunc, SystemClock );
 				if( server.serverRunning, serverRunning );
 			});
+			
+		if( isPrepared, {
+			if( node.isNil, {
+				ctlr2.update( this, \prepared );
+			}, {
+				ctlr2.update( this, \started );
+			});
+		});
 
 		w.onClose = {
 			window = nil;

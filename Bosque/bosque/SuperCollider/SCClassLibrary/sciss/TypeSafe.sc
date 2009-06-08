@@ -1,25 +1,25 @@
 /**
- *	(C)opyright 2006 Hanns Holger Rutz. All rights reserved.
+ *	(C)opyright 2006-2008 Hanns Holger Rutz. All rights reserved.
  *	Distributed under the GNU General Public License (GPL).
  *
  *	Class dependancies: (none)
  *
- *	@version	0.11, 20-Jul-06
+ *	@version	0.12, 29-Oct-08
  *	@author	Hanns Holger Rutz
  */
 TypeSafe {
 	classvar <>enabled = true;
 
 	*methodInform { arg method, message;
-		(method.ownerClass.name ++ "." ++ method.name ++ " : " ++ message).inform;
+		(method.ownerClass.name ++ ":" ++ method.name ++ " : " ++ message).inform;
 	}
 
 	*methodWarn { arg method, message;
-		(method.ownerClass.name ++ "." ++ method.name ++ " : " ++ message).warn;
+		(method.ownerClass.name ++ ":" ++ method.name ++ " : " ++ message).warn;
 	}
 
 	*methodError { arg method, message;
-		(method.ownerClass.name ++ "." ++ method.name ++ " failed: " ++ message).error;
+		(method.ownerClass.name ++ ":" ++ method.name ++ " failed: " ++ message).error;
 	}
 
 	*checkArgResp { arg method, obj ... selectors;
@@ -27,7 +27,7 @@ TypeSafe {
 		
 		selectors.do({ arg selector;
 			if( obj.respondsTo( selector ).not, {
-				(method.ownerClass.name ++ "." ++ method.name ++ " : Argument type mismatch : " ++
+				(method.ownerClass.name ++ ":" ++ method.name ++ " : Argument type mismatch : " ++
 				obj.class ++ " does not respond to '" ++ selector ++ "'").error;
 				^false;
 			});
@@ -40,7 +40,7 @@ TypeSafe {
 
 		if( obj.isNil, {
 			if( nilAllowed.not, {
-				(method.ownerClass.name ++ "." ++ method.name ++
+				(method.ownerClass.name ++ ":" ++ method.name ++
 					" : Argument type mismatch : nil not allowed").error;
 				^false;
 			});
@@ -57,7 +57,7 @@ TypeSafe {
 			if( obj.isKindOf( class ), { ^true; });
 		});
 		
-		(method.ownerClass.name ++ "." ++ method.name ++
+		(method.ownerClass.name ++ ":" ++ method.name ++
 			" : Argument type mismatch").error;
 		^false;
 	}
@@ -66,11 +66,11 @@ TypeSafe {
 		if( enabled.not, { ^true; });
 		
 		if( nilAllowed.not && obj.isNil, {
-			(method.ownerClass.name ++ "." ++ method.name ++
+			(method.ownerClass.name ++ ":" ++ method.name ++
 				" : Argument type mismatch : nil not allowed").error;
 			^false;
 		}, { if( obj.isNil.not && obj.isKindOf( kind ).not, {
-			(method.ownerClass.name ++ "." ++ method.name ++ " : Argument type mismatch : " ++
+			(method.ownerClass.name ++ ":" ++ method.name ++ " : Argument type mismatch : " ++
 				obj.class ++ " is not a kind of " ++ kind).error;
 			^false;
 		})});
@@ -86,12 +86,12 @@ TypeSafe {
 		
 		args.do({ arg agga, idx;
 			if( nilAllowed[ idx ].not && agga.isNil, {
-				(method.ownerClass.name ++ "." ++ method.name ++
+				(method.ownerClass.name ++ ":" ++ method.name ++
 					" : Argument type mismatch (" ++ method.argNames[ idx + 1 ] ++
 					") : nil not allowed").error;
 				success = false;
 			}, { if( agga.isNil.not && agga.isKindOf( classes[ idx ]).not, {
-				(method.ownerClass.name ++ "." ++ method.name ++
+				(method.ownerClass.name ++ ":" ++ method.name ++
 					" : Argument type mismatch (" ++ method.argNames[ idx + 1 ] ++
 					") : " ++ agga.class ++ " is not a kind of " ++ classes[ idx ]).error;
 				success = false;
