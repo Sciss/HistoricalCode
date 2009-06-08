@@ -93,7 +93,7 @@ extends SessionCollection
 		public static Edit add( Object source, MutableSessionCollection msc,
 								SessionObject... collToAdd )
 		{
-			final Edit e = new Edit( getResourceString( "editAddSessionObjects" ),
+			final Edit e = new Edit( "editAddSessionObjects",
 			                         source, msc, Arrays.asList( collToAdd ),
 			                         Collections.EMPTY_LIST );
 			return e;
@@ -102,7 +102,7 @@ extends SessionCollection
 		public static Edit remove( Object source, MutableSessionCollection msc,
 								   SessionObject... collToRemove )
 		{
-			final Edit e = new Edit( getResourceString( "editRemoveSessionObjects" ),
+			final Edit e = new Edit( "editRemoveSessionObjects",
 			                         source, msc, Collections.EMPTY_LIST,
 			                         Arrays.asList( collToRemove ));
 			return e;
@@ -157,7 +157,8 @@ extends SessionCollection
 
 		public String getPresentationName()
 		{
-			return name; // return getResourceString( "editAddSessionObjects" );
+//			return name; // return getResourceString( "editAddSessionObjects" );
+			return getResourceString( name );
 		}
 	}
 }

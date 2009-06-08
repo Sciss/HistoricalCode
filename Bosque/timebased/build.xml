@@ -5,13 +5,14 @@
 <project name="TimeBased" default="main">
 	<property name="src.dir"		value="src"/>
 	<property name="build.dir"		value="build"/>
+	<property name="dist.dir"		value="dist"/>
 	<property name="classes.dir"	value="${build.dir}/classes"/>
 	<property name="jar.file"		value="${ant.project.name}.jar"/>
 	<property name="resources.dir"	value="resources"/>
 	<property name="main-class"		value="de.sciss.timebased.Main"/>
 	<property name="lib.dir"		value="libraries"/>
 	<property name="libraries"		value="${lib.dir}/MRJAdapter.jar:${lib.dir}/SwingOSC.jar"/>
-	<property name="version"		value="0.11"/>
+	<property name="version"		value="0.12"/>
 	<property name="debug"			value="true"/>
 
 	<target name="clean">
@@ -48,5 +49,12 @@
         <java jar="${jar.file}" fork="true">
         	<!-- <arg value="..."/> -->
     	</java>
+	</target>
+	<target name="dist" depends="clean,jar">
+		<!-- sucky zip task don't create separate folder -->
+		<dirname property="parent.dir" file="${basedir}"/>
+		<basename property="folder.name" file="${basedir}"/>
+		<mkdir dir="${dist.dir}"/>
+		<zip destfile="${dist.dir}/${ant.project.name}-${version}.zip" basedir="${parent.dir}" includes="${folder.name}/**" excludes="${folder.name}/${classes.dir}/**, ${folder.name}/${dist.dir}, **/.DS_Store"/>
 	</target>
 </project>
