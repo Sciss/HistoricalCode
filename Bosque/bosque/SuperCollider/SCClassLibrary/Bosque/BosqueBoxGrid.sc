@@ -2,8 +2,16 @@
 // GNU licence - google it.
 // modified by Andre Bartetzki:
 // GUI-Support
-// // SCISS FIXED 21-Aug-07
 
+/**
+ *	Changelog:
+ *		- 21-Aug-07 fixing things
+ *		- 14-Jun-09 fixing for relative origin = true
+ *
+ *	@author	Thor Magnusson
+ *	@author	André Bartetzki
+ *	@author	Hanns Holger Rutz
+ */
 BosqueBoxGrid {
 
 	var <>gridNodes; 
@@ -126,7 +134,7 @@ BosqueBoxGrid {
 			.keyDownAction_({ |me, key, modifiers, unicode |				keyDownAction.value(key, modifiers, unicode);
 				this.refresh;
 			})
-			.drawFunc_({arg view; var bounds = view.bounds, fillrect;
+			.drawFunc_({arg view; var bounds = view.bounds.moveTo( 0, 0 ), fillrect;
 				pen.width = 1;
 				//background.set; // background color
 				pen.color = background;
@@ -367,7 +375,7 @@ pen.strokeRect(fillrect);
 	}
 
 	// local function
-	findNode {arg x, y; var rect, bounds = this.bounds;
+	findNode {arg x, y; var rect, bounds = this.bounds.moveTo( 0, 0 );
 		gridNodes.do({arg row;
 			row.do({arg node;
 // SCISS FIXED
