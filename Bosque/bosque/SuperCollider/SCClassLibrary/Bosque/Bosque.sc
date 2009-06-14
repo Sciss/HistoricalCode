@@ -2,7 +2,7 @@
  *	Bosque
  *	(Bosque)
  *
- *	Copyright (c) 2007-2008 Hanns Holger Rutz. All rights reserved.
+ *	Copyright (c) 2007-2009 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.30, 26-Oct-08
+ *	@version	0.31, 14-Jun-09
  */
 Bosque : Object {
 	classvar <>default;
@@ -531,9 +531,9 @@ if( createCC, {
 	}
 	
 	*createMouseEvent { arg view, x, y, modifiers, buttonNumber, clickCount;
-		var e = Event.new, bounds = view.bounds;
-		e[ \x ] = x - bounds.left;
-		e[ \y ] = y - bounds.top;
+		var e = AnyMap.new /*, bounds = view.bounds */;
+		e[ \x ] = x; // - bounds.left;
+		e[ \y ] = y; // - bounds.top;
 		e[ \clickCount ] = clickCount;
 		e[ \button ] = buttonNumber;
 		e[ \component ] = view;

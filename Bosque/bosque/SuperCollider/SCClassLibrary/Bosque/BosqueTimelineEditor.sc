@@ -2,7 +2,7 @@
  *	BosqueTimelineEditor
  *	(Bosque)
  *
- *	Copyright (c) 2007-2008 Hanns Holger Rutz. All rights reserved.
+ *	Copyright (c) 2007-2009 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -30,7 +30,7 @@
  *	Class dependancies: ScissUtil, ScissPlus, BosqueBoxGrid
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.36, 26-Oct-08
+ *	@version	0.37, 14-Jun-09
  */
 BosqueTimelineEditor : Object {
 	var <bosque;
@@ -711,7 +711,7 @@ BosqueTimelineEditor : Object {
 	}
 	
 	openFile { arg doc, path;
-		var f, fPath, text;
+		var f, fPath, text, found;
 		this.prFileNew( doc, ignoreDirty: true );
 		try {
 			f = File( path, "r" );
@@ -720,14 +720,21 @@ BosqueTimelineEditor : Object {
 //					text.postln;
 			text.interpret.value( doc );
 			doc.path = path;
-			fPath = path.splitext.first ++ "Func.rtf";
-			if( File.exists( fPath ), {
-				("Opening func file '" ++fPath++"'...").postln;
-				{ var doc = Document.open( fPath );
-				  { doc.text.interpret }.fork( AppClock )
-				}.defer;
-			}, {
-				("\nFunc file '" ++fPath++"' not found!").postln;
+			found = block { arg break;
+				[ "Func.scd", "Func.rtf" ].do({ arg suffix;
+					fPath = path.splitext.first ++ suffix;
+					if( File.exists( fPath ), {
+						("Opening func file '" ++fPath++"'...").postln;
+						{ var doc = Document.open( fPath );
+						  { doc.text.interpret }.fork( AppClock )
+						}.defer;
+						break.value( true );
+					});
+				});
+				false;
+			};
+			if( found.not, {
+					("\nFunc file for '" ++path++"' not found!").postln;
 			});
 		} { arg error;
 			error.reportError;
