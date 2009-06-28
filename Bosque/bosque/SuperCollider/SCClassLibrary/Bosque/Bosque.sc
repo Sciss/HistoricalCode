@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.31, 14-Jun-09
+ *	@version	0.31, 28-Jun-09
  */
 Bosque : Object {
 	classvar <>default;
@@ -332,10 +332,15 @@ Bosque : Object {
 		});
 	
 		(1..mbc).do({ arg numChannels;
-			SynthDef( \bosqueDiskIn ++ numChannels, { arg out, i_bufNum, i_dur, i_fadeIn, i_fadeOut, amp = 1;
-				var env;
-				env = EnvGen.kr( Env.linen( i_fadeIn, i_dur - (i_fadeIn + i_fadeOut), i_fadeOut, 1.0, \lin ), doneAction: 2 ) * amp;
-				Out.ar( out, DiskIn.ar( numChannels, i_bufNum ) * env );
+			SynthDef( \bosqueDiskIn ++ numChannels, { arg out, i_bufNum, i_dur, i_fadeIn, i_fadeOut, amp = 1,
+			                                              i_finTyp = 1, i_foutTyp = 1;
+				var env, envGen;
+//				env = Env.linen( i_fadeIn, i_dur - (i_fadeIn + i_fadeOut), i_fadeOut, 1.0, \lin );
+				env = Env([ 0, 1, 1, 0 ],
+				          [ i_fadeIn, i_dur - (i_fadeIn + i_fadeOut), i_fadeOut ],
+				          [ i_finTyp, 1, i_foutTyp ]);
+				envGen = EnvGen.kr( env, doneAction: 2 ) * amp;
+				Out.ar( out, DiskIn.ar( numChannels, i_bufNum ) * envGen );
 //				OffsetOut.ar( out, DiskIn.ar( numChannels, i_bufNum ) * env );
 			}).send( scsynth );
 		});

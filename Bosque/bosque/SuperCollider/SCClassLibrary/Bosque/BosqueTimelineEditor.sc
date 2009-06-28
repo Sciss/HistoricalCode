@@ -30,7 +30,7 @@
  *	Class dependancies: ScissUtil, ScissPlus, BosqueBoxGrid
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.37, 14-Jun-09
+ *	@version	0.37, 27-Jun-09
  */
 BosqueTimelineEditor : Object {
 	var <bosque;
@@ -974,10 +974,10 @@ BosqueTimelineEditor : Object {
 		});
 	}
 	
-	insertSpan { arg doc, span;
+	insertSpan { arg doc, span, touchMode;
 		var ce;
 		ce = JSyncCompoundEdit( "Insert Time Span" );
-		doc.editInsertTimeSpan( this, span, ce );
+		doc.editInsertTimeSpan( this, span, ce, touchMode );
 		ce.addPerform( BosqueTimelineViewEdit.select( this, doc.timelineView, span ));
 		doc.undoManager.addEdit( ce.performAndEnd );
 	}

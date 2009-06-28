@@ -2,7 +2,7 @@
  *	BosqueSession
  *	(Bosque)
  *
- *	Copyright (c) 2007-2008 Hanns Holger Rutz. All rights reserved.
+ *	Copyright (c) 2007-2009 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.30, 26-Oct-08
+ *	@version	0.30, 27-Jun-09
  */
 BosqueSession : Object {
 	var <bosque;
@@ -195,10 +195,10 @@ BosqueSession : Object {
 	
 	isDirty { ^dirty }
 
-	editInsertTimeSpan { arg source, span, ce;
+	editInsertTimeSpan { arg source, span, ce, touchMode;
 		trails.do({ arg t;
 			t.editBegin( ce );
-			t.editInsertSpan( source, span, nil, ce );
+			t.editInsertSpan( source, span, touchMode, ce );
 			t.editEnd( ce );
 		});
 		ce.addPerform( BosqueTimelineEdit.span( source, this, timeline.span.replaceStop( timeline.span.stop + span.length )));

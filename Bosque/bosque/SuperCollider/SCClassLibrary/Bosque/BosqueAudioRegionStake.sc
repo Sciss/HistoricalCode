@@ -2,7 +2,7 @@
  *	BosqueAudioRegionStake
  *	(Bosque)
  *
- *	Copyright (c) 2007-2008 Hanns Holger Rutz. All rights reserved.
+ *	Copyright (c) 2007-2009 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -28,7 +28,7 @@
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.19, 18-Aug-08
+ *	@version	0.20, 28-Jun-09
  */
 BosqueAudioRegionStake : BosqueRegionStake {
 	var <audioFile;
@@ -123,7 +123,7 @@ BosqueAudioRegionStake : BosqueRegionStake {
 		fadeFrames	= if( frameOffset == 0, { min( durFrames, fadeIn.numFrames )}, 0 );  // XXX a little bit cheesy!
 		fadeInSecs	= fadeFrames / s.sampleRate;
 		fadeOutSecs	= min( durFrames - fadeFrames, fadeOut.numFrames ) / s.sampleRate;
-		bndl.add( synth.newMsg( player.diskGroup, [ \i_bufNum, buffer.bufnum, \i_dur, durSecs, \i_fadeIn, fadeInSecs, \i_fadeOut, fadeOutSecs, \amp, gain, \out, track.busConfig.bus.index ]));
+		bndl.add( synth.newMsg( player.diskGroup, [ \i_bufNum, buffer.bufnum, \i_dur, durSecs, \i_fadeIn, fadeInSecs, \i_finTyp, fadeIn.type, \i_fadeOut, fadeOutSecs, \i_foutTyp, fadeOut.type, \amp, gain, \out, track.busConfig.bus.index ]));
 		player.nw.register( synth );
 		UpdateListener.newFor( synth, { arg upd, obj, what;
 			if( what === \n_end, {
