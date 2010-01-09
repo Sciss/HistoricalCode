@@ -58,7 +58,7 @@ import de.sciss.timebased.timeline.TimelineView;
  *  timeline.
  *
  *  @author		Hanns Holger Rutz
- *  @version	0.70, 19-Jul-08
+ *  @version	0.70, 09-Jan-10
  */
 public class TimelineAxis
 extends Axis
@@ -171,17 +171,17 @@ implements	TimelineView.Listener,
 //        recalcSpace();
 	}
 	
-	public void setEditor( TimelineView.Editor editor )
+	public void setEditor( TimelineView.Editor newEditor )
 	{
-		if( this.editor != editor ) {
-			this.editor = editor;
-			if( editor != null ) {
-				this.addMouseListener( mil );
-				this.addMouseMotionListener( mil );
-			} else {
+		if( editor != newEditor ) {
+			if( (editor != null) && (newEditor == null) ) {
 				this.removeMouseListener( mil );
 				this.removeMouseMotionListener( mil );
+			} else if( (editor == null) && (newEditor != null) ) {
+				this.addMouseListener( mil );
+				this.addMouseMotionListener( mil );
 			}
+			editor = newEditor;
 		}
 	}
 
