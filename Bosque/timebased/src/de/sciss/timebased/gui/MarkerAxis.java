@@ -336,19 +336,19 @@ implements	TimelineView.Listener,
 		triggerRedisplay();
 	}
 	
-	public void setEditor( Trail.Editor editor )
+	public void setEditor( Trail.Editor newEditor )
 	{
-		if( this.editor != editor ) {
-			this.editor = editor;
-			if( editor != null ) {
-				this.addMouseListener( mil );
-				this.addMouseMotionListener( mil );
-				this.addKeyListener( kl );
-			} else {
+		if( editor != newEditor ) {
+			if( (editor != null) && (newEditor == null) ) {
 				this.removeMouseListener( mil );
 				this.removeMouseMotionListener( mil );
 				this.removeKeyListener( kl );
+			} else if( (editor == null) && (newEditor != null) ){
+				this.addMouseListener( mil );
+				this.addMouseMotionListener( mil );
+				this.addKeyListener( kl );
 			}
+			editor = newEditor;
 		}
 	}
 
