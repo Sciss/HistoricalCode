@@ -113,6 +113,19 @@ Bosque : Object {
 		scsynth		= Server.default; // Server( \bosque, VerboseNetAddr( "127.0.0.1", 57001 )); // Server.default;
 	  swing.waitForBoot({
 
+// THERE IS A CRAZY BUG WITH de.sciss.gui.NumberField not firing any property changes for "value" any more
+// after launching bosque. If we create a numberfield in advance, the bug doesn't show up. Maybe
+// a classloader confusion that we cannot see yet...???
+{
+  var w, b;
+    
+    w = JSCWindow( "JSCNumberBox" );
+    b = JSCNumberBox( w, Rect( 10, 10, 100, 30 ));
+//    b.value = rrand( 1, 15 );
+//    b.action = { arg numb; numb.value.postln };
+//  w.front;
+}.value;
+
 		if( timeBasedJar.notNil, {
 			swing.addClasses( timeBasedJar );
 		});

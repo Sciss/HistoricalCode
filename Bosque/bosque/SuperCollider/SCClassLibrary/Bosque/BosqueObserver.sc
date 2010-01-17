@@ -88,11 +88,12 @@ BosqueObserver {
 			.action_({ arg b; var frames, framesC;
 				if( stake.notNil, {
 					frames 	= (b.value / 1000 * doc.timeline.rate).asInteger;
-					framesC	= frames .clip( 0, stake.span.length - stake.fadeOut.numFrames );
+					framesC	= frames.clip( 0, stake.span.length - stake.fadeOut.numFrames );
+//[ "frames", frames, "b.value", b.value, "rate", doc.timeline.rate, "framesC", framesC, "span.span", stake.span ].postln;
 					if( frames != framesC, {
 						b.value = (framesC / doc.timeline.rate * 1000).asInteger;
 					});
-					this.prModify( \replaceFadeIn, stake.fadeOut.replaceFrames( framesC ));
+					this.prModify( \replaceFadeIn, stake.fadeIn.replaceFrames( framesC ));
 				});
 			});
 		flow.nextLine;
@@ -101,7 +102,7 @@ BosqueObserver {
 			.action_({ arg b; var frames, framesC;
 				if( stake.notNil, {
 					frames 	= (b.value / 1000 * doc.timeline.rate).asInteger;
-					framesC	= frames .clip( 0, stake.span.length - stake.fadeIn.numFrames );
+					framesC	= frames.clip( 0, stake.span.length - stake.fadeIn.numFrames );
 					if( frames != framesC, {
 						b.value = (framesC / doc.timeline.rate * 1000).asInteger;
 					});
