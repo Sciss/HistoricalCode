@@ -2,7 +2,7 @@
  *	BosqueMovieView
  *	(Bosque)
  *
- *	Copyright (c) 2007-2008 Hanns Holger Rutz. All rights reserved.
+ *	Copyright (c) 2007-2010 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -24,18 +24,19 @@
  *
  *
  *	Changelog:
+ *		17-Jan-10   fixed timeline sync (now position is dispatched via timelineView)
  */
 
 /**
  *	@author	Hanns Holger Rutz
- *	@version	0.11, 26-Oct-08
+ *	@version	0.12, 17-Jan-10
  */
 BosqueMovieView {
 	var win, view;
 	var <path;
 	var <synced = false;
 	var <offset = 0.0;
-	var doc, updTransport, updTimeline;
+	var doc, updTransport, updTimeline, updTimelineView;
 	
 	*new {
 		^super.new.prInit;
@@ -44,7 +45,7 @@ BosqueMovieView {
 	prInit {
 	}
 	
-	makeGUI { arg path;
+	makeGUI {
 		var fntSmall, ggSync, ggOffset, gui, updThis;
 		
 		if( win.notNil, { ^this });
@@ -153,10 +154,13 @@ BosqueMovieView {
 				});
 				updTimeline = UpdateListener.newFor( doc.timeline, { arg upd, timeline, what, param1;
 					switch( what,
-					\position, {
-						this.position = param1 / doc.timeline.rate + offset;
-					},
 					\rate, {
+						this.position = param1 / doc.timeline.rate + offset;
+					});
+				});
+				updTimelineView = UpdateListener.newFor( doc.timelineView, { arg upd, timelineView, what, param1;
+					switch( what,
+					\positioned, {
 						this.position = param1 / doc.timeline.rate + offset;
 					});
 				});
@@ -168,6 +172,10 @@ BosqueMovieView {
 				if( updTimeline.notNil, {
 					updTimeline.remove;
 					updTimeline	= nil;
+				});
+				if( updTimelineView.notNil, {
+					updTimelineView.remove;
+					updTimelineView = nil;
 				});
 				doc	= nil;
 			});
