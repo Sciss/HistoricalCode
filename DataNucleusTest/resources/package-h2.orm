@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<!DOCTYPE orm SYSTEM "file:/javax/jdo/orm.dtd">
-<orm>
-<package name="de.sciss.datanucleustest">
-    <class name="Span" identity-type="datastore"></class>
-    <class name="SpanCollection" identity-type="datastore"></class>
-</package>
-</orm>
