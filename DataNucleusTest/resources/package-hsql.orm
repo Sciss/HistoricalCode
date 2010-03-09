@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!DOCTYPE orm SYSTEM "file:/javax/jdo/orm.dtd">
+<orm>
+    <package name="de.sciss.datanucleustest">
+        <class name="Span" identity-type="datastore" table="JDO_SPANS">
+            <inheritance strategy="new-table"/>
+            <field name="startVar">
+                <column name="SPAN_START" jdbc-type="BIGINT"/>
+            </field>
+            <field name="stopVar">
+                <column name="SPAN_STOP" jdbc-type="BIGINT"/>
+            </field>
+        </class>
+<!--
+        <class name="Book" identity-type="datastore" table="JDO_SPAN_COLL">
+            <inheritance strategy="new-table"/>
+            <field name="author">
+                <column length="40" jdbc-type="VARCHAR"/>
+            </field>
+            <field name="isbn">
+                <column length="20" jdbc-type="CHAR"/>
+            </field>
+            <field name="publisher">
+                <column length="40" jdbc-type="VARCHAR"/>
+            </field>
+        </class>
+-->
+    </package>
+</orm>
