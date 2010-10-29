@@ -1,9 +1,9 @@
 package de.sciss.synth.proc
 package impl
 
-class SwitchImpl[ C ]( init: Boolean )( implicit sys: System[ C ]) extends Switch[ C ] {
-   private val vr = sys.v( init )
+class SwitchImpl[ C ]( init: Boolean )( implicit c: Ctx[ C ]) extends Switch[ C ] {
+   private val vr = c.v( init )
 
-   def get( implicit c: C ) = vr.get
-   def set( v: Boolean )( implicit c: C ) = vr.set( v )
+   def get( implicit c: Ctx[ C ]) = vr.get
+   def set( v: Boolean )( implicit c: Ctx[ C ]) = vr.set( v )
 }

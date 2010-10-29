@@ -1,5 +1,5 @@
 /*
- *  EphemeralSystem.scala
+ *  KTemporalSystem.scala
  *  (SoundProcesses)
  *
  *  Copyright (c) 2009-2010 Hanns Holger Rutz. All rights reserved.
@@ -29,23 +29,31 @@
 package de.sciss.synth.proc
 
 import edu.stanford.ppl.ccstm.{STM, Txn, Ref}
+import de.sciss.confluent._
 
-object EphemeralSystem extends System[ EphemeralCtx ] {
-   private type C = Ctx[ EphemeralCtx ]
-   
-   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new EphemeralCtx( tx )))
-}
+object KTemporalSystem extends System[ KTemporalCtx ] {
+   private type C = Ctx[ KTemporalCtx ]
 
-class EphemeralCtx private[proc]( private[proc] val txn: Txn )
-extends Ctx[ EphemeralCtx ] {
-   private type C = Ctx[ EphemeralCtx ]
+   private val pathRef = Ref( VersionPath.init )
+
+   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new KTemporalCtx( tx )))
+
+ }
+
+class KTemporalCtx private[proc]( private[proc] val txn: Txn )
+extends Ctx[ KTemporalCtx ] {
+   private type C = Ctx[ KTemporalCtx ]
 
    def repr = this
-   def system = EphemeralSystem
-   def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ EphemeralCtx, T ] = new EVar( Ref( init ))
+   def system = KTemporalSystem
 
-   private class EVar[ /* @specialized */ T ]( ref: Ref[ T ]) extends Var[ EphemeralCtx, T ] {
-      def get( implicit c: C ) : T = ref.get( c.repr.txn )
-      def set( v: T )( implicit c: C ) : Unit = ref.set( v )( c.repr.txn )
+   def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ KTemporalCtx, T ] = {
+//      val ref = Ref[ T ]()
+      new KVar( Ref( init ))
    }
+
+   private class KVar[ /* @specialized */ T ]( ref: Ref[ T ]) extends Var[ KTemporalCtx, T ] {
+       def get( implicit c: C ) : T = ref.get( c.repr.txn )
+       def set( v: T )( implicit c: C ) : Unit = ref.set( v )( c.repr.txn )
+    }
 }
