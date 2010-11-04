@@ -1,0 +1,4 @@
+The filters (in package com.jhlabs.image) have been written by Jerry Huxtable and published on his website. There is no licensing information available.
+
+http://www.jhlabs.com/ip/filters/index.html
+

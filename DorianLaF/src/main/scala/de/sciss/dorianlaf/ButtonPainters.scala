@@ -3,9 +3,18 @@ package de.sciss.dorianlaf
 import javax.swing.UIManager
 import java.awt._
 import geom._
+import image.BufferedImageOp
 import util.Random
 import javax.swing.plaf.synth.{SynthConstants, SynthContext, SynthPainter}
+import com.jhlabs.image.UnsharpFilter
 
+object ButtonPainter {
+   lazy val opSharpen : BufferedImageOp = {
+      val res = new UnsharpFilter() // new WaveletSharpenImageOp
+      res.setRadius( 3f )
+      res
+   }
+}
 class ButtonPainter extends SynthPainter {
    override def paintButtonBackground( c: SynthContext, g: Graphics, x: Int, y0: Int, w: Int, h0: Int ) {
       val g2 = g.asInstanceOf[ Graphics2D ]

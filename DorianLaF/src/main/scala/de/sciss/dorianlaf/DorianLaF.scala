@@ -7,7 +7,7 @@ import java.io.{File, BufferedInputStream}
 
 object DorianLaF {
    def main( args: Array[ String ]) {
-      EventQueue.invokeLater( new Runnable { def run = demo })
+      EventQueue.invokeLater( new Runnable { def run = demo2 })
    }
 
    def demo {
@@ -15,7 +15,16 @@ object DorianLaF {
       val clz = DorianLaF.getClass
       syn.load( clz.getResourceAsStream( "DorianLaF.xml" ), clz )
       UIManager.setLookAndFeel( syn )
+      createSomeWidgets
+   }
 
+   def demo2 {
+      val laf = new DorianLookAndFeel
+      UIManager.setLookAndFeel( laf )
+      createSomeWidgets
+   }
+
+   def createSomeWidgets {
       val f       = new JFrame( "Frame" )
       val cp      = f.getContentPane
       cp.setLayout( new BoxLayout( cp, BoxLayout.Y_AXIS ))
