@@ -6,8 +6,18 @@ import javax.imageio.ImageIO
 import java.awt._
 
 object PanelBackgroundPainter {
-   lazy val pntCanvas = new TexturePaint( ImageIO.read(
-      PanelBackgroundPainter.getClass.getResourceAsStream( "canvas.png" )), new Rectangle( 0, 0, 128, 128 ))
+   lazy val pntCanvas = {
+      val imgGray = ImageIO.read( PanelBackgroundPainter.getClass.getResourceAsStream( "canvas.png" ))
+      val w = imgGray.getWidth
+      val h = imgGray.getHeight
+      val imgARGB = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
+         .getDefaultConfiguration().createCompatibleImage( w, h )
+      val g = imgARGB.createGraphics()
+      g.drawImage( imgGray, 0, 0, null )
+      g.dispose()
+      new TexturePaint( imgARGB, new Rectangle( 0, 0, w, h ))
+   }
+
    lazy val cmpCanvas = new ApplyCanvas
 }
 

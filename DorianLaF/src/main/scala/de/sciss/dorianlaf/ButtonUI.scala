@@ -4,11 +4,12 @@ import javax.swing.plaf.ComponentUI
 import javax.swing.border.Border
 import java.awt._
 import geom.{AffineTransform, Rectangle2D, Ellipse2D, Area}
-import image.{ConvolveOp, Kernel}
+import image.{BufferedImage, ConvolveOp, Kernel}
 import javax.swing.{SwingUtilities, LookAndFeel, AbstractButton, JComponent}
 import javax.swing.text.View
 import javax.swing.plaf.basic.{BasicHTML, BasicButtonUI}
 import sun.swing.SwingUtilities2
+import com.jhlabs.composite._
 
 object ButtonUI {
    def createUI( c: JComponent ) : ComponentUI = new ButtonUI
@@ -106,7 +107,7 @@ class ButtonUI extends BasicButtonUI {
 //   }
 
    // XXX TODO : remove references to sun class SwingUtilities2 
-   private def paintText2( g2: Graphics2D, b: AbstractButton, fm: FontMetrics, textRect: Rectangle, text: String ) {
+   private def paintText2( g2: Graphics2D, b: AbstractButton, fm: FontMetrics, textRect: Rectangle, text: String, colrBG: Color ) {
       val gc      = g2.getDeviceConfiguration()
 //      val img     = b.createImage( textRect.width, textRect.height )
       val img     = gc.createCompatibleImage( textRect.width, textRect.height )
@@ -115,8 +116,8 @@ class ButtonUI extends BasicButtonUI {
 //      val aaOld   = g2.getRenderingHint( RenderingHints.KEY_ANTIALIASING )
       val bm      = b.getModel
       val pressed = bm.isArmed && bm.isPressed
-      val colr = if( pressed ) Color.red else new Color( 0x80, 0x80, 0x80 )
-      imgG2.setColor( colr )
+//      val colr = /* if( pressed ) Color.red else */ new Color( 0x80, 0x80, 0x80 )
+      imgG2.setColor( colrBG )
       imgG2.fillRect( 0, 0, textRect.width, textRect.height )
       imgG2.setFont( g2.getFont )
       imgG2.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON )
@@ -140,7 +141,7 @@ class ButtonUI extends BasicButtonUI {
 //      g2.drawImage( img, textRect.x, textRect.y, b )
 //      val kernel = new Kernel( 3, 3, Array( 0f, -0.5f, 0f, -0.5f, 2f, -0.5f, 0f, -0.5f, 0f ))
 //      val op = new ConvolveOp( kernel )
-      val op = ButtonPainter.opSharpen
+      val op = if( pressed ) ButtonPainter.opShine else ButtonPainter.opSharpen
       g2.drawImage( img, op, textRect.x, textRect.y )
       img.flush()
 
@@ -172,14 +173,47 @@ class ButtonUI extends BasicButtonUI {
          if( b.getText() == null ) 0 else b.getIconTextGap() )
    }
 
-   private def paintButton( b: AbstractButton, g2: Graphics2D, x: Int, y: Int, w: Int, h: Int ) {
+   private def paintButton( b: AbstractButton, cg2: Graphics2D, x0: Int, y0: Int, w: Int, h: Int ) {
 //      val h = h0 - 2
 //      val y = y0 + 1
+      val gc      = cg2.getDeviceConfiguration()
+//      val img     = b.createImage( textRect.width, textRect.height )
+//      val img     = new BufferedImage( w, h, BufferedImage.TYPE_INT_RGB )
+
+      val img     = gc.createCompatibleImage( w, h, Transparency.TRANSLUCENT ) // textRect.width, textRect.height
+      val g2      = img.getGraphics().asInstanceOf[ Graphics2D ]
+//val g2 = cg2
+//      val atOrig2  = g2.getTransform
+
+//g2.setColor( Color.black )
+//g2.fillRect( 0, 0, w, h )
+
+//      val aaOld   = g2.getRenderingHint( RenderingHints.KEY_ANTIALIASING )
+      val bm      = b.getModel
+      val pressed = bm.isArmed && bm.isPressed
+//if( pressed ) g2.translate( 1, 1 )
+//      val colr = /* if( pressed ) Color.red else */ new Color( 0x80, 0x80, 0x80 )
+//      imgG2.setColor( colr )
+//      imgG2.fillRect( 0, 0, textRect.width, textRect.height )
+      g2.setFont( cg2.getFont )
+      g2.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON )
+val x = 0
+val y = 0
 
       val a0 = new Area( new Ellipse2D.Double( x+0, y + (h - (w-0)) * 0.5f, w-0, w-0 ))
       a0.intersect( new Area( new Rectangle2D.Double( x+0, y+0, w-0, h-0 )))
       g2.setColor( new Color( 0x00, 0x00, 0x00, 0x24 ))
       g2.fill( a0 )
+
+//      if( b.hasFocus ) {
+//         val strkOrig = g2.getStroke()
+//         val af = new Area( new Ellipse2D.Double( x+0, y + (h - (w-1)) * 0.5f, w-1, w-1 ))
+//         af.intersect( new Area( new Rectangle2D.Double( x+0, y+0, w-1, h-1 )))
+//         g2.setColor( new Color( 0xF0, 0xF0, 0xF0, 0xC0 ))
+//         g2.setStroke( new BasicStroke( 1f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10f, Array( 2f, 3f ), 0f ))
+//         g2.draw( af )
+//         g2.setStroke( strkOrig )
+//      }
 
       val a1 = new Area( new Ellipse2D.Double( x+1, y + (h - (w-2)) * 0.5f, w-2, w-2 ))
       a1.intersect( new Area( new Rectangle2D.Double( x+1, y+1, w-2, h-2 )))
@@ -193,27 +227,35 @@ class ButtonUI extends BasicButtonUI {
 
       val a3 = new Area( new Ellipse2D.Double( x+3, y + (h - (w-6)) * 0.5f, w-6, w-6 ))
       a3.intersect( new Area( new Rectangle2D.Double( x+3, y+3, w-6, h-6 )))
-      g2.setColor( new Color( 0xC0, 0xC0, 0xC0 ))
+      val colr3 = if( pressed ) new Color( 0xF0, 0xF0, 0xF0 ) else new Color( 0xC0, 0xC0, 0xC0 )
+      g2.setColor( colr3 )
       g2.fill( a3 )
 
       val a4 = new Area( new Ellipse2D.Double( x+4, y + (h - (w-8)) * 0.5f, w-8, w-8 ))
       a4.intersect( new Area( new Rectangle2D.Double( x+4, y+4, w-8, h-8 )))
-      g2.setColor( new Color( 0x96, 0x96, 0x96 ))
+      val colr4 = if( pressed ) new Color( 0xB6, 0xB6, 0xB6 ) else new Color( 0x96, 0x96, 0x96 )
+      g2.setColor( colr4 )
       g2.fill( a4 )
 
       val a5 = new Area( new Ellipse2D.Double( x+5, y + (h - (w-10)) * 0.5f, w-10, w-10 ))
       a5.intersect( new Area( new Rectangle2D.Double( x+5, y+5, w-10, h-10 )))
-      g2.setColor( new Color( 0x8A, 0x8A, 0x8A ))
+//      val colr5 = if( pressed ) new Color( 0xAA, 0xAA, 0xAA ) else new Color( 0x8A, 0x8A, 0x8A )
+      val colr5 = if( pressed ) new Color( 0xB2, 0xB2, 0xB2 ) else new Color( 0x92, 0x92, 0x92 ) 
+      g2.setColor( colr5 )
       g2.fill( a5 )
 
       val a6 = new Area( new Ellipse2D.Double( x+6, y + (h - (w-12)) * 0.5f, w-12, w-12 ))
       a6.intersect( new Area( new Rectangle2D.Double( x+6, y+6, w-12, h-12)))
 //      val state = c.getComponentState()
 //      val pressed = (state & SynthConstants.PRESSED) != 0
-      val bm = b.getModel
-      val pressed = bm.isArmed && bm.isPressed 
-      val colr = if( pressed ) Color.red else new Color( 0x80, 0x80, 0x80 )
-      g2.setColor( colr )
+//      val bm = b.getModel
+//      val pressed = bm.isArmed && bm.isPressed
+//      val colr = /* if( pressed ) Color.red else */ new Color( 0x80, 0x80, 0x80 )
+
+//      val colr6 = if( pressed ) new Color( 0xA0, 0xA0, 0xA0 ) else new Color( 0x80, 0x80, 0x80 )
+      val colr6 = if( pressed ) new Color( 0x90, 0x90, 0x90 ) else new Color( 0x70, 0x70, 0x70 )
+      g2.setColor( colr6 )
+//      g2.setPaint( new GradientPaint( x+6, y+6, new Color( 0x80, 0x80, 0x80 ), x+40, y+h-12, new Color( 0x60, 0x60, 0x60 )))
       g2.fill( a6 )
 
       val fm   = b.getFontMetrics( b.getFont() )
@@ -222,31 +264,77 @@ class ButtonUI extends BasicButtonUI {
 //      clearTextShiftOffset()
       
       if( text != null && text != "" ) {
-//            val v = c.getClientProperty( BasicHTML.propertyKey ).asInstanceOf[ View ]
-//            if( v != null ) {
-//                v.paint( g, textRect )
-//            } else {
-                paintText2( g2, b, fm, textRect, text )
-//            }
+         paintText2( g2, b, fm, textRect, text, colr6 )
+//         val mnemo = b.getDisplayedMnemonicIndex()
+//         if( bm.isEnabled() ) {
+//             g2.setColor( b.getForeground() )
+//             SwingUtilities2.drawStringUnderlineCharAt( b, g2, text, mnemo,
+//                0 /* textRect.x */ /* + getTextShiftOffset() */,
+//                /* textRect.y + */ fm.getAscent() /* + getTextShiftOffset() */)
+//         } else {
+//             g2.setColor( b.getBackground().brighter() )
+//             SwingUtilities2.drawStringUnderlineCharAt( b, g2, text, mnemo,
+//                /* textRect.x */ 0, /*textRect.y + */ fm.getAscent() )
+//             g2.setColor( b.getBackground().darker() )
+//             SwingUtilities2.drawStringUnderlineCharAt( b, g2, text, mnemo,
+//                /* textRect.x */ - 1, /* textRect.y + */ fm.getAscent() - 1 )
+//         }
+//
+////      g2.drawImage( img, textRect.x, textRect.y, b )
+////      val kernel = new Kernel( 3, 3, Array( 0f, -0.5f, 0f, -0.5f, 2f, -0.5f, 0f, -0.5f, 0f ))
+////      val op = new ConvolveOp( kernel )
+////         val op = if( pressed ) ButtonPainter.opShine else ButtonPainter.opSharpen
+//         g2.drawImage( img, ButtonPainter.opSharpen, textRect.x, textRect.y )
+////         img.flush()
       }
 
       g2.setPaint( PanelBackgroundPainter.pntCanvas )
       val cmpOrig = g2.getComposite
       val atOrig  = g2.getTransform
       g2.setComposite( PanelBackgroundPainter.cmpCanvas )
+//      g2.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER, 0.5f ))
+//      g2.setComposite( new PinLightComposite( 0.5f ))
       val winOff  = SwingUtilities.convertPoint( b, 0, 0, SwingUtilities.getWindowAncestor( b ))
-      // XXX we could do modulo canvas-size (128). is that better performance-wise?
+//      // XXX we could do modulo canvas-size (128). is that better performance-wise?
       g2.translate( -winOff.x, -winOff.y )
-      g2.fill( a3.createTransformedArea( AffineTransform.getTranslateInstance( winOff.x, winOff.y )))
+      g2.fill( a2.createTransformedArea( AffineTransform.getTranslateInstance( winOff.x, winOff.y )))
+//g2.setColor( Color.green )
+//g2.fillRect( 0, 0, w, h )
       g2.setComposite( cmpOrig )
       g2.setTransform( atOrig )
+
+      // new Rectangle2D.Double( x+4, y+4, w-8, h-8 )
+//      a4.intersect( new Area( new Ellipse2D.Float( x+4, y+4, (w-8) * 3, (h-8) * 3 )))
+//      g2.setColor( new Color( 0x00, 0x00, 0x00, 0x50 ))
+//      g2.fill( a4 )
+//      g2.setPaint( new GradientPaint( x+w*2/5, y+6, new Color( 0x00, 0x00, 0x00, 0x00 ), x+w*3/5, y+h-12, new Color( 0x00, 0x00, 0x00, 0x60 )))
+
+//      g2.setComposite( new PinLightComposite( 1f ))
+//      g2.setPaint( new GradientPaint( x + w*0.45f, y+6, new Color( 0x00, 0x00, 0x00, 0x00 ), x+w*0.55f, y+h-12, new Color( 0x00, 0x00, 0x00, 0x70 )))
+//      g2.setComposite( cmpOrig )
+//      val a3b = new Area( new Ellipse2D.Double( x+3.5f, y + (h - (w-6.5f)) * 0.5f, w-7, w-7 ))
+//      a3b.intersect( new Area( new Rectangle2D.Double( x+3.5f, y+4, w-7, h-7.5f )))
+//      g2.fill( a3b )
+
+      if( pressed ) {
+//         ButtonPainter.opShine.setDimensions( w, h )
+//         cg2.drawImage( img, ButtonPainter.opShine, x0 + 1, y0 + 1 )
+         cg2.drawImage( img, x0 + 1, y0 + 1, b )
+      } else {
+         a4.subtract( new Area( new Ellipse2D.Double( x+8, y + (h - (w-24)) * 0.5f, w-16, w-24 )))
+         g2.setColor( new Color( 0x00, 0x00, 0x00, 0x36 ))
+         g2.fill( a4 )
+         cg2.drawImage( img, x0, y0, b )
+      }
+//      g2.setTransform( atOrig2 )
+      img.flush()
    }
 
    // XXX why is the Button.margin ignored??
    override def getPreferredSize( c: JComponent ) : Dimension = {
       val d = super.getPreferredSize( c )
-      d.width  += 24 // 32
-      d.height += 12 // 16
+      d.width  += 20 //  24 // 32
+      d.height += 10 // 12 // 16
       d
    }
 }

@@ -6,14 +6,35 @@ import geom._
 import image.BufferedImageOp
 import util.Random
 import javax.swing.plaf.synth.{SynthConstants, SynthContext, SynthPainter}
-import com.jhlabs.image.UnsharpFilter
+import com.jhlabs.image._
 
 object ButtonPainter {
    lazy val opSharpen : BufferedImageOp = {
       val res = new UnsharpFilter() // new WaveletSharpenImageOp
-      res.setRadius( 3f )
+      res.setRadius( 2.5f )
+      res.setThreshold( 5 )
+//      println( "AMT " + res.getAmount )
+      res.setAmount( 0.5f )
       res
    }
+
+   lazy val opShine /* : BufferedImageOp*/ = {
+//      val res = new GlintFilter()
+//      res.setThreshold( 0.6f )
+//      res.setAmount( 0.07f ) // 7f )
+//      res.setLength( 1 )
+////      res.setBlur( 0f )
+////      res.setColormap( )
+//      val res = new RescaleFilter()
+//      res.setScale( 1.56f )
+//      val res = new GammaFilter()
+//      res.setGamma( 1.5f )
+      val res = new ContrastFilter()
+      res.setBrightness( 1.333f )
+      res
+   }
+
+//   lazy val opSharpenAndShine : BufferedImageOp = new CompoundFilter( opSharpen, opShine )
 }
 class ButtonPainter extends SynthPainter {
    override def paintButtonBackground( c: SynthContext, g: Graphics, x: Int, y0: Int, w: Int, h0: Int ) {

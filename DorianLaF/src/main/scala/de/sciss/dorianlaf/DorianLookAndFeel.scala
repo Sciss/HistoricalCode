@@ -2,8 +2,9 @@ package de.sciss.dorianlaf
 
 import javax.swing.plaf.basic.BasicLookAndFeel
 import javax.swing.{JComponent, UIDefaults}
-import java.awt.Insets
 import javax.swing.plaf.{ColorUIResource, InsetsUIResource, ComponentUI}
+import java.io.File
+import java.awt.{Font, Insets}
 
 object DorianLookAndFeel {
    private val packageName = "de.sciss.dorianlaf.";
@@ -37,10 +38,17 @@ class DorianLookAndFeel extends BasicLookAndFeel /* MetalLookAndFeel */ {
    }
 
    override protected def initComponentDefaults( table: UIDefaults ) {
-       super.initComponentDefaults( table )
+      super.initComponentDefaults( table )
+
+      // XXX the InputStream retrieved by getResourceAsStream causes
+      // a loading problem for some reason...
+      val dialogPlain15 = Font.createFont( Font.TRUETYPE_FONT,
+         new File( "/Users/rutz/Documents/devel/DorianLaF/src/main/resources/de/sciss/dorianlaf/CAFETA__.ttf" ))
+            .deriveFont( 15f )
 
       val uiDefaults = Array[ AnyRef ](
          "Button.border", new ButtonBorder, // packageName + "ButtonBorder"
+         "Button.font", dialogPlain15,
          "Panel.startBackground", new ColorUIResource( 70, 70, 70 ),
          "Panel.endBackground", new ColorUIResource( 50, 50, 50 )
 // XXX why this has no effect??
