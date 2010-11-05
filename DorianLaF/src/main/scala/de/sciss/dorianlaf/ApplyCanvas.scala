@@ -3,6 +3,11 @@ package de.sciss.dorianlaf
 import java.awt.{Composite, RenderingHints, CompositeContext}
 import java.awt.image._
 
+/**
+ * @todo the old version with setElem getElem on the data buffer was much faster.
+ *       it didn't work when src and dst raster had different sizes though. need
+ *       to fix that issue and then use the faster algorithm
+ */
 class ApplyCanvas extends Composite with CompositeContext {
    def createContext( srcCM: ColorModel, dstCM: ColorModel, hints: RenderingHints ) : CompositeContext = {
       val srcNum = srcCM.getNumComponents()
