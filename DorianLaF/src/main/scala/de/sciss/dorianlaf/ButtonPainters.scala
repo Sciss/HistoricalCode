@@ -11,8 +11,8 @@ import com.jhlabs.image._
 object ButtonPainter {
    lazy val opSharpen : BufferedImageOp = {
       val res = new UnsharpFilter() // new WaveletSharpenImageOp
-      res.setRadius( 2.5f )
-      res.setThreshold( 5 )
+      res.setRadius( 3f )
+      res.setThreshold( 1 )
 //      println( "AMT " + res.getAmount )
       res.setAmount( 0.5f )
       res

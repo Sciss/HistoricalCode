@@ -4,19 +4,25 @@ import javax.swing.plaf.synth.{SynthContext, SynthPainter}
 import javax.swing.UIManager
 import javax.imageio.ImageIO
 import java.awt._
+import image.BufferedImage
 
 object PanelBackgroundPainter {
-   lazy val pntCanvas = {
-      val imgGray = ImageIO.read( PanelBackgroundPainter.getClass.getResourceAsStream( "canvas.png" ))
+   private def imgTexture( name: String ) = {
+      val imgGray = ImageIO.read( PanelBackgroundPainter.getClass.getResourceAsStream( name ))
       val w = imgGray.getWidth
       val h = imgGray.getHeight
-      val imgARGB = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
-         .getDefaultConfiguration().createCompatibleImage( w, h )
+//      val imgARGB = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
+//         .getDefaultConfiguration().createCompatibleImage( w, h )
+      val imgARGB = new BufferedImage( w, h, BufferedImage.TYPE_INT_ARGB )  // XXX required by the jhlabs composites
+//val imgARGB = imgGray
       val g = imgARGB.createGraphics()
       g.drawImage( imgGray, 0, 0, null )
       g.dispose()
       new TexturePaint( imgARGB, new Rectangle( 0, 0, w, h ))
    }
+
+   lazy val pntCanvas   = imgTexture( "canvas.png" )
+   lazy val pntVertical = imgTexture( "verticalk.png" )
 
    lazy val cmpCanvas = new ApplyCanvas( 64, 1 )
 }

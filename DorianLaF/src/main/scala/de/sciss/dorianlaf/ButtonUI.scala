@@ -189,9 +189,6 @@ class ButtonUI extends BasicButtonUI {
 //g2.fillRect( 0, 0, w, h )
 
 //      val aaOld   = g2.getRenderingHint( RenderingHints.KEY_ANTIALIASING )
-      val bm         = b.getModel
-      val pressed    = bm.isArmed && bm.isPressed
-      val selected   = bm.isSelected
 //if( pressed ) g2.translate( 1, 1 )
 //      val colr = /* if( pressed ) Color.red else */ new Color( 0x80, 0x80, 0x80 )
 //      imgG2.setColor( colr )
@@ -201,6 +198,10 @@ class ButtonUI extends BasicButtonUI {
 val x = 0
 val y = 0
 
+      val bm         = b.getModel
+      val pressed    = bm.isArmed && bm.isPressed
+      val selected   = bm.isSelected
+      
       val a0 = new Area( new Ellipse2D.Double( x+0, y + (h - (w-0)) * 0.5f, w-0, w-0 ))
       a0.intersect( new Area( new Rectangle2D.Double( x+0, y+0, w-0, h-0 )))
       g2.setColor( new Color( 0x00, 0x00, 0x00, 0x24 ))
@@ -334,12 +335,12 @@ val y = 0
 ////         img.flush()
       }
 
-      g2.setPaint( PanelBackgroundPainter.pntCanvas )
+      g2.setPaint( PanelBackgroundPainter.pntVertical ) // pntCanvas 
       val cmpOrig = g2.getComposite
       val atOrig  = g2.getTransform
-      g2.setComposite( new ApplyCanvas( 128, 3 )) // PanelBackgroundPainter.cmpCanvas
+//      g2.setComposite( new ApplyCanvas( 128, 3 )) // PanelBackgroundPainter.cmpCanvas
 //      g2.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER, 0.5f ))
-//      g2.setComposite( new PinLightComposite( 0.5f ))
+      g2.setComposite( new PinLightComposite( 0.25f ))
       val winOff  = SwingUtilities.convertPoint( b, 0, 0, SwingUtilities.getWindowAncestor( b ))
 //      // XXX we could do modulo canvas-size (128). is that better performance-wise?
       g2.translate( -winOff.x, -winOff.y )
@@ -383,6 +384,7 @@ val y = 0
       val d = super.getPreferredSize( c )
       d.width  += 20 //  24 // 32
       d.height += 10 // 12 // 16
+d.width = (d.width + 3) & ~3   // XXX this is an issue of the jhlabs composites!
       d
    }
 }

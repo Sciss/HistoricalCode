@@ -2,9 +2,9 @@ package de.sciss.dorianlaf
 
 import javax.swing.plaf.basic.BasicLookAndFeel
 import javax.swing.{JComponent, UIDefaults}
-import javax.swing.plaf.{ColorUIResource, InsetsUIResource, ComponentUI}
 import java.io.File
 import java.awt.{Font, Insets}
+import javax.swing.plaf.{IconUIResource, ColorUIResource, InsetsUIResource, ComponentUI}
 
 object DorianLookAndFeel {
    private val packageName = "de.sciss.dorianlaf.";
@@ -60,7 +60,8 @@ class DorianLookAndFeel extends BasicLookAndFeel /* MetalLookAndFeel */ {
          "Label.font", dialogPlain16,
          "Label.foreground", new ColorUIResource( 0xFF, 0xFF, 0xFF ),
          "CheckBox.font", dialogPlain16,
-         "CheckBox.foreground", new ColorUIResource( 0xFF, 0xFF, 0xFF )
+         "CheckBox.foreground", new ColorUIResource( 0xFF, 0xFF, 0xFF ),
+         "CheckBox.icon", new IconUIResource( new CheckBoxIcon )
 // XXX why this has no effect??
 //         "Button.margin", new InsetsUIResource( 20, 30, 20, 30 )
       )
