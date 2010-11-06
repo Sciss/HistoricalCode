@@ -4,10 +4,11 @@ import javax.swing.plaf.synth.SynthLookAndFeel
 import javax.swing._
 import java.awt.{Font, BorderLayout, EventQueue}
 import java.io.{File, BufferedInputStream}
+import org.jdesktop.laffy.Laffy
 
 object DorianLaF {
    def main( args: Array[ String ]) {
-      EventQueue.invokeLater( new Runnable { def run = demo2 })
+      EventQueue.invokeLater( new Runnable { def run = laffyDemo })
    }
 
    def demo {
@@ -16,6 +17,12 @@ object DorianLaF {
       syn.load( clz.getResourceAsStream( "DorianLaF.xml" ), clz )
       UIManager.setLookAndFeel( syn )
       createSomeWidgets
+   }
+
+   def laffyDemo {
+      UIManager.installLookAndFeel( "Dorian", "de.sciss.dorianlaf.DorianLookAndFeel" )
+//      Laffy.getInstance().load( Array.empty[ AnyRef ])
+      new Thread( new Runnable { def run = Laffy.main( Array.empty[ String ])}).start
    }
 
    def demo2 {

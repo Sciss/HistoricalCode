@@ -26,7 +26,8 @@ class DorianLookAndFeel extends BasicLookAndFeel /* MetalLookAndFeel */ {
          "ButtonUI", packageName + "ButtonUI",
          "ToggleButtonUI", packageName + "ButtonUI",
          "CheckBoxUI", packageName + "ButtonUI",
-         "PanelUI", packageName + "PanelUI"
+         "PanelUI", packageName + "PanelUI",
+         "FileChooserUI", packageName + "FileChooserUI" // laffy needs it... 
 //                "MenuUI", packageName + "SceMenuUI",
 //         "ProgressBarUI", packageName + "SceProgressBarUI",
 //           "ScrollBarUI", packageName + "SceScrollBarUI",
