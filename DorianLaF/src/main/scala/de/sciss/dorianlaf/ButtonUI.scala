@@ -3,7 +3,7 @@ package de.sciss.dorianlaf
 import javax.swing.plaf.ComponentUI
 import javax.swing.border.Border
 import java.awt._
-import geom.{AffineTransform, Rectangle2D, Ellipse2D, Area}
+import geom._
 import image.{BufferedImage, ConvolveOp, Kernel}
 import javax.swing.text.View
 import javax.swing.plaf.basic.{BasicHTML, BasicButtonUI}
@@ -14,7 +14,7 @@ import javax.swing._
 object ButtonUI {
    def createUI( c: JComponent ) : ComponentUI = new ButtonUI
 }
-class ButtonUI extends BasicButtonUI {
+class ButtonUI extends BasicButtonUI with ButtonPainter {
    private val viewRect = new Rectangle()
    private val textRect = new Rectangle()
    private val iconRect = new Rectangle()
@@ -33,44 +33,21 @@ class ButtonUI extends BasicButtonUI {
 //      b.setMargin( new Insets( 30, 30, 30, 30 ))
    }
 
+   private val pasOutline : Shape = new GeneralPath()
+
    override def paint( g: Graphics, c: JComponent ) {
       val b       = c.asInstanceOf[ AbstractButton ]
       val g2      = g.asInstanceOf[ Graphics2D ]
-      val aaOld   = g2.getRenderingHint( RenderingHints.KEY_ANTIALIASING )
-      g2.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON )
-      paintButton( b, g2, 0, 0, c.getWidth, c.getHeight )
-      g2.setRenderingHint( RenderingHints.KEY_ANTIALIASING, aaOld )
-
-//      val bm      = b.getModel()
-//
-//      val text    = layout( b, c.getFontMetrics( c.getFont() ), b.getWidth(), b.getHeight() )
-//
-//      clearTextShiftOffset()
-
-//      // perform UI specific press action, e.g. Windows L&F shifts text
-//      if (model.isArmed() && model.isPressed()) {
-//         paintButtonPressed(g,b);
-//      }
-
-//      // Paint the Icon
-//      if(b.getIcon() != null) {
-//         paintIcon(g,c,iconRect);
-//      }
-
-//        if (text != null && !text.equals("")){
-////            val v = c.getClientProperty( BasicHTML.propertyKey ).asInstanceOf[ View ]
-////            if( v != null ) {
-////                v.paint( g, textRect )
-////            } else {
-//                paintText(g, b, textRect, text);
-////            }
-//        }
-
-//        if (b.isFocusPainted() && b.hasFocus()) {
-//            // paint UI specific focus
-//            paintFocus(g,b,viewRect,textRect,iconRect);
-//        }
-    }
+//      val aaOld   = g2.getRenderingHint( RenderingHints.KEY_ANTIALIASING )
+//      g2.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON )
+//      paintButton( b, g2, 0, 0, c.getWidth, c.getHeight )
+      val w = b.getWidth()
+      val h = b.getHeight()
+      val actOutline = new Area( new Ellipse2D.Double( 3, (h - (w-6)) * 0.5f, w-6, w-6 ))
+      actOutline.intersect( new Area( new Rectangle2D.Double( 3, 3, w-6, h-6 )))
+      paintButton( b, g2, 0, 0, pasOutline, actOutline )
+//      g2.setRenderingHint( RenderingHints.KEY_ANTIALIASING, aaOld )
+   }
 
 //   override def update( g: Graphics, c: JComponent ) {
 //      val b       = c.asInstanceOf[ AbstractButton ]
@@ -171,6 +148,25 @@ class ButtonUI extends BasicButtonUI {
          b.getVerticalTextPosition(), b.getHorizontalTextPosition(),
          viewRect, iconRect, textRect,
          if( b.getText() == null ) 0 else b.getIconTextGap() )
+   }
+
+   protected def paintButtonText( b: AbstractButton, g2: Graphics2D, colrBg: Color ) {
+      val fm   = b.getFontMetrics( b.getFont() )
+      val text = layout2( b, fm, b.getWidth(), b.getHeight() )
+
+      if( b.getIcon() != null ) {
+         paintIcon( g2, b, iconRect )
+      }
+
+      if( text != null && text != "" ) {
+         val v = b.getClientProperty( BasicHTML.propertyKey ).asInstanceOf[ View ]
+         if( v != null ) {
+            // XXX currently causes a NullPointerException in BoxView.paint???
+            // v.paint( g2, textRect )
+         } else {
+            paintText2( g2, b, fm, textRect, text, colrBg )
+         }
+      }
    }
 
    private def paintButton( b: AbstractButton, cg2: Graphics2D, x0: Int, y0: Int, w: Int, h: Int ) {
@@ -299,7 +295,7 @@ val y = 0
       val text = layout2( b, fm, w, h )
 
 //      clearTextShiftOffset()
-      
+
       if( b.getIcon() != null ) {
          paintIcon( g2, b, iconRect ) // new Rectangle( 0, 0, iconRect.width, iconRect.height ))
       }
@@ -307,7 +303,7 @@ val y = 0
       if( text != null && text != "" ) {
          val v = b.getClientProperty( BasicHTML.propertyKey ).asInstanceOf[ View ]
          if( v != null ) {
-            // XXX currently causes a NullPointerException in BoxView.paint??? 
+            // XXX currently causes a NullPointerException in BoxView.paint???
             // v.paint( g2, textRect )
          } else {
             paintText2( g2, b, fm, textRect, text, colr6 )

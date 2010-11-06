@@ -7,7 +7,7 @@ import java.awt._
 import image.BufferedImage
 
 object PanelBackgroundPainter {
-   private def imgTexture( name: String ) = {
+   private def imgARGB( name: String ) = {
       val imgGray = ImageIO.read( PanelBackgroundPainter.getClass.getResourceAsStream( name ))
       val w = imgGray.getWidth
       val h = imgGray.getHeight
@@ -18,11 +18,17 @@ object PanelBackgroundPainter {
       val g = imgARGB.createGraphics()
       g.drawImage( imgGray, 0, 0, null )
       g.dispose()
-      new TexturePaint( imgARGB, new Rectangle( 0, 0, w, h ))
+      imgARGB
+   }
+
+   private def imgTexture( name: String ) = {
+      val img = imgARGB( name )
+      new TexturePaint( img, new Rectangle( 0, 0, img.getWidth(), img.getHeight() ))
    }
 
    lazy val pntCanvas   = imgTexture( "canvas.png" )
    lazy val pntVertical = imgTexture( "verticalk.png" )
+   lazy val imgGlow     = imgARGB( "glow2.png" )
 
    lazy val cmpCanvas = new ApplyCanvas( 64, 1 )
 }
