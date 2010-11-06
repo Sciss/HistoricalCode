@@ -8,7 +8,10 @@ import org.jdesktop.laffy.Laffy
 
 object DorianLaF {
    def main( args: Array[ String ]) {
-      EventQueue.invokeLater( new Runnable { def run = laffyDemo })
+      EventQueue.invokeLater( new Runnable { def run = args.headOption match {
+         case Some( "--laffy" ) => laffyDemo
+         case _ => demo2
+      }})
    }
 
    def demo {

@@ -3,12 +3,18 @@ package de.sciss.dorianlaf
 import java.awt.{Composite, RenderingHints, CompositeContext}
 import java.awt.image._
 
+object ApplyCanvas {
+   val TURN_OFF = false // true
+}
+
 /**
  * @todo the old version with setElem getElem on the data buffer was much faster.
  *       it didn't work when src and dst raster had different sizes though. need
  *       to fix that issue and then use the faster algorithm
  */
-class ApplyCanvas extends Composite with CompositeContext {
+class ApplyCanvas( add: Int, div: Int ) extends Composite with CompositeContext {
+   import ApplyCanvas._
+   
    def createContext( srcCM: ColorModel, dstCM: ColorModel, hints: RenderingHints ) : CompositeContext = {
       val srcNum = srcCM.getNumComponents()
       val dstNum = dstCM.getNumComponents()
@@ -84,6 +90,7 @@ class ApplyCanvas extends Composite with CompositeContext {
 
    private class Context( srcAccess: Access, dstAccess: Access ) extends CompositeContext {
       def compose( srcR: Raster, dstInR: Raster, dstOutR: WritableRaster ) {
+         if( TURN_OFF ) return
    //if( true ) return
 //         val srcBuf		= srcR.getDataBuffer()
          val dstInBuf	= dstInR.getDataBuffer()
@@ -184,9 +191,9 @@ class ApplyCanvas extends Composite with CompositeContext {
       //         val mg = math.max( 0, math.min( 0xFF, dgi + sg * 2 )) // & 0xFF
       //         val mb = math.max( 0, math.min( 0xFF, dbi + sb * 2 )) // & 0xFF
 
-               val mr = math.max( 0, math.min( 0xFF, dri + (sr + 64) )) // & 0xFF
-               val mg = math.max( 0, math.min( 0xFF, dgi + (sg + 64) )) // & 0xFF
-               val mb = math.max( 0, math.min( 0xFF, dbi + (sb + 64) )) // & 0xFF
+               val mr = math.max( 0, math.min( 0xFF, dri + (sr + add) / div )) // & 0xFF
+               val mg = math.max( 0, math.min( 0xFF, dgi + (sg + add) / div )) // & 0xFF
+               val mb = math.max( 0, math.min( 0xFF, dbi + (sb + add) / div )) // & 0xFF
 
       //         dstOutBuf.setElem( i, (ma << 24) | (mr << 16) | (mg << 8) | mb )
       //         dstOutBuf.setElem( i, (ma << 24) | (mr << 16) | (mg << 8) | mb )

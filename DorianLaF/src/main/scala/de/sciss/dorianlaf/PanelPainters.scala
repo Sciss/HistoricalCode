@@ -18,7 +18,7 @@ object PanelBackgroundPainter {
       new TexturePaint( imgARGB, new Rectangle( 0, 0, w, h ))
    }
 
-   lazy val cmpCanvas = new ApplyCanvas
+   lazy val cmpCanvas = new ApplyCanvas( 64, 1 )
 }
 
 class PanelBackgroundPainter extends SynthPainter {

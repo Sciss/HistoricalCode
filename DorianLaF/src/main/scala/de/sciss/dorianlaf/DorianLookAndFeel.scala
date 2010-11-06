@@ -23,11 +23,12 @@ class DorianLookAndFeel extends BasicLookAndFeel /* MetalLookAndFeel */ {
       super.initClassDefaults( table )
 
       val uiDefaults = Array[ AnyRef ](
-         "ButtonUI", packageName + "ButtonUI",
+         "LabelUI",        packageName + "LabelUI",
+         "ButtonUI",       packageName + "ButtonUI",
          "ToggleButtonUI", packageName + "ButtonUI",
-         "CheckBoxUI", packageName + "ButtonUI",
-         "PanelUI", packageName + "PanelUI",
-         "FileChooserUI", packageName + "FileChooserUI" // laffy needs it... 
+         "CheckBoxUI",     packageName + "CheckBoxUI",
+         "PanelUI",        packageName + "PanelUI",
+         "FileChooserUI",  packageName + "FileChooserUI" // laffy needs it... 
 //                "MenuUI", packageName + "SceMenuUI",
 //         "ProgressBarUI", packageName + "SceProgressBarUI",
 //           "ScrollBarUI", packageName + "SceScrollBarUI",
@@ -45,15 +46,21 @@ class DorianLookAndFeel extends BasicLookAndFeel /* MetalLookAndFeel */ {
 
       // XXX the InputStream retrieved by getResourceAsStream causes
       // a loading problem for some reason...
-      val dialogPlain15 = Font.createFont( Font.TRUETYPE_FONT,
+      val fontBase = Font.createFont( Font.TRUETYPE_FONT,
          new File( "/Users/rutz/Documents/devel/DorianLaF/src/main/resources/de/sciss/dorianlaf/CAFETA__.ttf" ))
-            .deriveFont( 15f )
+      val dialogPlain15 = fontBase.deriveFont( 15f )
+      val dialogPlain16 = fontBase.deriveFont( 16f )
 
       val uiDefaults = Array[ AnyRef ](
          "Button.border", new ButtonBorder, // packageName + "ButtonBorder"
          "Button.font", dialogPlain15,
+         "Button.textForeground", new ColorUIResource( 30, 30, 30 ),
          "Panel.startBackground", new ColorUIResource( 70, 70, 70 ),
-         "Panel.endBackground", new ColorUIResource( 50, 50, 50 )
+         "Panel.endBackground", new ColorUIResource( 50, 50, 50 ),
+         "Label.font", dialogPlain16,
+         "Label.foreground", new ColorUIResource( 0xFF, 0xFF, 0xFF ),
+         "CheckBox.font", dialogPlain16,
+         "CheckBox.foreground", new ColorUIResource( 0xFF, 0xFF, 0xFF )
 // XXX why this has no effect??
 //         "Button.margin", new InsetsUIResource( 20, 30, 20, 30 )
       )

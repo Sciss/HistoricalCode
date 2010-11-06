@@ -5,11 +5,11 @@ import javax.swing.border.Border
 import java.awt._
 import geom.{AffineTransform, Rectangle2D, Ellipse2D, Area}
 import image.{BufferedImage, ConvolveOp, Kernel}
-import javax.swing.{SwingUtilities, LookAndFeel, AbstractButton, JComponent}
 import javax.swing.text.View
 import javax.swing.plaf.basic.{BasicHTML, BasicButtonUI}
 import sun.swing.SwingUtilities2
 import com.jhlabs.composite._
+import javax.swing._
 
 object ButtonUI {
    def createUI( c: JComponent ) : ComponentUI = new ButtonUI
@@ -125,7 +125,7 @@ class ButtonUI extends BasicButtonUI {
 //      super.paintText( imgG, b, new Rectangle( 0, 0, textRect.width, textRect.height ), text )
       val mnemo = b.getDisplayedMnemonicIndex()
       if( bm.isEnabled() ) {
-          imgG2.setColor( b.getForeground() )
+          imgG2.setColor( UIManager.getColor( "Button.textForeground" ))
           SwingUtilities2.drawStringUnderlineCharAt( b, imgG2, text, mnemo,
              0 /* textRect.x */ /* + getTextShiftOffset() */,
              /* textRect.y + */ fm.getAscent() /* + getTextShiftOffset() */)
@@ -189,8 +189,9 @@ class ButtonUI extends BasicButtonUI {
 //g2.fillRect( 0, 0, w, h )
 
 //      val aaOld   = g2.getRenderingHint( RenderingHints.KEY_ANTIALIASING )
-      val bm      = b.getModel
-      val pressed = bm.isArmed && bm.isPressed
+      val bm         = b.getModel
+      val pressed    = bm.isArmed && bm.isPressed
+      val selected   = bm.isSelected
 //if( pressed ) g2.translate( 1, 1 )
 //      val colr = /* if( pressed ) Color.red else */ new Color( 0x80, 0x80, 0x80 )
 //      imgG2.setColor( colr )
@@ -227,20 +228,46 @@ val y = 0
 
       val a3 = new Area( new Ellipse2D.Double( x+3, y + (h - (w-6)) * 0.5f, w-6, w-6 ))
       a3.intersect( new Area( new Rectangle2D.Double( x+3, y+3, w-6, h-6 )))
-      val colr3 = if( pressed ) new Color( 0xF0, 0xF0, 0xF0 ) else new Color( 0xC0, 0xC0, 0xC0 )
+      val colr3 = if( pressed ) {
+         new Color( 0xF0, 0xF0, 0xF0 )
+      } else if( selected ) {
+//         new Color( 0xFF, 0xFF, 0xCC )
+         new Color( 0xEF, 0xE3, 0xA3 )
+//         new Color( 0xF7, 0xF1, 0xB7 )
+      } else {
+         new Color( 0xC0, 0xC0, 0xC0 )
+      }
       g2.setColor( colr3 )
       g2.fill( a3 )
 
       val a4 = new Area( new Ellipse2D.Double( x+4, y + (h - (w-8)) * 0.5f, w-8, w-8 ))
       a4.intersect( new Area( new Rectangle2D.Double( x+4, y+4, w-8, h-8 )))
-      val colr4 = if( pressed ) new Color( 0xB6, 0xB6, 0xB6 ) else new Color( 0x96, 0x96, 0x96 )
+      val colr4 = if( pressed ) {
+         new Color( 0xB6, 0xB6, 0xB6 )
+      } else if( selected ) {
+//         new Color( 0xFF, 0xF1, 0xAA )
+//         new Color( 0xD4, 0xC3, 0x70 )
+//         new Color( 0xE9, 0xDA, 0x8D )
+         new Color( 0xB4, 0xB3, 0x70 )
+     } else {
+         new Color( 0x96, 0x96, 0x96 )
+      }
       g2.setColor( colr4 )
       g2.fill( a4 )
 
       val a5 = new Area( new Ellipse2D.Double( x+5, y + (h - (w-10)) * 0.5f, w-10, w-10 ))
       a5.intersect( new Area( new Rectangle2D.Double( x+5, y+5, w-10, h-10 )))
 //      val colr5 = if( pressed ) new Color( 0xAA, 0xAA, 0xAA ) else new Color( 0x8A, 0x8A, 0x8A )
-      val colr5 = if( pressed ) new Color( 0xB2, 0xB2, 0xB2 ) else new Color( 0x92, 0x92, 0x92 ) 
+      val colr5 = if( pressed ) {
+         new Color( 0xB2, 0xB2, 0xB2 )
+      } else if( selected ) {
+//         new Color( 0xFF, 0xEF, 0xA0 )
+//         new Color( 0xC9, 0xB8, 0x62 )
+//         new Color( 0xE4, 0xD3, 0x81 )
+         new Color( 0xA9, 0xA8, 0x62 )
+      } else {
+         new Color( 0x92, 0x92, 0x92 )
+      }
       g2.setColor( colr5 )
       g2.fill( a5 )
 
@@ -253,7 +280,16 @@ val y = 0
 //      val colr = /* if( pressed ) Color.red else */ new Color( 0x80, 0x80, 0x80 )
 
 //      val colr6 = if( pressed ) new Color( 0xA0, 0xA0, 0xA0 ) else new Color( 0x80, 0x80, 0x80 )
-      val colr6 = if( pressed ) new Color( 0x90, 0x90, 0x90 ) else new Color( 0x70, 0x70, 0x70 )
+      val colr6 = if( pressed ) {
+         new Color( 0x90, 0x90, 0x90 )
+      } else if( selected ) {
+//         new Color( 0xFF, 0xEE, 0x98 )
+//         new Color( 0xC0, 0xAE, 0x58 )
+//         new Color( 0xDF, 0xCE, 0x78 )
+         new Color( 0x90, 0x7E, 0x58 )
+      } else {
+         new Color( 0x70, 0x70, 0x70 )
+      }
       g2.setColor( colr6 )
 //      g2.setPaint( new GradientPaint( x+6, y+6, new Color( 0x80, 0x80, 0x80 ), x+40, y+h-12, new Color( 0x60, 0x60, 0x60 )))
       g2.fill( a6 )
@@ -263,8 +299,18 @@ val y = 0
 
 //      clearTextShiftOffset()
       
+      if( b.getIcon() != null ) {
+         paintIcon( g2, b, iconRect ) // new Rectangle( 0, 0, iconRect.width, iconRect.height ))
+      }
+
       if( text != null && text != "" ) {
-         paintText2( g2, b, fm, textRect, text, colr6 )
+         val v = b.getClientProperty( BasicHTML.propertyKey ).asInstanceOf[ View ]
+         if( v != null ) {
+            // XXX currently causes a NullPointerException in BoxView.paint??? 
+            // v.paint( g2, textRect )
+         } else {
+            paintText2( g2, b, fm, textRect, text, colr6 )
+         }
 //         val mnemo = b.getDisplayedMnemonicIndex()
 //         if( bm.isEnabled() ) {
 //             g2.setColor( b.getForeground() )
@@ -291,7 +337,7 @@ val y = 0
       g2.setPaint( PanelBackgroundPainter.pntCanvas )
       val cmpOrig = g2.getComposite
       val atOrig  = g2.getTransform
-      g2.setComposite( PanelBackgroundPainter.cmpCanvas )
+      g2.setComposite( new ApplyCanvas( 128, 3 )) // PanelBackgroundPainter.cmpCanvas
 //      g2.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER, 0.5f ))
 //      g2.setComposite( new PinLightComposite( 0.5f ))
       val winOff  = SwingUtilities.convertPoint( b, 0, 0, SwingUtilities.getWindowAncestor( b ))
@@ -320,9 +366,11 @@ val y = 0
 //         ButtonPainter.opShine.setDimensions( w, h )
 //         cg2.drawImage( img, ButtonPainter.opShine, x0 + 1, y0 + 1 )
          cg2.drawImage( img, x0 + 1, y0 + 1, b )
+      } else if( selected ) {
+         cg2.drawImage( img, x0, y0, b )
       } else {
          a4.subtract( new Area( new Ellipse2D.Double( x+8, y + (h - (w-24)) * 0.5f, w-16, w-24 )))
-         g2.setColor( new Color( 0x00, 0x00, 0x00, 0x36 ))
+         g2.setColor( new Color( 0x00, 0x00, 0x00, 0x20 ))     // 0x36
          g2.fill( a4 )
          cg2.drawImage( img, x0, y0, b )
       }
