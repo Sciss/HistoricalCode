@@ -59,6 +59,9 @@ object PanelBackgroundPainter {
    lazy val pntVertical = imgTexture( "verticalk.png" )
    lazy val imgGlow     = imgARGB(    "glow2.png" )
    lazy val pntLCD      = imgTexture( "lcd.png" )
+   lazy val pntKnob     = imgTexture( "knob2.png" )
+   lazy val imgLEDs     = imgARGB(    "leds_l.png" )
+   lazy val pntLEDs     = imgTexture( "leds_r.png" )
 
    lazy val cmpCanvas : Composite = new ApplyCanvas( 64, 1 )
 //   lazy val cmpCanvas : Composite = new OverlayComposite( 0.25f )

@@ -52,10 +52,11 @@ class DorianLookAndFeel extends BasicLookAndFeel /* MetalLookAndFeel */ {
 
       val uiDefaults = Array[ AnyRef ](
          "LabelUI",        packageName + "LabelUI",
+         "PanelUI",        packageName + "PanelUI",
          "ButtonUI",       packageName + "ButtonUI",
          "ToggleButtonUI", packageName + "ButtonUI",
          "CheckBoxUI",     packageName + "CheckBoxUI",
-         "PanelUI",        packageName + "PanelUI",
+         "SliderUI",       packageName + "SliderUI",
          "FileChooserUI",  packageName + "FileChooserUI", // laffy needs it...
          "ProgressBarUI",  packageName + "ProgressBarUI"
       )
