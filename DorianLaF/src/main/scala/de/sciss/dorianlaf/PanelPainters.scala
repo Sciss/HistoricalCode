@@ -1,3 +1,31 @@
+/*
+ *  PanelPainters.scala
+ *  (DorianLaF)
+ *
+ *  Copyright (c) 2010 Hanns Holger Rutz. All rights reserved.
+ *
+ *	 This software is free software; you can redistribute it and/or
+ *	 modify it under the terms of the GNU General Public License
+ *	 as published by the Free Software Foundation; either
+ *	 version 2, june 1991 of the License, or (at your option) any later version.
+ *
+ *	 This software is distributed in the hope that it will be useful,
+ *	 but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *	 General Public License for more details.
+ *
+ *	 You should have received a copy of the GNU General Public
+ *	 License (gpl.txt) along with this software; if not, write to the Free Software
+ *	 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *
+ *	 For further information, please contact Hanns Holger Rutz at
+ *	 contact@sciss.de
+ *
+ *
+ *  Changelog:
+ */
+
 package de.sciss.dorianlaf
 
 import javax.swing.plaf.synth.{SynthContext, SynthPainter}
@@ -5,6 +33,7 @@ import javax.swing.UIManager
 import javax.imageio.ImageIO
 import java.awt._
 import image.BufferedImage
+import com.jhlabs.composite.OverlayComposite
 
 object PanelBackgroundPainter {
    private def imgARGB( name: String ) = {
@@ -31,7 +60,8 @@ object PanelBackgroundPainter {
    lazy val imgGlow     = imgARGB(    "glow2.png" )
    lazy val pntLCD      = imgTexture( "lcd.png" )
 
-   lazy val cmpCanvas = new ApplyCanvas( 64, 1 )
+   lazy val cmpCanvas : Composite = new ApplyCanvas( 64, 1 )
+//   lazy val cmpCanvas : Composite = new OverlayComposite( 0.25f )
 }
 
 class PanelBackgroundPainter extends SynthPainter {
