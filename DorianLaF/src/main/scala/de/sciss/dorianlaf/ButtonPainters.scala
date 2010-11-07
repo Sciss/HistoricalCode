@@ -19,7 +19,7 @@ object ButtonPainter {
       res
    }
 
-   lazy val opShine /* : BufferedImageOp*/ = {
+   lazy val opShine : BufferedImageOp = {
 //      val res = new GlintFilter()
 //      res.setThreshold( 0.6f )
 //      res.setAmount( 0.07f ) // 7f )
@@ -32,6 +32,13 @@ object ButtonPainter {
 //      res.setGamma( 1.5f )
       val res = new ContrastFilter()
       res.setBrightness( 1.333f )
+      res
+   }
+
+   lazy val opLCD : BufferedImageOp = {
+      val res = new GlowFilter()
+      res.setAmount( 0.15f )
+      res.setRadius( 5f )
       res
    }
 
