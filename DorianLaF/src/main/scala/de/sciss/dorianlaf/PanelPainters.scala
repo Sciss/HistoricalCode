@@ -59,6 +59,7 @@ object PanelBackgroundPainter {
    lazy val pntVertical = imgTexture( "verticalk.png" )
    lazy val imgGlow     = imgARGB(    "glow2.png" )
    lazy val pntLCD      = imgTexture( "lcd.png" )
+   lazy val pntLCDDark  = imgTexture( "lcd_dark.png" )
    lazy val pntKnob     = imgTexture( "knob2.png" )
    lazy val imgLEDs     = imgARGB(    "leds_l.png" )
    lazy val pntLEDs     = imgTexture( "leds_r.png" )

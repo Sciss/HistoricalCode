@@ -29,10 +29,9 @@
 package de.sciss.dorianlaf
 
 import javax.swing.plaf.basic.BasicLookAndFeel
-import java.io.{RandomAccessFile, File}
-import java.awt.{Color, Font, Insets}
+import java.awt.{Color, Font}
 import javax.swing.plaf._
-import javax.swing.{BorderFactory, JComponent, UIDefaults}
+import javax.swing.{BorderFactory, UIDefaults}
 
 object DorianLookAndFeel {
    private val packageName = "de.sciss.dorianlaf.";
@@ -57,6 +56,7 @@ class DorianLookAndFeel extends BasicLookAndFeel /* MetalLookAndFeel */ {
          "ToggleButtonUI", packageName + "ButtonUI",
          "CheckBoxUI",     packageName + "CheckBoxUI",
          "SliderUI",       packageName + "SliderUI",
+         "ListUI",         packageName + "ListUI",
          "FileChooserUI",  packageName + "FileChooserUI", // laffy needs it...
          "ProgressBarUI",  packageName + "ProgressBarUI"
       )
@@ -95,6 +95,13 @@ class DorianLookAndFeel extends BasicLookAndFeel /* MetalLookAndFeel */ {
 //         new File( "/Users/rutz/Documents/devel/DorianLaF/src/main/resources/de/sciss/dorianlaf/CAFETA__.ttf" ))
       val dialogPlain15 = new FontUIResource( fontBase.deriveFont( 15f ))
       val dialogPlain16 = new FontUIResource( fontBase.deriveFont( 16f ))
+      val colrLCDBg     = new ColorUIResource( 0x07, 0x10, 0x18 )
+
+      val listCellRenderer = new UIDefaults.ActiveValue() {
+         def createValue( table: UIDefaults ) : AnyRef = new ListCellRenderer
+      }
+//      val lcdBorder = new BorderUIResource( BorderFactory.createMatteBorder( 1, 1, 1, 1, colrLCDBg ))
+      val emptyBorder = new BorderUIResource( BorderFactory.createEmptyBorder() )
 
       val uiDefaults = Array[ AnyRef ](
          "Button.border", new BorderUIResource( new ButtonBorder ), // packageName + "ButtonBorder"
@@ -105,7 +112,13 @@ class DorianLookAndFeel extends BasicLookAndFeel /* MetalLookAndFeel */ {
          "CheckBox.icon", new IconUIResource( new CheckBoxIcon ),
          "Label.font", dialogPlain16,
          "Label.foreground", new ColorUIResource( 0xFF, 0xFF, 0xFF ),
-         "Dorian.lcdBackground", new ColorUIResource( 0x07, 0x10, 0x18 ),
+         "List.background", colrLCDBg,
+         "List.font", dialogPlain16,
+         "List.cellRenderer", listCellRenderer,
+         "List.cellNoFocusBorder", emptyBorder,
+         "List.focusSelectedCellHighlightBorder", null,
+         "List.focusCellHighlightBorder", emptyBorder,
+         "Dorian.lcdBackground", colrLCDBg,
          "Panel.startBackground", new ColorUIResource( 70, 70, 70 ),
          "Panel.endBackground", new ColorUIResource( 50, 50, 50 ),
          "ProgressBar.font", dialogPlain15,

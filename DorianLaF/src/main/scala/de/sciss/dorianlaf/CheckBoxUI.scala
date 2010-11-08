@@ -53,9 +53,9 @@ class CheckBoxUI extends BasicCheckBoxUI {
    }
 }
 
-class CheckBoxIcon extends Icon with ButtonPainter {
-   def getIconWidth  = 28 // 22
-   def getIconHeight = 22
+class CheckBoxIcon( width: Int = 28, height: Int = 22 ) extends Icon with ButtonPainter {
+   def getIconWidth  = width
+   def getIconHeight = height
 
    protected def paintButtonText( b: AbstractButton, g2: Graphics2D, colrBg: Color ) {}
    
