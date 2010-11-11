@@ -30,21 +30,21 @@ package de.sciss.synth.proc
 
 import edu.stanford.ppl.ccstm.{STM, Txn, Ref}
 
-object EphemeralSystem extends System[ EphemeralCtx ] {
-   private type C = Ctx[ EphemeralCtx ]
+object EphemeralSystem extends System[ Ephemeral ] {
+   private type C = Ctx[ Ephemeral ]
    
-   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new EphemeralCtx( tx )))
+   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new Ephemeral( tx )))
 }
 
-class EphemeralCtx private[proc]( private[proc] val txn: Txn )
-extends Ctx[ EphemeralCtx ] {
-   private type C = Ctx[ EphemeralCtx ]
+class Ephemeral private[proc]( private[proc] val txn: Txn )
+extends Ctx[ Ephemeral ] {
+   private type C = Ctx[ Ephemeral ]
 
    def repr = this
    def system = EphemeralSystem
-   def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ EphemeralCtx, T ] = new EVar( Ref( init ))
+   def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ Ephemeral, T ] = new EVar( Ref( init ))
 
-   private class EVar[ /* @specialized */ T ]( ref: Ref[ T ]) extends Var[ EphemeralCtx, T ] {
+   private class EVar[ /* @specialized */ T ]( ref: Ref[ T ]) extends Var[ Ephemeral, T ] {
       def get( implicit c: C ) : T = ref.get( c.repr.txn )
       def set( v: T )( implicit c: C ) : Unit = ref.set( v )( c.repr.txn )
    }

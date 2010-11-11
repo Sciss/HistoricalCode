@@ -32,10 +32,10 @@ import edu.stanford.ppl.ccstm.{TxnLocal, STM, Txn, Ref}
 import collection.immutable.{SortedMap => ISortedMap}
 import Double.{PositiveInfinity => dinf}
 
-object PTemporalSystem extends System[ PTemporalCtx ] {
-   private type C = Ctx[ PTemporalCtx ]
+object PTemporalSystem extends System[ PTemporal ] {
+   private type C = Ctx[ PTemporal ]
 
-   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new PTemporalCtx( tx )))
+   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new PTemporal( tx )))
 
    def at[ T ]( period: Period )( thunk: => T )( implicit c: C ) : T =
       during( Interval( period, Period( dinf )))( thunk )
@@ -47,10 +47,10 @@ object PTemporalSystem extends System[ PTemporalCtx ] {
    }
 }
 
-class PTemporalCtx private[proc]( private[proc] val txn: Txn )
-extends Ctx[ PTemporalCtx ] {
+class PTemporal private[proc]( private[proc] val txn: Txn )
+extends Ctx[ PTemporal ] {
 
-   private type C = Ctx[ PTemporalCtx ]
+   private type C = Ctx[ PTemporal ]
 
    private val intervalRef = new TxnLocal[ Interval ] {
       override protected def initialValue( txn: Txn ) = Interval( Period( 0.0 ), Period( dinf ))
@@ -59,7 +59,7 @@ extends Ctx[ PTemporalCtx ] {
    def repr = this
    def system = PTemporalSystem
 
-   def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ PTemporalCtx, T ] =
+   def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ PTemporal, T ] =
       new PVar( Ref( ISortedMap( Period( 0.0 ) -> init )( Ordering.ordered[ Period ])))
 
 
@@ -68,7 +68,7 @@ extends Ctx[ PTemporalCtx ] {
 
    private[proc] def interval_=( newInterval: Interval ) = intervalRef.set( newInterval )( txn )
 
-   private class PVar[ /* @specialized */ T ]( ref: Ref[ ISortedMap[ Period, T ]]) extends Var[ PTemporalCtx, T ] {
+   private class PVar[ /* @specialized */ T ]( ref: Ref[ ISortedMap[ Period, T ]]) extends Var[ PTemporal, T ] {
       def get( implicit c: C ) : T = {
          val map = ref.get( c.repr.txn )
          map.to( c.repr.period ).last._2  // XXX is .last efficient? we might need to switch to FingerTree.Ranged

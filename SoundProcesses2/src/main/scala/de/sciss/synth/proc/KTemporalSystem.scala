@@ -28,32 +28,71 @@
 
 package de.sciss.synth.proc
 
-import edu.stanford.ppl.ccstm.{STM, Txn, Ref}
 import de.sciss.confluent._
+import edu.stanford.ppl.ccstm.{TxnLocal, STM, Txn, Ref}
 
-object KTemporalSystem extends System[ KTemporalCtx ] {
-   private type C = Ctx[ KTemporalCtx ]
+object KTemporalSystem extends System[ KTemporal ] {
+   private type C = Ctx[ KTemporal ]
 
-   private val pathRef = Ref( VersionPath.init )
+   private val currentPathRef = Ref( VersionPath.init )
 
-   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new KTemporalCtx( tx )))
+   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new KTemporal( tx, currentPathRef )))
 
+   def in[ T ]( version: VersionPath )( fun: C => T ) : T = STM.atomic { tx =>
+      val oldCurr = currentPathRef.swap( version )( tx )
+      try {
+         fun( new KTemporal( tx, currentPathRef ))
+      } finally {
+         currentPathRef.set( oldCurr )( tx )
+      }
+   }
  }
 
-class KTemporalCtx private[proc]( private[proc] val txn: Txn )
-extends Ctx[ KTemporalCtx ] {
-   private type C = Ctx[ KTemporalCtx ]
+class KTemporal private[proc]( private[proc] val txn: Txn, pathRef: Ref[ VersionPath ])
+extends Ctx[ KTemporal ] {
+//   ctx =>
+   
+   private type C = Ctx[ KTemporal ]
+
+   private val isWriting = new TxnLocal[ Boolean ] {
+      override protected def initialValue( txn: Txn ) = false
+   }
 
    def repr = this
    def system = KTemporalSystem
 
-   def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ KTemporalCtx, T ] = {
+   def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ KTemporal, T ] = {
 //      val ref = Ref[ T ]()
-      new KVar( Ref( init ))
+      val fat0 = FatValue.empty[ T ]
+      val vp   = writePath
+//println( "ASSIGN AT " + vp + " : " + init )
+      val fat1 = fat0.assign( vp.path, init )
+      new KVar( Ref( fat1 ))
    }
 
-   private class KVar[ /* @specialized */ T ]( ref: Ref[ T ]) extends Var[ KTemporalCtx, T ] {
-       def get( implicit c: C ) : T = ref.get( c.repr.txn )
-       def set( v: T )( implicit c: C ) : Unit = ref.set( v )( c.repr.txn )
+   def path : VersionPath = readPath
+
+   private[proc] def readPath : VersionPath = pathRef.get( txn )
+
+   private[proc] def writePath : VersionPath = {
+      val p = pathRef.get( txn )
+      if( isWriting.get( txn )) p else {
+         isWriting.set( true )( txn )
+         val pw = p.newBranch
+         pathRef.set( pw )( txn )
+         pw
+      }
+   }
+
+   private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ T ]]) extends Var[ KTemporal, T ] {
+       def get( implicit c: C ) : T = {
+          val vp   = c.repr.readPath
+          ref.get( c.repr.txn ).access( vp.path )
+            .getOrElse( error( "No assignment for path " + vp ))
+       }
+
+       def set( v: T )( implicit c: C ) {
+          ref.transform( _.assign( c.repr.writePath.path, v ))( c.repr.txn )
+       }
     }
 }
