@@ -34,28 +34,28 @@ import edu.stanford.ppl.ccstm.{TxnLocal, STM, Txn, Ref}
 object KTemporalSystem extends System[ KTemporal ] {
    private type C = Ctx[ KTemporal ]
 
-   private val currentPathRef = Ref( VersionPath.init )
-
-   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new KTemporal( tx, currentPathRef )))
+//   private val currentPathRef = Ref( VersionPath.init )
+//
+//   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new KTemporal( tx, currentPathRef )))
 
    def in[ T ]( version: VersionPath )( fun: C => T ) : T = STM.atomic { tx =>
-      val oldCurr = currentPathRef.swap( version )( tx )
-      try {
-         fun( new KTemporal( tx, currentPathRef ))
-      } finally {
-         currentPathRef.set( oldCurr )( tx )
-      }
+//      val oldCurr = currentPathRef.swap( version )( tx )
+//      try {
+         fun( new KTemporal( tx, version ))   // currentPathRef
+//      } finally {
+//         currentPathRef.set( oldCurr )( tx )
+//      }
    }
  }
 
-class KTemporal private[proc]( private[proc] val txn: Txn, pathRef: Ref[ VersionPath ])
+class KTemporal private[proc]( private[proc] val txn: Txn, initPath: VersionPath )
 extends Ctx[ KTemporal ] {
 //   ctx =>
    
    private type C = Ctx[ KTemporal ]
 
-   private val isWriting = new TxnLocal[ Boolean ] {
-      override protected def initialValue( txn: Txn ) = false
+   private val pathRef = new TxnLocal[ VersionPath ] {
+      override protected def initialValue( txn: Txn ) = initPath
    }
 
    def repr = this
@@ -70,23 +70,28 @@ extends Ctx[ KTemporal ] {
       new KVar( Ref( fat1 ))
    }
 
-   def path : VersionPath = readPath
+   def path : VersionPath = pathRef.get( txn )
 
-   private[proc] def readPath : VersionPath = pathRef.get( txn )
+//   private[proc] def readPath : VersionPath = pathRef.get( txn )
 
    private[proc] def writePath : VersionPath = {
       val p = pathRef.get( txn )
-      if( isWriting.get( txn )) p else {
-         isWriting.set( true )( txn )
+//      if( isWriting.get( txn )) p else {
+//         isWriting.set( true )( txn )
+//         val pw = p.newBranch
+//         pathRef.set( pw )( txn )
+//         pw
+//      }
+      if( p == initPath ) {
          val pw = p.newBranch
          pathRef.set( pw )( txn )
          pw
-      }
+      } else p
    }
 
    private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ T ]]) extends Var[ KTemporal, T ] {
        def get( implicit c: C ) : T = {
-          val vp   = c.repr.readPath
+          val vp   = c.repr.path // readPath
           ref.get( c.repr.txn ).access( vp.path )
             .getOrElse( error( "No assignment for path " + vp ))
        }
