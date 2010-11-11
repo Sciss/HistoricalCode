@@ -46,7 +46,7 @@ object KTemporalSystem extends System[ KTemporal ] {
 //         currentPathRef.set( oldCurr )( tx )
 //      }
    }
- }
+}
 
 class KTemporal private[proc]( private[proc] val txn: Txn, initPath: VersionPath )
 extends Ctx[ KTemporal ] {

@@ -4,7 +4,7 @@ import impl.ProcImpl
 import de.sciss.confluent.VersionPath
 
 object Test {
-   def main( args: Array[ String ]) { test3 }
+   def main( args: Array[ String ]) { test4 }
    
    def test {
       val sys = EphemeralSystem
@@ -18,7 +18,7 @@ object Test {
    }
 
    def test2 {
-      implicit val sys = PTemporalSystem
+      val sys = PTemporalSystem
       import DSL._
 
       sys.t { implicit c =>
@@ -36,7 +36,7 @@ object Test {
    }
 
    def test3 {
-      implicit val sys = KTemporalSystem
+      val sys = KTemporalSystem
 
       val v0 = VersionPath.init
       val (p, v1) = sys.in( v0 ) { implicit c =>
@@ -61,6 +61,44 @@ object Test {
       }
    }
 
-   // BitemporalSystem
-   // def test4 { }
+   def test4 {
+      val sys = BitemporalSystem
+      import DSL._
+
+      val v0 = VersionPath.init
+      val (p, v1) = sys.in( v0 ) { implicit c =>
+         val p = new ProcImpl
+         sys.at( 2.0 ) {
+            p.playing.set( true )
+         }
+         sys.during( 4.0 -> 6.0 ) {
+            p.playing.set( false )
+         }
+         (p, c.repr.path)
+      }
+
+      val v2 = sys.in( v1 ) { implicit c =>
+         sys.at( 3.0 ) {
+            p.playing.set( false )
+         }
+         sys.during( 5.0 -> 6.0 ) {
+            p.playing.set( true )
+         }
+         c.repr.path
+      }
+
+      sys.in( v1 ) { implicit c =>
+         (0.0 to 6.0 by 1.0).foreach( t => sys.at( t ) {
+            println( "in " + v1 + " at " + t + " playing? " + p.playing.get )
+         })
+      }
+
+      println()
+
+      sys.in( v2 ) { implicit c =>
+         (0.0 to 6.0 by 1.0).foreach( t => sys.at( t ) {
+            println( "in " + v2 + " at " + t + " playing? " + p.playing.get )
+         })
+      }
+   }
 }
