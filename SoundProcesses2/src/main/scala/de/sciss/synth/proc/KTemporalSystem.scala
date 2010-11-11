@@ -89,15 +89,18 @@ extends Ctx[ KTemporal ] {
       } else p
    }
 
-   private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ T ]]) extends Var[ KTemporal, T ] {
-       def get( implicit c: C ) : T = {
-          val vp   = c.repr.path // readPath
-          ref.get( c.repr.txn ).access( vp.path )
-            .getOrElse( error( "No assignment for path " + vp ))
-       }
+   private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ T ]]) extends TxnVar[ KTemporal, T ] {
+      protected def txn( c: C ) = c.repr.txn
 
-       def set( v: T )( implicit c: C ) {
-          ref.transform( _.assign( c.repr.writePath.path, v ))( c.repr.txn )
-       }
-    }
+      def get( implicit c: C ) : T = {
+         val vp   = c.repr.path // readPath
+         ref.get( txn( c )).access( vp.path )
+            .getOrElse( error( "No assignment for path " + vp ))
+      }
+
+      def set( v: T )( implicit c: C ) {
+         ref.transform( _.assign( c.repr.writePath.path, v ))( txn( c ))
+         fireUpdate( v, c )
+      }
+   }
 }

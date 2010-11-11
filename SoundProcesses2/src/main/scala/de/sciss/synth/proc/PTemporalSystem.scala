@@ -68,9 +68,11 @@ extends Ctx[ PTemporal ] {
 
    private[proc] def interval_=( newInterval: Interval ) = intervalRef.set( newInterval )( txn )
 
-   private class PVar[ /* @specialized */ T ]( ref: Ref[ ISortedMap[ Period, T ]]) extends Var[ PTemporal, T ] {
+   private class PVar[ /* @specialized */ T ]( ref: Ref[ ISortedMap[ Period, T ]]) extends TxnVar[ PTemporal, T ] {
+      protected def txn( c: C ) = c.repr.txn
+      
       def get( implicit c: C ) : T = {
-         val map = ref.get( c.repr.txn )
+         val map = ref.get( txn( c ))
          map.to( c.repr.period ).last._2  // XXX is .last efficient? we might need to switch to FingerTree.Ranged
       }
       def set( v: T )( implicit c: C ) {
@@ -80,7 +82,8 @@ extends Ctx[ PTemporal ] {
             (ival.start -> v) +
             (ival.end -> map.to( ival.end ).last._2) ++ // XXX .last efficient?
             map.from( ival.end )
-         )( c.repr.txn )
+         )( txn( c ))
+         fireUpdate( v, c )
       }
    }
 }

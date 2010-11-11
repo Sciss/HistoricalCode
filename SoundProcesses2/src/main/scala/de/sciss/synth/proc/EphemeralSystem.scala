@@ -44,8 +44,12 @@ extends Ctx[ Ephemeral ] {
    def system = EphemeralSystem
    def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ Ephemeral, T ] = new EVar( Ref( init ))
 
-   private class EVar[ /* @specialized */ T ]( ref: Ref[ T ]) extends Var[ Ephemeral, T ] {
-      def get( implicit c: C ) : T = ref.get( c.repr.txn )
-      def set( v: T )( implicit c: C ) : Unit = ref.set( v )( c.repr.txn )
+   private class EVar[ /* @specialized */ T ]( ref: Ref[ T ]) extends TxnVar[ Ephemeral, T ] {
+      protected def txn( c: C ) = c.repr.txn
+      def get( implicit c: C ) : T = ref.get( txn( c ))
+      def set( v: T )( implicit c: C ) {
+         ref.set( v )( txn( c ))
+         fireUpdate( v, c )
+      }
    }
 }

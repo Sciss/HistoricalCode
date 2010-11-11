@@ -90,10 +90,12 @@ extends Ctx[ Bitemporal ] {
    private[proc] def interval_=( newInterval: Interval ) = intervalRef.set( newInterval )( txn )
 
    private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ ISortedMap[ Period, T ]]])
-   extends Var[ Bitemporal, T ] {
+   extends TxnVar[ Bitemporal, T ] {
+      protected def txn( c: C ) = c.repr.txn
+
       def get( implicit c: C ) : T = {
          val vp   = c.repr.path
-         val map  = ref.get( c.repr.txn ).access( vp.path )
+         val map  = ref.get( txn( c )).access( vp.path )
            .getOrElse( error( "No assignment for path " + vp ))
          map.to( c.repr.period ).last._2  // XXX is .last efficient? we might need to switch to FingerTree.Ranged
       }
@@ -103,7 +105,8 @@ extends Ctx[ Bitemporal ] {
          val rp   = c.repr.path
          val wp   = c.repr.writePath 
          val ival = c.repr.interval
-         val fat  = ref.get( c.repr.txn ) 
+         val t    = txn( c )
+         val fat  = ref.get( t )
          val map  = fat.access( rp.path )
            .getOrElse( error( "No assignment for path " + rp ))
 
@@ -112,7 +115,8 @@ extends Ctx[ Bitemporal ] {
             (ival.start -> v) +
             (ival.end -> map.to( ival.end ).last._2) ++ // XXX .last efficient?
             map.from( ival.end )
-         ))( c.repr.txn )
+         ))( t )
+         fireUpdate( v, c )
       }
    }
 }
