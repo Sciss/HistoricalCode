@@ -7,7 +7,7 @@ import view.OfflineVisualView
 import javax.swing.WindowConstants
 
 object Test {
-   def main( args: Array[ String ]) { test5 }
+   def main( args: Array[ String ]) { test4 }
 
    def test5 { EventQueue.invokeLater( new Runnable { def run {
       val v = new OfflineVisualView

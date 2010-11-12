@@ -30,6 +30,7 @@ package de.sciss.synth.proc
 
 import de.sciss.confluent._
 import edu.stanford.ppl.ccstm.{TxnLocal, STM, Txn, Ref}
+import impl.ModelImpl
 
 object KTemporalSystem extends System[ KTemporal ] {
    private type C = Ctx[ KTemporal ]
@@ -89,7 +90,8 @@ extends Ctx[ KTemporal ] {
       } else p
    }
 
-   private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ T ]]) extends Var[ KTemporal, T ] {
+   private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ T ]])
+   extends Var[ KTemporal, T ] with ModelImpl[ KTemporal, T ] {
 //      protected def txn( c: C ) = c.repr.txn
 
       def get( implicit c: C ) : T = {

@@ -29,6 +29,7 @@
 package de.sciss.synth.proc
 
 import edu.stanford.ppl.ccstm.{STM, Txn, Ref}
+import impl.ModelImpl
 
 object EphemeralSystem extends System[ Ephemeral ] {
    private type C = Ctx[ Ephemeral ]
@@ -44,8 +45,8 @@ extends Ctx[ Ephemeral ] {
    def system = EphemeralSystem
    def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ Ephemeral, T ] = new EVar( Ref( init ))
 
-   private class EVar[ /* @specialized */ T ]( ref: Ref[ T ]) extends Var[ Ephemeral, T ] {
-//      protected def txn( c: C ) = c.repr.txn
+   private class EVar[ /* @specialized */ T ]( ref: Ref[ T ])
+   extends Var[ Ephemeral, T ] with ModelImpl[ Ephemeral, T ] {
       def get( implicit c: C ) : T = ref.get( c.txn )
       def set( v: T )( implicit c: C ) {
          ref.set( v )( c.txn )

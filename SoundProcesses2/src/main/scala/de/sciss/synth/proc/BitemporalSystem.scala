@@ -32,6 +32,7 @@ import de.sciss.confluent.{FatValue, VersionPath}
 import edu.stanford.ppl.ccstm.{STM, Ref, TxnLocal, Txn}
 import collection.immutable.{SortedMap => ISortedMap}
 import Double.{PositiveInfinity => dinf}
+import impl.ModelImpl
 
 // todo: compose systems, contexts and vars from common parts
 object BitemporalSystem extends System[ Bitemporal ] {
@@ -90,12 +91,10 @@ extends Ctx[ Bitemporal ] {
    private[proc] def interval_=( newInterval: Interval ) = intervalRef.set( newInterval )( txn )
 
    private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ ISortedMap[ Period, T ]]])
-   extends Var[ Bitemporal, T ] {
-      protected def txn( c: C ) = c.repr.txn
-
+   extends Var[ Bitemporal, T ] with ModelImpl[ Bitemporal, T ] {
       def get( implicit c: C ) : T = {
          val vp   = c.repr.path
-         val map  = ref.get( txn( c )).access( vp.path )
+         val map  = ref.get( c.txn ).access( vp.path )
            .getOrElse( error( "No assignment for path " + vp ))
          map.to( c.repr.period ).last._2  // XXX is .last efficient? we might need to switch to FingerTree.Ranged
       }
@@ -105,7 +104,7 @@ extends Ctx[ Bitemporal ] {
          val rp   = c.repr.path
          val wp   = c.repr.writePath 
          val ival = c.repr.interval
-         val t    = txn( c )
+         val t    = c.txn
          val fat  = ref.get( t )
          val map  = fat.access( rp.path )
            .getOrElse( error( "No assignment for path " + rp ))

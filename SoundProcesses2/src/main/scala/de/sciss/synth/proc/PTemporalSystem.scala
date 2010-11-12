@@ -31,6 +31,7 @@ package de.sciss.synth.proc
 import edu.stanford.ppl.ccstm.{TxnLocal, STM, Txn, Ref}
 import collection.immutable.{SortedMap => ISortedMap}
 import Double.{PositiveInfinity => dinf}
+import impl.ModelImpl
 
 object PTemporalSystem extends System[ PTemporal ] {
    private type C = Ctx[ PTemporal ]
@@ -68,9 +69,8 @@ extends Ctx[ PTemporal ] {
 
    private[proc] def interval_=( newInterval: Interval ) = intervalRef.set( newInterval )( txn )
 
-   private class PVar[ /* @specialized */ T ]( ref: Ref[ ISortedMap[ Period, T ]]) extends Var[ PTemporal, T ] {
-//      protected def txn( c: C ) = c.repr.txn
-      
+   private class PVar[ /* @specialized */ T ]( ref: Ref[ ISortedMap[ Period, T ]])
+   extends Var[ PTemporal, T ] with ModelImpl[ PTemporal, T ] {
       def get( implicit c: C ) : T = {
          val map = ref.get( c.txn )
          map.to( c.repr.period ).last._2  // XXX is .last efficient? we might need to switch to FingerTree.Ranged
