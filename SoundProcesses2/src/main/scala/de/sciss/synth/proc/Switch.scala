@@ -1,3 +1,3 @@
 package de.sciss.synth.proc
 
-trait Switch[ C ] extends NamedVar[ C, Boolean ]
+trait Switch[ C ] extends Var[ C, Boolean ] with Model[ C, Boolean ] with Named

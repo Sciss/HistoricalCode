@@ -7,7 +7,7 @@ import view.OfflineVisualView
 import javax.swing.WindowConstants
 
 object Test {
-   def main( args: Array[ String ]) { test4 }
+   def main( args: Array[ String ]) { test5 }
 
    def test5 { EventQueue.invokeLater( new Runnable { def run {
       val v = new OfflineVisualView
@@ -18,7 +18,7 @@ object Test {
       val sys = EphemeralSystem
 
       sys.t { implicit c =>
-         val p = new ProcImpl
+         val p = Factory.proc( "p1" )
          println( "playing? " + p.playing.get )
          p.playing.set( true )
          println( "playing? " + p.playing.get )
@@ -30,7 +30,7 @@ object Test {
       import DSL._
 
       sys.t { implicit c =>
-         val p = new ProcImpl
+         val p = Factory.proc( "p1" )
          sys.at( 2.0 ) {
             p.playing.set( true )
          }
@@ -48,7 +48,7 @@ object Test {
 
       val v0 = VersionPath.init
       val (p, v1) = sys.in( v0 ) { implicit c =>
-         val p = new ProcImpl
+         val p = Factory.proc( "p1" )
          println( "playing? " + p.playing.get )
          (p, c.repr.path)
       }
@@ -75,7 +75,7 @@ object Test {
 
       val v0 = VersionPath.init
       val (p, v1) = sys.in( v0 ) { implicit c =>
-         val p = new ProcImpl
+         val p = Factory.proc( "p1" )
 
          p.addListener( new Model.Listener[ Bitemporal, AnyRef ] {
             def updated( what: AnyRef )( implicit c: Ctx[ Bitemporal ]) {

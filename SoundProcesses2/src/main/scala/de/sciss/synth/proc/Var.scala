@@ -9,7 +9,7 @@ object Var {
 //   }
 }
 
-trait Var[ Repr, T ] extends Model[ Repr, T ] {
+trait Var[ Repr, T ] /* extends Model[ Repr, T ] */ {
    import Var._
 //   type L = Listener[ Repr, T ]
 
@@ -21,8 +21,8 @@ trait Var[ Repr, T ] extends Model[ Repr, T ] {
 //   def removeListener( l: L )( implicit c: Ctx[ Repr ]) : Unit
 }
 
-trait NamedVar[ Repr, T ] extends Var[ Repr, T ] {
-   def name: String
-}
+//trait NamedVar[ Repr, T ] extends Var[ Repr, T ] {
+//   def name: String
+//}
 
 //trait TxnVar[ Repr, T ] extends Var[ Repr, T ] with TxnModel[ Repr, T ]
