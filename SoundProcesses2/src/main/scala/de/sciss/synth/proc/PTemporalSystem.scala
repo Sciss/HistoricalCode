@@ -33,8 +33,10 @@ import collection.immutable.{SortedMap => ISortedMap}
 import Double.{PositiveInfinity => dinf}
 import impl.ModelImpl
 
-object PTemporalSystem extends System[ PTemporal ] {
+object PTemporalSystem extends System /*[ PTemporal ]*/ {
    private type C = Ctx[ PTemporal ]
+
+   override def toString = "PTemporalSystem"
 
    def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new PTemporal( tx )))
 

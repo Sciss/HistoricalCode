@@ -31,15 +31,21 @@ package de.sciss.synth.proc
 import impl.ProcImpl
 import de.sciss.confluent.VersionPath
 import java.awt.EventQueue
-import view.OfflineVisualView
 import javax.swing.WindowConstants
+import view.{ContextNavigator, GroupView, OfflineVisualView}
 
 object Test {
    def main( args: Array[ String ]) { test5 }
 
    def test5 { EventQueue.invokeLater( new Runnable { def run {
-      val v = new OfflineVisualView
-      v.frame.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE )
+      val sys = BitemporalSystem
+
+      sys.in( VersionPath.init ) { implicit c =>
+         val ov = new OfflineVisualView
+         ov.frame.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE )
+         val pg = Factory.group( "g1" )
+         val gv = new GroupView( pg, ContextNavigator() )
+      }
    }})}
 
    def test {

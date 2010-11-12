@@ -28,23 +28,101 @@
 
 package de.sciss.synth.proc.view
 
-import javax.swing.{WindowConstants, JFrame}
-import java.awt.event.{WindowEvent, WindowAdapter}
-import de.sciss.synth.proc.{Ctx, EphemeralSystem => Eph, ProcGroup}
+import javax.swing._
+import event.{AncestorEvent, AncestorListener, ListSelectionListener, ListSelectionEvent}
+import java.awt.{EventQueue, BorderLayout}
+import java.awt.event.{ActionListener, ActionEvent, WindowEvent, WindowAdapter}
+import de.sciss.synth.proc.{Factory, Proc, Ctx, EphemeralSystem => Eph, ProcGroup}
 
-class GroupView[ C ]( g: ProcGroup[ C ])( implicit c: Ctx[ C ]) {
+class GroupView[ C ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
+   private val listModel  = new DefaultListModel()
+   private val list       = new JList( listModel )
+
    val frame = {
       val l = g.listener { implicit c => {
-         case ProcGroup.ProcAdded( p )    => println( "added : " + p.name )
-         case ProcGroup.ProcRemoved( p )  => println( "removed : " + p.name )
+         case ProcGroup.ProcAdded( p )   /* XXX if( nav.isApplicable( c )) */ => defer( add( p ))
+         case ProcGroup.ProcRemoved( p ) /* XXX if( nav.isApplicable( c )) */ => defer( remove( p ))
       }}
-      val f = new JFrame( "Group : " + g.name )
-      f.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE )
-      f.addWindowListener( new WindowAdapter {
-         override def windowClosed( w: WindowEvent ) {
-            Eph.t( implicit c => g.removeListener( l ))
+
+      val f          = new JFrame( "Group : " + g.name )
+      val cp         = f.getContentPane()
+      list.setVisibleRowCount( 5 )
+      list.setPrototypeCellValue( "Halochila" )
+      val butAdd     = new JButton( "Add" )
+      butAdd.addActionListener( new ActionListener {
+         def actionPerformed( e: ActionEvent ) = userAddProc
+      })
+      val butRemove  = new JButton( "Remove" )
+      butRemove.addActionListener( new ActionListener {
+         def actionPerformed( e: ActionEvent ) = userRemoveProc
+      })
+      butRemove.setEnabled( false )
+      list.addListSelectionListener( new ListSelectionListener {
+         def valueChanged( e: ListSelectionEvent ) {
+            butRemove.setEnabled( list.getSelectedIndex() >= 0 )
          }
       })
+      val butPane    = Box.createHorizontalBox()
+//      butPane.add( Box.createHorizontalStrut( 4 ))
+      butPane.add( butAdd )
+//      butPane.add( Box.createHorizontalStrut( 4 ))
+      butPane.add( butRemove )
+//      butPane.add( Box.createHorizontalStrut( 4 ))
+      butPane.add( Box.createHorizontalGlue() )
+
+      cp.add( nav.view, BorderLayout.NORTH )
+      cp.add( new JScrollPane( list ), BorderLayout.CENTER )
+      cp.add( butPane, BorderLayout.SOUTH )
+
+      list.addAncestorListener( new AncestorListener {
+         def ancestorAdded( e: AncestorEvent ) {
+            listModel.removeAllElements()
+            Eph.t { implicit c =>
+               g.addListener( l )
+               // XXX add elements
+            }
+         }
+         def ancestorRemoved( e: AncestorEvent ) {
+            Eph.t { implicit c => g.removeListener( l )}
+         }
+         def ancestorMoved( e: AncestorEvent ) {}
+      })
+
+      f.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE )
+//      f.addWindowListener( new WindowAdapter {
+//         override def windowClosed( w: WindowEvent ) {
+//            Eph.t( implicit c => g.removeListener( l ))
+//         }
+//      })
+      f.pack()
+      f.setLocationRelativeTo( null )
+      f.setVisible( true )
       f
+   }
+
+   private def defer( thunk: => Unit ) { EventQueue.invokeLater( new Runnable { def run = thunk })}
+
+   private def add( p: Proc[ C ]) {
+      listModel.addElement( p )
+   }
+
+   private def remove( p: Proc[ C ]) {
+      listModel.removeElement( p )
+   }
+
+   private def userAddProc {
+      val name = JOptionPane.showInputDialog( "Enter name of new proc" )
+      if( name == null ) return
+      
+      nav.t { implicit c =>
+         g.add( Factory.proc( name ))
+      }
+   }
+
+   private def userRemoveProc {
+      val procs = list.getSelectedValues().collect { case p: Proc[ _ ] => p.asInstanceOf[ Proc[ C ]]}
+      nav.t { implicit c =>
+         procs.foreach( g.remove( _ ))
+      }
    }
 }

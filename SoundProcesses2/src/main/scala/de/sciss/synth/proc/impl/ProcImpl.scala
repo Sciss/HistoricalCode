@@ -33,6 +33,8 @@ import collection.immutable.{Queue => IQueue}
 
 class ProcImpl[ C ]( val name: String )( implicit c: Ctx[ C ])
 extends Proc[ C ] with ModelImpl[ C, Proc.Update ] {
+   override def toString = "Proc(" + name + ")"
+
    val playing = new SwitchImpl( "playing", false )
    val amp     = new ControllerImpl( "amp", 1.0 )
    val freq    = new ControllerImpl( "freq", 441.0 )

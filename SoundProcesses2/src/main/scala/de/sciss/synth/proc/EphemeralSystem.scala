@@ -31,9 +31,11 @@ package de.sciss.synth.proc
 import edu.stanford.ppl.ccstm.{STM, Txn, Ref}
 import impl.ModelImpl
 
-object EphemeralSystem extends System[ Ephemeral ] {
+object EphemeralSystem extends System /*[ Ephemeral ] */ {
    private type C = Ctx[ Ephemeral ]
-   
+
+   override def toString = "EphemeralSystem"
+
    def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new EphemeralImpl( tx )))
 
    private class EphemeralImpl private[proc]( val txn: Txn )

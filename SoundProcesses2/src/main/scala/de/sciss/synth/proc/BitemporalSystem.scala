@@ -35,8 +35,10 @@ import Double.{PositiveInfinity => dinf}
 import impl.ModelImpl
 
 // todo: compose systems, contexts and vars from common parts
-object BitemporalSystem extends System[ Bitemporal ] {
+object BitemporalSystem extends System /*[ Bitemporal ]*/ {
    private type C = Ctx[ Bitemporal ]
+
+   override def toString = "BitemporalSystem"
 
    def in[ T ]( version: VersionPath )( fun: C => T ) : T = STM.atomic { tx =>
       fun( new Bitemporal( tx, version ))

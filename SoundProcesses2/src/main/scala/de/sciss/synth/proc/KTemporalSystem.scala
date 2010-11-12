@@ -32,20 +32,13 @@ import de.sciss.confluent._
 import edu.stanford.ppl.ccstm.{TxnLocal, STM, Txn, Ref}
 import impl.ModelImpl
 
-object KTemporalSystem extends System[ KTemporal ] {
+object KTemporalSystem extends System /*[ KTemporal ]*/ {
    private type C = Ctx[ KTemporal ]
 
-//   private val currentPathRef = Ref( VersionPath.init )
-//
-//   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new KTemporal( tx, currentPathRef )))
+   override def toString = "KTemporalSystem"
 
    def in[ T ]( version: VersionPath )( fun: C => T ) : T = STM.atomic { tx =>
-//      val oldCurr = currentPathRef.swap( version )( tx )
-//      try {
-         fun( new KTemporal( tx, version ))   // currentPathRef
-//      } finally {
-//         currentPathRef.set( oldCurr )( tx )
-//      }
+      fun( new KTemporal( tx, version ))
    }
 }
 
