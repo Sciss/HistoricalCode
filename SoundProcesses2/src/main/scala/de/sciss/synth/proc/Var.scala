@@ -21,4 +21,8 @@ trait Var[ Repr, T ] extends Model[ Repr, T ] {
 //   def removeListener( l: L )( implicit c: Ctx[ Repr ]) : Unit
 }
 
+trait NamedVar[ Repr, T ] extends Var[ Repr, T ] {
+   def name: String
+}
+
 //trait TxnVar[ Repr, T ] extends Var[ Repr, T ] with TxnModel[ Repr, T ]
