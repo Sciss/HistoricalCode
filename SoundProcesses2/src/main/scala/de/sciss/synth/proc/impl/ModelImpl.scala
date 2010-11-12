@@ -9,11 +9,11 @@ trait ModelImpl[ Repr, U ] extends Model[ Repr, U ] {
 
    private val listeners = Ref( IQueue.empty[ L ])
 
-   def addListener( l: L )( implicit c: Ctx[ Repr ]) {
+   def addListener( l: L )( implicit c: Ctx[ _ ]) {
       listeners.transform( _ enqueue l )( c.txn )
    }
 
-   def removeListener( l: L )( implicit c: Ctx[ Repr ]) {
+   def removeListener( l: L )( implicit c: Ctx[ _ ]) {
       listeners.transform( _.filter( _ != l ))( c.txn )
    }
 

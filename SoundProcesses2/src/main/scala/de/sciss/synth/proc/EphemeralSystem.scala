@@ -34,23 +34,25 @@ import impl.ModelImpl
 object EphemeralSystem extends System[ Ephemeral ] {
    private type C = Ctx[ Ephemeral ]
    
-   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new Ephemeral( tx )))
-}
+   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new EphemeralImpl( tx )))
 
-class Ephemeral private[proc]( val txn: Txn )
-extends Ctx[ Ephemeral ] {
-   private type C = Ctx[ Ephemeral ]
+   private class EphemeralImpl private[proc]( val txn: Txn )
+   extends Ephemeral with Ctx[ Ephemeral ] {
+      private type C = Ctx[ Ephemeral ]
 
-   def repr = this
-   def system = EphemeralSystem
-   def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ Ephemeral, T ] = new EVar( Ref( init ))
+      def repr = this
+      def system = EphemeralSystem
+      def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ Ephemeral, T ] = new EVar( Ref( init ))
 
-   private class EVar[ /* @specialized */ T ]( ref: Ref[ T ])
-   extends Var[ Ephemeral, T ] with ModelImpl[ Ephemeral, T ] {
-      def get( implicit c: C ) : T = ref.get( c.txn )
-      def set( v: T )( implicit c: C ) {
-         ref.set( v )( c.txn )
-         fireUpdate( v )
+      private class EVar[ /* @specialized */ T ]( ref: Ref[ T ])
+      extends Var[ Ephemeral, T ] with ModelImpl[ Ephemeral, T ] {
+         def get( implicit c: C ) : T = ref.get( c.txn )
+         def set( v: T )( implicit c: C ) {
+            ref.set( v )( c.txn )
+            fireUpdate( v )
+         }
       }
    }
 }
+
+trait Ephemeral extends Ctx[ Ephemeral ]
