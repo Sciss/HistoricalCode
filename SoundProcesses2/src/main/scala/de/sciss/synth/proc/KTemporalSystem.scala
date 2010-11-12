@@ -48,7 +48,7 @@ object KTemporalSystem extends System[ KTemporal ] {
    }
 }
 
-class KTemporal private[proc]( private[proc] val txn: Txn, initPath: VersionPath )
+class KTemporal private[proc]( val txn: Txn, initPath: VersionPath )
 extends Ctx[ KTemporal ] {
 //   ctx =>
    
@@ -89,18 +89,23 @@ extends Ctx[ KTemporal ] {
       } else p
    }
 
-   private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ T ]]) extends TxnVar[ KTemporal, T ] {
-      protected def txn( c: C ) = c.repr.txn
+   private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ T ]]) extends Var[ KTemporal, T ] {
+//      protected def txn( c: C ) = c.repr.txn
 
       def get( implicit c: C ) : T = {
          val vp   = c.repr.path // readPath
-         ref.get( txn( c )).access( vp.path )
+         ref.get( c.txn ).access( vp.path )
             .getOrElse( error( "No assignment for path " + vp ))
       }
 
       def set( v: T )( implicit c: C ) {
-         ref.transform( _.assign( c.repr.writePath.path, v ))( txn( c ))
+         ref.transform( _.assign( c.repr.writePath.path, v ))( c.txn )
          fireUpdate( v, c )
       }
+
+//      def transform( f: T => T )( implicit c: C ) {
+//         ref.transform( _.assign( c.repr.writePath.path, v ))( txn( c ))
+//         fireUpdate( v, c )
+//      }
    }
 }

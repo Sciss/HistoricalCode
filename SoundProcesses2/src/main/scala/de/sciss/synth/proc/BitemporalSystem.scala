@@ -51,7 +51,7 @@ object BitemporalSystem extends System[ Bitemporal ] {
    }
 }
 
-class Bitemporal private[proc]( private[proc] val txn: Txn, initPath: VersionPath )
+class Bitemporal private[proc]( val txn: Txn, initPath: VersionPath )
 extends Ctx[ Bitemporal ] {
    private type C = Ctx[ Bitemporal ]
 
@@ -90,7 +90,7 @@ extends Ctx[ Bitemporal ] {
    private[proc] def interval_=( newInterval: Interval ) = intervalRef.set( newInterval )( txn )
 
    private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ ISortedMap[ Period, T ]]])
-   extends TxnVar[ Bitemporal, T ] {
+   extends Var[ Bitemporal, T ] {
       protected def txn( c: C ) = c.repr.txn
 
       def get( implicit c: C ) : T = {

@@ -36,7 +36,7 @@ object EphemeralSystem extends System[ Ephemeral ] {
    def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new Ephemeral( tx )))
 }
 
-class Ephemeral private[proc]( private[proc] val txn: Txn )
+class Ephemeral private[proc]( val txn: Txn )
 extends Ctx[ Ephemeral ] {
    private type C = Ctx[ Ephemeral ]
 
@@ -44,11 +44,11 @@ extends Ctx[ Ephemeral ] {
    def system = EphemeralSystem
    def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ Ephemeral, T ] = new EVar( Ref( init ))
 
-   private class EVar[ /* @specialized */ T ]( ref: Ref[ T ]) extends TxnVar[ Ephemeral, T ] {
-      protected def txn( c: C ) = c.repr.txn
-      def get( implicit c: C ) : T = ref.get( txn( c ))
+   private class EVar[ /* @specialized */ T ]( ref: Ref[ T ]) extends Var[ Ephemeral, T ] {
+//      protected def txn( c: C ) = c.repr.txn
+      def get( implicit c: C ) : T = ref.get( c.txn )
       def set( v: T )( implicit c: C ) {
-         ref.set( v )( txn( c ))
+         ref.set( v )( c.txn )
          fireUpdate( v, c )
       }
    }

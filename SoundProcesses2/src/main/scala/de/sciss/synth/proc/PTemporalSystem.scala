@@ -47,7 +47,7 @@ object PTemporalSystem extends System[ PTemporal ] {
    }
 }
 
-class PTemporal private[proc]( private[proc] val txn: Txn )
+class PTemporal private[proc]( val txn: Txn )
 extends Ctx[ PTemporal ] {
 
    private type C = Ctx[ PTemporal ]
@@ -68,11 +68,11 @@ extends Ctx[ PTemporal ] {
 
    private[proc] def interval_=( newInterval: Interval ) = intervalRef.set( newInterval )( txn )
 
-   private class PVar[ /* @specialized */ T ]( ref: Ref[ ISortedMap[ Period, T ]]) extends TxnVar[ PTemporal, T ] {
-      protected def txn( c: C ) = c.repr.txn
+   private class PVar[ /* @specialized */ T ]( ref: Ref[ ISortedMap[ Period, T ]]) extends Var[ PTemporal, T ] {
+//      protected def txn( c: C ) = c.repr.txn
       
       def get( implicit c: C ) : T = {
-         val map = ref.get( txn( c ))
+         val map = ref.get( c.txn )
          map.to( c.repr.period ).last._2  // XXX is .last efficient? we might need to switch to FingerTree.Ranged
       }
       def set( v: T )( implicit c: C ) {
@@ -82,7 +82,7 @@ extends Ctx[ PTemporal ] {
             (ival.start -> v) +
             (ival.end -> map.to( ival.end ).last._2) ++ // XXX .last efficient?
             map.from( ival.end )
-         )( txn( c ))
+         )( c.txn )
          fireUpdate( v, c )
       }
    }
