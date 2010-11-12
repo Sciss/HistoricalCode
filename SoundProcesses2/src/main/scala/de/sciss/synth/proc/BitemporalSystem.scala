@@ -115,7 +115,7 @@ extends Ctx[ Bitemporal ] {
             (ival.end -> map.to( ival.end ).last._2) ++ // XXX .last efficient?
             map.from( ival.end )
          ))( t )
-         fireUpdate( v, c )
+         fireUpdate( v )
       }
    }
 }

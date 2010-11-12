@@ -83,7 +83,7 @@ extends Ctx[ PTemporal ] {
             (ival.end -> map.to( ival.end ).last._2) ++ // XXX .last efficient?
             map.from( ival.end )
          )( c.txn )
-         fireUpdate( v, c )
+         fireUpdate( v )
       }
    }
 }

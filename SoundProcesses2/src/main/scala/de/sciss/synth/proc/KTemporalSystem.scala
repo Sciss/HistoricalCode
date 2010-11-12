@@ -102,7 +102,7 @@ extends Ctx[ KTemporal ] {
 
       def set( v: T )( implicit c: C ) {
          ref.transform( _.assign( c.repr.writePath.path, v ))( c.txn )
-         fireUpdate( v, c )
+         fireUpdate( v )
       }
 
 //      def transform( f: T => T )( implicit c: C ) {

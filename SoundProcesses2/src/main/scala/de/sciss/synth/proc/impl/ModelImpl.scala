@@ -17,7 +17,7 @@ trait ModelImpl[ Repr, U ] extends Model[ Repr, U ] {
       listeners.transform( _.filter( _ != l ))( c.txn )
    }
 
-   protected def fireUpdate( u: U, c: Ctx[ Repr ]) {
+   protected def fireUpdate( u: U )( implicit c: Ctx[ Repr ]) {
       listeners.get( c.txn ).foreach( _.updated( u )( c ))
    }
 }

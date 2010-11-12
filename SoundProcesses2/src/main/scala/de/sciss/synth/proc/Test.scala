@@ -76,6 +76,19 @@ object Test {
       val v0 = VersionPath.init
       val (p, v1) = sys.in( v0 ) { implicit c =>
          val p = new ProcImpl
+
+         p.addListener( new Model.Listener[ Bitemporal, AnyRef ] {
+            def updated( what: AnyRef )( implicit c: Ctx[ Bitemporal ]) {
+//               println( "updated: " + what )
+               what match {
+                  case (s: Switch[ _ ], on: Boolean) => {
+                     println( s.name + " " + (if( on ) "ON " else "OFF") + " in " + c.repr.path + " during " + c.repr.interval )
+                  }
+                  case _ =>
+               }
+            }
+         })
+
          sys.at( 2.0 ) {
             p.playing.set( true )
          }

@@ -50,7 +50,7 @@ extends Ctx[ Ephemeral ] {
       def get( implicit c: C ) : T = ref.get( c.txn )
       def set( v: T )( implicit c: C ) {
          ref.set( v )( c.txn )
-         fireUpdate( v, c )
+         fireUpdate( v )
       }
    }
 }
