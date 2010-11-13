@@ -97,13 +97,18 @@ class VersionGraphView {
 //      val cp   = f.getContentPane()
       val sys  = BitemporalSystem   // XXX could as well be KTemporal
       
-      val l = new Model.Listener[ Bitemporal, Bitemporal.Update ] {
-         def updated( u: Bitemporal.Update )( implicit c: Ctx[ Bitemporal ]) {
-            u match {
-               case Bitemporal.NewBranch( oldPath, newPath ) => defer( add( oldPath.version, newPath ))   // XXX on txn commit
-            }
-         }
-      }
+//      val l = new Model.Listener[ Bitemporal, Bitemporal.Update ] {
+//         def updated( u: Bitemporal.Update )( implicit c: Ctx[ Bitemporal ]) {
+//            u match {
+//               case Bitemporal.NewBranch( oldPath, newPath ) => defer( add( oldPath.version, newPath ))   // XXX on txn commit
+//            }
+//         }
+//      }
+
+      val l = Model.onCommit[ Bitemporal, Bitemporal.Update ]( tr => defer( tr.foreach {
+         case Bitemporal.NewBranch( oldPath, newPath ) => add( oldPath.version, newPath )
+         case _ =>
+      }))
 
 //      val colLabel      = "label"
       val display       = new Display( vis )

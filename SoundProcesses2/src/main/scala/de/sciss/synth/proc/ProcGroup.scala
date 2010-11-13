@@ -36,11 +36,12 @@ object ProcGroup {
 
 trait ProcGroup[ C ] extends Model[ C, ProcGroup.Update[ C ]] with Named {
 //   type Listener = Model.Listener[ C, ProcGroup.Update[ C ]]
-   def listener( f: Function1[ Ctx[ C ], PartialFunction[ ProcGroup.Update[ C ], Unit ]]) =
-      new Model.Listener[ C, ProcGroup.Update[ C ]] {
-         def updated( u: ProcGroup.Update[ C ])( implicit c: Ctx[ C ]) = f( c )( u )
-      }
+//   def listener( f: Function1[ Ctx[ C ], PartialFunction[ ProcGroup.Update[ C ], Unit ]]) =
+//      new Model.Listener[ C, ProcGroup.Update[ C ]] {
+//         def updated( u: ProcGroup.Update[ C ])( implicit c: Ctx[ C ]) = f( c )( u )
+//      }
    
    def add( p: Proc[ C ])( implicit c: Ctx[ C ]) : Unit
    def remove( p: Proc[ C ])( implicit c: Ctx[ C ]) : Unit
+   def all( implicit c: Ctx[ C ]) : Traversable[ Proc[ C ]]
 }

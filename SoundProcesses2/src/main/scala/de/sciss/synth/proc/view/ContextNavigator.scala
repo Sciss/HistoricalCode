@@ -4,9 +4,9 @@ import de.sciss.synth.proc.{EphemeralSystem => Eph, _}
 import de.sciss.confluent.VersionPath
 import impl.{EphemeralModelVarImpl, ModelImpl}
 import javax.swing._
-import edu.stanford.ppl.ccstm.{STM, Ref}
 import event.{AncestorListener, AncestorEvent}
 import java.awt.EventQueue
+import edu.stanford.ppl.ccstm.{Txn, TxnLocal, STM, Ref}
 
 object ContextNavigator {
    def apply[ C ]()( implicit c: Ctx[ C ]) : ContextNavigator[ C ] = (c.repr match {
@@ -28,10 +28,24 @@ object ContextNavigator {
 //      def view = new JComponent with Disposable { def dispose {} }
       def view = new JPanel()
       def t[ T ]( fun: Ctx[ Ephemeral ] => T ) : T = Eph.t( fun )
+      def isApplicable( implicit c: Ctx[ Ephemeral ]) = true
    }
 
    private class BitemporalNav( vRef: EphemeralModelVarImpl[ Bitemporal, VersionPath ])
    extends ContextNavigator[ Bitemporal ] {
+      private val txnInitiator = new TxnLocal[ Boolean ] {
+         override protected def initialValue( txn: Txn ) = false
+      }
+
+      def isApplicable( implicit c: Ctx[ Bitemporal ]) = {
+//         val cp = c.repr.path
+////         val ci = c.repr.interval
+//         val np = vRef.get
+//println( "checking cp = " + cp + ", np = " + np )
+//         cp == np
+         txnInitiator.get( c.txn )
+      }
+
       def view = {
 //         val p = new JPanel with Disposable {
 //            def dispose {
@@ -80,13 +94,15 @@ object ContextNavigator {
          // (although that is ok and the existing transaction is joined)
          // ; like BitemporalSystem.inRef( vRef.getTxn( _ )) { ... } ?
          STM.atomic { t =>
-            val oldPath = vRef.getTxn( t ) 
+            val oldPath = vRef.getTxn( t )
+            txnInitiator.set( true )( t )
             BitemporalSystem.in( oldPath ) { implicit c =>
                val res     = fun( c )
                val newPath = c.repr.path
                if( newPath != oldPath ) {
                   vRef.set( newPath )
                }
+               txnInitiator.set( false )( t )
                res
             }
          }
@@ -97,4 +113,5 @@ object ContextNavigator {
 trait ContextNavigator[ C ] {
    def view : JComponent /* with Disposable */
    def t[ T ]( fun: Ctx[ C ] => T ) : T
+   def isApplicable( implicit c: Ctx[ C ]) : Boolean
 }

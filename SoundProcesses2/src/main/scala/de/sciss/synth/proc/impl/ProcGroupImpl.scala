@@ -44,4 +44,6 @@ extends ProcGroup[ C ] with ModelImpl[ C, ProcGroup.Update[ C ]] {
       procs.set( procs.get - p )
       fireUpdate( ProcGroup.ProcRemoved( p ))
    }
+
+   def all( implicit c: Ctx[ C ]) : Traversable[ Proc[ C ]] = procs.get( c )
 }

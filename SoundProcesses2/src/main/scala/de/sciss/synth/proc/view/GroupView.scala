@@ -32,17 +32,23 @@ import javax.swing._
 import event.{AncestorEvent, AncestorListener, ListSelectionListener, ListSelectionEvent}
 import java.awt.{EventQueue, BorderLayout}
 import java.awt.event.{ActionListener, ActionEvent, WindowEvent, WindowAdapter}
-import de.sciss.synth.proc.{Factory, Proc, Ctx, EphemeralSystem => Eph, ProcGroup}
+import de.sciss.synth.proc.{Model, Factory, Proc, Ctx, EphemeralSystem => Eph, ProcGroup}
 
 class GroupView[ C ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
    private val listModel  = new DefaultListModel()
    private val list       = new JList( listModel )
 
    val frame = {
-      val l = g.listener { implicit c => {
-         case ProcGroup.ProcAdded( p )   /* XXX if( nav.isApplicable( c )) */ => defer( add( p ))    // XXX on txn commit
-         case ProcGroup.ProcRemoved( p ) /* XXX if( nav.isApplicable( c )) */ => defer( remove( p )) // XXX on txn commit
-      }}
+//      val l = g.listener { implicit c => {
+//         case ProcGroup.ProcAdded( p )   /* XXX if( nav.isApplicable( c )) */ => defer( add( p ))    // XXX on txn commit
+//         case ProcGroup.ProcRemoved( p ) /* XXX if( nav.isApplicable( c )) */ => defer( remove( p )) // XXX on txn commit
+//      }}
+
+      val l = Model.filterOnCommit[ C, ProcGroup.Update[ C ]]( (_, c) => nav.isApplicable( c ))( tr =>
+         defer( tr.foreach {
+            case ProcGroup.ProcAdded( p )   => add( p )
+            case ProcGroup.ProcRemoved( p ) => remove( p )
+         }))
 
       val f          = new JFrame( "Group : " + g.name )
       val cp         = f.getContentPane()
@@ -77,9 +83,10 @@ class GroupView[ C ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
       list.addAncestorListener( new AncestorListener {
          def ancestorAdded( e: AncestorEvent ) {
             listModel.removeAllElements()
-            Eph.t { implicit c =>
+//            Eph.t { implicit c => }
+            nav.t { implicit c =>
+               addFull( g.all )
                g.addListener( l )
-               // XXX add elements
             }
          }
          def ancestorRemoved( e: AncestorEvent ) {
@@ -101,6 +108,10 @@ class GroupView[ C ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
    }
 
    private def defer( thunk: => Unit ) { EventQueue.invokeLater( new Runnable { def run = thunk })}
+
+   private def addFull( ps: Traversable[ Proc[ C ]]) {
+      ps.foreach( listModel.addElement( _ ))
+   }
 
    private def add( p: Proc[ C ]) {
       listModel.addElement( p )

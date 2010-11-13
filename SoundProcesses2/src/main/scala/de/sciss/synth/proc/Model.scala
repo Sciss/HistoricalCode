@@ -28,13 +28,38 @@
 
 package de.sciss.synth.proc
 
-import edu.stanford.ppl.ccstm.{Ref, Txn}
 import collection.immutable.{Queue => IQueue}
+import edu.stanford.ppl.ccstm.{TxnLocal, Ref, Txn}
 
 object Model {
    trait Listener[ Repr, U ] {
       def updated( update: U )( implicit c: Ctx[ Repr ])
    }
+
+   def onCommit[ Repr, U ]( committed: Traversable[ U ] => Unit ) : Listener[ Repr, U ] =
+      filterOnCommit( (_: U, _: Ctx[ Repr ]) => true )( committed )
+
+//   def collectOnCommit[ Repr, U, V ]( pf: PartialFunction[ (U, Ctx[ Repr ]), V ])( committed: Traversable[ V ] => Unit )
+
+   def filterOnCommit[ Repr, U ]( filter: Function2[ U, Ctx[ Repr ], Boolean ])( committed: Traversable[ U ] => Unit ) =
+      new Listener[ Repr, U ] {
+         val queueRef = new TxnLocal[ IQueue[ U ]] {
+            override protected def initialValue( txn: Txn ) = IQueue.empty
+         }
+         def updated( update: U )( implicit c: Ctx[ Repr ]) {
+            if( filter( update, c )) {
+               val txn  = c.txn
+               val q0   = queueRef.get( txn )
+               queueRef.set( q0 enqueue update )( txn )
+               if( q0.isEmpty ) {
+                  txn.beforeCommit( txn => {
+                     val q1 = queueRef.get( txn )
+                     txn.afterCommit( _ => committed( q1 ))
+                  }, Int.MaxValue )
+               }
+            }
+         }
+      }
 }
 
 trait Model[ Repr, U ] {
