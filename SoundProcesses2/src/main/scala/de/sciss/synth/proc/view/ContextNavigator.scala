@@ -20,7 +20,7 @@ object ContextNavigator {
 //         val vModel  = new ModelImpl[ Ephemeral, VersionPath ] {}
          implicit val c = bc
          val vRef    = new EphemeralModelVarImpl[ Bitemporal, VersionPath ]( bc.path )
-         new BitemporalNav( vRef )
+         new BitemporalNav( bc.system, vRef )
       case _ => error( "No context navigator available for " + c.system )
    }).asInstanceOf[ ContextNavigator[ C ]] // XXX can we work around the cast?
 
@@ -31,7 +31,7 @@ object ContextNavigator {
       def isApplicable( implicit c: Ctx[ Ephemeral ]) = true
    }
 
-   private class BitemporalNav( vRef: EphemeralModelVarImpl[ Bitemporal, VersionPath ])
+   private class BitemporalNav( system: BitemporalSystem, vRef: EphemeralModelVarImpl[ Bitemporal, VersionPath ])
    extends ContextNavigator[ Bitemporal ] {
       private val txnInitiator = new TxnLocal[ Boolean ] {
          override protected def initialValue( txn: Txn ) = false
@@ -96,7 +96,7 @@ object ContextNavigator {
          STM.atomic { t =>
             val oldPath = vRef.getTxn( t )
             txnInitiator.set( true )( t )
-            BitemporalSystem.in( oldPath ) { implicit c =>
+            system.in( oldPath ) { implicit c =>
                val res     = fun( c )
                val newPath = c.repr.path
                if( newPath != oldPath ) {

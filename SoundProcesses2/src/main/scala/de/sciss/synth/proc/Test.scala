@@ -39,7 +39,7 @@ object Test {
    def main( args: Array[ String ]) { test5 }
 
    def test5 { EventQueue.invokeLater( new Runnable { def run {
-      val sys = BitemporalSystem
+      val sys = BitemporalSystem()
 
       val pg = sys.in( VersionPath.init ) { implicit c =>
 //         val ov = new OfflineVisualView
@@ -47,7 +47,7 @@ object Test {
          Factory.group( "g1" )
       }
 
-      val vv = new VersionGraphView
+      val vv = new VersionGraphView( sys )
       val f  = new JFrame( "Version Graph" )
       val b  = Box.createHorizontalBox()
       val ggGroupView = new JButton( "View Group" )
@@ -132,7 +132,7 @@ object Test {
    }
 
    def test4 {
-      val sys = BitemporalSystem
+      val sys = BitemporalSystem()
       import DSL._
 
       val v0 = VersionPath.init

@@ -51,7 +51,7 @@ import javax.swing.{JComponent, JButton, WindowConstants, JFrame}
 import java.beans.{PropertyChangeListener, PropertyChangeEvent}
 import de.sciss.confluent._
 
-class VersionGraphView {
+class VersionGraphView( system: BitemporalSystem ) {
    private val grpGraph    = "graph"
    private val grpNodes    = "graph.nodes"
    private val grpEdges    = "graph.edges"
@@ -95,7 +95,6 @@ class VersionGraphView {
    val panel : JComponent = {
 //      val f    = new JFrame( "Version Graph" )
 //      val cp   = f.getContentPane()
-      val sys  = BitemporalSystem   // XXX could as well be KTemporal
       
 //      val l = new Model.Listener[ Bitemporal, Bitemporal.Update ] {
 //         def updated( u: Bitemporal.Update )( implicit c: Ctx[ Bitemporal ]) {
@@ -183,8 +182,8 @@ class VersionGraphView {
                g.clear()
                nodeMap = nodeMap.empty
                Eph.t { implicit c =>
-                  addFull( sys.dag )
-                  sys.addListener( l )
+                  addFull( system.dag )
+                  system.addListener( l )
                }
             } finally {
                startAnimation
@@ -192,7 +191,7 @@ class VersionGraphView {
          }
          def ancestorRemoved( e: AncestorEvent ) {
             stopAnimation
-            Eph.t { implicit c => sys.removeListener( l )}
+            Eph.t { implicit c => system.removeListener( l )}
          }
          def ancestorMoved( e: AncestorEvent ) {}
       })
