@@ -21,7 +21,7 @@ object ContextNavigator {
          implicit val c = bc
          val vRef    = new EphemeralModelVarImpl[ Bitemporal, VersionPath ]( bc.path )
          new BitemporalNav( bc.system, vRef )
-      case _ => error( "No context navigator available for " + c.system )
+      case _ => error( "No context navigator available for " + c /*.system */ )
    }).asInstanceOf[ ContextNavigator[ C ]] // XXX can we work around the cast?
 
    private class EphemeralNav extends ContextNavigator[ Ephemeral ] {

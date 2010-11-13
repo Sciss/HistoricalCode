@@ -29,7 +29,6 @@
 package de.sciss.synth.proc.view
 
 import javax.swing.event.{AncestorListener, AncestorEvent}
-import de.sciss.synth.proc.{Model, Ctx, Bitemporal, BitemporalSystem, EphemeralSystem => Eph}
 import prefuse.action.assignment.ColorAction
 import prefuse.action.layout.graph.ForceDirectedLayout
 import prefuse.visual.VisualItem
@@ -50,8 +49,10 @@ import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing.{JComponent, JButton, WindowConstants, JFrame}
 import java.beans.{PropertyChangeListener, PropertyChangeEvent}
 import de.sciss.confluent._
+import de.sciss.synth.proc.{KTemporal, KTemporalSystemLike, KTemporalLike, Model, Ctx, Bitemporal, BitemporalSystem, EphemeralSystem => Eph}
+//class VersionGraphView( system: BitemporalSystem ) { }
 
-class VersionGraphView( system: BitemporalSystem ) {
+class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) {
    private val grpGraph    = "graph"
    private val grpNodes    = "graph.nodes"
    private val grpEdges    = "graph.edges"
@@ -104,8 +105,8 @@ class VersionGraphView( system: BitemporalSystem ) {
 //         }
 //      }
 
-      val l = Model.onCommit[ Bitemporal, Bitemporal.Update ]( tr => defer( tr.foreach {
-         case Bitemporal.NewBranch( oldPath, newPath ) => add( oldPath.version, newPath )
+      val l = Model.onCommit[ C, KTemporal.Update ]( tr => defer( tr.foreach {
+         case KTemporal.NewBranch( oldPath, newPath ) => add( oldPath.version, newPath )
          case _ =>
       }))
 

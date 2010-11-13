@@ -37,9 +37,20 @@ object KTemporalSystem {
 
    def apply() : KTemporalSystem = new SystemImpl
 
-   private class SystemImpl extends KTemporalSystem {
+   private class SystemImpl extends KTemporalSystem with ModelImpl[ KTemporal, KTemporal.Update ] {
       sys =>
-      
+
+      // XXX BEGIN :::::::::::::::::: DUP FROM BITEMPORAL
+      val dagRef = {
+         val fat0 = FatValue.empty[ VersionPath ]
+         val vp   = VersionPath.init
+         val fat1 = fat0.assign( vp.path, vp )
+         Ref( fat1 )
+      }
+
+      def dag( implicit c: Ctx[ _ ]) : LexiTrie[ OracleMap[ VersionPath ]] = dagRef.get( c.txn ).trie
+      // XXX END :::::::::::::::::: DUP FROM BITEMPORAL
+
       override def toString = "KTemporalSystem"
 
       def in[ T ]( version: VersionPath )( fun: C => T ) : T = STM.atomic { tx =>
@@ -47,9 +58,9 @@ object KTemporalSystem {
       }
    }
 
-   private class CtxImpl private[proc]( val system: KTemporalSystem, val txn: Txn, initPath: VersionPath )
+   private class CtxImpl private[proc]( val system: SystemImpl, val txn: Txn, initPath: VersionPath )
    extends KTemporal {
-   //   ctx =>
+      ctx =>
 
       private type C = Ctx[ KTemporal ]
 
@@ -72,20 +83,18 @@ object KTemporalSystem {
 
    //   private[proc] def readPath : VersionPath = pathRef.get( txn )
 
+      // XXX BEGIN :::::::::::::::::: DUP FROM BITEMPORAL
       private[proc] def writePath : VersionPath = {
          val p = pathRef.get( txn )
-   //      if( isWriting.get( txn )) p else {
-   //         isWriting.set( true )( txn )
-   //         val pw = p.newBranch
-   //         pathRef.set( pw )( txn )
-   //         pw
-   //      }
          if( p == initPath ) {
             val pw = p.newBranch
             pathRef.set( pw )( txn )
+            system.dagRef.transform( _.assign( pw.path, pw ))( txn )
+            system.fireUpdate( KTemporal.NewBranch( p, pw ))( ctx )
             pw
          } else p
       }
+      // XXX END :::::::::::::::::: DUP FROM BITEMPORAL
    }
 
    private class VarImpl[ /* @specialized */ T ]( ref: Ref[ FatValue[ T ]])
@@ -110,11 +119,25 @@ object KTemporalSystem {
    }
 }
 
-trait KTemporal extends Ctx[ KTemporal ] {
+trait KTemporalLike {
    def path : VersionPath
    private[proc] def writePath : VersionPath
 }
 
-trait KTemporalSystem extends System {
-   def in[ T ]( version: VersionPath )( fun: Ctx[ KTemporal ] => T ) : T
+object KTemporal {
+   sealed trait Update
+   case class NewBranch( oldPath: VersionPath, newPath: VersionPath ) extends Update
 }
+
+trait KTemporal extends KTemporalLike with Ctx[ KTemporal ]
+
+trait KTemporalSystemLike[ C <: KTemporalLike ] extends Model[ C, KTemporal.Update ] {
+   def in[ T ]( version: VersionPath )( fun: Ctx[ C ] => T ) : T
+   def dag( implicit c: Ctx[ _ ]) : LexiTrie[ OracleMap[ VersionPath ]]
+}
+
+trait KTemporalSystem extends KTemporalSystemLike[ KTemporal ] 
+
+//trait KTemporalSystem /* extends System */ {
+//   def in[ T ]( version: VersionPath )( fun: Ctx[ KTemporal ] => T ) : T
+//}

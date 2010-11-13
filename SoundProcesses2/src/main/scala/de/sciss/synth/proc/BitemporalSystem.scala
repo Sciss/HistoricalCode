@@ -40,7 +40,7 @@ object BitemporalSystem {
 
    def apply() : BitemporalSystem = new SystemImpl
 
-   private class SystemImpl extends BitemporalSystem /*[ Bitemporal ]*/ with ModelImpl[ Bitemporal, Bitemporal.Update ] {
+   private class SystemImpl extends BitemporalSystem /*[ Bitemporal ]*/ with ModelImpl[ Bitemporal, KTemporal.Update ] {
       sys =>
 
       val dagRef = {
@@ -99,7 +99,7 @@ object BitemporalSystem {
             val pw = p.newBranch
             pathRef.set( pw )( txn )
             system.dagRef.transform( _.assign( pw.path, pw ))( txn )
-            system.fireUpdate( Bitemporal.NewBranch( p, pw ))( ctx )
+            system.fireUpdate( KTemporal.NewBranch( p, pw ))( ctx )
             pw
          } else p
       }
@@ -140,26 +140,29 @@ object BitemporalSystem {
    }
 }
 
-trait BitemporalSystem extends System with Model[ Bitemporal, Bitemporal.Update ] {
+trait BitemporalSystem
+extends KTemporalSystemLike[ Bitemporal ]
+/* with Model[ Bitemporal, Bitemporal.Update ] */ {
+   
    private type C = Ctx[ Bitemporal ]
 
-   def dag( implicit c: Ctx[ _ ]) : LexiTrie[ OracleMap[ VersionPath ]]
-   def in[ T ]( version: VersionPath )( fun: C => T ) : T
+//   def dag( implicit c: Ctx[ _ ]) : LexiTrie[ OracleMap[ VersionPath ]]
+//   def in[ T ]( version: VersionPath )( fun: C => T ) : T
    def at[ T ]( period: Period )( thunk: => T )( implicit c: C ) : T
    def during[ T ]( interval: Interval )( thunk: => T )( implicit c: C ) : T
 }
 
-object Bitemporal {
-   sealed trait Update
-   case class NewBranch( oldPath: VersionPath, newPath: VersionPath ) extends Update
-}
+//object Bitemporal {
+//   sealed trait Update
+//   case class NewBranch( oldPath: VersionPath, newPath: VersionPath ) extends Update
+//}
 
-trait Bitemporal extends Ctx[ Bitemporal ] {
-   def path : VersionPath
+trait Bitemporal extends KTemporalLike with Ctx[ Bitemporal ] {
+//   def path : VersionPath
    def period : Period
    def interval : Interval
-   override def system : BitemporalSystem
+   /* override */ def system : BitemporalSystem
 
-   private[proc] def writePath : VersionPath
+//   private[proc] def writePath : VersionPath
    private[proc] def interval_=( newInterval: Interval ) : Unit
 }
