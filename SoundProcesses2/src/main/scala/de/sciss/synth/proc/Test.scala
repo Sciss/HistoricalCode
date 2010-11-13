@@ -30,9 +30,10 @@ package de.sciss.synth.proc
 
 import impl.ProcImpl
 import de.sciss.confluent.VersionPath
-import java.awt.EventQueue
-import javax.swing.WindowConstants
-import view.{ContextNavigator, GroupView, OfflineVisualView}
+import view.{VersionGraphView, ContextNavigator, GroupView, OfflineVisualView}
+import java.awt.{BorderLayout, EventQueue}
+import javax.swing.{Box, JButton, JFrame, WindowConstants}
+import java.awt.event.{ActionListener, ActionEvent}
 
 object Test {
    def main( args: Array[ String ]) { test5 }
@@ -40,12 +41,39 @@ object Test {
    def test5 { EventQueue.invokeLater( new Runnable { def run {
       val sys = BitemporalSystem
 
-      sys.in( VersionPath.init ) { implicit c =>
-         val ov = new OfflineVisualView
-         ov.frame.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE )
-         val pg = Factory.group( "g1" )
-         val gv = new GroupView( pg, ContextNavigator() )
+      val pg = sys.in( VersionPath.init ) { implicit c =>
+//         val ov = new OfflineVisualView
+//         ov.frame.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE )
+         Factory.group( "g1" )
       }
+
+      val vv = new VersionGraphView
+      val f  = new JFrame( "Version Graph" )
+      val b  = Box.createHorizontalBox()
+      val ggGroupView = new JButton( "View Group" )
+      b.add( ggGroupView )
+      b.add( Box.createHorizontalGlue() )
+      ggGroupView.addActionListener( new ActionListener {
+         def actionPerformed( e: ActionEvent ) {
+            vv.selection match {
+               case path :: Nil => sys.in( path ) { implicit c => new GroupView( pg, ContextNavigator() )}
+               case _ =>
+            }
+         }
+      })
+      ggGroupView.setEnabled( false )
+      vv.addSelectionListener { sel => ggGroupView.setEnabled( sel match {
+         case path :: Nil => true
+         case _ => false
+      })}
+      val cp = f.getContentPane()
+      cp.add( vv.panel, BorderLayout.CENTER )
+      cp.add( b, BorderLayout.SOUTH )
+      f.pack() // setSize( 300, 300 )
+      f.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE ) // DISPOSE_ON_CLOSE
+      f.setLocationRelativeTo( null )
+      f.setVisible( true )
+
    }})}
 
    def test {

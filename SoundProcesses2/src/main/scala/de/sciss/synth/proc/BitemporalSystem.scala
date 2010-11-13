@@ -28,20 +28,28 @@
 
 package de.sciss.synth.proc
 
-import de.sciss.confluent.{FatValue, VersionPath}
 import edu.stanford.ppl.ccstm.{STM, Ref, TxnLocal, Txn}
 import collection.immutable.{SortedMap => ISortedMap}
 import Double.{PositiveInfinity => dinf}
 import impl.ModelImpl
-
+import de.sciss.confluent.{LexiTrie, OracleMap, FatValue, VersionPath}
 // todo: compose systems, contexts and vars from common parts
-object BitemporalSystem extends System /*[ Bitemporal ]*/ {
+object BitemporalSystem extends System /*[ Bitemporal ]*/ with ModelImpl[ Bitemporal, Bitemporal.Update ] {
    private type C = Ctx[ Bitemporal ]
+
+   private val dagRef = {
+      val fat0 = FatValue.empty[ VersionPath ]
+      val vp   = VersionPath.init
+      val fat1 = fat0.assign( vp.path, vp )
+      Ref( fat1 )
+   }
+
+   def dag( implicit c: Ctx[ _ ]) : LexiTrie[ OracleMap[ VersionPath ]] = dagRef.get( c.txn ).trie
 
    override def toString = "BitemporalSystem"
 
    def in[ T ]( version: VersionPath )( fun: C => T ) : T = STM.atomic { tx =>
-      fun( new Bitemporal( tx, version ))
+      fun( new BitemporalImpl( tx, version ))
    }
 
    def at[ T ]( period: Period )( thunk: => T )( implicit c: C ) : T =
@@ -52,72 +60,90 @@ object BitemporalSystem extends System /*[ Bitemporal ]*/ {
       c.repr.interval = interval
       try { thunk } finally { c.repr.interval = oldIval }
    }
+
+   private class BitemporalImpl private[proc]( val txn: Txn, initPath: VersionPath )
+   extends Bitemporal {
+      ctx =>
+      
+      private type C = Ctx[ Bitemporal ]
+
+      private val pathRef = new TxnLocal[ VersionPath ] {
+         override protected def initialValue( txn: Txn ) = initPath
+      }
+
+      private val intervalRef = new TxnLocal[ Interval ] {
+         override protected def initialValue( txn: Txn ) = Interval( Period( 0.0 ), Period( dinf ))
+      }
+
+      def repr = this
+      def system = BitemporalSystem
+
+      def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ Bitemporal, T ] = {
+         val fat0 = FatValue.empty[ ISortedMap[ Period, T ]]
+         val vp   = writePath
+         val fat1 = fat0.assign( vp.path, ISortedMap( Period( 0.0 ) -> init )( Ordering.ordered[ Period ]))
+         new KVar( Ref( fat1 ))
+      }
+
+      def path : VersionPath = pathRef.get( txn )
+
+      private[proc] def writePath : VersionPath = {
+         val p = pathRef.get( txn )
+         if( p == initPath ) {
+            val pw = p.newBranch
+            pathRef.set( pw )( txn )
+            dagRef.transform( _.assign( pw.path, pw ))( txn )
+            fireUpdate( Bitemporal.NewBranch( p, pw ))( ctx )
+            pw
+         } else p
+      }
+
+      def period : Period     = interval.start
+      def interval : Interval = intervalRef.get( txn )
+
+      private[proc] def interval_=( newInterval: Interval ) = intervalRef.set( newInterval )( txn )
+
+      private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ ISortedMap[ Period, T ]]])
+      extends Var[ Bitemporal, T ] with ModelImpl[ Bitemporal, T ] {
+         def get( implicit c: C ) : T = {
+            val vp   = c.repr.path
+            val map  = ref.get( c.txn ).access( vp.path )
+              .getOrElse( error( "No assignment for path " + vp ))
+            map.to( c.repr.period ).last._2  // XXX is .last efficient? we might need to switch to FingerTree.Ranged
+         }
+
+         // todo: collapse access and assign into one transform method in FatValue
+         def set( v: T )( implicit c: C ) {
+            val rp   = c.repr.path
+            val wp   = c.repr.writePath
+            val ival = c.repr.interval
+            val t    = c.txn
+            val fat  = ref.get( t )
+            val map  = fat.access( rp.path )
+              .getOrElse( error( "No assignment for path " + rp ))
+
+            ref.set( fat.assign( wp.path,
+               map.to( ival.start ) +
+               (ival.start -> v) +
+               (ival.end -> map.to( ival.end ).last._2) ++ // XXX .last efficient?
+               map.from( ival.end )
+            ))( t )
+            fireUpdate( v )
+         }
+      }
+   }
 }
 
-class Bitemporal private[proc]( val txn: Txn, initPath: VersionPath )
-extends Ctx[ Bitemporal ] {
-   private type C = Ctx[ Bitemporal ]
+object Bitemporal {
+   sealed trait Update
+   case class NewBranch( oldPath: VersionPath, newPath: VersionPath ) extends Update 
+}
 
-   private val pathRef = new TxnLocal[ VersionPath ] {
-      override protected def initialValue( txn: Txn ) = initPath
-   }
+trait Bitemporal extends Ctx[ Bitemporal ] {
+   def path : VersionPath
+   def period : Period
+   def interval : Interval
 
-   private val intervalRef = new TxnLocal[ Interval ] {
-      override protected def initialValue( txn: Txn ) = Interval( Period( 0.0 ), Period( dinf ))
-   }
-   
-   def repr = this
-   def system = BitemporalSystem
-
-   def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ Bitemporal, T ] = {
-      val fat0 = FatValue.empty[ ISortedMap[ Period, T ]]
-      val vp   = writePath
-      val fat1 = fat0.assign( vp.path, ISortedMap( Period( 0.0 ) -> init )( Ordering.ordered[ Period ]))
-      new KVar( Ref( fat1 ))
-   }
-
-   def path : VersionPath = pathRef.get( txn )
-
-   private[proc] def writePath : VersionPath = {
-      val p = pathRef.get( txn )
-      if( p == initPath ) {
-         val pw = p.newBranch
-         pathRef.set( pw )( txn )
-         pw
-      } else p
-   }
-
-   def period : Period     = interval.start
-   def interval : Interval = intervalRef.get( txn )
-
-   private[proc] def interval_=( newInterval: Interval ) = intervalRef.set( newInterval )( txn )
-
-   private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ ISortedMap[ Period, T ]]])
-   extends Var[ Bitemporal, T ] with ModelImpl[ Bitemporal, T ] {
-      def get( implicit c: C ) : T = {
-         val vp   = c.repr.path
-         val map  = ref.get( c.txn ).access( vp.path )
-           .getOrElse( error( "No assignment for path " + vp ))
-         map.to( c.repr.period ).last._2  // XXX is .last efficient? we might need to switch to FingerTree.Ranged
-      }
-
-      // todo: collapse access and assign into one transform method in FatValue
-      def set( v: T )( implicit c: C ) {
-         val rp   = c.repr.path
-         val wp   = c.repr.writePath 
-         val ival = c.repr.interval
-         val t    = c.txn
-         val fat  = ref.get( t )
-         val map  = fat.access( rp.path )
-           .getOrElse( error( "No assignment for path " + rp ))
-
-         ref.set( fat.assign( wp.path,
-            map.to( ival.start ) +
-            (ival.start -> v) +
-            (ival.end -> map.to( ival.end ).last._2) ++ // XXX .last efficient?
-            map.from( ival.end )
-         ))( t )
-         fireUpdate( v )
-      }
-   }
+   private[proc] def writePath : VersionPath
+   private[proc] def interval_=( newInterval: Interval ) : Unit
 }

@@ -78,6 +78,7 @@ object ContextNavigator {
          // XXX todo: should add t to BitemporalSystem and pass txn to in
          // variant so we don't call atomic twice
          // (although that is ok and the existing transaction is joined)
+         // ; like BitemporalSystem.inRef( vRef.getTxn( _ )) { ... } ?
          STM.atomic { t =>
             val oldPath = vRef.getTxn( t ) 
             BitemporalSystem.in( oldPath ) { implicit c =>

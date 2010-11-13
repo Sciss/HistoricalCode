@@ -40,8 +40,8 @@ class GroupView[ C ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
 
    val frame = {
       val l = g.listener { implicit c => {
-         case ProcGroup.ProcAdded( p )   /* XXX if( nav.isApplicable( c )) */ => defer( add( p ))
-         case ProcGroup.ProcRemoved( p ) /* XXX if( nav.isApplicable( c )) */ => defer( remove( p ))
+         case ProcGroup.ProcAdded( p )   /* XXX if( nav.isApplicable( c )) */ => defer( add( p ))    // XXX on txn commit
+         case ProcGroup.ProcRemoved( p ) /* XXX if( nav.isApplicable( c )) */ => defer( remove( p )) // XXX on txn commit
       }}
 
       val f          = new JFrame( "Group : " + g.name )
