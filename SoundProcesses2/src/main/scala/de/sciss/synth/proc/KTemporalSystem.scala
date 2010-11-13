@@ -32,58 +32,63 @@ import de.sciss.confluent._
 import edu.stanford.ppl.ccstm.{TxnLocal, STM, Txn, Ref}
 import impl.ModelImpl
 
-object KTemporalSystem extends System /*[ KTemporal ]*/ {
+object KTemporalSystem {
    private type C = Ctx[ KTemporal ]
 
-   override def toString = "KTemporalSystem"
+   def apply() : KTemporalSystem = new SystemImpl
 
-   def in[ T ]( version: VersionPath )( fun: C => T ) : T = STM.atomic { tx =>
-      fun( new KTemporal( tx, version ))
-   }
-}
+   private class SystemImpl extends KTemporalSystem {
+      sys =>
+      
+      override def toString = "KTemporalSystem"
 
-class KTemporal private[proc]( val txn: Txn, initPath: VersionPath )
-extends Ctx[ KTemporal ] {
-//   ctx =>
-   
-   private type C = Ctx[ KTemporal ]
-
-   private val pathRef = new TxnLocal[ VersionPath ] {
-      override protected def initialValue( txn: Txn ) = initPath
+      def in[ T ]( version: VersionPath )( fun: C => T ) : T = STM.atomic { tx =>
+         fun( new CtxImpl( sys, tx, version ))
+      }
    }
 
-   def repr = this
-   def system = KTemporalSystem
+   private class CtxImpl private[proc]( val system: KTemporalSystem, val txn: Txn, initPath: VersionPath )
+   extends KTemporal {
+   //   ctx =>
 
-   def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ KTemporal, T ] = {
-//      val ref = Ref[ T ]()
-      val fat0 = FatValue.empty[ T ]
-      val vp   = writePath
-//println( "ASSIGN AT " + vp + " : " + init )
-      val fat1 = fat0.assign( vp.path, init )
-      new KVar( Ref( fat1 ))
+      private type C = Ctx[ KTemporal ]
+
+      private val pathRef = new TxnLocal[ VersionPath ] {
+         override protected def initialValue( txn: Txn ) = initPath
+      }
+
+      def repr = this
+
+      def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ KTemporal, T ] = {
+   //      val ref = Ref[ T ]()
+         val fat0 = FatValue.empty[ T ]
+         val vp   = writePath
+   //println( "ASSIGN AT " + vp + " : " + init )
+         val fat1 = fat0.assign( vp.path, init )
+         new VarImpl( Ref( fat1 ))
+      }
+
+      def path : VersionPath = pathRef.get( txn )
+
+   //   private[proc] def readPath : VersionPath = pathRef.get( txn )
+
+      private[proc] def writePath : VersionPath = {
+         val p = pathRef.get( txn )
+   //      if( isWriting.get( txn )) p else {
+   //         isWriting.set( true )( txn )
+   //         val pw = p.newBranch
+   //         pathRef.set( pw )( txn )
+   //         pw
+   //      }
+         if( p == initPath ) {
+            val pw = p.newBranch
+            pathRef.set( pw )( txn )
+            pw
+         } else p
+      }
    }
 
-   def path : VersionPath = pathRef.get( txn )
-
-//   private[proc] def readPath : VersionPath = pathRef.get( txn )
-
-   private[proc] def writePath : VersionPath = {
-      val p = pathRef.get( txn )
-//      if( isWriting.get( txn )) p else {
-//         isWriting.set( true )( txn )
-//         val pw = p.newBranch
-//         pathRef.set( pw )( txn )
-//         pw
-//      }
-      if( p == initPath ) {
-         val pw = p.newBranch
-         pathRef.set( pw )( txn )
-         pw
-      } else p
-   }
-
-   private class KVar[ /* @specialized */ T ]( ref: Ref[ FatValue[ T ]])
+   private class VarImpl[ /* @specialized */ T ]( ref: Ref[ FatValue[ T ]])
    extends Var[ KTemporal, T ] with ModelImpl[ KTemporal, T ] {
 //      protected def txn( c: C ) = c.repr.txn
 
@@ -103,4 +108,13 @@ extends Ctx[ KTemporal ] {
 //         fireUpdate( v, c )
 //      }
    }
+}
+
+trait KTemporal extends Ctx[ KTemporal ] {
+   def path : VersionPath
+   private[proc] def writePath : VersionPath
+}
+
+trait KTemporalSystem extends System {
+   def in[ T ]( version: VersionPath )( fun: Ctx[ KTemporal ] => T ) : T
 }

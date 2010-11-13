@@ -106,7 +106,7 @@ object Test {
    }
 
    def test3 {
-      val sys = KTemporalSystem
+      val sys = KTemporalSystem()
 
       val v0 = VersionPath.init
       val (p, v1) = sys.in( v0 ) { implicit c =>
