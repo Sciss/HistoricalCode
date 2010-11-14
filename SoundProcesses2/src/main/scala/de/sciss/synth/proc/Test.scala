@@ -50,8 +50,10 @@ object Test {
       val vv = new VersionGraphView( sys )
       val f  = new JFrame( "Version Graph" )
       val b  = Box.createHorizontalBox()
-      val ggGroupView = new JButton( "View Group" )
+      val ggGroupView      = new JButton( "View Group" )
+      val ggTimelineView   = new JButton( "View Timeline" )
       b.add( ggGroupView )
+      b.add( ggTimelineView )
       b.add( Box.createHorizontalGlue() )
       ggGroupView.addActionListener( new ActionListener {
          def actionPerformed( e: ActionEvent ) {
@@ -61,11 +63,23 @@ object Test {
             }
          }
       })
+      ggTimelineView.addActionListener( new ActionListener {
+         def actionPerformed( e: ActionEvent ) {
+            vv.selection match {
+               case path :: Nil => sys.in( path ) { implicit c => new OfflineVisualView( pg, ContextNavigator() )}
+               case _ =>
+            }
+         }
+      })
       ggGroupView.setEnabled( false )
-      vv.addSelectionListener { sel => ggGroupView.setEnabled( sel match {
-         case path :: Nil => true
-         case _ => false
-      })}
+      ggTimelineView.setEnabled( false )
+      vv.addSelectionListener { sel => val enabled = sel match {
+            case path :: Nil => true
+            case _ => false
+         }
+         ggGroupView.setEnabled( enabled )
+         ggTimelineView.setEnabled( enabled )
+      }
       val cp = f.getContentPane()
       cp.add( vv.panel, BorderLayout.CENTER )
       cp.add( b, BorderLayout.SOUTH )
