@@ -29,10 +29,10 @@
 package de.sciss.synth.proc
 
 import edu.stanford.ppl.ccstm.{STM, Ref, TxnLocal, Txn}
-import collection.immutable.{SortedMap => ISortedMap}
+import collection.immutable.{Set => ISet, SortedMap => ISortedMap}
 import Double.{PositiveInfinity => dinf}
-import impl.ModelImpl
 import de.sciss.confluent.{LexiTrie, OracleMap, FatValue, VersionPath}
+import impl.{EphemeralModelVarImpl, ModelImpl}
 
 // todo: compose systems, contexts and vars from common parts
 object BitemporalSystem {
@@ -40,7 +40,7 @@ object BitemporalSystem {
 
    def apply() : BitemporalSystem = new SystemImpl
 
-   private class SystemImpl extends BitemporalSystem /*[ Bitemporal ]*/ with ModelImpl[ Bitemporal, KTemporal.Update ] {
+   private class SystemImpl extends BitemporalSystem with ModelImpl[ Bitemporal, KTemporal.Update[ Bitemporal ]] {
       sys =>
 
       val dagRef = {
@@ -49,8 +49,22 @@ object BitemporalSystem {
          val fat1 = fat0.assign( vp.path, vp )
          Ref( fat1 )
       }
-
       def dag( implicit c: Ctx[ _ ]) : LexiTrie[ OracleMap[ VersionPath ]] = dagRef.get( c.txn ).trie
+
+      val cursorsRef = Ref( ISet.empty[ Cursor[ Bitemporal ]])
+      def cursors( implicit c: Ctx[ _ ]) : ISet[ Cursor[ Bitemporal ]] = cursorsRef.get( c.txn )
+
+      def addCursor( implicit c: C ) : Cursor[ Bitemporal ] = {
+         val csr = new KTemporalSystem.CursorImpl( sys, new EphemeralModelVarImpl[ Bitemporal, VersionPath ]( c.repr.path ))
+         cursorsRef.transform( _ + csr )( c.txn )
+         sys.fireUpdate( KTemporal.CursorAdded( csr ))
+         csr
+      }
+
+      def removeCursor( cursor: Cursor[ Bitemporal ])( implicit c: C ) {
+         cursorsRef.transform( _ - cursor )( c.txn )
+         sys.fireUpdate( KTemporal.CursorRemoved( cursor ))
+      }
 
       override def toString = "BitemporalSystem"
 
@@ -99,7 +113,7 @@ object BitemporalSystem {
             val pw = p.newBranch
             pathRef.set( pw )( txn )
             system.dagRef.transform( _.assign( pw.path, pw ))( txn )
-            system.fireUpdate( KTemporal.NewBranch( p, pw ))( ctx )
+            system.fireUpdate( KTemporal.NewBranch[ Bitemporal ]( p, pw ))( ctx )  // why NewBranch here _with_ type parameter?
             pw
          } else p
       }

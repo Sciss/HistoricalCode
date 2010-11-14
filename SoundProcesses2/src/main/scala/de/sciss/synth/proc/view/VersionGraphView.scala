@@ -105,7 +105,7 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
 //         }
 //      }
 
-      val l = Model.onCommit[ C, KTemporal.Update ]( tr => defer( tr.foreach {
+      val l = Model.onCommit[ C, KTemporal.Update[ C ]]( tr => defer( tr.foreach {
          case KTemporal.NewBranch( oldPath, newPath ) => add( oldPath.version, newPath )
          case _ =>
       }))
