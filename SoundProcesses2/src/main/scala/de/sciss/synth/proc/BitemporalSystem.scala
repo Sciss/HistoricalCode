@@ -51,17 +51,17 @@ object BitemporalSystem {
       }
       def dag( implicit c: Ctx[ _ ]) : LexiTrie[ OracleMap[ VersionPath ]] = dagRef.get( c.txn ).trie
 
-      val cursorsRef = Ref( ISet.empty[ Cursor[ Bitemporal ]])
-      def cursors( implicit c: Ctx[ _ ]) : ISet[ Cursor[ Bitemporal ]] = cursorsRef.get( c.txn )
+      val cursorsRef = Ref( ISet.empty[ KTemporalCursor[ Bitemporal ]])
+      def cursors( implicit c: Ctx[ _ ]) : ISet[ KTemporalCursor[ Bitemporal ]] = cursorsRef.get( c.txn )
 
-      def addCursor( implicit c: C ) : Cursor[ Bitemporal ] = {
+      def addCursor( implicit c: C ) : KTemporalCursor[ Bitemporal ] = {
          val csr = new KTemporalSystem.CursorImpl( sys, new EphemeralModelVarImpl[ Bitemporal, VersionPath ]( c.repr.path ))
          cursorsRef.transform( _ + csr )( c.txn )
          sys.fireUpdate( KTemporal.CursorAdded( csr ))
          csr
       }
 
-      def removeCursor( cursor: Cursor[ Bitemporal ])( implicit c: C ) {
+      def removeCursor( cursor: KTemporalCursor[ Bitemporal ])( implicit c: C ) {
          cursorsRef.transform( _ - cursor )( c.txn )
          sys.fireUpdate( KTemporal.CursorRemoved( cursor ))
       }
@@ -155,8 +155,7 @@ object BitemporalSystem {
 }
 
 trait BitemporalSystem
-extends KTemporalSystemLike[ Bitemporal ]
-/* with Model[ Bitemporal, Bitemporal.Update ] */ {
+extends KTemporalSystemLike[ Bitemporal ] with System /*[ Bitemporal ]*/ {
    
    private type C = Ctx[ Bitemporal ]
 

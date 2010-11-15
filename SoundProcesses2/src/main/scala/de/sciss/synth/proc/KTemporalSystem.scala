@@ -31,7 +31,7 @@ package de.sciss.synth.proc
 import de.sciss.confluent._
 import edu.stanford.ppl.ccstm.{TxnLocal, STM, Txn, Ref}
 import impl.{EphemeralModelVarImpl, ModelImpl}
-import collection.{Set => ISet}
+import collection.immutable.{Set => ISet}
 
 object KTemporalSystem {
    private type C = Ctx[ KTemporal ]
@@ -53,17 +53,17 @@ object KTemporalSystem {
       // XXX END :::::::::::::::::: DUP FROM BITEMPORAL
 
       // XXX BEGIN :::::::::::::::::: DUP FROM BITEMPORAL
-      val cursorsRef = Ref( ISet.empty[ Cursor[ KTemporal ]])
-      def cursors( implicit c: Ctx[ _ ]) : ISet[ Cursor[ KTemporal ]] = cursorsRef.get( c.txn )
+      val cursorsRef = Ref( ISet.empty[ KTemporalCursor[ KTemporal ]])
+      def cursors( implicit c: Ctx[ _ ]) : ISet[ KTemporalCursor[ KTemporal ]] = cursorsRef.get( c.txn )
 
-      def addCursor( implicit c: C ) : Cursor[ KTemporal ] = {
+      def addCursor( implicit c: C ) : KTemporalCursor[ KTemporal ] = {
          val csr = new KTemporalSystem.CursorImpl( sys, new EphemeralModelVarImpl[ KTemporal, VersionPath ]( c.repr.path ))
          cursorsRef.transform( _ + csr )( c.txn )
          sys.fireUpdate( KTemporal.CursorAdded( csr ))
          csr
       }
 
-      def removeCursor( cursor: Cursor[ KTemporal ])( implicit c: C ) {
+      def removeCursor( cursor: KTemporalCursor[ KTemporal ])( implicit c: C ) {
          cursorsRef.transform( _ - cursor )( c.txn )
          sys.fireUpdate( KTemporal.CursorRemoved( cursor ))
       }
@@ -138,12 +138,13 @@ object KTemporalSystem {
 
    private[proc] class CursorImpl[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ],
                                                          vRef: EphemeralModelVarImpl[ C, VersionPath ])
-   extends Cursor[ C ] {
+   extends KTemporalCursor[ C ] with ModelImpl[ C, KTemporalCursor.Update ] {
       private val txnInitiator = new TxnLocal[ Boolean ] {
          override protected def initialValue( txn: Txn ) = false
       }
 
       def isApplicable( implicit c: Ctx[ C ]) = txnInitiator.get( c.txn )
+      def path( implicit c: Ctx[ _ ]) : VersionPath = vRef.getTxn( c.txn )
 
       def t[ T ]( fun: Ctx[ C ] => T ) : T = {
          // XXX todo: should add t to KTemporalSystemLike and pass txn to in
@@ -158,6 +159,7 @@ object KTemporalSystem {
                val newPath = c.repr.path
                if( newPath != oldPath ) {
                   vRef.set( newPath )
+                  fireUpdate( KTemporalCursor.Moved( oldPath, newPath ))
                }
                txnInitiator.set( false )( t )
                res
@@ -174,10 +176,10 @@ trait KTemporalLike {
 }
 
 object KTemporal {
-   sealed trait Update[ C ]
-   case class NewBranch[ C ]( oldPath: VersionPath, newPath: VersionPath ) extends Update[ C ]
-   case class CursorAdded[ C ]( cursor: Cursor[ C ]) extends Update[ C ]
-   case class CursorRemoved[ C ]( cursor: Cursor[ C ]) extends Update[ C ]
+   sealed trait Update[ C <: KTemporalLike ]
+   case class NewBranch[ C <: KTemporalLike ]( oldPath: VersionPath, newPath: VersionPath ) extends Update[ C ]
+   case class CursorAdded[ C <: KTemporalLike ]( cursor: KTemporalCursor[ C ]) extends Update[ C ]
+   case class CursorRemoved[ C <: KTemporalLike ]( cursor: KTemporalCursor[ C ]) extends Update[ C ]
 }
 
 trait KTemporal extends KTemporalLike with Ctx[ KTemporal ]
@@ -187,9 +189,9 @@ trait KTemporalSystemLike[ C <: KTemporalLike ] extends Model[ C, KTemporal.Upda
 
    def in[ T ]( version: VersionPath )( fun: Ctx[ C ] => T ) : T
    def dag( implicit c: Ctx[ _ ]) : LexiTrie[ OracleMap[ VersionPath ]]
-   def addCursor( implicit c: Ctx[ C ]) : Cursor[ C ]
-   def removeCursor( cursor: Cursor[ C ])( implicit c: Ctx[ C ]) : Unit
-   def cursors( implicit c: Ctx[ _ ]) : ISet[ Cursor[ C ]]
+   def addCursor( implicit c: Ctx[ C ]) : KTemporalCursor[ C ]
+   def removeCursor( cursor: KTemporalCursor[ C ])( implicit c: Ctx[ C ]) : Unit
+   def cursors( implicit c: Ctx[ _ ]) : ISet[ KTemporalCursor[ C ]]
 
 //   = {
 //      val csr = new KTemporalSystem.CursorImpl( sys, new EphemeralModelVarImpl[ C, VersionPath ]( c.repr.path ))
@@ -199,8 +201,17 @@ trait KTemporalSystemLike[ C <: KTemporalLike ] extends Model[ C, KTemporal.Upda
 //   }
 }
 
-trait KTemporalSystem extends KTemporalSystemLike[ KTemporal ] 
+trait KTemporalSystem extends KTemporalSystemLike[ KTemporal ] with System /*[ KTemporal, KTemporalCursor[ KTemporal ]] */  
 
 //trait KTemporalSystem /* extends System */ {
 //   def in[ T ]( version: VersionPath )( fun: Ctx[ KTemporal ] => T ) : T
 //}
+
+object KTemporalCursor {
+   sealed trait Update
+   case class Moved( oldPath: VersionPath, newPath: VersionPath ) extends Update
+}
+
+trait KTemporalCursor[ C <: KTemporalLike ] extends Cursor[ C ] with Model[ C, KTemporalCursor.Update ] {
+   def path( implicit c: Ctx[ _ ]) : VersionPath
+}

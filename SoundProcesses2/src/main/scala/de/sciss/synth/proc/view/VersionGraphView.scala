@@ -29,7 +29,6 @@
 package de.sciss.synth.proc.view
 
 import javax.swing.event.{AncestorListener, AncestorEvent}
-import prefuse.action.assignment.ColorAction
 import prefuse.action.layout.graph.ForceDirectedLayout
 import prefuse.visual.VisualItem
 import prefuse.util.ColorLib
@@ -38,9 +37,8 @@ import prefuse.action.{RepaintAction, ActionList}
 import prefuse.{Constants, Visualization, Display}
 import prefuse.visual.expression.InGroupPredicate
 import prefuse.render.{DefaultRendererFactory, EdgeRenderer, LabelRenderer}
-import java.awt.{Color, BorderLayout, EventQueue}
 import collection.breakOut
-import collection.immutable.{IntMap, Stack => IStack}
+import collection.immutable.{IntMap, Set => ISet, Stack => IStack}
 import prefuse.controls._
 import prefuse.data.event.TupleSetListener
 import prefuse.data.tuple.TupleSet
@@ -49,8 +47,11 @@ import java.awt.event.{ActionEvent, ActionListener}
 import javax.swing.{JComponent, JButton, WindowConstants, JFrame}
 import java.beans.{PropertyChangeListener, PropertyChangeEvent}
 import de.sciss.confluent._
-import de.sciss.synth.proc.{KTemporal, KTemporalSystemLike, KTemporalLike, Model, Ctx, Bitemporal, BitemporalSystem, EphemeralSystem => Eph}
 import GUIUtils._
+import de.sciss.synth.proc.{KTemporalCursor, KTemporal, KTemporalSystemLike, KTemporalLike, Model, Ctx, Bitemporal, BitemporalSystem, EphemeralSystem => Eph}
+import prefuse.action.assignment.{StrokeAction, ColorAction}
+import java.awt.{BasicStroke, Color, BorderLayout, EventQueue}
+import prefuse.data.expression.{AbstractPredicate, ComparisonPredicate, ColumnExpression, ObjectLiteral}
 
 class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) {
    private val grpGraph    = "graph"
@@ -59,54 +60,50 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
    private val actColor    = "color"
    private val actLayout   = "layout"
    private val colPath     = "path"
+   private val colCursor   = "cursor"
    private val vis         = new Visualization()
    private val g           = new Graph()
 
    private var nodeMap     = IntMap.empty[ Node ]
 
+   type Selection = (VersionPath, List[ KTemporalCursor[ C ]])
+
+   private var mapCsr   = Map.empty[ KTemporalCursor[ C ], CursorListener ]
+
    private val selListeners   = new JComponent {
-      type S      = List[ VersionPath ]
-      var oldSel: S = Nil
+      var oldSel: List[ Selection ] = Nil
       val propSel = "selection"
       
-      def newSelection( sel: S ) {
+      def newSelection( sel: List[ Selection ]) {
          val o    = oldSel
          oldSel   = sel
+//println( "BOOM " + sel )
          firePropertyChange( propSel, o, sel )
       }
 
-      def addL( fun: S => Unit ) {
+      def addL( fun: List[ Selection ] => Unit ) {
          val l = new SelectionActionListener( fun )
          addPropertyChangeListener( propSel, l )
       }
 
-      def removeL( fun: S => Unit ) {
+      def removeL( fun: List[ Selection ] => Unit ) {
          val l = new SelectionActionListener( fun )
          removePropertyChangeListener( propSel, l )
       }
 
-      private case class SelectionActionListener( fun: S => Unit )
+      private case class SelectionActionListener( fun: List[ Selection ] => Unit )
       extends PropertyChangeListener {
          def propertyChange( e: PropertyChangeEvent ) {
-            fun( e.getNewValue().asInstanceOf[ S ])
+            fun( e.getNewValue().asInstanceOf[ List[ Selection ]])
          }
       }
    }
 
    val panel : JComponent = {
-//      val f    = new JFrame( "Version Graph" )
-//      val cp   = f.getContentPane()
-      
-//      val l = new Model.Listener[ Bitemporal, Bitemporal.Update ] {
-//         def updated( u: Bitemporal.Update )( implicit c: Ctx[ Bitemporal ]) {
-//            u match {
-//               case Bitemporal.NewBranch( oldPath, newPath ) => defer( add( oldPath.version, newPath ))   // XXX on txn commit
-//            }
-//         }
-//      }
-
       val l = Model.onCommit[ C, KTemporal.Update[ C ]]( tr => defer( tr.foreach {
-         case KTemporal.NewBranch( oldPath, newPath ) => add( oldPath.version, newPath )
+         case KTemporal.NewBranch( oldPath, newPath ) => addVertex( oldPath.version, newPath )
+         case KTemporal.CursorAdded( csr )            => addCursor( csr )
+         case KTemporal.CursorRemoved( csr )          => removeCursor( csr )
          case _ =>
       }))
 
@@ -116,19 +113,29 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
       val nodes         = g.getNodeTable()
       g.addColumn( VisualItem.LABEL, classOf[ String ])
       g.addColumn( colPath, classOf[ Vector[ Version ]])
+      g.addColumn( colCursor, classOf[ List[ KTemporalCursor[ C ]]]) // XXX maybe not the smartest way to occupy space in each vertex?
 
       // colors
       val colrGray   = ColorLib.rgb( 0xC0, 0xC0, 0xC0 )
       val colrFocus  = ColorLib.rgb( 0x60, 0x60, 0xC0 )
       val colrBlack  = ColorLib.rgb( 0x00, 0x00, 0x00 )
       val colrWhite  = ColorLib.rgb( 0xFF, 0xFF, 0xFF )
-      val actionNodeStroke = new ColorAction( grpNodes, VisualItem.STROKECOLOR, colrGray )
+      val colrHighlight = ColorLib.rgb( 0xFF, 0x00, 0x60 )
+      val predFocus        = new InGroupPredicate( Visualization.FOCUS_ITEMS )
+//      val predCursor       = new ComparisonPredicate( ComparisonPredicate.NEQ,
+//         new ColumnExpression( colCursor ), new ObjectLiteral( Nil ))
+      val predCursor       = new AbstractPredicate() {
+         override def getBoolean( t: Tuple ) : Boolean = t.get( colCursor ) != Nil
+      }
+      val actionNodeDraw   = new ColorAction( grpNodes, VisualItem.STROKECOLOR, colrGray )
       val actionNodeFill   = new ColorAction( grpNodes, VisualItem.FILLCOLOR,   colrGray )
       val actionTextColor  = new ColorAction( grpNodes, VisualItem.TEXTCOLOR,   colrBlack )
       val actionEdgeColor  = new ColorAction( grpEdges, VisualItem.STROKECOLOR, colrGray )
-      val predFocus        = new InGroupPredicate( Visualization.FOCUS_ITEMS )
+      val actionNodeStroke = new StrokeAction( grpNodes )
+      actionNodeStroke.add( predCursor, new BasicStroke( 2f ))
       actionNodeFill.add( predFocus, colrFocus )
-      actionNodeStroke.add( predFocus, colrFocus )
+      actionNodeDraw.add( predCursor, colrHighlight )
+      actionNodeDraw.add( predFocus, colrFocus )
       actionTextColor.add( predFocus, colrWhite )
 
       val lay = new ForceDirectedLayout( grpGraph )
@@ -151,8 +158,9 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
       // quick repaint
       val actionColor = new ActionList()
       actionColor.add( actionTextColor )
-      actionColor.add( actionNodeStroke )
+      actionColor.add( actionNodeDraw )
       actionColor.add( actionNodeFill )
+      actionColor.add( actionNodeStroke )
       actionColor.add( actionEdgeColor )
       vis.putAction( actColor, actionColor )
 
@@ -176,26 +184,21 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
       display.setForeground( Color.WHITE )
       display.setBackground( Color.BLACK )
 
-      display.addAncestorListener( new AncestorListener {
-         def ancestorAdded( e: AncestorEvent ) {
-            stopAnimation
-            try {
-               g.clear()
-               nodeMap = nodeMap.empty
-               Eph.t { implicit c =>
-                  addFull( system.dag )
-                  system.addListener( l )
-               }
-            } finally {
-               startAnimation
+      ancestorAction( display ) {
+         stopAnimation
+         try {
+            Eph.t { implicit c =>
+               addFullVertices( system.dag )
+               addFullCursors( system.cursors )
+               system.addListener( l )
             }
+         } finally {
+            startAnimation
          }
-         def ancestorRemoved( e: AncestorEvent ) {
-            stopAnimation
-            Eph.t { implicit c => system.removeListener( l )}
-         }
-         def ancestorMoved( e: AncestorEvent ) {}
-      })
+      } {
+         stopAnimation
+         Eph.t { implicit c => system.removeListener( l )}
+      }
 
       display.setSize( 300, 300 )
 //      cp.add( display, BorderLayout.CENTER )
@@ -207,18 +210,22 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
       display
    }
 
-   def addSelectionListener( fun: List[ VersionPath ] => Unit ) {
+   def addSelectionListener( fun: List[ Selection ] => Unit ) {
       selListeners.addL( fun )
    }
 
-   def removeSelectionListener( fun: List[ VersionPath ] => Unit ) {
+   def removeSelectionListener( fun: List[ Selection ] => Unit ) {
       selListeners.removeL( fun )
    }
 
-   def selection : List[ VersionPath ] = {
+   def selection : List[ Selection ] = {
       val tupT = vis.getGroup( Visualization.FOCUS_ITEMS ).tuples.asInstanceOf[ java.util.Iterator[ Tuple ]] 
       val iter = collection.JavaConversions.asIterator( tupT )
-      iter.map( t => VersionPath.wrap( t.get( colPath ).asInstanceOf[ Vector[ Version ]])).toList
+      iter.map( t => {
+         val vp   = VersionPath.wrap( t.get( colPath ).asInstanceOf[ Vector[ Version ]])
+         val csr  = t.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C ]]]
+         (vp, csr)
+      }).toList
    }
 
    private def stopAnimation {
@@ -230,9 +237,9 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
       vis.run( actColor )
    }
 
-   private def addFull( trie: LexiTrie[ OracleMap[ VersionPath ]]) {
-//               full.inspect
-//               full.sub.keys.toList.sorted
+   private def addFullVertices( trie: LexiTrie[ OracleMap[ VersionPath ]]) {
+      g.clear()
+      nodeMap = nodeMap.empty
       trie.sub.foreach { tup =>
          val (key, trie2) = tup
          val tree = trie2.value.get.entries.head._1.tree // woops, elegant it's not...
@@ -288,6 +295,7 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
             val predV   = pred.elem
             pNode.setString( VisualItem.LABEL, predV.toString )
             pNode.set( colPath, headPath :+ predV )
+            pNode.set( colCursor, Nil )
             parent.foreach( g.addEdge( _, pNode ))
             nodeMap += predV.id -> pNode
             val succ    = pred.moveRight
@@ -309,13 +317,75 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
       }
    }
 
-   private def add( parent: Version, child: VersionPath ) {
+   private def addFullCursors( csr: Traversable[ KTemporalCursor[ C ]]) {
+      csr.foreach( addCursor( _ ))
+   }
+
+   private def addCursor( csr: KTemporalCursor[ C ]) {
+      Eph.t { implicit c =>
+         nodeMap.get( csr.path.version.id ).foreach { pNode =>
+            val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C ]]]
+            pNode.set( colCursor, csr :: csrs )
+            checkKarlheinz( pNode )
+         }
+         val csrL = CursorListener( csr )
+         mapCsr += csr -> csrL
+         csr.addListener( csrL.list )
+      }
+      startAnimation
+   }
+
+   private def moveCursor( csr: KTemporalCursor[ C ], oldPath: VersionPath, newPath: VersionPath ) {
+//println( "CURSOR DORFER " + oldPath + " -> " + newPath )
+      nodeMap.get( oldPath.version.id ).foreach { pNode =>
+//println( "CURSOR DORFER REM" )
+         val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C ]]]
+         pNode.set( colCursor, csrs.filterNot( _ == csr ))
+         checkKarlheinz( pNode )
+      }
+      nodeMap.get( newPath.version.id ).foreach { pNode =>
+//println( "CURSOR DORFER ADD" )
+         val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C ]]]
+         pNode.set( colCursor, csr :: csrs )
+         checkKarlheinz( pNode ) // XXX should collapse karlheinzes
+      }
+      startAnimation
+   }
+
+   private def removeCursor( csr: KTemporalCursor[ C ]) {
+      Eph.t { implicit c =>
+         mapCsr.get( csr ).foreach { csrL =>
+            csr.removeListener( csrL.list )
+            mapCsr -= csr
+         }
+         val id = csr.path.version.id
+         nodeMap.get( id ).foreach { pNode =>
+            val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C ]]]
+            pNode.set( colCursor, csrs.filterNot( _ == csr ))
+            checkKarlheinz( pNode )
+         }
+         nodeMap -= id
+      }
+   }
+
+   private def checkKarlheinz( pNode: Node ) {
+      val lulu = vis.getVisualItem( grpGraph, pNode )
+//      val tupT = vis.getGroup( Visualization.FOCUS_ITEMS ).tuples.asInstanceOf[ java.util.Iterator[ Tuple ]]
+//println( "KARLHEINZ? " + collection.JavaConversions.asIterator( tupT ).toList + " :: " + pNode )
+      if( vis.getGroup( Visualization.FOCUS_ITEMS ).containsTuple( lulu )) {
+//println( "...........SI" )
+         selListeners.newSelection( selection )
+      }
+   }
+
+   private def addVertex( parent: Version, child: VersionPath ) {
       stopAnimation
       try {
          val pNode   = g.addNode()
          val childV  = child.version
          pNode.setString( VisualItem.LABEL, childV.toString )
          pNode.set( colPath, child.path )
+         pNode.set( colCursor, Nil )
 //         val vi      = vis.getVisualItem( grpGraph, pNode )
 //         vi.setString( VisualItem.LABEL, path.version.toString )
          nodeMap += childV.id -> pNode
@@ -323,5 +393,15 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
       } finally {
          startAnimation
       }
+   }
+
+   case class CursorListener( csr: KTemporalCursor[ C ]) {
+      val list =  Model.onCommit[ C, KTemporalCursor.Update ]( tr => defer( tr.foreach {
+         case KTemporalCursor.Moved( oldPath, newPath ) => moveCursor( csr, oldPath, newPath )
+         case _ =>
+      }))
+
+//      def add( implicit c: Ctx[ _ ]) { csr.addListener( l )}
+//      def remove( implicit c: Ctx[ _ ]) { csr.removeListener( l )}
    }
 }

@@ -30,7 +30,7 @@ package de.sciss.synth.proc
 
 import impl.ProcImpl
 import de.sciss.confluent.VersionPath
-import view.{VersionGraphView, ContextNavigator, GroupView, OfflineVisualView}
+import view.{VersionGraphView, GroupView, OfflineVisualView}
 import java.awt.{BorderLayout, EventQueue}
 import javax.swing.{Box, JButton, JFrame, WindowConstants}
 import java.awt.event.{ActionListener, ActionEvent}
@@ -57,10 +57,18 @@ object Test {
       b.add( ggGroupView )
       b.add( ggTimelineView )
       b.add( Box.createHorizontalGlue() )
+      ggCursor.addActionListener( new ActionListener {
+         def actionPerformed( e: ActionEvent ) {
+            vv.selection match {
+               case (path, Nil) :: Nil => sys.in( path ) { implicit c => sys.addCursor }
+               case _ =>
+            }
+         }
+      })
       ggGroupView.addActionListener( new ActionListener {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
-               case path :: Nil => sys.in( path ) { implicit c => new GroupView( pg, ContextNavigator() )}
+               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c => new GroupView( pg, csr )}
                case _ =>
             }
          }
@@ -68,19 +76,24 @@ object Test {
       ggTimelineView.addActionListener( new ActionListener {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
-               case path :: Nil => sys.in( path ) { implicit c => new OfflineVisualView( pg, ContextNavigator() )}
+               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c => new OfflineVisualView( pg, csr )}
                case _ =>
             }
          }
       })
+      ggCursor.setEnabled( false )
       ggGroupView.setEnabled( false )
       ggTimelineView.setEnabled( false )
-      vv.addSelectionListener { sel => val enabled = sel match {
-            case path :: Nil => true
-            case _ => false
+      vv.addSelectionListener { sel =>
+//         println( "JO, SEL = " + sel )
+         val (en1, en2) = sel match {
+            case (path, Nil) :: Nil          => (true, false)
+            case (path, csr :: Nil) :: Nil   => (true, true)
+            case _                           => (false, false)
          }
-         ggGroupView.setEnabled( enabled )
-         ggTimelineView.setEnabled( enabled )
+         ggCursor.setEnabled( en1 )
+         ggGroupView.setEnabled( en2 )
+         ggTimelineView.setEnabled( en2 )
       }
       val cp = f.getContentPane()
       cp.add( vv.panel, BorderLayout.CENTER )

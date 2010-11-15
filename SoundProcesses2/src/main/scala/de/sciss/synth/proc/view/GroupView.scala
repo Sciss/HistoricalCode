@@ -32,10 +32,10 @@ import javax.swing._
 import event.{AncestorEvent, AncestorListener, ListSelectionListener, ListSelectionEvent}
 import java.awt.{EventQueue, BorderLayout}
 import java.awt.event.{ActionListener, ActionEvent, WindowEvent, WindowAdapter}
-import de.sciss.synth.proc.{Model, Factory, Proc, Ctx, EphemeralSystem => Eph, ProcGroup}
 import GUIUtils._
+import de.sciss.synth.proc.{Cursor, Model, Factory, Proc, Ctx, EphemeralSystem => Eph, ProcGroup}
 
-class GroupView[ C ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
+class GroupView[ C ]( g: ProcGroup[ C ], csr: Cursor[ C ]) {
    private val listModel  = new DefaultListModel()
    private val list       = new JList( listModel )
 
@@ -45,7 +45,7 @@ class GroupView[ C ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
 //         case ProcGroup.ProcRemoved( p ) /* XXX if( nav.isApplicable( c )) */ => defer( remove( p )) // XXX on txn commit
 //      }}
 
-      val l = Model.filterOnCommit[ C, ProcGroup.Update[ C ]]( (_, c) => nav.isApplicable( c ))( tr =>
+      val l = Model.filterOnCommit[ C, ProcGroup.Update[ C ]]( (_, c) => csr.isApplicable( c ))( tr =>
          defer( tr.foreach {
             case ProcGroup.ProcAdded( p )   => add( p )
             case ProcGroup.ProcRemoved( p ) => remove( p )
@@ -77,24 +77,18 @@ class GroupView[ C ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
 //      butPane.add( Box.createHorizontalStrut( 4 ))
       butPane.add( Box.createHorizontalGlue() )
 
-      cp.add( nav.view, BorderLayout.NORTH )
+//      cp.add( nav.view, BorderLayout.NORTH )
       cp.add( new JScrollPane( list ), BorderLayout.CENTER )
       cp.add( butPane, BorderLayout.SOUTH )
 
-      list.addAncestorListener( new AncestorListener {
-         def ancestorAdded( e: AncestorEvent ) {
-            listModel.removeAllElements()
-//            Eph.t { implicit c => }
-            nav.t { implicit c =>
-               addFull( g.all )
-               g.addListener( l )
-            }
+      ancestorAction( list ) {
+         csr.t { implicit c =>
+            addFull( g.all )
+            g.addListener( l )
          }
-         def ancestorRemoved( e: AncestorEvent ) {
-            Eph.t { implicit c => g.removeListener( l )}
-         }
-         def ancestorMoved( e: AncestorEvent ) {}
-      })
+      } {
+         Eph.t { implicit c => g.removeListener( l )}
+      }
 
       f.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE )
 //      f.addWindowListener( new WindowAdapter {
@@ -109,6 +103,7 @@ class GroupView[ C ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
    }
 
    private def addFull( ps: Traversable[ Proc[ C ]]) {
+      listModel.removeAllElements()
       ps.foreach( listModel.addElement( _ ))
    }
 
@@ -124,14 +119,14 @@ class GroupView[ C ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
       val name = JOptionPane.showInputDialog( "Enter name of new proc" )
       if( name == null ) return
       
-      nav.t { implicit c =>
+      csr.t { implicit c =>
          g.add( Factory.proc( name ))
       }
    }
 
    private def userRemoveProc {
       val procs = list.getSelectedValues().collect { case p: Proc[ _ ] => p.asInstanceOf[ Proc[ C ]]}
-      nav.t { implicit c =>
+      csr.t { implicit c =>
          procs.foreach( g.remove( _ ))
       }
    }
