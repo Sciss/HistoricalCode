@@ -31,18 +31,19 @@ package de.sciss.synth.proc.view
 import javax.swing.{JViewport, Box, JPanel, ScrollPaneConstants => SPC, JScrollPane, JFrame}
 import java.awt.{Dimension, BorderLayout, Color}
 import de.sciss.synth.proc._
+import GUIUtils._
 
 class OfflineVisualView[ C <: PTemporalLike ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
    private var viewSpan = Interval( Period( 0.0 ), Period( 60.0 ))
 
    val (frame, axis) = {
-//      val l = Model.filterOnCommit[ C, ProcGroup.Update[ C ]]( (_, c) => nav.isApplicable( c ))( tr =>
-//         defer( tr.foreach {
-//            case ProcGroup.ProcAdded( p )   => add( p )
-//            case ProcGroup.ProcRemoved( p ) => remove( p )
-//         }))
+      val l = Model.filterOnCommit[ C, ProcGroup.Update[ C ]]( (_, c) => nav.isApplicable( c ))( tr =>
+         defer( tr.foreach {
+            case ProcGroup.ProcAdded( p )   => add( p )
+            case ProcGroup.ProcRemoved( p ) => remove( p )
+         }))
 
-      val f                = new JFrame( "Offline View" )
+      val f                = new JFrame( "Offline View (" + g.name + ")" )
       val cp               = f.getContentPane()
       val timelineAxis     = new Axis( Axis.HORIZONTAL, Axis.TIMEFORMAT )
       timelineAxis.minimum = viewSpan.start.v
@@ -72,5 +73,11 @@ val timelinePanel = new JPanel()
       (f, timelineAxis)
    }
 
-   
+   private def add( p: Proc[ C ]) {
+//      listModel.addElement( p )
+   }
+
+   private def remove( p: Proc[ C ]) {
+//      listModel.removeElement( p )
+   }
 }

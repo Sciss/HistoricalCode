@@ -50,7 +50,7 @@ import javax.swing.{JComponent, JButton, WindowConstants, JFrame}
 import java.beans.{PropertyChangeListener, PropertyChangeEvent}
 import de.sciss.confluent._
 import de.sciss.synth.proc.{KTemporal, KTemporalSystemLike, KTemporalLike, Model, Ctx, Bitemporal, BitemporalSystem, EphemeralSystem => Eph}
-//class VersionGraphView( system: BitemporalSystem ) { }
+import GUIUtils._
 
 class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) {
    private val grpGraph    = "graph"
@@ -229,8 +229,6 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
    private def startAnimation {
       vis.run( actColor )
    }
-
-   private def defer( thunk: => Unit ) { EventQueue.invokeLater( new Runnable { def run = thunk })}
 
    private def addFull( trie: LexiTrie[ OracleMap[ VersionPath ]]) {
 //               full.inspect

@@ -33,6 +33,7 @@ import event.{AncestorEvent, AncestorListener, ListSelectionListener, ListSelect
 import java.awt.{EventQueue, BorderLayout}
 import java.awt.event.{ActionListener, ActionEvent, WindowEvent, WindowAdapter}
 import de.sciss.synth.proc.{Model, Factory, Proc, Ctx, EphemeralSystem => Eph, ProcGroup}
+import GUIUtils._
 
 class GroupView[ C ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
    private val listModel  = new DefaultListModel()
@@ -106,8 +107,6 @@ class GroupView[ C ]( g: ProcGroup[ C ], nav: ContextNavigator[ C ]) {
       f.setVisible( true )
       f
    }
-
-   private def defer( thunk: => Unit ) { EventQueue.invokeLater( new Runnable { def run = thunk })}
 
    private def addFull( ps: Traversable[ Proc[ C ]]) {
       ps.foreach( listModel.addElement( _ ))
