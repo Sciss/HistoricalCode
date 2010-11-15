@@ -104,7 +104,7 @@ object Test {
    }
 
    def test2 {
-      val sys = PTemporalSystem
+      val sys = PTemporalSystem()
       import DSL._
 
       sys.t { implicit c =>

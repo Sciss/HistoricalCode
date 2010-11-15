@@ -33,59 +33,75 @@ import collection.immutable.{SortedMap => ISortedMap}
 import Double.{PositiveInfinity => dinf}
 import impl.ModelImpl
 
-object PTemporalSystem /* extends System */ /*[ PTemporal ]*/ {
+object PTemporalSystem {
    private type C = Ctx[ PTemporal ]
 
-   override def toString = "PTemporalSystem"
+   def apply() : PTemporalSystem = new SystemImpl
 
-   def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new PTemporal( tx )))
+   private class SystemImpl extends PTemporalSystem {
+      sys =>
+      
+      override def toString = "PTemporalSystem"
 
-   def at[ T ]( period: Period )( thunk: => T )( implicit c: C ) : T =
-      during( Interval( period, Period( dinf )))( thunk )
+      def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new CtxImpl( sys, tx )))
 
-   def during[ T ]( interval: Interval )( thunk: => T )( implicit c: C ) : T = {
-      val oldIval = c.repr.interval
-      c.repr.interval = interval
-      try { thunk } finally { c.repr.interval = oldIval }
+      def at[ T ]( period: Period )( thunk: => T )( implicit c: C ) : T =
+         during( Interval( period, Period( dinf )))( thunk )
+
+      def during[ T ]( interval: Interval )( thunk: => T )( implicit c: C ) : T = {
+         val oldIval = c.repr.interval
+         c.repr.interval = interval
+         try { thunk } finally { c.repr.interval = oldIval }
+      }
+   }
+
+   private class CtxImpl( val system: SystemImpl, val txn: Txn )
+   extends PTemporal {
+      private val intervalRef = new TxnLocal[ Interval ] {
+         override protected def initialValue( txn: Txn ) = Interval( Period( 0.0 ), Period( dinf ))
+      }
+
+      def repr = this
+
+      def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ PTemporal, T ] =
+         new PVar( Ref( ISortedMap( Period( 0.0 ) -> init )( Ordering.ordered[ Period ])))
+
+
+      def period : Period     = interval.start
+      def interval : Interval = intervalRef.get( txn )
+
+      private[proc] def interval_=( newInterval: Interval ) = intervalRef.set( newInterval )( txn )
+
+      private class PVar[ /* @specialized */ T ]( ref: Ref[ ISortedMap[ Period, T ]])
+      extends Var[ PTemporal, T ] with ModelImpl[ PTemporal, T ] {
+         def get( implicit c: C ) : T = {
+            val map = ref.get( c.txn )
+            map.to( c.repr.period ).last._2  // XXX is .last efficient? we might need to switch to FingerTree.Ranged
+         }
+         def set( v: T )( implicit c: C ) {
+            val ival = c.repr.interval
+            ref.transform( map =>
+               map.to( ival.start ) +
+               (ival.start -> v) +
+               (ival.end -> map.to( ival.end ).last._2) ++ // XXX .last efficient?
+               map.from( ival.end )
+            )( c.txn )
+            fireUpdate( v )
+         }
+      }
    }
 }
 
-class PTemporal private[proc]( val txn: Txn )
-extends Ctx[ PTemporal ] {
-
-   private type C = Ctx[ PTemporal ]
-
-   private val intervalRef = new TxnLocal[ Interval ] {
-      override protected def initialValue( txn: Txn ) = Interval( Period( 0.0 ), Period( dinf ))
-   }
-
-   def repr = this
-   def system = PTemporalSystem
-
-   def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ PTemporal, T ] =
-      new PVar( Ref( ISortedMap( Period( 0.0 ) -> init )( Ordering.ordered[ Period ])))
-
-
-   def period : Period     = interval.start
-   def interval : Interval = intervalRef.get( txn )
-
-   private[proc] def interval_=( newInterval: Interval ) = intervalRef.set( newInterval )( txn )
-
-   private class PVar[ /* @specialized */ T ]( ref: Ref[ ISortedMap[ Period, T ]])
-   extends Var[ PTemporal, T ] with ModelImpl[ PTemporal, T ] {
-      def get( implicit c: C ) : T = {
-         val map = ref.get( c.txn )
-         map.to( c.repr.period ).last._2  // XXX is .last efficient? we might need to switch to FingerTree.Ranged
-      }
-      def set( v: T )( implicit c: C ) {
-         val ival = c.repr.interval
-         ref.transform( map =>
-            map.to( ival.start ) +
-            (ival.start -> v) +
-            (ival.end -> map.to( ival.end ).last._2) ++ // XXX .last efficient?
-            map.from( ival.end )
-         )( c.txn )
-         fireUpdate( v )
-      }
-   }
+trait PTemporalSystem {
+   def t[ T ]( fun: Ctx[ PTemporal ] => T ) : T
+   def at[ T ]( period: Period )( thunk: => T )( implicit c: Ctx[ PTemporal ]) : T
+   def during[ T ]( interval: Interval )( thunk: => T )( implicit c: Ctx[ PTemporal ]) : T
 }
+
+trait PTemporalLike {
+   def period : Period
+   def interval : Interval
+   private[proc] def interval_=( newInterval: Interval )
+}
+
+trait PTemporal extends PTemporalLike with Ctx[ PTemporal ]

@@ -171,7 +171,7 @@ extends KTemporalSystemLike[ Bitemporal ]
 //   case class NewBranch( oldPath: VersionPath, newPath: VersionPath ) extends Update
 //}
 
-trait Bitemporal extends KTemporalLike with Ctx[ Bitemporal ] {
+trait Bitemporal extends KTemporalLike with PTemporalLike with Ctx[ Bitemporal ] {
 //   def path : VersionPath
    def period : Period
    def interval : Interval
