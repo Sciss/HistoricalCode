@@ -32,6 +32,7 @@ import javax.swing.plaf.basic.BasicPanelUI
 import javax.swing.plaf.ComponentUI
 import javax.swing.{UIManager, AbstractButton, JComponent}
 import java.awt._
+import com.jhlabs.composite.{PinLightComposite, OverlayComposite}
 
 object PanelUI {
    def createUI( c: JComponent ) : ComponentUI = new PanelUI
@@ -47,6 +48,8 @@ class PanelUI extends BasicPanelUI {
    private def paintPanelBackground( c: JComponent , g: Graphics, x: Int, y: Int, w: Int, h: Int ) {
       val start   = UIManager.getColor( "Panel.startBackground" )
       val end     = UIManager.getColor( "Panel.endBackground" )
+//val start = new Color( 35, 35, 35 )
+//val end   = new Color( 0, 0, 0 )
       val g2      = g.asInstanceOf[ Graphics2D ]
       val pntGrad = new GradientPaint( x, y, start, w, h, end )
       g2.setPaint( pntGrad )
@@ -55,6 +58,7 @@ class PanelUI extends BasicPanelUI {
       g2.setPaint( PanelBackgroundPainter.pntCanvas )
       val cmpOrig = g2.getComposite
       g2.setComposite( PanelBackgroundPainter.cmpCanvas )
+//      g2.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER, 0.25f ))
       g2.fillRect( x, y, w, h )
       g2.setComposite( cmpOrig )
 
