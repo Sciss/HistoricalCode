@@ -28,16 +28,18 @@
 
 package de.sciss.synth.proc.view
 
-import java.awt.{Dimension, BorderLayout, Color}
 import de.sciss.synth.proc.{EphemeralSystem => Eph, _}
 import GUIUtils._
 import javax.swing.{BorderFactory, JLabel, JComponent, JViewport, Box, JPanel, ScrollPaneConstants => SPC, JScrollPane, JFrame}
+import javax.swing.border.BevelBorder
+import java.awt.{Cursor => AWTCursor, _}
 
 class OfflineVisualView[ C <: PTemporalLike ]( g: ProcGroup[ C ], csr: Cursor[ C ]) {
    private var viewSpan          = Interval( Period( 0.0 ), Period( 60.0 ))
-   private var map               = Map.empty[ Proc[ C ], JComponent ]
+   private var map               = Map.empty[ Proc[ C ], ProcView ]
    private val columnHeaderView  = Box.createVerticalBox()
-   private val rowHeaderView     = Box.createVerticalBox()
+   private val rowHeaderView     = new JPanel( new GridLayout( 0, 1 ))
+   private val tracksView        = new JPanel( new GridLayout( 0, 1 ))
 
    val (frame, axis) = {
       val l = Model.filterOnCommit[ C, ProcGroup.Update[ C ]]( (_, c) => csr.isApplicable( c ))( tr =>
@@ -61,8 +63,8 @@ val viewPort = new JViewport()
       tracksPanel.setCorner( SPC.UPPER_LEFT_CORNER, new JPanel() ) // fixes white background problem
       tracksPanel.setCorner( SPC.LOWER_LEFT_CORNER, new JPanel() ) // fixes white background problem
       tracksPanel.setCorner( SPC.UPPER_RIGHT_CORNER, new JPanel() ) // fixes white background problem
-val timelinePanel = new JPanel()
-      tracksPanel.setViewportView( timelinePanel )
+//val timelinePanel = new JPanel()
+      tracksPanel.setViewportView( tracksView )
       tracksPanel.setRowHeaderView( rowHeaderView )
       columnHeaderView.add( timelineAxis )
       tracksPanel.setColumnHeaderView( columnHeaderView )
@@ -92,20 +94,46 @@ val timelinePanel = new JPanel()
    private def add( p: Proc[ C ]) {
 //      listModel.addElement( p )
       val c = new JLabel( p.name )
-      c.setBorder( BorderFactory.createBevelBorder( 2 ))
+      c.setBorder( BorderFactory.createBevelBorder( BevelBorder.RAISED ))
+      c.setPreferredSize( new Dimension( 48, 64 ))
       rowHeaderView.add( c )
       rowHeaderView.revalidate()
-//      rowHeaderView.repaint()
-      map += p -> c
+      val t = new TrackView( p )
+      t.setPreferredSize( new Dimension( 480, 64 ))
+      tracksView.add( t )
+      tracksView.revalidate()
+      map += p -> ProcView( c, t )
    }
 
    private def remove( p: Proc[ C ]) {
 //      listModel.removeElement( p )
-      val co = map.get( p )
+      val pvo = map.get( p )
       map -= p
-      co.foreach { c =>
-         rowHeaderView.remove( c )
+      pvo.foreach { pv =>
+         rowHeaderView.remove( pv.header )
          rowHeaderView.revalidate()
+         tracksView.remove( pv.trackView )
+         tracksView.revalidate()
       }
    }
+
+   private class TrackView( p: Proc[ C ]) extends JComponent {
+      setBorder( BorderFactory.createMatteBorder( 1, 0, 1, 0, Color.white ))
+      setOpaque( true )
+
+      override def paintComponent( g: Graphics ) {
+         val in = getInsets()
+         val g2 = g.asInstanceOf[ Graphics2D ]
+         val x = in.left
+         val y = in.top
+         val w = getWidth() - (in.left + in.right)
+         val h = getHeight() - (in.top + in.bottom)
+//         g2.setColor( Color.blue )
+//         g2.fillRect( x, y, w, h )
+
+//         p.amp.range...
+      }
+   }
+
+   private case class ProcView( header: JComponent, trackView: JComponent )
 }
