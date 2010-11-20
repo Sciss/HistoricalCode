@@ -30,10 +30,14 @@ package de.sciss.synth.proc
 
 import edu.stanford.ppl.ccstm.Txn
 
-trait Ctx[ Repr ] {
-   def repr : Repr
+trait PFactory[ P ] {
+
+}
+
+trait Ctx[ K ] {
+   def repr : K
 //   def system : System /*[ Repr ]*/
-   def v[ T ]( init : T )( implicit m: ClassManifest[ T ]) : Var[ Repr, T ]
+   def v[ P, V ]( init : V )( implicit m: ClassManifest[ V ], p: PFactory[ P ]) : Var[ K, P, V ]
    def txn: Txn
 }
 

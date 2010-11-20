@@ -3,6 +3,9 @@ package de.sciss.synth.proc
 import impl.{ProcGroupImpl, ProcImpl}
 
 object Factory {
-   def proc[ C ]( name: String )( implicit c: Ctx[ C ]) : Proc[ C ] = new ProcImpl( name )
-   def group[ C ]( name: String )( implicit c: Ctx[ C ]) : ProcGroup[ C ] = new ProcGroupImpl( name )
+   def proc[ K, P ]( name: String )( implicit c: Ctx[ K ], p: PFactory[ P ]) : Proc[ K, P ] =
+      new ProcImpl( name )
+
+   def group[ K, P ]( name: String )( implicit c: Ctx[ K ], p: PFactory[ P ]) : ProcGroup[ K, P ] =
+      new ProcGroupImpl( name )
 }

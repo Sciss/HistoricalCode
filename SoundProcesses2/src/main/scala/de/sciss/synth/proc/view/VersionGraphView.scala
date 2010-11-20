@@ -48,7 +48,7 @@ import javax.swing.{JComponent, JButton, WindowConstants, JFrame}
 import java.beans.{PropertyChangeListener, PropertyChangeEvent}
 import de.sciss.confluent._
 import GUIUtils._
-import de.sciss.synth.proc.{KTemporalCursor, KTemporal, KTemporalSystemLike, KTemporalLike, Model, Ctx, Bitemporal, BitemporalSystem, EphemeralSystem => Eph}
+import de.sciss.synth.proc.{KTemporalCursor, KTemporal, KTemporalSystemLike, KTemporalLike, Model, Ctx, EphemeralSystem => Eph}
 import prefuse.action.assignment.{StrokeAction, ColorAction}
 import java.awt.{BasicStroke, Color, BorderLayout, EventQueue}
 import prefuse.data.expression.{AbstractPredicate, ComparisonPredicate, ColumnExpression, ObjectLiteral}

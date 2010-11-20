@@ -30,12 +30,12 @@ package de.sciss.synth.proc
 package impl
 
 // todo: we could mix in something like a VarProxy?
-class SwitchImpl[ C ]( val name: String, init: Boolean )( implicit c: Ctx[ C ])
-extends Switch[ C ] with ModelImpl[ C, Boolean ] {
-   private val vr = c.v( init )
+class SwitchImpl[ K, P ]( val name: String, init: Boolean )( implicit c: Ctx[ K ], p: PFactory[ P ])
+extends Switch[ K, P ] with ModelImpl[ K, Boolean ] {
+   private val vr = c.v[ P, Boolean ]( init )
 
-   def get( implicit c: Ctx[ C ]) = vr.get
-   def set( v: Boolean )( implicit c: Ctx[ C ]) {
+   def get( implicit c: Ctx[ K ]) = vr.get
+   def set( v: Boolean )( implicit c: Ctx[ K ]) {
       vr.set( v )
       fireUpdate( v )
    }

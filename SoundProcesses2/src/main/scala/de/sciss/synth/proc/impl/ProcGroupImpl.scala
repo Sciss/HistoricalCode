@@ -28,22 +28,23 @@
 
 package de.sciss.synth.proc.impl
 
-import de.sciss.synth.proc.{Proc, ProcGroup, Ctx}
 import collection.immutable.{Set => ISet}
+import de.sciss.synth.proc.{PFactory, Proc, ProcGroup, Ctx}
 
-class ProcGroupImpl[ C ]( val name: String )( implicit c: Ctx[ C ])
-extends ProcGroup[ C ] with ModelImpl[ C, ProcGroup.Update[ C ]] {
-   private val procs = c.v( ISet.empty[ Proc[ C ]])
+class ProcGroupImpl[ K, P ]( val name: String )( implicit c: Ctx[ K ], p: PFactory[ P ])
+extends ProcGroup[ K, P ] with ModelImpl[ K, ProcGroup.Update[ K, P ]] {
+   // pero por-que??
+   private val procs = c.v[ P, ISet[ Proc[ K, P ]]]( ISet.empty[ Proc[ K, P ]])
 
-   def add( p: Proc[ C ])( implicit c: Ctx[ C ]) {
+   def add( p: Proc[ K, P ])( implicit c: Ctx[ K ]) {
       procs.set( procs.get + p )
       fireUpdate( ProcGroup.ProcAdded( p ))
    }
 
-   def remove( p: Proc[ C ])( implicit c: Ctx[ C ]) {
+   def remove( p: Proc[ K, P ])( implicit c: Ctx[ K ]) {
       procs.set( procs.get - p )
       fireUpdate( ProcGroup.ProcRemoved( p ))
    }
 
-   def all( implicit c: Ctx[ C ]) : Traversable[ Proc[ C ]] = procs.get( c )
+   def all( implicit c: Ctx[ K ]) : Traversable[ Proc[ K, P ]] = procs.get( c )
 }

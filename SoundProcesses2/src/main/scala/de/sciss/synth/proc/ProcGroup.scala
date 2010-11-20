@@ -29,19 +29,19 @@
 package de.sciss.synth.proc
 
 object ProcGroup {
-   sealed trait Update[ C ]
-   case class ProcAdded[ C ]( /* idx: Int, */ p: Proc[ C ]) extends Update[ C ]
-   case class ProcRemoved[ C ]( /* idx: Int, */ p: Proc[ C ]) extends Update[ C ]
+   sealed trait Update[ K, P ]
+   case class ProcAdded[ K, P ]( /* idx: Int, */ p: Proc[ K, P ]) extends Update[ K, P ]
+   case class ProcRemoved[ K, P ]( /* idx: Int, */ p: Proc[ K, P ]) extends Update[ K, P ]
 }
 
-trait ProcGroup[ C ] extends Model[ C, ProcGroup.Update[ C ]] with Named {
+trait ProcGroup[ K, P ] extends Model[ K, ProcGroup.Update[ K, P ]] with Named {
 //   type Listener = Model.Listener[ C, ProcGroup.Update[ C ]]
 //   def listener( f: Function1[ Ctx[ C ], PartialFunction[ ProcGroup.Update[ C ], Unit ]]) =
 //      new Model.Listener[ C, ProcGroup.Update[ C ]] {
 //         def updated( u: ProcGroup.Update[ C ])( implicit c: Ctx[ C ]) = f( c )( u )
 //      }
    
-   def add( p: Proc[ C ])( implicit c: Ctx[ C ]) : Unit
-   def remove( p: Proc[ C ])( implicit c: Ctx[ C ]) : Unit
-   def all( implicit c: Ctx[ C ]) : Traversable[ Proc[ C ]]
+   def add( p: Proc[ K, P ])( implicit c: Ctx[ K ]) : Unit
+   def remove( p: Proc[ K, P ])( implicit c: Ctx[ K ]) : Unit
+   def all( implicit c: Ctx[ K ]) : Traversable[ Proc[ K, P ]]
 }

@@ -88,9 +88,9 @@ object KTemporalSystem {
 
       def repr = this
 
-      def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ KTemporal, T ] = {
+      def v[ P, V ]( init: V )( implicit m: ClassManifest[ V ], p: PFactory[ P ]) : Var[ KTemporal, P, V ] = {
    //      val ref = Ref[ T ]()
-         val fat0 = FatValue.empty[ T ]
+         val fat0 = FatValue.empty[ V ]
          val vp   = writePath
    //println( "ASSIGN AT " + vp + " : " + init )
          val fat1 = fat0.assign( vp.path, init )
@@ -115,17 +115,17 @@ object KTemporalSystem {
       // XXX END :::::::::::::::::: DUP FROM BITEMPORAL
    }
 
-   private class VarImpl[ /* @specialized */ T ]( ref: Ref[ FatValue[ T ]])
-   extends Var[ KTemporal, T ] with ModelImpl[ KTemporal, T ] {
+   private class VarImpl[ P, /* @specialized */ V ]( ref: Ref[ FatValue[ V ]])
+   extends Var[ KTemporal, P, V ] with ModelImpl[ KTemporal, V ] {
 //      protected def txn( c: C ) = c.repr.txn
 
-      def get( implicit c: C ) : T = {
+      def get( implicit c: C ) : V = {
          val vp   = c.repr.path // readPath
          ref.get( c.txn ).access( vp.path )
             .getOrElse( error( "No assignment for path " + vp ))
       }
 
-      def set( v: T )( implicit c: C ) {
+      def set( v: V )( implicit c: C ) {
          ref.transform( _.assign( c.repr.writePath.path, v ))( c.txn )
          fireUpdate( v )
       }

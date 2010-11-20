@@ -34,15 +34,15 @@ import javax.swing.{BorderFactory, JLabel, JComponent, JViewport, Box, JPanel, S
 import javax.swing.border.BevelBorder
 import java.awt.{Cursor => AWTCursor, _}
 
-class OfflineVisualView[ C <: PTemporalLike ]( g: ProcGroup[ C ], csr: Cursor[ C ]) {
+class OfflineVisualView[ K, P /* <: PTemporalLike */]( g: ProcGroup[ K, P ], csr: Cursor[ K ]) {
    private var viewSpan          = Interval( Period( 0.0 ), Period( 60.0 ))
-   private var map               = Map.empty[ Proc[ C ], ProcView ]
+   private var map               = Map.empty[ Proc[ K, P ], ProcView ]
    private val columnHeaderView  = Box.createVerticalBox()
    private val rowHeaderView     = new JPanel( new GridLayout( 0, 1 ))
    private val tracksView        = new JPanel( new GridLayout( 0, 1 ))
 
    val (frame, axis) = {
-      val l = Model.filterOnCommit[ C, ProcGroup.Update[ C ]]( (_, c) => csr.isApplicable( c ))( tr =>
+      val l = Model.filterOnCommit[ K, ProcGroup.Update[ K, P ]]( (_, c) => csr.isApplicable( c ))( tr =>
          defer( tr.foreach {
             case ProcGroup.ProcAdded( p )   => add( p )
             case ProcGroup.ProcRemoved( p ) => remove( p )
@@ -86,12 +86,12 @@ val viewPort = new JViewport()
       (f, timelineAxis)
    }
 
-   private def addFull( ps: Traversable[ Proc[ C ]]) {
+   private def addFull( ps: Traversable[ Proc[ K, P ]]) {
       rowHeaderView.removeAll()
       ps.foreach( add( _ ))
    }
 
-   private def add( p: Proc[ C ]) {
+   private def add( p: Proc[ K, P ]) {
 //      listModel.addElement( p )
       val c = new JLabel( p.name )
       c.setBorder( BorderFactory.createBevelBorder( BevelBorder.RAISED ))
@@ -105,7 +105,7 @@ val viewPort = new JViewport()
       map += p -> ProcView( c, t )
    }
 
-   private def remove( p: Proc[ C ]) {
+   private def remove( p: Proc[ K, P ]) {
 //      listModel.removeElement( p )
       val pvo = map.get( p )
       map -= p
@@ -117,7 +117,7 @@ val viewPort = new JViewport()
       }
    }
 
-   private class TrackView( p: Proc[ C ]) extends JComponent {
+   private class TrackView( p: Proc[ K, P ]) extends JComponent {
       setBorder( BorderFactory.createMatteBorder( 1, 0, 1, 0, Color.white ))
       setOpaque( true )
 

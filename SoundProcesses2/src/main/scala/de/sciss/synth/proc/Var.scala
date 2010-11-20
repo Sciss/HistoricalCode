@@ -9,12 +9,13 @@ object Var {
 //   }
 }
 
-trait Var[ Repr, T ] /* extends Model[ Repr, T ] */ {
+trait Var[ K, P, V ] /* extends Model[ Repr, T ] */ {
    import Var._
 //   type L = Listener[ Repr, T ]
 
-   def set( v: T )( implicit c: Ctx[ Repr ]) : Unit
-   def get( implicit c: Ctx[ Repr ]) : T
+//   def repr: P
+   def set( v: V )( implicit c: Ctx[ K ]) : Unit
+   def get( implicit c: Ctx[ K ]) : V
 //   def transform( f: T => T )( implicit c: Ctx[ Repr ]) : Unit
 
 //   def addListener( l: L )( implicit c: Ctx[ Repr ]) : Unit
