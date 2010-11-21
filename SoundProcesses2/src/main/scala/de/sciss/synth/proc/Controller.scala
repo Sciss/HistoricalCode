@@ -28,4 +28,4 @@
 
 package de.sciss.synth.proc
 
-trait Controller[ K, P ] extends Var[ K, P, Double ] with Model[ K, Double ] with Named
+trait Controller[ C, V[ _ ]] extends Var[ C, V, Double ] with Model[ C, V, Double ] with Named

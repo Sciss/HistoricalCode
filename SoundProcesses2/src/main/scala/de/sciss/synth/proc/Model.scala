@@ -32,21 +32,21 @@ import collection.immutable.{Queue => IQueue}
 import edu.stanford.ppl.ccstm.{TxnLocal, Ref, Txn}
 
 object Model {
-   trait Listener[ Repr, U ] {
-      def updated( update: U )( implicit c: Ctx[ Repr ])
+   trait Listener[ C, V[ _ ], U ] {
+      def updated( update: U )( implicit c: Ctx[ C, V ])
    }
 
-   def onCommit[ Repr, U ]( committed: Traversable[ U ] => Unit ) : Listener[ Repr, U ] =
-      filterOnCommit( (_: U, _: Ctx[ Repr ]) => true )( committed )
+   def onCommit[ C, V[ _ ], U ]( committed: Traversable[ U ] => Unit ) : Listener[ C, V, U ] =
+      filterOnCommit( (_: U, _: Ctx[ C, V ]) => true )( committed )
 
 //   def collectOnCommit[ Repr, U, V ]( pf: PartialFunction[ (U, Ctx[ Repr ]), V ])( committed: Traversable[ V ] => Unit )
 
-   def filterOnCommit[ Repr, U ]( filter: Function2[ U, Ctx[ Repr ], Boolean ])( committed: Traversable[ U ] => Unit ) =
-      new Listener[ Repr, U ] {
+   def filterOnCommit[ C, V[ _ ], U ]( filter: Function2[ U, Ctx[ C, V ], Boolean ])( committed: Traversable[ U ] => Unit ) =
+      new Listener[ C, V, U ] {
          val queueRef = new TxnLocal[ IQueue[ U ]] {
             override protected def initialValue( txn: Txn ) = IQueue.empty
          }
-         def updated( update: U )( implicit c: Ctx[ Repr ]) {
+         def updated( update: U )( implicit c: Ctx[ C, V ]) {
             if( filter( update, c )) {
                val txn  = c.txn
                val q0   = queueRef.get( txn )
@@ -62,13 +62,13 @@ object Model {
       }
 }
 
-trait Model[ Repr, U ] {
+trait Model[ C, V[ _ ], U ] {
    import Model._
 
-   type L = Listener[ Repr, U ]
+   type L = Listener[ C, V, U ]
 
 //   def addListener( l: L )( implicit c: Ctx[ Repr ]) : Unit
 //   def removeListener( l: L )( implicit c: Ctx[ Repr ]) : Unit
-   def addListener( l: L )( implicit c: Ctx[ _ ]) : Unit
-   def removeListener( l: L )( implicit c: Ctx[ _ ]) : Unit
+   def addListener( l: L )( implicit c: Ctx[ _, _ ]) : Unit
+   def removeListener( l: L )( implicit c: Ctx[ _, _ ]) : Unit
 }

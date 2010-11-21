@@ -32,25 +32,25 @@ import edu.stanford.ppl.ccstm.{STM, Txn, Ref}
 import impl.ModelImpl
 
 object EphemeralSystem /* extends System */ /*[ Ephemeral ] */ {
-   private type C = Ctx[ Ephemeral ]
+   private type C = Ctx[ Ephemeral, Nothing ]
 
    override def toString = "EphemeralSystem"
 
    def t[ T ]( fun: C => T ) : T = STM.atomic( tx => fun( new EphemeralImpl( tx )))
 
    private class EphemeralImpl private[proc]( val txn: Txn )
-   extends Ephemeral with Ctx[ Ephemeral ] {
-      private type C = Ctx[ Ephemeral ]
+   extends Ephemeral with Ctx[ Ephemeral, Nothing ] {
+      private type C = Ctx[ Ephemeral, Nothing ]
 
       def repr = this
       def system = EphemeralSystem
-      def v[ P, V ]( init: V )( implicit m: ClassManifest[ V ], p: PFactory[ P ]) : Var[ Ephemeral, P, V ] =
+      def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ Ephemeral, Nothing, T ] =
          new EVar( Ref( init ))
 
-      private class EVar[ P, V ]( ref: Ref[ V ])
-      extends Var[ Ephemeral, P, V ] with ModelImpl[ Ephemeral, V ] {
-         def get( implicit c: C ) : V = ref.get( c.txn )
-         def set( v: V )( implicit c: C ) {
+      private class EVar[ T ]( ref: Ref[ T ])
+      extends Var[ Ephemeral, Nothing, T ] with ModelImpl[ Ephemeral, Nothing, T ] {
+         def get( implicit c: C ) : T = ref.get( c.txn )
+         def set( v: T )( implicit c: C ) {
             ref.set( v )( c.txn )
             fireUpdate( v )
          }
@@ -58,4 +58,4 @@ object EphemeralSystem /* extends System */ /*[ Ephemeral ] */ {
    }
 }
 
-trait Ephemeral extends Ctx[ Ephemeral ]
+trait Ephemeral extends Ctx[ Ephemeral, Nothing ]

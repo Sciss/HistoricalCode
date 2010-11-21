@@ -48,12 +48,12 @@ import javax.swing.{JComponent, JButton, WindowConstants, JFrame}
 import java.beans.{PropertyChangeListener, PropertyChangeEvent}
 import de.sciss.confluent._
 import GUIUtils._
-import de.sciss.synth.proc.{KTemporalCursor, KTemporal, KTemporalSystemLike, KTemporalLike, Model, Ctx, EphemeralSystem => Eph}
 import prefuse.action.assignment.{StrokeAction, ColorAction}
 import java.awt.{BasicStroke, Color, BorderLayout, EventQueue}
 import prefuse.data.expression.{AbstractPredicate, ComparisonPredicate, ColumnExpression, ObjectLiteral}
+import de.sciss.synth.proc.{KTemporalVarLike, KTemporalCursor, KTemporal, KTemporalSystemLike, KTemporalLike, Model, Ctx, EphemeralSystem => Eph}
 
-class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) {
+class VersionGraphView[ C <: KTemporalLike, V[ _ ] <: KTemporalVarLike[ _ ]]( system: KTemporalSystemLike[ C, V ]) {
    private val grpGraph    = "graph"
    private val grpNodes    = "graph.nodes"
    private val grpEdges    = "graph.edges"
@@ -66,9 +66,9 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
 
    private var nodeMap     = IntMap.empty[ Node ]
 
-   type Selection = (VersionPath, List[ KTemporalCursor[ C ]])
+   type Selection = (VersionPath, List[ KTemporalCursor[ C, V ]])
 
-   private var mapCsr   = Map.empty[ KTemporalCursor[ C ], CursorListener ]
+   private var mapCsr   = Map.empty[ KTemporalCursor[ C, V ], CursorListener ]
 
    private val selListeners   = new JComponent {
       var oldSel: List[ Selection ] = Nil
@@ -100,7 +100,7 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
    }
 
    val panel : JComponent = {
-      val l = Model.onCommit[ C, KTemporal.Update[ C ]]( tr => defer( tr.foreach {
+      val l = Model.onCommit[ C, V, KTemporal.Update[ C, V ]]( tr => defer( tr.foreach {
          case KTemporal.NewBranch( oldPath, newPath ) => addVertex( oldPath.version, newPath )
          case KTemporal.CursorAdded( csr )            => addCursor( csr )
          case KTemporal.CursorRemoved( csr )          => removeCursor( csr )
@@ -113,7 +113,7 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
       val nodes         = g.getNodeTable()
       g.addColumn( VisualItem.LABEL, classOf[ String ])
       g.addColumn( colPath, classOf[ Vector[ Version ]])
-      g.addColumn( colCursor, classOf[ List[ KTemporalCursor[ C ]]]) // XXX maybe not the smartest way to occupy space in each vertex?
+      g.addColumn( colCursor, classOf[ List[ KTemporalCursor[ C, V ]]]) // XXX maybe not the smartest way to occupy space in each vertex?
 
       // colors
       val colrGray   = ColorLib.rgb( 0xC0, 0xC0, 0xC0 )
@@ -223,7 +223,7 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
       val iter = collection.JavaConversions.asIterator( tupT )
       iter.map( t => {
          val vp   = VersionPath.wrap( t.get( colPath ).asInstanceOf[ Vector[ Version ]])
-         val csr  = t.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C ]]]
+         val csr  = t.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C, V ]]]
          (vp, csr)
       }).toList
    }
@@ -317,14 +317,14 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
       }
    }
 
-   private def addFullCursors( csr: Traversable[ KTemporalCursor[ C ]]) {
+   private def addFullCursors( csr: Traversable[ KTemporalCursor[ C, V ]]) {
       csr.foreach( addCursor( _ ))
    }
 
-   private def addCursor( csr: KTemporalCursor[ C ]) {
+   private def addCursor( csr: KTemporalCursor[ C, V ]) {
       Eph.t { implicit c =>
          nodeMap.get( csr.path.version.id ).foreach { pNode =>
-            val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C ]]]
+            val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C, V ]]]
             pNode.set( colCursor, csr :: csrs )
             checkKarlheinz( pNode )
          }
@@ -335,24 +335,24 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
       startAnimation
    }
 
-   private def moveCursor( csr: KTemporalCursor[ C ], oldPath: VersionPath, newPath: VersionPath ) {
+   private def moveCursor( csr: KTemporalCursor[ C, V ], oldPath: VersionPath, newPath: VersionPath ) {
 //println( "CURSOR DORFER " + oldPath + " -> " + newPath )
       nodeMap.get( oldPath.version.id ).foreach { pNode =>
 //println( "CURSOR DORFER REM" )
-         val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C ]]]
+         val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C, V ]]]
          pNode.set( colCursor, csrs.filterNot( _ == csr ))
          checkKarlheinz( pNode )
       }
       nodeMap.get( newPath.version.id ).foreach { pNode =>
 //println( "CURSOR DORFER ADD" )
-         val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C ]]]
+         val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C, V ]]]
          pNode.set( colCursor, csr :: csrs )
          checkKarlheinz( pNode ) // XXX should collapse karlheinzes
       }
       startAnimation
    }
 
-   private def removeCursor( csr: KTemporalCursor[ C ]) {
+   private def removeCursor( csr: KTemporalCursor[ C, V ]) {
       Eph.t { implicit c =>
          mapCsr.get( csr ).foreach { csrL =>
             csr.removeListener( csrL.list )
@@ -360,7 +360,7 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
          }
          val id = csr.path.version.id
          nodeMap.get( id ).foreach { pNode =>
-            val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C ]]]
+            val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C, V ]]]
             pNode.set( colCursor, csrs.filterNot( _ == csr ))
             checkKarlheinz( pNode )
          }
@@ -395,8 +395,8 @@ class VersionGraphView[ C <: KTemporalLike ]( system: KTemporalSystemLike[ C ]) 
       }
    }
 
-   case class CursorListener( csr: KTemporalCursor[ C ]) {
-      val list =  Model.onCommit[ C, KTemporalCursor.Update ]( tr => defer( tr.foreach {
+   case class CursorListener( csr: KTemporalCursor[ C, V ]) {
+      val list =  Model.onCommit[ C, V, KTemporalCursor.Update ]( tr => defer( tr.foreach {
          case KTemporalCursor.Moved( oldPath, newPath ) => moveCursor( csr, oldPath, newPath )
          case _ =>
       }))

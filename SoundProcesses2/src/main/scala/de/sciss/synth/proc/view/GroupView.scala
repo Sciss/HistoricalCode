@@ -33,9 +33,9 @@ import event.{AncestorEvent, AncestorListener, ListSelectionListener, ListSelect
 import java.awt.{EventQueue, BorderLayout}
 import java.awt.event.{ActionListener, ActionEvent, WindowEvent, WindowAdapter}
 import GUIUtils._
-import de.sciss.synth.proc.{PFactory, Cursor, Model, Factory, Proc, Ctx, EphemeralSystem => Eph, ProcGroup}
+import de.sciss.synth.proc.{Cursor, Model, Factory, Proc, Ctx, EphemeralSystem => Eph, ProcGroup}
 
-class GroupView[ K, P ]( g: ProcGroup[ K, P ], csr: Cursor[ K ])( implicit p: PFactory[ P ]) {
+class GroupView[ C, V[ _ ]]( g: ProcGroup[ C, V ], csr: Cursor[ C, V ]) {
    private val listModel  = new DefaultListModel()
    private val list       = new JList( listModel )
 
@@ -45,7 +45,7 @@ class GroupView[ K, P ]( g: ProcGroup[ K, P ], csr: Cursor[ K ])( implicit p: PF
 //         case ProcGroup.ProcRemoved( p ) /* XXX if( nav.isApplicable( c )) */ => defer( remove( p )) // XXX on txn commit
 //      }}
 
-      val l = Model.filterOnCommit[ K, ProcGroup.Update[ K, P ]]( (_, c) => csr.isApplicable( c ))( tr =>
+      val l = Model.filterOnCommit[ C, V, ProcGroup.Update[ C, V ]]( (_, c) => csr.isApplicable( c ))( tr =>
          defer( tr.foreach {
             case ProcGroup.ProcAdded( p )   => add( p )
             case ProcGroup.ProcRemoved( p ) => remove( p )
@@ -102,30 +102,30 @@ class GroupView[ K, P ]( g: ProcGroup[ K, P ], csr: Cursor[ K ])( implicit p: PF
       f
    }
 
-   private def addFull( ps: Traversable[ Proc[ K, _ ]]) {
+   private def addFull( ps: Traversable[ Proc[ C, V ]]) {
       listModel.removeAllElements()
       ps.foreach( listModel.addElement( _ ))
    }
 
-   private def add( p: Proc[ K, _ ]) {
+   private def add( p: Proc[ C, V ]) {
       listModel.addElement( p )
    }
 
-   private def remove( p: Proc[ K, _ ]) {
+   private def remove( p: Proc[ C, V ]) {
       listModel.removeElement( p )
    }
 
    private def userAddProc {
       val name = JOptionPane.showInputDialog( "Enter name of new proc" )
       if( name == null ) return
-      
+
       csr.t { implicit c =>
          g.add( Factory.proc( name ))
       }
    }
 
    private def userRemoveProc {
-      val procs = list.getSelectedValues().collect { case p: Proc[ _, _ ] => p.asInstanceOf[ Proc[ K, P ]]}
+      val procs = list.getSelectedValues().collect { case p: Proc[ _, _ ] => p.asInstanceOf[ Proc[ C, V ]]}
       csr.t { implicit c =>
          procs.foreach( g.remove( _ ))
       }

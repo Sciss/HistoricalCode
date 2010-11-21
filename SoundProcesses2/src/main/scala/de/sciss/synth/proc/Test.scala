@@ -41,15 +41,13 @@ object Test {
    def test5 { EventQueue.invokeLater( new Runnable { def run {
       val sys = KTemporalSystem() // BitemporalSystem()
 
-implicit val schnuckendorfer = new PFactory[ AnyRef ] {}
-
       val pg = sys.in( VersionPath.init ) { implicit c =>
 //         val ov = new OfflineVisualView
 //         ov.frame.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE )
          Factory.group( "g1" )
       }
 
-      val vv = new VersionGraphView( sys )
+      val vv = new VersionGraphView[ KTemporal, KTemporalVar ]( sys )
       val f  = new JFrame( "Version Graph" )
       val b  = Box.createHorizontalBox()
       val ggCursor         = new JButton( "Add Cursor" )
@@ -70,7 +68,7 @@ implicit val schnuckendorfer = new PFactory[ AnyRef ] {}
       ggGroupView.addActionListener( new ActionListener {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
-               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c => new GroupView( pg, csr )}
+               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c => new GroupView[ KTemporal, KTemporalVar ]( pg, csr )}
                case _ =>
             }
          }
@@ -78,7 +76,7 @@ implicit val schnuckendorfer = new PFactory[ AnyRef ] {}
       ggTimelineView.addActionListener( new ActionListener {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
-               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c => new OfflineVisualView( pg, csr )}
+               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c => new OfflineVisualView[ KTemporal, KTemporalVar ]( pg, csr )}
                case _ =>
             }
          }

@@ -29,19 +29,19 @@
 package de.sciss.synth.proc
 
 object ProcGroup {
-   sealed trait Update[ K, P ]
-   case class ProcAdded[ K, P ]( /* idx: Int, */ p: Proc[ K, P ]) extends Update[ K, P ]
-   case class ProcRemoved[ K, P ]( /* idx: Int, */ p: Proc[ K, P ]) extends Update[ K, P ]
+   sealed trait Update[ C, V[ _ ]]
+   case class ProcAdded[ C, V[ _ ]]( /* idx: Int, */ p: Proc[ C, V ]) extends Update[ C, V ]
+   case class ProcRemoved[ C, V[ _ ]]( /* idx: Int, */ p: Proc[ C, V ]) extends Update[ C, V ]
 }
 
-trait ProcGroup[ K, P ] extends Model[ K, ProcGroup.Update[ K, P ]] with Named {
+trait ProcGroup[ C, V[ _ ]] extends Model[ C, V, ProcGroup.Update[ C, V ]] with Named {
 //   type Listener = Model.Listener[ C, ProcGroup.Update[ C ]]
 //   def listener( f: Function1[ Ctx[ C ], PartialFunction[ ProcGroup.Update[ C ], Unit ]]) =
 //      new Model.Listener[ C, ProcGroup.Update[ C ]] {
 //         def updated( u: ProcGroup.Update[ C ])( implicit c: Ctx[ C ]) = f( c )( u )
 //      }
    
-   def add( p: Proc[ K, P ])( implicit c: Ctx[ K ]) : Unit
-   def remove( p: Proc[ K, P ])( implicit c: Ctx[ K ]) : Unit
-   def all( implicit c: Ctx[ K ]) : Traversable[ Proc[ K, P ]]
+   def add( p: Proc[ C, V ])( implicit c: Ctx[ C, V ]) : Unit
+   def remove( p: Proc[ C, V ])( implicit c: Ctx[ C, V ]) : Unit
+   def all( implicit c: Ctx[ C, V ]) : Traversable[ Proc[ C, V ]]
 }

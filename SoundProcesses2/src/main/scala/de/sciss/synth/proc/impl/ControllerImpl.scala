@@ -30,12 +30,12 @@ package de.sciss.synth.proc
 package impl
 
 // todo: we could mix in something like a VarProxy?
-class ControllerImpl[ K, P ]( val name: String, init: Double )( implicit c: Ctx[ K ], p: PFactory[ P ])
-extends Controller[ K, P ] with ModelImpl[ K, Double ] {
-   private val vr = c.v[ P, Double ]( init )
+class ControllerImpl[ C, V[ _ ]]( val name: String, init: Double )( implicit c: Ctx[ C, V ])
+extends Controller[ C, V ] with ModelImpl[ C, V, Double ] {
+   private val vr = c.v( init )
 
-   def get( implicit c: Ctx[ K ]) = vr.get
-   def set( v: Double )( implicit c: Ctx[ K ]) {
+   def get( implicit c: Ctx[ C, V ]) = vr.get
+   def set( v: Double )( implicit c: Ctx[ C, V ]) {
       vr.set( v )
       fireUpdate( v )
    }

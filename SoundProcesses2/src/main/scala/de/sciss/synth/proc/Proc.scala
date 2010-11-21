@@ -32,8 +32,8 @@ object Proc {
    case class Update( what: AnyRef )
 }
 
-trait Proc[ K, P ] extends Model[ K, Proc.Update ] with Named {
-   def playing : Switch[ K, P ]
-   def amp : Controller[ K, P ]
-   def freq : Controller[ K, P ]
+trait Proc[ C, V[ _ ]] extends Model[ C, V, Proc.Update ] with Named {
+   def playing : Switch[ C, V ]
+   def amp : Controller[ C, V ]
+   def freq : Controller[ C, V ]
 }
