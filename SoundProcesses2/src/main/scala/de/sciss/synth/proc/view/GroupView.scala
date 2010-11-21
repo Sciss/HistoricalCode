@@ -87,7 +87,7 @@ class GroupView[ C, V[ _ ]]( g: ProcGroup[ C, V ], csr: Cursor[ C, V ]) {
             g.addListener( l )
          }
       } {
-         Eph.t { implicit c => g.removeListener( l )}
+         Eph.t { implicit c => g.removeListener[ Nothing ]( l )}
       }
 
       f.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE )

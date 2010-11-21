@@ -49,6 +49,7 @@ object EphemeralSystem /* extends System */ /*[ Ephemeral ] */ {
 
       private class EVar[ T ]( ref: Ref[ T ])
       extends Var[ Ephemeral, Nothing, T ] with ModelImpl[ Ephemeral, Nothing, T ] {
+         def repr = error( "No repr" )
          def get( implicit c: C ) : T = ref.get( c.txn )
          def set( v: T )( implicit c: C ) {
             ref.set( v )( c.txn )

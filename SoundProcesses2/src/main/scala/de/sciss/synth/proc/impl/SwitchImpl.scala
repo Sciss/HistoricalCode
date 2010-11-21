@@ -34,6 +34,8 @@ class SwitchImpl[ C, V[ _ ]]( val name: String, init: Boolean )( implicit c: Ctx
 extends Switch[ C, V ] with ModelImpl[ C, V, Boolean ] {
    private val vr = c.v( init )
 
+   def repr = vr.repr
+
    def get( implicit c: Ctx[ C, V ]) = vr.get
    def set( v: Boolean )( implicit c: Ctx[ C, V ]) {
       vr.set( v )

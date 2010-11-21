@@ -69,6 +69,6 @@ trait Model[ C, V[ _ ], U ] {
 
 //   def addListener( l: L )( implicit c: Ctx[ Repr ]) : Unit
 //   def removeListener( l: L )( implicit c: Ctx[ Repr ]) : Unit
-   def addListener( l: L )( implicit c: Ctx[ _, _ ]) : Unit
-   def removeListener( l: L )( implicit c: Ctx[ _, _ ]) : Unit
+   def addListener[ X[ _ ]]( l: L )( implicit c: Ctx[ _, X ]) : Unit
+   def removeListener[ X[ _ ]]( l: L )( implicit c: Ctx[ _, X ]) : Unit
 }

@@ -50,12 +50,12 @@ object KTemporalSystem {
          Ref( fat1 )
       }
 
-      def dag( implicit c: Ctx[ _, _ ]) : LexiTrie[ OracleMap[ VersionPath ]] = dagRef.get( c.txn ).trie
+      def dag[ X[ _ ]]( implicit c: Ctx[ _, X ]) : LexiTrie[ OracleMap[ VersionPath ]] = dagRef.get( c.txn ).trie
       // XXX END :::::::::::::::::: DUP FROM BITEMPORAL
 
       // XXX BEGIN :::::::::::::::::: DUP FROM BITEMPORAL
       val cursorsRef = Ref( ISet.empty[ KTemporalCursor[ KTemporal, KTemporalVar ]])
-      def cursors( implicit c: Ctx[ _, _ ]) : ISet[ KTemporalCursor[ KTemporal, KTemporalVar ]] = cursorsRef.get( c.txn )
+      def cursors[ X[ _ ]]( implicit c: Ctx[ _, X ]) : ISet[ KTemporalCursor[ KTemporal, KTemporalVar ]] = cursorsRef.get( c.txn )
 
       def addCursor( implicit c: C ) : KTemporalCursor[ KTemporal, KTemporalVar ] = {
          val csr = new KTemporalSystem.CursorImpl[ KTemporal, KTemporalVar ]( sys, new EphemeralModelVarImpl[ KTemporal, VersionPath ]( c.repr.path ))
@@ -89,7 +89,7 @@ object KTemporalSystem {
 
       def repr = this
 
-      def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : Var[ KTemporal, KTemporalVar, T ] = {
+      def v[ T ]( init: T )( implicit m: ClassManifest[ T ]) : KTemporalVar[ T ] = {
    //      val ref = Ref[ T ]()
          val fat0 = FatValue.empty[ T ]
          val vp   = writePath
@@ -120,6 +120,8 @@ object KTemporalSystem {
    extends KTemporalVar[ T ] with ModelImpl[ KTemporal, KTemporalVar, T ] {
 //      protected def txn( c: C ) = c.repr.txn
 
+      def repr = this
+
       def get( implicit c: C ) : T = {
          val vp   = c.repr.path // readPath
          ref.get( c.txn ).access( vp.path )
@@ -145,7 +147,7 @@ object KTemporalSystem {
       }
 
       def isApplicable( implicit c: Ctx[ C, V ]) = txnInitiator.get( c.txn )
-      def path( implicit c: Ctx[ _, _ ]) : VersionPath = vRef.getTxn( c.txn )
+      def path[ X[ _ ]]( implicit c: Ctx[ _, X ]) : VersionPath = vRef.getTxn( c.txn )
 
       def t[ T ]( fun: Ctx[ C, V ] => T ) : T = {
          // XXX todo: should add t to KTemporalSystemLike and pass txn to in
@@ -198,10 +200,10 @@ extends Model[ C, V, KTemporal.Update[ C, V ]] {
    sys =>
 
    def in[ T ]( version: VersionPath )( fun: Ctx[ C, V ] => T ) : T
-   def dag( implicit c: Ctx[ _, _ ]) : LexiTrie[ OracleMap[ VersionPath ]]
+   def dag[ X[ _ ]]( implicit c: Ctx[ _, X ]) : LexiTrie[ OracleMap[ VersionPath ]]
    def addCursor( implicit c: Ctx[ C, V ]) : KTemporalCursor[ C, V ]
    def removeCursor( cursor: KTemporalCursor[ C, V ])( implicit c: Ctx[ C, V ]) : Unit
-   def cursors( implicit c: Ctx[ _, _ ]) : ISet[ KTemporalCursor[ C, V ]]
+   def cursors[ X[ _ ]]( implicit c: Ctx[ _, X ]) : ISet[ KTemporalCursor[ C, V ]]
 
 //   = {
 //      val csr = new KTemporalSystem.CursorImpl( sys, new EphemeralModelVarImpl[ C, VersionPath ]( c.repr.path ))
@@ -228,5 +230,5 @@ trait KTemporalVar[ T ] extends KTemporalVarLike[T] with Var[ KTemporal, KTempor
 
 trait KTemporalCursor[ C <: KTemporalLike, V[ _ ] <: KTemporalVarLike[ _ ]]
 extends Cursor[ C, V ] with Model[ C, V, KTemporalCursor.Update ] {
-   def path( implicit c: Ctx[ _, _ ]) : VersionPath
+   def path[ X[ _ ]]( implicit c: Ctx[ _, X ]) : VersionPath
 }

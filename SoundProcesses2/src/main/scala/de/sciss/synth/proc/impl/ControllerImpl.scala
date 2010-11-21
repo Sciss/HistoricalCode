@@ -34,6 +34,8 @@ class ControllerImpl[ C, V[ _ ]]( val name: String, init: Double )( implicit c: 
 extends Controller[ C, V ] with ModelImpl[ C, V, Double ] {
    private val vr = c.v( init )
 
+   def repr = vr.repr
+
    def get( implicit c: Ctx[ C, V ]) = vr.get
    def set( v: Double )( implicit c: Ctx[ C, V ]) {
       vr.set( v )

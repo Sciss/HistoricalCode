@@ -188,16 +188,16 @@ class VersionGraphView[ C <: KTemporalLike, V[ _ ] <: KTemporalVarLike[ _ ]]( sy
          stopAnimation
          try {
             Eph.t { implicit c =>
-               addFullVertices( system.dag )
-               addFullCursors( system.cursors )
-               system.addListener( l )
+               addFullVertices( system.dag[ Nothing ])
+               addFullCursors( system.cursors[ Nothing ])
+               system.addListener[ Nothing ]( l )
             }
          } finally {
             startAnimation
          }
       } {
          stopAnimation
-         Eph.t { implicit c => system.removeListener( l )}
+         Eph.t { implicit c => system.removeListener[ Nothing ]( l )}
       }
 
       display.setSize( 300, 300 )
@@ -323,14 +323,14 @@ class VersionGraphView[ C <: KTemporalLike, V[ _ ] <: KTemporalVarLike[ _ ]]( sy
 
    private def addCursor( csr: KTemporalCursor[ C, V ]) {
       Eph.t { implicit c =>
-         nodeMap.get( csr.path.version.id ).foreach { pNode =>
+         nodeMap.get( csr.path[ Nothing ].version.id ).foreach { pNode =>
             val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C, V ]]]
             pNode.set( colCursor, csr :: csrs )
             checkKarlheinz( pNode )
          }
          val csrL = CursorListener( csr )
          mapCsr += csr -> csrL
-         csr.addListener( csrL.list )
+         csr.addListener[ Nothing ]( csrL.list )
       }
       startAnimation
    }
@@ -355,10 +355,10 @@ class VersionGraphView[ C <: KTemporalLike, V[ _ ] <: KTemporalVarLike[ _ ]]( sy
    private def removeCursor( csr: KTemporalCursor[ C, V ]) {
       Eph.t { implicit c =>
          mapCsr.get( csr ).foreach { csrL =>
-            csr.removeListener( csrL.list )
+            csr.removeListener[ Nothing ]( csrL.list )
             mapCsr -= csr
          }
-         val id = csr.path.version.id
+         val id = csr.path[ Nothing ].version.id
          nodeMap.get( id ).foreach { pNode =>
             val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KTemporalCursor[ C, V ]]]
             pNode.set( colCursor, csrs.filterNot( _ == csr ))

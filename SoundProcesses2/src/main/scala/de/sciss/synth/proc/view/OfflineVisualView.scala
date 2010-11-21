@@ -77,7 +77,7 @@ val viewPort = new JViewport()
             g.addListener( l )
          }
       } {
-         Eph.t { implicit c => g.removeListener( l )}
+         Eph.t { implicit c => g.removeListener[ Nothing ]( l )}
       }
 
       f.setSize( 600, 300 )
