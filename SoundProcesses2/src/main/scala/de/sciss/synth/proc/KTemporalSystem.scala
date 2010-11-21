@@ -30,7 +30,7 @@ package de.sciss.synth.proc
 
 import de.sciss.confluent._
 import edu.stanford.ppl.ccstm.{TxnLocal, STM, Txn, Ref}
-import impl.{EphemeralModelVarImpl, ModelImpl}
+import impl.{ModelImpl}
 import collection.immutable.{Set => ISet}
 
 object KTemporalSystem {
@@ -58,10 +58,11 @@ object KTemporalSystem {
       def cursors[ X[ _ ]]( implicit c: Ctx[ _, X ]) : ISet[ KTemporalCursor[ KTemporal, KTemporalVar ]] = cursorsRef.get( c.txn )
 
       def addCursor( implicit c: C ) : KTemporalCursor[ KTemporal, KTemporalVar ] = {
-         val csr = new KTemporalSystem.CursorImpl[ KTemporal, KTemporalVar ]( sys, new EphemeralModelVarImpl[ KTemporal, VersionPath ]( c.repr.path ))
-         cursorsRef.transform( _ + csr )( c.txn )
-         sys.fireUpdate( KTemporal.CursorAdded( csr ))
-         csr
+//         val csr = new KTemporalSystem.CursorImpl[ KTemporal, KTemporalVar ]( sys, new EphemeralModelVarImpl[ KTemporal, VersionPath ]( c.repr.path ))
+//         cursorsRef.transform( _ + csr )( c.txn )
+//         sys.fireUpdate( KTemporal.CursorAdded( csr ))
+//         csr
+error( "NOT YET IMPLEMENTED" )
       }
 
       def removeCursor( cursor: KTemporalCursor[ KTemporal, KTemporalVar ])( implicit c: C ) {
@@ -139,37 +140,37 @@ object KTemporalSystem {
 //      }
    }
 
-   private[proc] class CursorImpl[ C <: KTemporalLike, V[ _ ] <: KTemporalVarLike[ _ ]]
-      ( system: KTemporalSystemLike[ C, V ], vRef: EphemeralModelVarImpl[ C, VersionPath ])
-   extends KTemporalCursor[ C, V ] with ModelImpl[ C, V, KTemporalCursor.Update ] {
-      private val txnInitiator = new TxnLocal[ Boolean ] {
-         override protected def initialValue( txn: Txn ) = false
-      }
-
-      def isApplicable( implicit c: Ctx[ C, V ]) = txnInitiator.get( c.txn )
-      def path[ X[ _ ]]( implicit c: Ctx[ _, X ]) : VersionPath = vRef.getTxn( c.txn )
-
-      def t[ T ]( fun: Ctx[ C, V ] => T ) : T = {
-         // XXX todo: should add t to KTemporalSystemLike and pass txn to in
-         // variant so we don't call atomic twice
-         // (although that is ok and the existing transaction is joined)
-         // ; like BitemporalSystem.inRef( vRef.getTxn( _ )) { ... } ?
-         STM.atomic { t =>
-            val oldPath = vRef.getTxn( t )
-            txnInitiator.set( true )( t )
-            system.in( oldPath ) { implicit c =>
-               val res     = fun( c )
-               val newPath = c.repr.path
-               if( newPath != oldPath ) {
-                  vRef.set( newPath )
-                  fireUpdate( KTemporalCursor.Moved( oldPath, newPath ))
-               }
-               txnInitiator.set( false )( t )
-               res
-            }
-         }
-      }
-   }
+//   private[proc] class CursorImpl[ C <: KTemporalLike, V[ _ ] <: KTemporalVarLike[ _ ]]
+//      ( system: KTemporalSystemLike[ C, V ], vRef: EphemeralModelVarImpl[ C, VersionPath ])
+//   extends KTemporalCursor[ C, V ] with ModelImpl[ C, V, KTemporalCursor.Update ] {
+//      private val txnInitiator = new TxnLocal[ Boolean ] {
+//         override protected def initialValue( txn: Txn ) = false
+//      }
+//
+//      def isApplicable( implicit c: Ctx[ C, V ]) = txnInitiator.get( c.txn )
+//      def path[ X[ _ ]]( implicit c: Ctx[ _, X ]) : VersionPath = vRef.getTxn( c.txn )
+//
+//      def t[ T ]( fun: Ctx[ C, V ] => T ) : T = {
+//         // XXX todo: should add t to KTemporalSystemLike and pass txn to in
+//         // variant so we don't call atomic twice
+//         // (although that is ok and the existing transaction is joined)
+//         // ; like BitemporalSystem.inRef( vRef.getTxn( _ )) { ... } ?
+//         STM.atomic { t =>
+//            val oldPath = vRef.getTxn( t )
+//            txnInitiator.set( true )( t )
+//            system.in( oldPath ) { implicit c =>
+//               val res     = fun( c )
+//               val newPath = c.repr.path
+//               if( newPath != oldPath ) {
+//                  vRef.set( newPath )
+//                  fireUpdate( KTemporalCursor.Moved( oldPath, newPath ))
+//               }
+//               txnInitiator.set( false )( t )
+//               res
+//            }
+//         }
+//      }
+//   }
 }
 
 trait KTemporalLike {
