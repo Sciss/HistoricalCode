@@ -1,6 +1,6 @@
 package de.sciss.synth.proc
 
-import impl.{ProcGroupImpl, KSystemImpl}
+import impl.{ESystemImpl, ProcGroupImpl, KSystemImpl}
 
 object Factory {
    def proc[ C <: Ct, V[_] <: Vr[ C, _ ]]( name: String )( implicit sys: System[ C, V ], c: C ) : Proc[ C, V ] =
@@ -10,4 +10,5 @@ object Factory {
       ProcGroupImpl[ C, V ]( name )
 
    def ksystem : KSystem = KSystemImpl()
+   def esystem : ESystem = ESystemImpl
 }

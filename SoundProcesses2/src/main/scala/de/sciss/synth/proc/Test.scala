@@ -32,6 +32,7 @@ import de.sciss.confluent.VersionPath
 import java.awt.{BorderLayout, EventQueue}
 import javax.swing.{Box, JButton, JFrame, WindowConstants}
 import java.awt.event.{ActionListener, ActionEvent}
+import view.VersionGraphView
 
 object Test {
    def main( args: Array[ String ]) { test5 }
@@ -43,7 +44,7 @@ object Test {
        // bloody hell
       val pg = sys.in( VersionPath.init ) { implicit c => Factory.group[ KCtx, KSystem.Var ]( "g1" )( sys, c )}
 
-//      val vv = new VersionGraphView[ KTemporal, KTemporalVar ]( sys )
+      val vv = new VersionGraphView[ KCtx, KSystem.Var ]( sys )
       val f  = new JFrame( "Version Graph" )
       val b  = Box.createHorizontalBox()
       val ggCursor         = new JButton( "Add Cursor" )
@@ -53,46 +54,46 @@ object Test {
       b.add( ggGroupView )
       b.add( ggTimelineView )
       b.add( Box.createHorizontalGlue() )
-//      ggCursor.addActionListener( new ActionListener {
-//         def actionPerformed( e: ActionEvent ) {
-//            vv.selection match {
-//               case (path, Nil) :: Nil => sys.in( path ) { implicit c => sys.addCursor }
-//               case _ =>
-//            }
-//         }
-//      })
-//      ggGroupView.addActionListener( new ActionListener {
-//         def actionPerformed( e: ActionEvent ) {
-//            vv.selection match {
+      ggCursor.addActionListener( new ActionListener {
+         def actionPerformed( e: ActionEvent ) {
+            vv.selection match {
+               case (path, Nil) :: Nil => sys.in( path ) { implicit c => sys.addCursor }
+               case _ =>
+            }
+         }
+      })
+      ggGroupView.addActionListener( new ActionListener {
+         def actionPerformed( e: ActionEvent ) {
+            vv.selection match {
 //               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c => new GroupView[ KTemporal, KTemporalVar ]( pg, csr )}
-//               case _ =>
-//            }
-//         }
-//      })
-//      ggTimelineView.addActionListener( new ActionListener {
-//         def actionPerformed( e: ActionEvent ) {
-//            vv.selection match {
+               case _ =>
+            }
+         }
+      })
+      ggTimelineView.addActionListener( new ActionListener {
+         def actionPerformed( e: ActionEvent ) {
+            vv.selection match {
 //               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c => new OfflineVisualView[ KTemporal, KTemporalVar ]( pg, csr )}
-//               case _ =>
-//            }
-//         }
-//      })
+               case _ =>
+            }
+         }
+      })
       ggCursor.setEnabled( false )
       ggGroupView.setEnabled( false )
       ggTimelineView.setEnabled( false )
-//      vv.addSelectionListener { sel =>
-////         println( "JO, SEL = " + sel )
-//         val (en1, en2) = sel match {
-//            case (path, Nil) :: Nil          => (true, false)
-//            case (path, csr :: Nil) :: Nil   => (true, true)
-//            case _                           => (false, false)
-//         }
-//         ggCursor.setEnabled( en1 )
-//         ggGroupView.setEnabled( en2 )
-//         ggTimelineView.setEnabled( en2 )
-//      }
+      vv.addSelectionListener { sel =>
+//         println( "JO, SEL = " + sel )
+         val (en1, en2) = sel match {
+            case (path, Nil) :: Nil          => (true, false)
+            case (path, csr :: Nil) :: Nil   => (true, true)
+            case _                           => (false, false)
+         }
+         ggCursor.setEnabled( en1 )
+         ggGroupView.setEnabled( en2 )
+         ggTimelineView.setEnabled( en2 )
+      }
       val cp = f.getContentPane()
-//      cp.add( vv.panel, BorderLayout.CENTER )
+      cp.add( vv.panel, BorderLayout.CENTER )
       cp.add( b, BorderLayout.SOUTH )
       f.pack() // setSize( 300, 300 )
       f.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE ) // DISPOSE_ON_CLOSE

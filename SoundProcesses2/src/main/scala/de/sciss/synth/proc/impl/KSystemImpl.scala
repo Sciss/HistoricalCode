@@ -26,16 +26,17 @@
  *  Changelog:
  */
 
-package de.sciss.synth.proc.impl
+package de.sciss.synth.proc
+package impl
 
-import de.sciss.confluent.{FatValue, VersionPath}
 import edu.stanford.ppl.ccstm.{TxnLocal, Txn, Ref, STM}
-import de.sciss.synth.proc.{ECtx, KVar, KCtx, KSystem}
+import de.sciss.confluent.{LexiTrie, OracleMap, FatValue, VersionPath}
+import collection.immutable.{Set => ISet}
 
 object KSystemImpl {
    def apply() : KSystem = new Sys
 
-   private class Sys extends KSystem with ModelImpl[ KCtx, KSystem.Update ] {
+   private class Sys extends KSystem with ModelImpl[ KCtx, KSystem.Update[ KCtx, KSystem.Var ]] {
       sys =>
       
       override def toString = "KSystem"
@@ -47,9 +48,28 @@ object KSystemImpl {
          Ref( fat1 )
       }
 
+      val cursorsRef = Ref( ISet.empty[ KCursor[ KCtx, KSystem.Var ]])
+
+      def dag( implicit c: ECtx ) : LexiTrie[ OracleMap[ VersionPath ]] = dagRef.get( c.txn ).trie
+      def cursors( implicit c: ECtx ) : ISet[ KCursor[ KCtx, KSystem.Var ]] = cursorsRef.get( c.txn )
+
+      def addCursor( implicit c: KCtx ) : KCursor[ KCtx, KSystem.Var ] = {
+         val csr = new CursorImpl( sys, c.path )
+         cursorsRef.transform( _ + csr )( c.txn )
+         sys.fireUpdate( KSystem.CursorAdded[ KCtx, KSystem.Var ]( csr ))
+         csr
+      }
+
+      def removeCursor( cursor: KCursor[ KCtx, KSystem.Var ])( implicit c: KCtx ) {
+         cursorsRef.transform( _ - cursor )( c.txn )
+         sys.fireUpdate( KSystem.CursorRemoved[ KCtx, KSystem.Var ]( cursor ))
+      }
+
       def in[ R ]( version: VersionPath )( fun: KCtx => R ) : R = STM.atomic { tx =>
          fun( new Ctx( sys, tx, version ))
       }
+
+      def t[ R ]( fun: ECtx => R ) : R = Factory.esystem.t( fun )
 
       def v[ T ]( init: T )( implicit m: ClassManifest[ T ], c: KCtx ) : KVar[ KCtx, T ] = {
          val fat0 = FatValue.empty[ T ]
@@ -61,7 +81,7 @@ object KSystemImpl {
       def newBranch( v: VersionPath )( implicit c: KCtx ) : VersionPath = {
          val pw = v.newBranch
          dagRef.transform( _.assign( pw.path, pw ))( c.txn )
-         fireUpdate( KSystem.NewBranch( v, pw ))( c )
+         fireUpdate( KSystem.NewBranch[ KCtx, KSystem.Var ]( v, pw ))
          pw
       } 
    }
@@ -116,5 +136,38 @@ object KSystemImpl {
 //         ref.transform( _.assign( c.repr.writePath.path, v ))( txn( c ))
 //         fireUpdate( v, c )
 //      }
+   }
+
+   private class CursorImpl( sys: Sys, initialPath: VersionPath )
+   extends KCursor[ KCtx, KSystem.Var ] with ModelImpl[ KCtx, KCursor.Update ] {
+      private val vRef = Ref( initialPath )
+
+      private val txnInitiator = new TxnLocal[ Boolean ] {
+         override protected def initialValue( txn: Txn ) = false
+      }
+
+      def isApplicable( implicit c: KCtx ) = txnInitiator.get( c.txn )
+      def path( implicit c: ECtx ) : VersionPath = vRef.get( c.txn )
+
+      def t[ R ]( fun: KCtx => R ) : R = {
+         // XXX todo: should add t to KTemporalSystemLike and pass txn to in
+         // variant so we don't call atomic twice
+         // (although that is ok and the existing transaction is joined)
+         // ; like BitemporalSystem.inRef( vRef.getTxn( _ )) { ... } ?
+         STM.atomic { t =>
+            val oldPath = vRef.get( t )
+            txnInitiator.set( true )( t )
+            sys.in( oldPath ) { implicit c =>
+               val res     = fun( c )
+               val newPath = c.path
+               if( newPath != oldPath ) {
+                  vRef.set( newPath )( c.txn )
+                  fireUpdate( KCursor.Moved( oldPath, newPath ))
+               }
+               txnInitiator.set( false )( t )
+               res
+            }
+         }
+      }
    }
 }
