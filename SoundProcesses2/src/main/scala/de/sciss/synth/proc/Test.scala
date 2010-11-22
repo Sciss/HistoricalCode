@@ -32,19 +32,21 @@ import de.sciss.confluent.VersionPath
 import java.awt.{BorderLayout, EventQueue}
 import javax.swing.{Box, JButton, JFrame, WindowConstants}
 import java.awt.event.{ActionListener, ActionEvent}
-import view.{GroupView, VersionGraphView}
+import view.{OfflineVisualView, GroupView, VersionGraphView}
 
 object Test {
    def main( args: Array[ String ]) { test5 }
 
    def test5 {
     EventQueue.invokeLater( new Runnable { def run {
+      type MyCtx = KCtx
+      type MyVar[~] = KSystem.Var[~]
       implicit val sys = Factory.ksystem // BitemporalSystem()
 
        // bloody hell
-      val pg = sys.in( VersionPath.init ) { implicit c => Factory.group[ KCtx, KSystem.Var ]( "g1" )( sys, c )}
+      val pg = sys.in( VersionPath.init ) { implicit c => Factory.group[ MyCtx, MyVar ]( "g1" )( sys, c )}
 
-      val vv = new VersionGraphView[ KCtx, KSystem.Var ]( sys )
+      val vv = new VersionGraphView[ MyCtx, MyVar ]( sys )
       val f  = new JFrame( "Version Graph" )
       val b  = Box.createHorizontalBox()
       val ggCursor         = new JButton( "Add Cursor" )
@@ -66,7 +68,7 @@ object Test {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
                case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c =>
-                  new GroupView[ KCtx, KSystem.Var ]( sys, pg, csr )
+                  new GroupView[ MyCtx, MyVar ]( sys, pg, csr )
                }
                case _ =>
             }
@@ -75,7 +77,9 @@ object Test {
       ggTimelineView.addActionListener( new ActionListener {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
-//               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c => new OfflineVisualView[ KTemporal, KTemporalVar ]( pg, csr )}
+               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c =>
+                  new OfflineVisualView[ MyCtx, MyVar ]( sys, pg, csr )
+               }
                case _ =>
             }
          }

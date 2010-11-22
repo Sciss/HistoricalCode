@@ -29,12 +29,12 @@
 package de.sciss.synth.proc
 
 object ProcGroup {
-   sealed trait Update[ C <: Ct, V[ $ ] <: Vr[ C, $ ]]
-   case class ProcAdded[ C <: Ct, V[ $ ] <: Vr[ C, $ ]]( /* idx: Int, */ p: Proc[ C, V ]) extends Update[ C, V ]
-   case class ProcRemoved[ C <: Ct, V[ $ ] <: Vr[ C, $ ]]( /* idx: Int, */ p: Proc[ C, V ]) extends Update[ C, V ]
+   sealed trait Update[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]
+   case class ProcAdded[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( /* idx: Int, */ p: Proc[ C, V ]) extends Update[ C, V ]
+   case class ProcRemoved[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( /* idx: Int, */ p: Proc[ C, V ]) extends Update[ C, V ]
 }
 
-trait ProcGroup[ C <: Ct, V[ $ ] <: Vr[ C, $ ]] extends Model[ C, ProcGroup.Update[ C, V ]] with Named {
+trait ProcGroup[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]] extends Model[ C, ProcGroup.Update[ C, V ]] with Named {
 //   val sys: S
 //   type Listener = Model.Listener[ C, ProcGroup.Update[ C ]]
 //   def listener( f: Function1[ Ctx[ C ], PartialFunction[ ProcGroup.Update[ C ], Unit ]]) =

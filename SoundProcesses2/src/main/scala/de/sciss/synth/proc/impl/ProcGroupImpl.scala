@@ -32,12 +32,12 @@ package impl
 import collection.immutable.{Set => ISet}
 
 object ProcGroupImpl {
-   def apply[ C <: Ct, V[ $ ] <: Vr[ C, $ ]]( name: String )( implicit sys: System[ C, V ], c: C ) : ProcGroup[ C, V ] = {
+   def apply[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( name: String )( implicit sys: System[ C, V ], c: C ) : ProcGroup[ C, V ] = {
       val procs: V[ ISet[ Proc[ C, V ]]] = sys.v( ISet.empty[ Proc[ C, V ]])
       new Group[ C, V ]( name, procs )
    }
 
-   private class Group[ C <: Ct, V[ $ ] <: Vr[ C, $ ]]( val name: String, procs: V[ ISet[ Proc[ C, V ]]])
+   private class Group[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( val name: String, procs: V[ ISet[ Proc[ C, V ]]])
    extends ProcGroup[ C, V ] with ModelImpl[ C, ProcGroup.Update[ C, V ]] {
 
       override def toString = "ProcGroup(" + name + ")"

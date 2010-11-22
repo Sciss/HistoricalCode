@@ -35,7 +35,7 @@ import java.awt.{EventQueue, BorderLayout}
 import java.awt.event.{ActionListener, ActionEvent, WindowEvent, WindowAdapter}
 import GUIUtils._
 
-class GroupView[ C <: Ct, V[ $ ] <: Vr[ C, $ ]]( sys: System[ C, V ],  g: ProcGroup[ C, V ],
+class GroupView[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( sys: System[ C, V ],  g: ProcGroup[ C, V ],
                                                  csr: Cursor[ C, V ]) {
    private val listModel  = new DefaultListModel()
    private val list       = new JList( listModel )

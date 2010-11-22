@@ -32,7 +32,7 @@ object Proc {
    case class Update( what: AnyRef )
 }
 
-trait Proc[ C <: Ct, V[ $ ] <: Vr[ C, $ ]]
+trait Proc[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]
 extends Model[ C, Proc.Update ] with Named {
    type Switch       = V[ Boolean ] with Model[ C, Boolean ] with Named
    type Controller   = V[ Double ]  with Model[ C, Double ]  with Named 
