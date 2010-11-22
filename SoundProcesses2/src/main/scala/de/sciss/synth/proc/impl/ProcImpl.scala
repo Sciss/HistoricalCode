@@ -31,26 +31,28 @@ package impl
 
 import collection.immutable.{Queue => IQueue}
 
-class ProcImpl[ C, V[ _ ]]( val name: String )( implicit c: Ctx[ C, V ])
-extends Proc[ C, V ] with ModelImpl[ C, V, Proc.Update ] {
+class ProcImpl[ S <: System ]( val sys: S, val name: String )( implicit c: sys.C )
+extends Proc[ S ] /* with ModelImpl[ C, V, Proc.Update ] */ {
    override def toString = "Proc(" + name + ")"
+
+   val model   = new ModelImpl[ sys.Ctx, Proc.Update ] {}
 
    val playing = new SwitchImpl[ C, V ]( "playing", false )
    val amp     = new ControllerImpl[ C, V ]( "amp", 1.0 )
    val freq    = new ControllerImpl[ C, V ]( "freq", 441.0 )
 
-   playing.addListener( new Model.Listener[ C, V, Boolean ] {
-      def updated( v: Boolean )( implicit c: Ctx[ C, V ]) {
+   playing.addListener( new Model.Listener[ sys.Ctx, Boolean ] {
+      def updated( v: Boolean )( implicit c: sys.Ctx ) {
          fireUpdate( Proc.Update( playing -> v ))
       }
    })
-   amp.addListener( new Model.Listener[ C, V, Double ] {
-      def updated( v: Double )( implicit c: Ctx[ C, V ]) {
+   amp.addListener( new Model.Listener[ sys.Ctx, Double ] {
+      def updated( v: Double )( implicit c: sys.Ctx ) {
          fireUpdate( Proc.Update( amp -> v ))
       }
    })
-   freq.addListener( new Model.Listener[ C, V, Double ] {
-      def updated( v: Double )( implicit c: Ctx[ C, V ]) {
+   freq.addListener( new Model.Listener[ sys.Ctx, Double ] {
+      def updated( v: Double )( implicit c: sys.Ctx ) {
          fireUpdate( Proc.Update( freq -> v ))
       }
    })

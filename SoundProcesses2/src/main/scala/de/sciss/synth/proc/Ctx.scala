@@ -30,7 +30,20 @@ package de.sciss.synth.proc
 
 import edu.stanford.ppl.ccstm.Txn
 
-trait Ctx[ C, V[ _ ]] extends Repr[ C ] {
-   def v[ T ]( init : T )( implicit m: ClassManifest[ T ]) : Var[ C, V, T ]
-   def txn: Txn
+//trait Ctx[ C, V[ _ ]] extends Repr[ C ] {
+//   def v[ T ]( init : T )( implicit m: ClassManifest[ T ]) : Var[ C, V, T ]
+//   def txn: Txn
+//}
+
+trait TxnHolder { def txn: Txn }
+
+trait ECtx extends TxnHolder {
+   def v[ T ]( init : T )( implicit m: ClassManifest[ T ]) : EVar[ ECtx, T ]
+//   def txn: Txn
+}
+
+trait KCtx extends TxnHolder {
+   def v[ T ]( init: T ) : KVar[ KCtx, T ]
+//   def txn: Txn
+   def eph : ECtx
 }

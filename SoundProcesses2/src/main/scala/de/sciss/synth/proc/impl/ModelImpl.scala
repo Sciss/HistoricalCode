@@ -1,23 +1,23 @@
 package de.sciss.synth.proc.impl
 
 import edu.stanford.ppl.ccstm.Ref
-import de.sciss.synth.proc.{Ctx, Model}
 import collection.immutable.{Queue => IQueue}
-                    
-trait ModelImpl[ C, V[ _ ], U ] extends Model[ C, V, U ] {
+import de.sciss.synth.proc.{ECtx, Model}
+
+trait ModelImpl[ C, T ] extends Model[ C, T ] {
    import Model._
 
    private val listeners = Ref( IQueue.empty[ L ])
 
-   def addListener[ X[ _ ]]( l: L )( implicit c: Ctx[ _, X ]) {
+   def addListener[ X[ _ ]]( l: L )( implicit c: ECtx ) {
       listeners.transform( _ enqueue l )( c.txn )
    }
 
-   def removeListener[ X[ _ ]]( l: L )( implicit c: Ctx[ _, X ]) {
+   def removeListener[ X[ _ ]]( l: L )( implicit c: ECtx ) {
       listeners.transform( _.filter( _ != l ))( c.txn )
    }
 
-   protected def fireUpdate( u: U )( implicit c: Ctx[ C, V ]) {
+   protected def fireUpdate( u: T )( implicit c: C ) {
       listeners.get( c.txn ).foreach( _.updated( u )( c ))
    }
 }
