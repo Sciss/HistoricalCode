@@ -29,18 +29,16 @@
 package de.sciss.synth.proc
 
 import edu.stanford.ppl.ccstm.Txn
+import de.sciss.confluent.VersionPath
 
 trait CtxLike {
    def txn: Txn
-   def eph : ECtx
-//   def v[ T ]( init: T ) : V[ C, T ]
+//   def eph : ECtx
 }
 
-trait ECtx extends CtxLike {
-//   def v[ T ]( init: T ) : EVar[ ECtx, T ]
-}
+trait ECtx extends CtxLike
 
 trait KCtx extends CtxLike {
-//   def v[ T ]( init: T ) : KVar[ KCtx, T ]
-//   def eph : ECtx
+   def path : VersionPath
+   private[proc] def writePath : VersionPath
 }

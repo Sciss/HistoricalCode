@@ -38,13 +38,10 @@ object Test {
 
    def test5 {
     EventQueue.invokeLater( new Runnable { def run {
-      val sys = Factory.ksystem // BitemporalSystem()
+      implicit val sys = Factory.ksystem // BitemporalSystem()
 
-      val pg = sys.in( VersionPath.init ) { implicit c =>
-//         val ov = new OfflineVisualView
-//         ov.frame.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE )
-         Factory.group( "g1" )
-      }
+       // bloody hell
+      val pg = sys.in( VersionPath.init ) { implicit c => Factory.group[ KCtx, KSystem.Var ]( "g1" )( sys, c )}
 
 //      val vv = new VersionGraphView[ KTemporal, KTemporalVar ]( sys )
       val f  = new JFrame( "Version Graph" )
