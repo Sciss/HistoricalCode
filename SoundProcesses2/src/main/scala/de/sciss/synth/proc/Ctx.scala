@@ -33,7 +33,7 @@ import de.sciss.confluent.VersionPath
 
 trait CtxLike {
    def txn: Txn
-//   def eph : ECtx
+   def eph : ECtx
 }
 
 trait ECtx extends CtxLike

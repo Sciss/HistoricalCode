@@ -32,7 +32,7 @@ import de.sciss.confluent.VersionPath
 import java.awt.{BorderLayout, EventQueue}
 import javax.swing.{Box, JButton, JFrame, WindowConstants}
 import java.awt.event.{ActionListener, ActionEvent}
-import view.VersionGraphView
+import view.{GroupView, VersionGraphView}
 
 object Test {
    def main( args: Array[ String ]) { test5 }
@@ -65,7 +65,9 @@ object Test {
       ggGroupView.addActionListener( new ActionListener {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
-//               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c => new GroupView[ KTemporal, KTemporalVar ]( pg, csr )}
+               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c =>
+                  new GroupView[ KCtx, KSystem.Var ]( sys, pg, csr )
+               }
                case _ =>
             }
          }

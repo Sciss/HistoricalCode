@@ -7,7 +7,7 @@ import de.sciss.confluent.VersionPath
 //   def isApplicable( implicit c: Ctx[ C, V ]) : Boolean
 //}
 
-trait Cursor[ C <: Ct, V[ _ ] <: Vr[ C, _ ]] {
+trait Cursor[ C <: Ct, V[ $ ] <: Vr[ C, $ ]] {
    def t[ R ]( fun: C => R ) : R
 //   def read[ T ]( vr: V[ T ])( implicit c: C ) : T
 //   def write[ T ]( vr: V[ T ], v: T )( implicit c: C ) : Unit
@@ -33,7 +33,7 @@ object KCursor {
    case class Moved( oldPath: VersionPath, newPath: VersionPath ) extends Update
 }
 
-trait KCursor[ C <: Ct, V[ _ ] <: KVar[ C, _ ]]
+trait KCursor[ C <: Ct, V[ $ ] <: KVar[ C, $ ]]
 extends Cursor[ C, V ] with Model[ C, KCursor.Update ] {
    def path( implicit c: ECtx ) : VersionPath
 }

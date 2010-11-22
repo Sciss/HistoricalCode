@@ -98,6 +98,8 @@ object KSystemImpl {
 
       def path : VersionPath = pathRef.get( txn )
 
+      def eph : ECtx = ESystemImpl.join( txn )
+
    //   private[proc] def readPath : VersionPath = pathRef.get( txn )
 
       private[proc] def writePath : VersionPath = {

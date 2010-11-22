@@ -31,7 +31,7 @@ package de.sciss.synth.proc
 import de.sciss.confluent.{OracleMap, LexiTrie, VersionPath}
 import collection.immutable.{Set => ISet}
 
-trait System[ C <: Ct, V[_] <: Vr[ C, _ ]] {
+trait System[ C <: Ct, V[ $ ] <: Vr[ C, $ ]] {
 //   type Var[ _ ]
 //   type Ctx <: CtxLike
    def t[ R ]( fun: ECtx => R ) : R // any system can initiate an ephemeral transaction
@@ -51,19 +51,19 @@ trait ESystem extends System[ ECtx, ESystem.Var ]
 object KSystem {
    type Var[ A ] = KVar[ KCtx, A ]
 
-   sealed trait Update[ C <: Ct, V[ _ ] <: KVar[ C, _ ]]
+   sealed trait Update[ C <: Ct, V[ $ ] <: KVar[ C, $ ]]
 
-   case class NewBranch[ C <: Ct, V[ _ ] <: KVar[ C, _ ]]( oldPath: VersionPath, newPath: VersionPath )
+   case class NewBranch[ C <: Ct, V[ $ ] <: KVar[ C, $ ]]( oldPath: VersionPath, newPath: VersionPath )
    extends Update[ C, V ]
 
-   case class CursorAdded[ C <: Ct, V[ _ ] <: KVar[ C, _ ]]( cursor: KCursor[ C, V ])
+   case class CursorAdded[ C <: Ct, V[ $ ] <: KVar[ C, $ ]]( cursor: KCursor[ C, V ])
    extends Update[ C, V ]
 
-   case class CursorRemoved[ C <: Ct, V[ _ ] <: KVar[ C, _ ]]( cursor: KCursor[ C, V ])
+   case class CursorRemoved[ C <: Ct, V[ $ ] <: KVar[ C, $ ]]( cursor: KCursor[ C, V ])
    extends Update[ C, V ]
 }
 
-trait KSystemLike[ C <: Ct, V[_] <: KVar[ C, _ ]]
+trait KSystemLike[ C <: Ct, V[ $ ] <: KVar[ C, $ ]]
 extends System[ C, V ] with Model[ C, KSystem.Update[ C, V ]] {
    def in[ R ]( v: VersionPath )( fun: C => R ) : R
 

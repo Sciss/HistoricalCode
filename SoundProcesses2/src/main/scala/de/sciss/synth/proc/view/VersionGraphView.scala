@@ -51,7 +51,7 @@ import prefuse.action.assignment.{StrokeAction, ColorAction}
 import java.awt.{BasicStroke, Color}
 import prefuse.data.expression.{AbstractPredicate}
 
-class VersionGraphView[ C <: Ct, V[_] <: KVar[ C, _ ]]( sys: KSystemLike[ C, V ]) {
+class VersionGraphView[ C <: Ct, V[ $ ] <: KVar[ C, $ ]]( sys: KSystemLike[ C, V ]) {
    private val grpGraph    = "graph"
    private val grpNodes    = "graph.nodes"
    private val grpEdges    = "graph.edges"

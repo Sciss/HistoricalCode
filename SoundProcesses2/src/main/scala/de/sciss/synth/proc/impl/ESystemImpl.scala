@@ -38,8 +38,11 @@ object ESystemImpl extends ESystem {
    def v[ T ]( init: T )( implicit m: ClassManifest[ T ], c: ECtx ) : EVar[ ECtx, T ] =
       new Var( Ref( init ), m.toString )
 
+   def join( txn: Txn ) : ECtx = new Ctx( txn )
+
    private class Ctx( val txn: Txn ) extends ECtx {
       override def toString = "ECtx"
+      def eph : ECtx = this
    }
 
    private class Var[ T ]( ref: Ref[ T ], typeName: String )

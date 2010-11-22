@@ -30,28 +30,26 @@ package de.sciss.synth.proc
 package impl
 
 import collection.immutable.{Set => ISet}
-import edu.stanford.ppl.ccstm.Ref
 
 object ProcGroupImpl {
-   def apply[ C <: Ct, V[_] <: Vr[ C, _ ]]( name: String )( implicit sys: System[ C, V ], c: C ) : ProcGroup[ C, V ] = {
-      val name0   = name
+   def apply[ C <: Ct, V[ $ ] <: Vr[ C, $ ]]( name: String )( implicit sys: System[ C, V ], c: C ) : ProcGroup[ C, V ] = {
+      val procs: V[ ISet[ Proc[ C, V ]]] = sys.v( ISet.empty[ Proc[ C, V ]])
+      new Group[ C, V ]( name, procs )
+   }
 
-      new ProcGroup[ C, V ] with ModelImpl[ C, ProcGroup.Update[ C, V ]] {
-         def name = name0
-         private val procs: V[ ISet[ Proc[ C, V ]]] = sys.v( ISet.empty[ Proc[ C, V ]])
+   private class Group[ C <: CtxLike, V[ $ ] <: EVar[ C, $ ]]( val name: String, procs: V[ ISet[ Proc[ C, V ]]])
+   extends ProcGroup[ C, V ] with ModelImpl[ C, ProcGroup.Update[ C, V ]] {
 
-         def add( p: Proc[ C, V ])( implicit c: C ) {
-//            val ps: ISet[ Proc[ C, V ]] = procs.get
-//            procs.set( ps + p )
-            fireUpdate( ProcGroup.ProcAdded( p ))
-         }
-
-         def remove( p: Proc[ C, V ])( implicit c: C ) {
-//            procs.set( procs.get - p )
-            fireUpdate( ProcGroup.ProcRemoved( p ))
-         }
-
-         def all( implicit c: C ) : Traversable[ Proc[ C, V ]] = error( "SHIT" ) // procs.get( c )
+      def add( p: Proc[ C, V ])( implicit c: C ) {
+         procs.set( procs.get + p )
+         fireUpdate( ProcGroup.ProcAdded( p ))
       }
+
+      def remove( p: Proc[ C, V ])( implicit c: C ) {
+         procs.set( procs.get - p )
+         fireUpdate( ProcGroup.ProcRemoved( p ))
+      }
+
+      def all( implicit c: C ) : ISet[ Proc[ C, V ]] = procs.get
    }
 }
