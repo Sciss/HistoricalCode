@@ -28,7 +28,9 @@
 
 package de.sciss.synth.proc
 
-trait System[ C <: CtxLike, V[ _ ] <: EVar[ C, _ ]] {
+import de.sciss.confluent.{VersionPath, Version}
+
+trait System[ C <: Ct, V[_] <: Vr[ C, _ ]] {
 //   type Var[ _ ]
 //   type Ctx <: CtxLike
    def t[ R ]( fun: C => R ) : R // any system can initiate an ephemeral transaction
@@ -50,6 +52,6 @@ object KSystem {
 trait KSystem extends System[ KCtx, KSystem.Var ] /* with KAccessProvider[ KSystem ] */ {
 //   type Var[ T ] = KVar[ KCtx, T ]
 //   type Ctx = KCtx
-//   def in( v: Int ) : Cursor[ KSystem, KCtx, KSystem.Var ]
+   def in[ R ]( v: VersionPath )( fun: KCtx => R ) : R
 }
 
