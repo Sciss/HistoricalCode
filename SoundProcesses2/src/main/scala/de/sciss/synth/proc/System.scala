@@ -36,6 +36,8 @@ trait System[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]] {
 //   type Ctx <: CtxLike
    def t[ R ]( fun: ECtx => R ) : R // any system can initiate an ephemeral transaction
    def v[ T ]( init: T )( implicit m: ClassManifest[ T ], c: C ) : V[ T ]
+   def modelVar[ T ]( init: T )( implicit m: ClassManifest[ T ], c: C ) : V[ T ] with Model[ C, T ]
+   def userVar[ T ]( init: T )( user: (C, T) => Unit )( implicit m: ClassManifest[ T ], c: C ) : V[ T ]
 }
 
 object ESystem {

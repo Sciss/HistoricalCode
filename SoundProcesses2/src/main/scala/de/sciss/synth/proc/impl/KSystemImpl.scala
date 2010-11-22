@@ -72,10 +72,25 @@ object KSystemImpl {
       def t[ R ]( fun: ECtx => R ) : R = Factory.esystem.t( fun )
 
       def v[ T ]( init: T )( implicit m: ClassManifest[ T ], c: KCtx ) : KVar[ KCtx, T ] = {
+         val (ref, name) = prep( init )
+         new Var( ref, name )
+      }
+
+      def modelVar[ T ]( init: T )( implicit m: ClassManifest[ T ], c: KCtx ) : KVar[ KCtx, T ] with Model[ KCtx, T ] = {
+         val (ref, name) = prep( init )
+         new ModelVar( ref, name )
+      }
+
+      def userVar[ T ]( init: T )( user: (KCtx, T) => Unit )( implicit m: ClassManifest[ T ], c: KCtx ) : KVar[ KCtx, T ] = {
+         val (ref, name) = prep( init )
+         new UserVar( ref, name, user )
+      }
+
+      private def prep[ T ]( init: T )( implicit m: ClassManifest[ T ], c: KCtx ) : (Ref[ FatValue[ T ]], String) = {
          val fat0 = FatValue.empty[ T ]
          val vp   = c.writePath
          val fat1 = fat0.assign( vp.path, init )
-         new Var( Ref( fat1 ), m.toString )
+         Ref( fat1 ) -> m.toString
       }
 
       def newBranch( v: VersionPath )( implicit c: KCtx ) : VersionPath = {
@@ -114,9 +129,11 @@ object KSystemImpl {
       }
    }
 
-   private class Var[ T ]( ref: Ref[ FatValue[ T ]], typeName: String )
-   extends KVar[ KCtx, T ] with ModelImpl[ KCtx, T ] {
+   private trait AbstractVar[ T ] // ( ref: Ref[ FatValue[ T ]], typeName: String )
+   extends KVar[ KCtx, T ] /* with ModelImpl[ KCtx, T ] */ {
 //      protected def txn( c: C ) = c.repr.txn
+      protected val ref: Ref[ FatValue[ T ]]
+      protected val typeName : String
 
       override def toString = "KVar[" + typeName + "]"
 
@@ -131,6 +148,8 @@ object KSystemImpl {
          fireUpdate( v )
       }
 
+      protected def fireUpdate( v: T )( implicit c: KCtx ) : Unit
+
       def range( vStart: VersionPath, vStop: VersionPath )( implicit c: ECtx ) : Traversable[ T ] =
          error( "NOT YET IMPLEMENTED" )
 
@@ -138,6 +157,18 @@ object KSystemImpl {
 //         ref.transform( _.assign( c.repr.writePath.path, v ))( txn( c ))
 //         fireUpdate( v, c )
 //      }
+   }
+
+   private class Var[ T ]( val ref: Ref[ FatValue[ T ]], val typeName: String ) extends AbstractVar[ T ] {
+      protected def fireUpdate( v: T )( implicit c: KCtx ) {}
+   }
+
+   private class ModelVar[ T ]( val ref: Ref[ FatValue[ T ]], val typeName: String )
+   extends AbstractVar[ T ] with ModelImpl[ KCtx, T ]
+
+   private class UserVar[ T ]( val ref: Ref[ FatValue[ T ]], val typeName: String, user: (KCtx, T) => Unit )
+   extends AbstractVar[ T ] {
+      protected def fireUpdate( v: T )( implicit c: KCtx ) { user( c, v )}
    }
 
    private class CursorImpl( sys: Sys, initialPath: VersionPath )

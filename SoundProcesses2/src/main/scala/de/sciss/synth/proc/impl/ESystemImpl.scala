@@ -26,17 +26,24 @@
  *  Changelog:
  */
 
-package de.sciss.synth.proc.impl
+package de.sciss.synth.proc
+package impl
 
 import edu.stanford.ppl.ccstm.{Ref, Txn, STM}
-import de.sciss.synth.proc.{EVar, ECtx, ESystem}
 
 object ESystemImpl extends ESystem {
-   override def toString = "EphemeralSystem"
+   override def toString = "ESystem"
 
    def t[ T ]( fun: ECtx => T ) : T = STM.atomic( tx => fun( new Ctx( tx )))
+
    def v[ T ]( init: T )( implicit m: ClassManifest[ T ], c: ECtx ) : EVar[ ECtx, T ] =
       new Var( Ref( init ), m.toString )
+
+   def modelVar[ T ]( init: T )( implicit m: ClassManifest[ T ], c: ECtx ) : EVar[ ECtx, T ] with Model[ ECtx, T ] =
+      new ModelVar( Ref( init ), m.toString )
+
+   def userVar[ T ]( init: T )( user: (ECtx, T) => Unit )( implicit m: ClassManifest[ T ], c: ECtx ) : EVar[ ECtx, T ] =
+      new UserVar( Ref( init ), m.toString, user )
 
    def join( txn: Txn ) : ECtx = new Ctx( txn )
 
@@ -45,15 +52,30 @@ object ESystemImpl extends ESystem {
       def eph : ECtx = this
    }
 
-   private class Var[ T ]( ref: Ref[ T ], typeName: String )
-   extends EVar[ ECtx, T ] with ModelImpl[ ECtx, T ] {
+   private trait AbstractVar[ T ] extends EVar[ ECtx, T ] {
+      protected val ref: Ref[ T ]
+      protected val typeName: String
+
+      protected def fireUpdate( v: T )( implicit c: ECtx ) : Unit
+
       override def toString = "EVar[" + typeName + "]"
 
-      def repr = error( "No repr" )
       def get( implicit c: ECtx ) : T = ref.get( c.txn )
       def set( v: T )( implicit c: ECtx ) {
          ref.set( v )( c.txn )
          fireUpdate( v )
       }
+   }
+
+   private class Var[ T ]( val ref: Ref[ T ], val typeName: String ) extends AbstractVar[ T ] {
+      protected def fireUpdate( v: T )( implicit c: ECtx ) {}
+   }
+
+   private class ModelVar[ T ]( val ref: Ref[ T ], val typeName: String )
+   extends AbstractVar[ T ] with ModelImpl[ ECtx, T ]
+
+   private class UserVar[ T ]( val ref: Ref[ T ], val typeName: String, user: (ECtx, T) => Unit )
+   extends AbstractVar[ T ] {
+      protected def fireUpdate( v: T )( implicit c: ECtx ) { user( c, v )}
    }
 }
