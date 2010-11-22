@@ -35,16 +35,11 @@ object Model {
    trait Listener[ -C, -T ] {
       def updated( v: T )( implicit c: C ) : Unit
    }
-//   trait Listener[ C, V[ _ ], U ] {
-//      def updated( update: U )( implicit c: Ctx[ C, V ])
-//   }
 
-   def onCommit[ C <: TxnHolder, T ]( committed: Traversable[ T ] => Unit ) : Listener[ C, T ] =
+   def onCommit[ C <: CtxLike, T ]( committed: Traversable[ T ] => Unit ) : Listener[ C, T ] =
       filterOnCommit( (_: T, _: C) => true )( committed )
 
-//   def collectOnCommit[ Repr, U, V ]( pf: PartialFunction[ (U, Ctx[ Repr ]), V ])( committed: Traversable[ V ] => Unit )
-
-   def filterOnCommit[ C <: TxnHolder, T ]( filter: Function2[ T, C, Boolean ])( committed: Traversable[ T ] => Unit ) =
+   def filterOnCommit[ C <: CtxLike, T ]( filter: Function2[ T, C, Boolean ])( committed: Traversable[ T ] => Unit ) =
       new Listener[ C, T ] {
          val queueRef = new TxnLocal[ IQueue[ T ]] {
             override protected def initialValue( txn: Txn ) = IQueue.empty
@@ -69,9 +64,6 @@ trait Model[ C, T ] {
    import Model._
 
    type L = Listener[ C, T ]
-
-//   def addListener[ X[ _ ]]( l: L )( implicit c: Ctx[ _, X ]) : Unit
-//   def removeListener[ X[ _ ]]( l: L )( implicit c: Ctx[ _, X ]) : Unit
 
    def addListener( l: Listener[ C, T ])( implicit c: ECtx ) : Unit
    def removeListener( l: Listener[ C, T ])( implicit c: ECtx ) : Unit

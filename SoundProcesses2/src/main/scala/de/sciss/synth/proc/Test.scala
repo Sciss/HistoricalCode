@@ -28,7 +28,6 @@
 
 package de.sciss.synth.proc
 
-import impl.ProcImpl
 import de.sciss.confluent.VersionPath
 import java.awt.{BorderLayout, EventQueue}
 import javax.swing.{Box, JButton, JFrame, WindowConstants}

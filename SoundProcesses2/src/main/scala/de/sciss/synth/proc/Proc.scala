@@ -32,14 +32,14 @@ object Proc {
    case class Update( what: AnyRef )
 }
 
-trait Proc[ S <: System ] extends /* Model[ S, Proc.Update ] with */ Named {
-   val sys: S
+trait Proc[ C <: CtxLike, V[ _ ] <: EVar[ C, _ ]]
+extends Model[ C, Proc.Update ] with Named {
 //   def playing : Switch[ C, V ]
 //   def amp : Controller[ C, V ]
 //   def freq : Controller[ C, V ]
-   def model : Model[ sys.Ctx, Proc.Update ]
+//   def model : Model[ sys.Ctx, Proc.Update ]
 
-   def playing : sys.Var[ Boolean ] with Model[ sys.Ctx, Boolean ] with Named
-   def amp : sys.Var[ Double ] with Model[ sys.Ctx, Double ] with Named
-   def freq : sys.Var[ Double ] with Model[ sys.Ctx, Double ] with Named
+   def playing : V[ Boolean ] with Model[ C, Boolean ] with Named
+   def amp     : V[ Double ]  with Model[ C, Double ]  with Named
+   def freq    : V[ Double ]  with Model[ C, Double ]  with Named
 }
