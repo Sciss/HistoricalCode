@@ -34,12 +34,15 @@ object Proc {
 
 trait Proc[ C <: Ct, V[ $ ] <: Vr[ C, $ ]]
 extends Model[ C, Proc.Update ] with Named {
+   type Switch       = V[ Boolean ] with Model[ C, Boolean ] with Named
+   type Controller   = V[ Double ]  with Model[ C, Double ]  with Named 
+
 //   def playing : Switch[ C, V ]
 //   def amp : Controller[ C, V ]
 //   def freq : Controller[ C, V ]
 //   def model : Model[ sys.Ctx, Proc.Update ]
 
-   def playing : V[ Boolean ] with Model[ C, Boolean ] with Named
-   def amp     : V[ Double ]  with Model[ C, Double ]  with Named
-   def freq    : V[ Double ]  with Model[ C, Double ]  with Named
+//   def playing : Switch
+//   def amp     : Controller
+//   def freq    : Controller
 }

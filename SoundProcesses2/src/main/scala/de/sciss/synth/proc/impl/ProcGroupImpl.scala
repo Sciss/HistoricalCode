@@ -37,8 +37,10 @@ object ProcGroupImpl {
       new Group[ C, V ]( name, procs )
    }
 
-   private class Group[ C <: CtxLike, V[ $ ] <: EVar[ C, $ ]]( val name: String, procs: V[ ISet[ Proc[ C, V ]]])
+   private class Group[ C <: Ct, V[ $ ] <: Vr[ C, $ ]]( val name: String, procs: V[ ISet[ Proc[ C, V ]]])
    extends ProcGroup[ C, V ] with ModelImpl[ C, ProcGroup.Update[ C, V ]] {
+
+      override def toString = "ProcGroup(" + name + ")"
 
       def add( p: Proc[ C, V ])( implicit c: C ) {
          procs.set( procs.get + p )
