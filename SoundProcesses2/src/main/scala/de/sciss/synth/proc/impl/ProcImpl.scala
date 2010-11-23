@@ -35,17 +35,20 @@ object ProcImpl {
    def apply[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( name: String )( implicit sys: System[ C, V ], c: C ) : Proc[ C, V ] = {
       val playing = new Switch[ C, V ] with ModelImpl[ C, Boolean ] {
          val name = "playing"
-         val v = sys.v( false )
+         val v = sys.userVar( false ) { (c, bool) => fireUpdate( bool )( c )}
+         override def toString = "Switch(" + name + ")"
       }
       val amp = new Controller[ C, V ] with ModelImpl[ C, Double ] {
          val name = "amp"
-         val v = sys.v( 1.0 )
+         val v = sys.userVar( 1.0 ) { (c, d) => fireUpdate( d )( c )}
+         override def toString = "Controller(" + name + ")"
       }
       val freq = new Controller[ C, V ] with ModelImpl[ C, Double ] {
          val name = "freq"
-         val v = sys.v( 441.0 )
+         val v = sys.userVar( 441.0 ) { (c, d) => fireUpdate( d )( c )}
+         override def toString = "Controller(" + name + ")"
       }
-      val res = new Impl[ C, V ]( name, playing, freq, amp )
+      val res = new Impl[ C, V ]( name, playing, amp, freq )
       playing.addListener( new Model.Listener[ C, Boolean ] {
          def updated( v: Boolean )( implicit c: C ) {
             res.fireUpdate( Proc.Update( playing -> v ))

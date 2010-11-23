@@ -33,6 +33,7 @@ import GUIUtils._
 import javax.swing.{BorderFactory, JLabel, JComponent, JViewport, Box, JPanel, ScrollPaneConstants => SPC, JScrollPane, JFrame}
 import javax.swing.border.BevelBorder
 import java.awt.{Cursor => AWTCursor, _}
+import event.{MouseAdapter, MouseEvent}
 
 class OfflineVisualView[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( sys: System[ C, V ],
                                                          g: ProcGroup[ C, V ], csr: Cursor[ C, V ]) {
@@ -78,7 +79,10 @@ val viewPort = new JViewport()
             g.addListener( l )
          }
       } {
-         sys.t { implicit c => g.removeListener( l )}
+         sys.t { implicit c =>
+            g.removeListener( l )
+            removeFull // ( g.all )
+         }
       }
 
       f.setSize( 600, 300 )
@@ -87,30 +91,50 @@ val viewPort = new JViewport()
       (f, timelineAxis)
    }
 
-   private def addFull( ps: Traversable[ Proc[ C, V ]]) {
+   private def addFull( ps: Traversable[ Proc[ C, V ]])( implicit c: CtxLike ) {
+//      rowHeaderView.removeAll()
+      ps.foreach( add0( _ ))
+   }
+
+   private def removeFull( implicit c: CtxLike ) {
       rowHeaderView.removeAll()
-      ps.foreach( add( _ ))
+      map.keysIterator.foreach( remove0( _ ))
    }
 
    private def add( p: Proc[ C, V ]) {
+      sys.t { implicit c => add0( p )}
+   }
+
+   private def add0( p: Proc[ C, V ])( implicit c: CtxLike ) {
 //      listModel.addElement( p )
-      val c = new JLabel( p.name )
-      c.setBorder( BorderFactory.createBevelBorder( BevelBorder.RAISED ))
-      c.setPreferredSize( new Dimension( 48, 64 ))
-      rowHeaderView.add( c )
+      val lb = new JLabel( p.name )
+      lb.setBorder( BorderFactory.createBevelBorder( BevelBorder.RAISED ))
+      lb.setPreferredSize( new Dimension( 48, 64 ))
+      rowHeaderView.add( lb )
       rowHeaderView.revalidate()
       val t = new TrackView( p )
       t.setPreferredSize( new Dimension( 480, 64 ))
       tracksView.add( t )
       tracksView.revalidate()
-      map += p -> ProcView( c, t )
+      val pv = ProcView( lb, t )
+      map += p -> pv
+
+      p.addListener( pv )
+//      p.freq.addListener( pv.gugu )
    }
 
    private def remove( p: Proc[ C, V ]) {
+      sys.t { implicit c => remove0( p )}
+   }
+
+   private def remove0( p: Proc[ C, V ])( implicit c: CtxLike ) {
 //      listModel.removeElement( p )
       val pvo = map.get( p )
       map -= p
       pvo.foreach { pv =>
+         p.removeListener( pv )
+//         p.freq.removeListener( pv.gugu )
+
          rowHeaderView.remove( pv.header )
          rowHeaderView.revalidate()
          tracksView.remove( pv.trackView )
@@ -121,6 +145,13 @@ val viewPort = new JViewport()
    private class TrackView( p: Proc[ C, V ]) extends JComponent {
       setBorder( BorderFactory.createMatteBorder( 1, 0, 1, 0, Color.white ))
       setOpaque( true )
+      addMouseListener( new MouseAdapter {
+         override def mousePressed( e: MouseEvent ) {
+            csr.t { implicit c =>
+               p.freq.v.set( p.freq.v.get + 100 ) 
+            }
+         }
+      })
 
       override def paintComponent( g: Graphics ) {
          val in = getInsets()
@@ -137,4 +168,15 @@ val viewPort = new JViewport()
    }
 
    private case class ProcView( header: JComponent, trackView: JComponent )
+   extends Model.Listener[ C, Proc.Update ] {
+      def updated( u: Proc.Update )( implicit c: C ) {
+         println( "UPDATE : " + u.what )
+      }
+
+//      val gugu = new Model.Listener[ C, Double ] {
+//         def updated( u: Double )( implicit c: C ) {
+//            println( "DOUBLE : " + u )
+//         }
+//      }
+   }
 }

@@ -65,17 +65,22 @@ class GroupView[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( sys: System[ C, V ],  g: ProcGr
          def actionPerformed( e: ActionEvent ) = userRemoveProc
       })
       butRemove.setEnabled( false )
+      val butView    = new JButton( "View" )
+      butView.addActionListener( new ActionListener {
+         def actionPerformed( e: ActionEvent ) = userViewProc
+      })
+      butView.setEnabled( false )
       list.addListSelectionListener( new ListSelectionListener {
          def valueChanged( e: ListSelectionEvent ) {
-            butRemove.setEnabled( list.getSelectedIndex() >= 0 )
+            val enabled = list.getSelectedIndex() >= 0
+            butRemove.setEnabled( enabled )
+            butView.setEnabled( enabled )
          }
       })
       val butPane    = Box.createHorizontalBox()
-//      butPane.add( Box.createHorizontalStrut( 4 ))
       butPane.add( butAdd )
-//      butPane.add( Box.createHorizontalStrut( 4 ))
       butPane.add( butRemove )
-//      butPane.add( Box.createHorizontalStrut( 4 ))
+      butPane.add( butView )
       butPane.add( Box.createHorizontalGlue() )
 
 //      cp.add( nav.view, BorderLayout.NORTH )
@@ -129,6 +134,13 @@ class GroupView[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( sys: System[ C, V ],  g: ProcGr
       val procs = list.getSelectedValues().collect { case p: Proc[ _, _ ] => p.asInstanceOf[ Proc[ C, V ]]}
       csr.t { implicit c =>
          procs.foreach( g.remove( _ ))
+      }
+   }
+
+   private def userViewProc {
+      val procs = list.getSelectedValues().collect { case p: Proc[ _, _ ] => p.asInstanceOf[ Proc[ C, V ]]}
+      csr.t { implicit c =>
+         procs.foreach( new MomentaryProcView[ C, V ]( sys, _, csr ))
       }
    }
 }
