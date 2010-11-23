@@ -85,7 +85,7 @@ class GroupView[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( sys: System[ C, V ],  g: ProcGr
       ancestorAction( list ) {
          csr.t { implicit c =>
             addFull( g.all )
-            g.addListener( l )( c.eph )
+            g.addListener( l )
          }
       } {
          sys.t { implicit c => g.removeListener( l )}

@@ -28,4 +28,6 @@
 
 package de.sciss.synth.proc
 
-//trait Switch[ C, V[ _ ]] extends Var[ C, V, Boolean ] with Model[ C, V, Boolean ] with Named
+trait Switch[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]] extends Model[ C, Boolean ] with Named {
+   val v : V[ Boolean ]
+}

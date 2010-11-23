@@ -75,7 +75,7 @@ val viewPort = new JViewport()
       ancestorAction( tracksPanel ) {
          csr.t { implicit c =>
             addFull( g.all )
-            g.addListener( l )( c.eph )
+            g.addListener( l )
          }
       } {
          sys.t { implicit c => g.removeListener( l )}

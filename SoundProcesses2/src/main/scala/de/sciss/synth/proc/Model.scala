@@ -65,6 +65,6 @@ trait Model[ C, T ] {
 
    type L = Listener[ C, T ]
 
-   def addListener( l: Listener[ C, T ])( implicit c: ECtx ) : Unit
-   def removeListener( l: Listener[ C, T ])( implicit c: ECtx ) : Unit
+   def addListener( l: Listener[ C, T ])( implicit c: CtxLike ) : Unit
+   def removeListener( l: Listener[ C, T ])( implicit c: CtxLike ) : Unit
 }

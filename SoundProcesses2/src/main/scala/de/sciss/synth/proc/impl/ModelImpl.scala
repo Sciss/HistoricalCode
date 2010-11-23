@@ -37,11 +37,11 @@ trait ModelImpl[ C <: CtxLike, T ] extends Model[ C, T ] {
 
    private val listeners = Ref( IQueue.empty[ L ])
 
-   def addListener( l: L )( implicit c: ECtx ) {
+   def addListener( l: L )( implicit c: CtxLike ) {
       listeners.transform( _ enqueue l )( c.txn )
    }
 
-   def removeListener( l: L )( implicit c: ECtx ) {
+   def removeListener( l: L )( implicit c: CtxLike ) {
       listeners.transform( _.filter( _ != l ))( c.txn )
    }
 
