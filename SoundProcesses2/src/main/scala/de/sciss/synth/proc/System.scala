@@ -32,8 +32,6 @@ import de.sciss.confluent.{OracleMap, LexiTrie, VersionPath}
 import collection.immutable.{Set => ISet}
 
 trait System[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]] {
-//   type Var[ _ ]
-//   type Ctx <: CtxLike
    def t[ R ]( fun: ECtx => R ) : R // any system can initiate an ephemeral transaction
    def v[ T ]( init: T )( implicit m: ClassManifest[ T ], c: C ) : V[ T ]
    def modelVar[ T ]( init: T )( implicit m: ClassManifest[ T ], c: C ) : V[ T ] with Model[ C, T ]
@@ -41,7 +39,7 @@ trait System[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]] {
 }
 
 object ESystem {
-   type Var[ A ] = EVar[ ECtx, A ]
+   type Var[ ~ ] = EVar[ ECtx, ~ ]
 }
 trait ESystem extends System[ ECtx, ESystem.Var ]
 /* with Cursor[ ESystem, ECtx, ESystem.Var ] with CursorProvider[ ESystem ] */ {
@@ -50,8 +48,10 @@ trait ESystem extends System[ ECtx, ESystem.Var ]
 //   def t[ R ]( fun: ECtx => R ) : R
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
 object KSystem {
-   type Var[ A ] = KVar[ KCtx, A ]
+   type Var[ ~ ] = KVar[ KCtx, ~ ]
 
    sealed trait Update[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]
 
@@ -72,15 +72,40 @@ extends System[ C, V ] with Model[ C, KSystem.Update[ C, V ]] {
    def newBranch( v: VersionPath )( implicit c: C ) : VersionPath
    def dag( implicit c: ECtx ) : LexiTrie[ OracleMap[ VersionPath ]]
 
-   def addCursor( implicit c: C ) : KCursor[ C, V ]
-   def removeCursor( cursor: KCursor[ C, V ])( implicit c: C ) : Unit
-   def cursors( implicit c: ECtx ) : ISet[ KCursor[ C, V ]]
+   def addKCursor( implicit c: C ) : KCursor[ C, V ]
+   def removeKCursor( cursor: KCursor[ C, V ])( implicit c: C ) : Unit
+   def kcursors( implicit c: ECtx ) : ISet[ KCursor[ C, V ]]
 }
 
-trait KSystem extends KSystemLike[ KCtx, KSystem.Var ] with Model[ KCtx, KSystem.Update[ KCtx, KSystem.Var ]] {
-//   type Var[ T ] = KVar[ KCtx, T ]
-//   type Ctx = KCtx
-//   def in[ R ]( v: VersionPath )( fun: KCtx => R ) : R
-//   def newBranch( v: VersionPath )( implicit c: KCtx ) : VersionPath
+trait KSystem extends KSystemLike[ KCtx, KSystem.Var ] with Model[ KCtx, KSystem.Update[ KCtx, KSystem.Var ]]
+
+///////////////////////////////////////////////////////////////////////////////
+
+object PSystem {
+   type Var[ ~ ] = PVar[ PCtx, ~ ]
+
+   sealed trait Update[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]
+
+   case class CursorAdded[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]( cursor: PCursor[ C, V ])
+   extends Update[ C, V ]
+
+   case class CursorRemoved[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]( cursor: PCursor[ C, V ])
+   extends Update[ C, V ]
 }
 
+trait PSystemLike[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]
+extends System[ C, V ] with Model[ C, PSystem.Update[ C, V ]] {
+//   def in[ R ]( v: VersionPath )( fun: C => R ) : R
+
+   def addPCursor( implicit c: C ) : PCursor[ C, V ]
+   def removePCursor( cursor: PCursor[ C, V ])( implicit c: C ) : Unit
+   def pcursors( implicit c: ECtx ) : ISet[ PCursor[ C, V ]]
+}
+
+trait PSystem extends PSystemLike[ PCtx, PSystem.Var ] with Model[ PCtx, PSystem.Update[ PCtx, PSystem.Var ]]
+
+///////////////////////////////////////////////////////////////////////////////
+
+object BSystem {
+   type Var[ ~ ] = BVar[ BCtx, ~ ]
+}

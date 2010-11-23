@@ -187,7 +187,7 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]( sys: KSystemLike[ C, V
          try {
             sys.t { implicit c =>
                addFullVertices( sys.dag )
-               addFullCursors( sys.cursors )
+               addFullCursors( sys.kcursors )
                sys.addListener( l )
             }
          } finally {

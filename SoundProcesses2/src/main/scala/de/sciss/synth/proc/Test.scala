@@ -59,7 +59,7 @@ object Test {
       ggCursor.addActionListener( new ActionListener {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
-               case (path, Nil) :: Nil => sys.in( path ) { implicit c => sys.addCursor }
+               case (path, Nil) :: Nil => sys.in( path ) { implicit c => sys.addKCursor }
                case _ =>
             }
          }

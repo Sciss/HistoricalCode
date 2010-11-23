@@ -51,16 +51,16 @@ object KSystemImpl {
       val cursorsRef = Ref( ISet.empty[ KCursor[ KCtx, KSystem.Var ]])
 
       def dag( implicit c: ECtx ) : LexiTrie[ OracleMap[ VersionPath ]] = dagRef.get( c.txn ).trie
-      def cursors( implicit c: ECtx ) : ISet[ KCursor[ KCtx, KSystem.Var ]] = cursorsRef.get( c.txn )
+      def kcursors( implicit c: ECtx ) : ISet[ KCursor[ KCtx, KSystem.Var ]] = cursorsRef.get( c.txn )
 
-      def addCursor( implicit c: KCtx ) : KCursor[ KCtx, KSystem.Var ] = {
+      def addKCursor( implicit c: KCtx ) : KCursor[ KCtx, KSystem.Var ] = {
          val csr = new CursorImpl( sys, c.path )
          cursorsRef.transform( _ + csr )( c.txn )
          sys.fireUpdate( KSystem.CursorAdded[ KCtx, KSystem.Var ]( csr ))
          csr
       }
 
-      def removeCursor( cursor: KCursor[ KCtx, KSystem.Var ])( implicit c: KCtx ) {
+      def removeKCursor( cursor: KCursor[ KCtx, KSystem.Var ])( implicit c: KCtx ) {
          cursorsRef.transform( _ - cursor )( c.txn )
          sys.fireUpdate( KSystem.CursorRemoved[ KCtx, KSystem.Var ]( cursor ))
       }
@@ -150,7 +150,7 @@ object KSystemImpl {
 
       protected def fireUpdate( v: T )( implicit c: KCtx ) : Unit
 
-      def range( vStart: VersionPath, vStop: VersionPath )( implicit c: ECtx ) : Traversable[ T ] =
+      def krange( vStart: VersionPath, vStop: VersionPath )( implicit c: ECtx ) : Traversable[ T ] =
          error( "NOT YET IMPLEMENTED" )
 
 //      def transform( f: T => T )( implicit c: C ) {

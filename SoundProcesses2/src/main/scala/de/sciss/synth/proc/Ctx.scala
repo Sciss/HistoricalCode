@@ -38,7 +38,18 @@ trait CtxLike {
 
 trait ECtx extends CtxLike
 
-trait KCtx extends CtxLike {
+trait KCtxLike extends CtxLike {
    def path : VersionPath
    private[proc] def writePath : VersionPath
 }
+
+trait KCtx extends KCtxLike
+
+trait PCtxLike extends CtxLike {
+   def period : Period
+   def interval : Interval
+}
+
+trait PCtx extends PCtxLike
+
+trait BCtx extends KCtxLike with PCtxLike
