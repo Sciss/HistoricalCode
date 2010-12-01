@@ -32,7 +32,7 @@ import de.sciss.confluent.VersionPath
 import java.awt.{BorderLayout, EventQueue}
 import javax.swing.{Box, JButton, JFrame, WindowConstants}
 import java.awt.event.{ActionListener, ActionEvent}
-import view.{GroupView, VersionGraphView}
+import view.{OfflineVisualView, GroupView, VersionGraphView}
 
 object Test {
    def main( args: Array[ String ]) { test5 }
@@ -79,7 +79,7 @@ object Test {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
                case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c =>
-//                  new OfflineVisualView[ MyCtx, MyVar ]( sys, pg, csr )
+                  new OfflineVisualView[ MyCtx, MyVar ]( sys, pg, csr )
                }
                case _ =>
             }
