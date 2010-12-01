@@ -31,6 +31,7 @@ package impl
 
 import edu.stanford.ppl.ccstm.{TxnLocal, Txn, Ref, STM}
 import collection.immutable.{Set => ISet, SortedMap => ISortedMap}
+import Double.{PositiveInfinity => dinf}
 
 object PSystemImpl {
    def apply() : PSystem = new Sys
@@ -57,8 +58,17 @@ object PSystemImpl {
          sys.fireUpdate( PSystem.CursorRemoved[ PCtx, PSystem.Var ]( cursor ))
       }
 
-      def in[ R ]( ival: Interval )( fun: PCtx => R ) : R = STM.atomic { tx =>
-         fun( new Ctx( sys, tx, ival ))
+//      def in[ R ]( ival: Interval )( fun: PCtx => R ) : R = STM.atomic { tx =>
+//         fun( new Ctx( sys, tx, ival ))
+//      }
+
+      def at[ T ]( period: Period )( thunk: => T )( implicit c: PCtx ) : T =
+         during( Interval( period, Period( dinf )))( thunk )
+
+      def during[ T ]( interval: Interval )( thunk: => T )( implicit c: PCtx ) : T = {
+         val oldIval = c.interval
+         c.interval = interval
+         try { thunk } finally { c.interval = oldIval }
       }
 
       def t[ R ]( fun: ECtx => R ) : R = Factory.esystem.t( fun )
@@ -94,6 +104,7 @@ object PSystemImpl {
 
       def period : Period     = interval.start
       def interval : Interval = intervalRef.get( txn )
+      private[proc] def interval_=( i: Interval ) = intervalRef.set( i )( txn )
 
       def eph : ECtx = ESystemImpl.join( txn )
    }

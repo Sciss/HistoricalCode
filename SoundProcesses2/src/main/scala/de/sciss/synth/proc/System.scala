@@ -30,6 +30,7 @@ package de.sciss.synth.proc
 
 import de.sciss.confluent.{OracleMap, LexiTrie, VersionPath}
 import collection.immutable.{Set => ISet}
+import Double.{PositiveInfinity => dinf}
 
 trait System[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]] {
    def t[ R ]( fun: ECtx => R ) : R // any system can initiate an ephemeral transaction
@@ -100,6 +101,9 @@ extends System[ C, V ] with Model[ C, PSystem.Update[ C, V ]] {
    def addPCursor( implicit c: C ) : PCursor[ C, V ]
    def removePCursor( cursor: PCursor[ C, V ])( implicit c: C ) : Unit
    def pcursors( implicit c: ECtx ) : ISet[ PCursor[ C, V ]]
+
+   def at[ T ]( period: Period )( thunk: => T )( implicit c: C ) : T
+   def during[ T ]( interval: Interval )( thunk: => T )( implicit c: C ) : T
 }
 
 trait PSystem extends PSystemLike[ PCtx, PSystem.Var ] with Model[ PCtx, PSystem.Update[ PCtx, PSystem.Var ]]

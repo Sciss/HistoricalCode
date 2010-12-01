@@ -63,7 +63,7 @@ object KCursor {
 
 trait KCursor[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]
 extends Cursor[ C, V ] with Model[ C, KCursor.Update ] {
-   def path( implicit c: ECtx ) : VersionPath
+//   def path( implicit c: ECtx ) : VersionPath
 }
 
 object PCursor {
@@ -73,5 +73,4 @@ object PCursor {
 
 trait PCursor[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]
 extends Cursor[ C, V ] with Model[ C, PCursor.Update ] {
-   def path( implicit c: ECtx ) : VersionPath
 }

@@ -48,6 +48,7 @@ trait KCtx extends KCtxLike
 trait PCtxLike extends CtxLike {
    def period : Period
    def interval : Interval
+   private[proc] def interval_=( i: Interval ) : Unit
 }
 
 trait PCtx extends PCtxLike
