@@ -8,11 +8,11 @@ trait EVar[ C, T ] {
 }
 
 trait KVar[ C, T ] extends EVar[ C, T ]  {
-   def krange( vStart: VersionPath, vStop: VersionPath )( implicit c: ECtx ) : Traversable[ T ]
+   def kRange( vStart: VersionPath, vStop: VersionPath )( implicit c: CtxLike ) : Traversable[ (VersionPath, T) ]
 }
 
 trait PVar[ C, T ] extends EVar[ C, T ]  {
-   def prange( r: Interval )( implicit c: ECtx ) : Traversable[ T ]
+   def pRange( r: Interval )( implicit c: CtxLike ) : Traversable[ (Period, T) ]
 }
 
 trait BVar[ C, T ] extends KVar[ C, T ] with PVar[ C, T ]

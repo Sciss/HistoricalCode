@@ -36,7 +36,7 @@ import collection.immutable.{Set => ISet}
 object KSystemImpl {
    def apply() : KSystem = new Sys
 
-   private class Sys extends KSystem with ModelImpl[ ECtx, KSystemLike.Update[ KCtx, KSystem.Cursor ]] {
+   private class Sys extends KSystem with ModelImpl[ CtxLike, KSystemLike.Update ] {
       sys =>
 
       override def toString = "KSystem"
@@ -47,32 +47,6 @@ object KSystemImpl {
          val fat1 = fat0.assign( vp.path, vp )
          Ref( fat1 )
       }
-
-      val cursorsRef = Ref( ISet.empty[ KSystem.Cursor ])
-
-      def dag( implicit c: ECtx ) : LexiTrie[ OracleMap[ VersionPath ]] = dagRef.get( c.txn ).trie
-      def cursorsInK( implicit c: ECtx ) : Iterable[ KSystem.Cursor ] = cursorsRef.get( c.txn )
-
-      def projectIn( vp: VersionPath ) : KSystem.Projection = new CursorImpl( sys, vp )
-
-      def cursorIn( vp: VersionPath )( implicit c: ECtx ) : KSystem.Cursor = {
-         val csr = new CursorImpl( sys, vp )
-         cursorsRef.transform( _ + csr )( c.txn )
-         sys.fireUpdate( KSystemLike.CursorAdded[ KCtx, KSystem.Cursor ]( csr ))
-         csr
-      }
-
-      def removeKCursor( cursor: KSystem.Cursor )( implicit c: ECtx ) {
-         cursorsRef.transform( _ - cursor )( c.txn )
-         sys.fireUpdate( KSystemLike.CursorRemoved[ KCtx, KSystem.Cursor ]( cursor ))
-      }
-
-      def in[ R ]( version: VersionPath )( fun: KCtx => R ) : R = STM.atomic { tx =>
-         fun( new Ctx( sys, tx, version ))
-      }
-
-      def range[ T ]( vr: KSystem.Var[ T ], interval: (VersionPath, VersionPath) )( implicit c: ECtx ) : Traversable[ T ] =
-         error( "NOT YET IMPLEMENTED" )
 
       def t[ R ]( fun: ECtx => R ) : R = Factory.esystem.t( fun )
 
@@ -98,11 +72,43 @@ object KSystemImpl {
          Ref( fat1 ) -> m.toString
       }
 
-      def newBranch( v: VersionPath )( implicit c: ECtx ) : VersionPath = {
+      def newBranch( v: VersionPath )( implicit c: CtxLike ) : VersionPath = {
          val pw = v.newBranch
          dagRef.transform( _.assign( pw.path, pw ))( c.txn )
-         fireUpdate( KSystemLike.NewBranch[ KCtx, KSystem.Cursor ]( v, pw ))
+         fireUpdate( KSystemLike.NewBranch( v, pw ))
          pw
+      }
+
+      def dag( implicit c: CtxLike ) : LexiTrie[ OracleMap[ VersionPath ]] = dagRef.get( c.txn ).trie
+
+      def kProjector = KEProjImpl
+
+      object KEProjImpl extends KEProjector[ KCtx, KSystem.Var ]
+      with ModelImpl[ ECtx, Projector.Update[ KCtx, KSystem.Cursor ]] {
+
+         val cursorsRef = Ref( ISet.empty[ KSystem.Cursor ])
+         def cursors( implicit c: CtxLike ) : Iterable[ KSystem.Cursor ] = cursorsRef.get( c.txn )
+
+         def projectIn( vp: VersionPath ) : KSystem.Projection = new CursorImpl( sys, vp )
+
+         def cursorIn( vp: VersionPath )( implicit c: ECtx ) : KSystem.Cursor = {
+            val csr = new CursorImpl( sys, vp )
+            cursorsRef.transform( _ + csr )( c.txn )
+            fireUpdate( Projector.CursorAdded[ KCtx, KSystem.Cursor ]( csr ))
+            csr
+         }
+
+         def removeKCursor( cursor: KSystem.Cursor )( implicit c: ECtx ) {
+            cursorsRef.transform( _ - cursor )( c.txn )
+            fireUpdate( Projector.CursorRemoved[ KCtx, KSystem.Cursor ]( cursor ))
+         }
+
+         def in[ R ]( version: VersionPath )( fun: KCtx => R ) : R = STM.atomic { tx =>
+            fun( new Ctx( sys, tx, version ))
+         }
+
+         def range[ T ]( vr: KSystem.Var[ T ], interval: (VersionPath, VersionPath) )( implicit c: CtxLike ) : Traversable[ (VersionPath, T) ] =
+            error( "NOT YET IMPLEMENTED" )
       }
    }
 
@@ -155,7 +161,7 @@ object KSystemImpl {
 
       protected def fireUpdate( v: T )( implicit c: KCtx ) : Unit
 
-      def krange( vStart: VersionPath, vStop: VersionPath )( implicit c: ECtx ) : Traversable[ T ] =
+      def kRange( vStart: VersionPath, vStop: VersionPath )( implicit c: CtxLike ) : Traversable[ (VersionPath, T) ] =
          error( "NOT YET IMPLEMENTED" )
 
 //      def transform( f: T => T )( implicit c: C ) {
@@ -187,10 +193,10 @@ object KSystemImpl {
       }
 
       def isApplicable( implicit c: KCtx ) = txnInitiator.get( c.txn )
-      def path( implicit c: ECtx ) : VersionPath = vRef.get( c.txn )
+      def path( implicit c: CtxLike ) : VersionPath = vRef.get( c.txn )
 
       def dispose( implicit c: ECtx ) {
-         sys.removeKCursor( csr )
+         sys.kProjector.removeKCursor( csr )
       }
 
       def t[ R ]( fun: KCtx => R ) : R = {
@@ -201,7 +207,7 @@ object KSystemImpl {
          STM.atomic { t =>
             val oldPath = vRef.get( t )
             txnInitiator.set( true )( t )
-            sys.in( oldPath ) { implicit c =>
+            sys.kProjector.in( oldPath ) { implicit c =>
                val res     = fun( c )
                val newPath = c.path
                if( newPath != oldPath ) {

@@ -49,44 +49,46 @@ trait EProjection[ C <: Ct ] extends Projection[ C ] {
 
 trait ECursor[ C <: Ct ] extends EProjection[ C ] with Cursor[ C ]
 
-//trait Projector[ Dim, CsrType, ProjType ] {
-//   def cursorIn( v: Dim ) : CsrType
-//   def projectIn( v: Dim ) : ProjType
-//}
+object Projector {
+   sealed trait Update[ C <: Ct, +Csr <: Cursor[ C ]]
+   case class CursorAdded[ C <: Ct, Csr <: Cursor[ C ]]( cursor: Csr ) extends Update[ C, Csr ]
+   case class CursorRemoved[ C <: Ct, Csr <: Cursor[ C ]]( cursor: Csr ) extends Update[ C, Csr ]
+}
 
-trait KProjector[ C <: Ct, +Proj, +Csr ] {
+trait Projector[ C <: Ct, +Csr <: Cursor[ C ]] extends Model[ ECtx, Projector.Update[ C, Csr ]] {
+   def cursors( implicit c: CtxLike ) : Iterable[ Csr ]  // Set doesn't work because of variance...
+}
+
+trait KProjector[ C <: Ct, +Proj, +Csr <: Cursor[ C ]] extends Projector[ C, Csr ] {
    def cursorIn( v: VersionPath )( implicit c: ECtx ) : Csr
    def projectIn( v: VersionPath ) : Proj
-   def cursorsInK( implicit c: ECtx ) : Iterable[ Csr ]  // Set doesn't work because of variance...
-//   def cursorIn( v: VersionPath )( implicit c: ECtx ) : ECursor[ C ] with KProjection[ C ]
-//   def projectIn( v: VersionPath )( implicit c: ECtx ) : EProjection[ C ] with KProjection[ C ]
-//   def in[ R ]( v: VersionPath )( fun: C => R ) : Unit
-//   def range[ T ]( vr: V[ T ], interval: (VersionPath, VersionPath) )( implicit c: ECtx ) : Traversable[ T ]
+//   def kCursors( implicit c: CtxLike ) : Iterable[ Csr ]  // Set doesn't work because of variance...
+}
+
+trait KProjection[ C <: Ct ] extends Projection[ C ] {
+   def path( implicit c: CtxLike ) : VersionPath
 }
 
 trait KEProjector[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]
 extends KProjector[ C, EProjection[ C ] with KProjection[ C ], ECursor[ C ] with KProjection[ C ]] {
    def in[ R ]( v: VersionPath )( fun: C => R ) : R
-   def range[ T ]( vr: V[ T ], interval: (VersionPath, VersionPath) )( implicit c: ECtx ) : Traversable[ T ]
+   def range[ T ]( vr: V[ T ], interval: (VersionPath, VersionPath) )( implicit c: CtxLike ) : Traversable[ (VersionPath, T) ]
 }
 
-//object KCursor {
-//   sealed trait Update
-//   case class Moved( oldPath: VersionPath, newPath: VersionPath ) extends Update
-//}
-
-//trait KCursor[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]
-//extends KProjector[ C, V ] with Cursor[ C ] with Model[ C, KCursor.Update ]
-
-trait KProjection[ C <: Ct ] {
-   def path( implicit c: ECtx ) : VersionPath
+trait PProjector[ C <: Ct, +Proj, +Csr <: Cursor[ C ]] extends Projector[ C, Csr ] {
+   def cursorAt( p: Period )( implicit c: ECtx ) : Csr
+   def projectAt( p: Period ) : Proj
+//   def pCursors( implicit c: CtxLike ) : Iterable[ Csr ]  // Set doesn't work because of variance...
 }
 
-//object PCursor {
-//   sealed trait Update
-////   case class Moved( oldPath: VersionPath, newPath: VersionPath ) extends Update
-//}
-//
-//trait PCursor[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]
-//extends Cursor[ C, V ] with Model[ C, PCursor.Update ] {
-//}
+trait PProjection[ C <: Ct ] extends Projection[ C ] {
+   def period( implicit c: ECtx ) : Period
+//   def interval( implicit c: ECtx ) : Interval
+}
+
+trait PEProjector[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]
+extends PProjector[ C, EProjection[ C ] with PProjection[ C ], ECursor[ C ] with PProjection[ C ]] {
+   def at[ R ]( p: Period )( fun: C => R ) : R
+//   def during[ R ]( ival: Interval )( fun: C => R ) : R
+   def range[ T ]( vr: V[ T ], interval: Interval )( implicit c: ECtx ) : Traversable[ (Period, T) ]
+}

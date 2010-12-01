@@ -81,7 +81,7 @@ object Model {
       }
 }
 
-trait Model[ C, T ] {
+trait Model[ C, +T ] {
    import Model._
 
    type L = Listener[ C, T ]

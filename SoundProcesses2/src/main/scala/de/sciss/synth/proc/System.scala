@@ -52,20 +52,23 @@ trait ESystem extends System[ ECtx, ESystem.Var ]
 ///////////////////////////////////////////////////////////////////////////////
 
 object KSystemLike {
-   /* sealed */ trait Update[ C <: Ct, Csr <: KProjection[ C ] with Cursor[ C ]]
+   /* sealed */ trait Update // [ C <: Ct, Csr <: KProjection[ C ] with Cursor[ C ]]
 
-   case class NewBranch[ C <: Ct, Csr <: KProjection[ C ] with Cursor[ C ]]( oldPath: VersionPath, newPath: VersionPath )
-   extends Update[ C, Csr ]
-   case class CursorAdded[ C <: Ct, Csr <: KProjection[ C ] with Cursor[ C ]]( cursor: Csr ) extends Update[ C, Csr ]
-   case class CursorRemoved[ C <: Ct, Csr <: KProjection[ C ] with Cursor[ C ]]( cursor: Csr ) extends Update[ C, Csr ]
+//   case class NewBranch[ C <: Ct, Csr <: KProjection[ C ] with Cursor[ C ]]( oldPath: VersionPath, newPath: VersionPath )
+   case class NewBranch( oldPath: VersionPath, newPath: VersionPath )
+   extends Update // [ C, Csr ]
+//   case class CursorAdded[ C <: Ct, Csr <: KProjection[ C ] with Cursor[ C ]]( cursor: Csr ) extends Update[ C, Csr ]
+//   case class CursorRemoved[ C <: Ct, Csr <: KProjection[ C ] with Cursor[ C ]]( cursor: Csr ) extends Update[ C, Csr ]
 }
 
 trait KSystemLike[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ], Proj <: KProjection[ C ], Csr <: KProjection[ C ] with Cursor[ C ]]
-extends System[ C, V ] with Model[ ECtx, KSystemLike.Update[ C, Csr ]] with KProjector[ C, Proj, Csr ] {
+extends System[ C, V ] with Model[ CtxLike, KSystemLike.Update ] {
 //   def in[ R ]( v: VersionPath )( fun: C => R ) : R
 
-   def newBranch( v: VersionPath )( implicit c: ECtx ) : VersionPath
-   def dag( implicit c: ECtx ) : LexiTrie[ OracleMap[ VersionPath ]]
+   def kProjector : KProjector[ C, Proj, Csr ]
+
+   def newBranch( v: VersionPath )( implicit c: CtxLike ) : VersionPath
+   def dag( implicit c: CtxLike ) : LexiTrie[ OracleMap[ VersionPath ]]
 
 //   def addKCursor( implicit c: C ) : KCursor[ C, V ]
 //   def removeKCursor( cursor: KCursor[ C, V ])( implicit c: C ) : Unit
@@ -79,39 +82,50 @@ object KSystem {
 //   sealed trait Update extends KSystemLike.Update[ KCtx, Var ]
 }
 
-trait KSystem extends KSystemLike[ KCtx, KSystem.Var, KSystem.Projection, KSystem.Cursor ]
-with KEProjector[ KCtx, KSystem.Var ]
+trait KSystem extends KSystemLike[ KCtx, KSystem.Var, KSystem.Projection, KSystem.Cursor ] {
+   def kProjector : KEProjector[ KCtx, KSystem.Var ]
+}
+// with KEProjector[ KCtx, KSystem.Var ]
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//object PSystem {
-//   type Var[ ~ ] = PVar[ PCtx, ~ ]
-//
-//   sealed trait Update[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]
-//
-//   case class CursorAdded[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]( cursor: PCursor[ C, V ])
-//   extends Update[ C, V ]
-//
-//   case class CursorRemoved[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]( cursor: PCursor[ C, V ])
-//   extends Update[ C, V ]
-//}
-//
-//trait PSystemLike[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]
-//extends System[ C, V ] with Model[ C, PSystem.Update[ C, V ]] {
-////   def in[ R ]( v: VersionPath )( fun: C => R ) : R
-//
-//   def addPCursor( implicit c: C ) : PCursor[ C, V ]
-//   def removePCursor( cursor: PCursor[ C, V ])( implicit c: C ) : Unit
-//   def pcursors( implicit c: ECtx ) : ISet[ PCursor[ C, V ]]
-//
-//   def at[ T ]( period: Period )( thunk: => T )( implicit c: C ) : T
-//   def during[ T ]( interval: Interval )( thunk: => T )( implicit c: C ) : T
-//}
-//
-//trait PSystem extends PSystemLike[ PCtx, PSystem.Var ] with Model[ PCtx, PSystem.Update[ PCtx, PSystem.Var ]]
+object PSystemLike {
+   /* sealed */ trait Update[ C <: Ct, Csr <: PProjection[ C ] with Cursor[ C ]]
+
+   case class CursorAdded[ C <: Ct, Csr <: PProjection[ C ] with Cursor[ C ]]( cursor: Csr ) extends Update[ C, Csr ]
+   case class CursorRemoved[ C <: Ct, Csr <: PProjection[ C ] with Cursor[ C ]]( cursor: Csr ) extends Update[ C, Csr ]
+}
+
+trait PSystemLike[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ], Proj <: PProjection[ C ], Csr <: PProjection[ C ] with Cursor[ C ]]
+extends System[ C, V ] with Model[ CtxLike, PSystemLike.Update[ C, Csr ]] {
+   def pProjector : PProjector[ C, Proj, Csr ]
+}
+
+object PSystem {
+   type Var[ ~ ]     = PVar[ PCtx, ~ ]
+   type Projection   = EProjection[ PCtx ] with PProjection[ PCtx ]
+   type Cursor       = ECursor[ PCtx ] with PProjection[ PCtx ]
+}
+
+trait PSystem extends PSystemLike[ PCtx, PSystem.Var, PSystem.Projection, PSystem.Cursor ] {
+   def pProjector : PEProjector[ PCtx, PSystem.Var ]
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
-//object BSystem {
-//   type Var[ ~ ] = BVar[ BCtx, ~ ]
-//}
+object BSystem {
+   type Var[ ~ ]     = BVar[ BCtx, ~ ]
+   type Projection   = EProjection[ PCtx ] with PProjection[ PCtx ]
+   type Cursor       = ECursor[ PCtx ] with PProjection[ PCtx ]
+
+//   trait Update extends KSystemLike.Update[ BCtx, C <: Ct, Csr <: PProjection[ C ] with Cursor[ C ]]
+}
+//trait BSystem
+//extends /* KSystemLike[ BCtx, BSystem.Var, KSystem.Projection, KSystem.Cursor ]
+//with    */ KEProjector[ BCtx, BSystem.Var ]
+//with    /* PSystemLike[ BCtx, BSystem.Var, PSystem.Projection, PSystem.Cursor ]
+//with    */ PEProjector[ BCtx, BSystem.Var ]
+
+//trait BSystem
+//extends KSystemLike[ BCtx, BSystem.Var, KSystem.Projection, KSystem.Cursor ]
+//with    PSystemLike[ BCtx, BSystem.Var, PSystem.Projection, PSystem.Cursor ]

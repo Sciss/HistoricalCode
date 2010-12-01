@@ -98,11 +98,13 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ], Csr <: KProjection[ C ]
    }
 
    val panel : JComponent = {
-      val l = Model.onCommit[ ECtx, KSystemLike.Update[ C, Csr ]]( tr => defer( tr.foreach {
+      val lSys = Model.onCommit[ CtxLike, KSystemLike.Update ]( tr => defer( tr.foreach {
          case KSystemLike.NewBranch( oldPath, newPath ) => addVertex( oldPath.version, newPath )
-         case KSystemLike.CursorAdded( csr )            => addCursor( csr )
-         case KSystemLike.CursorRemoved( csr )          => removeCursor( csr )
-         case _ =>
+      }))
+
+      val lCsr = Model.onCommit[ CtxLike, Projector.Update[ C, Csr ]]( tr => defer( tr.foreach {
+         case Projector.CursorAdded( csr )            => addCursor( csr )
+         case Projector.CursorRemoved( csr )          => removeCursor( csr )
       }))
 
 //      val colLabel      = "label"
@@ -187,15 +189,19 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ], Csr <: KProjection[ C ]
          try {
             sys.t { implicit c =>
                addFullVertices( sys.dag )
-               addFullCursors( sys.cursorsInK )
-               sys.addListener( l )
+               addFullCursors( sys.kProjector.cursors )
+               sys.addListener( lSys )
+               sys.kProjector.addListener( lCsr)
             }
          } finally {
             startAnimation
          }
       } {
          stopAnimation
-         sys.t { implicit c => sys.removeListener( l )}
+         sys.t { implicit c =>
+            sys.removeListener( lSys )
+            sys.kProjector.removeListener( lCsr )
+         }
       }
 
       display.setSize( 300, 300 )
@@ -401,7 +407,7 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ], Csr <: KProjection[ C ]
 //         case KCursor.Moved( oldPath, newPath ) => moveCursor( csr, oldPath, newPath )
 //         case _ =>
 //      }))
-      val list = Model.reduceOnCommit[ ECtx, Cursor.Update, VersionPath ] {
+      val list = Model.reduceOnCommit[ CtxLike, Cursor.Update, VersionPath ] {
          case (Cursor.Moved, ctx) => csr.path( ctx.eph )
       } { newPath => defer {
          val oldPath = path

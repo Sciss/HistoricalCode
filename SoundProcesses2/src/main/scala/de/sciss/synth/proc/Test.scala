@@ -45,7 +45,7 @@ object Test {
       implicit val sys = Factory.ksystem // BitemporalSystem()
 
        // bloody hell
-      val pg = sys.in( VersionPath.init ) { implicit c => Factory.group[ MyCtx, MyVar ]( "g1" )( sys, c )}
+      val pg = sys.kProjector.in( VersionPath.init ) { implicit c => Factory.group[ MyCtx, MyVar ]( "g1" )( sys, c )}
 
       val vv = new VersionGraphView[ MyCtx, MyVar, MyCsr ]( sys )
       val f  = new JFrame( "Version Graph" )
@@ -60,7 +60,7 @@ object Test {
       ggCursor.addActionListener( new ActionListener {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
-               case (path, Nil) :: Nil => sys.t { implicit c => sys.cursorIn( path )}
+               case (path, Nil) :: Nil => sys.t { implicit c => sys.kProjector.cursorIn( path )}
                case _ =>
             }
          }
@@ -68,7 +68,7 @@ object Test {
       ggGroupView.addActionListener( new ActionListener {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
-               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c =>
+               case (path, csr :: Nil) :: Nil => sys.kProjector.in( path ) { implicit c =>
                   new GroupView[ MyCtx, MyVar ]( sys, pg, csr )
                }
                case _ =>
@@ -78,7 +78,7 @@ object Test {
       ggTimelineView.addActionListener( new ActionListener {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
-               case (path, csr :: Nil) :: Nil => sys.in( path ) { implicit c =>
+               case (path, csr :: Nil) :: Nil => sys.kProjector.in( path ) { implicit c =>
                   new OfflineVisualView[ MyCtx, MyVar ]( sys, pg, csr )
                }
                case _ =>
