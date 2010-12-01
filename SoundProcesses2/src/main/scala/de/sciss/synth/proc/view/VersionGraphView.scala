@@ -51,7 +51,7 @@ import prefuse.action.assignment.{StrokeAction, ColorAction}
 import java.awt.{BasicStroke, Color}
 import prefuse.data.expression.{AbstractPredicate}
 
-class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]( sys: KSystemLike[ C, V ]) {
+class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ], Csr <: KProjection[ C ] with Cursor[ C ]]( sys: KSystemLike[ C, V, _, Csr ]) {
    private val grpGraph    = "graph"
    private val grpNodes    = "graph.nodes"
    private val grpEdges    = "graph.edges"
@@ -64,9 +64,9 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]( sys: KSystemLike[ C, V
 
    private var nodeMap     = IntMap.empty[ Node ]
 
-   type Selection = (VersionPath, List[ KCursor[ C, V ]])
+   type Selection = (VersionPath, List[ Csr ])
 
-   private var mapCsr   = Map.empty[ KCursor[ C, V ], CursorListener ]
+   private var mapCsr   = Map.empty[ Csr, CursorListener ]
 
    private val selListeners   = new JComponent {
       var oldSel: List[ Selection ] = Nil
@@ -98,10 +98,10 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]( sys: KSystemLike[ C, V
    }
 
    val panel : JComponent = {
-      val l = Model.onCommit[ C, KSystem.Update[ C, V ]]( tr => defer( tr.foreach {
-         case KSystem.NewBranch( oldPath, newPath ) => addVertex( oldPath.version, newPath )
-         case KSystem.CursorAdded( csr )            => addCursor( csr )
-         case KSystem.CursorRemoved( csr )          => removeCursor( csr )
+      val l = Model.onCommit[ ECtx, KSystemLike.Update[ C, Csr ]]( tr => defer( tr.foreach {
+         case KSystemLike.NewBranch( oldPath, newPath ) => addVertex( oldPath.version, newPath )
+         case KSystemLike.CursorAdded( csr )            => addCursor( csr )
+         case KSystemLike.CursorRemoved( csr )          => removeCursor( csr )
          case _ =>
       }))
 
@@ -111,7 +111,7 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]( sys: KSystemLike[ C, V
       val nodes         = g.getNodeTable()
       g.addColumn( VisualItem.LABEL, classOf[ String ])
       g.addColumn( colPath, classOf[ Vector[ Version ]])
-      g.addColumn( colCursor, classOf[ List[ KCursor[ C, V ]]]) // XXX maybe not the smartest way to occupy space in each vertex?
+      g.addColumn( colCursor, classOf[ List[ Csr ]]) // XXX maybe not the smartest way to occupy space in each vertex?
 
       // colors
       val colrGray   = ColorLib.rgb( 0xC0, 0xC0, 0xC0 )
@@ -187,7 +187,7 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]( sys: KSystemLike[ C, V
          try {
             sys.t { implicit c =>
                addFullVertices( sys.dag )
-               addFullCursors( sys.kcursors )
+               addFullCursors( sys.cursorsInK )
                sys.addListener( l )
             }
          } finally {
@@ -221,7 +221,7 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]( sys: KSystemLike[ C, V
       val iter = collection.JavaConversions.asIterator( tupT )
       iter.map( t => {
          val vp   = VersionPath.wrap( t.get( colPath ).asInstanceOf[ Vector[ Version ]])
-         val csr  = t.get( colCursor ).asInstanceOf[ List[ KCursor[ C, V ]]]
+         val csr  = t.get( colCursor ).asInstanceOf[ List[ Csr ]]
          (vp, csr)
       }).toList
    }
@@ -315,42 +315,44 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]( sys: KSystemLike[ C, V
       }
    }
 
-   private def addFullCursors( csr: Traversable[ KCursor[ C, V ]]) {
+   private def addFullCursors( csr: Traversable[ Csr ]) {
       csr.foreach( addCursor( _ ))
    }
 
-   private def addCursor( csr: KCursor[ C, V ]) {
+   private def addCursor( csr: Csr ) {
       sys.t { implicit c =>
-         nodeMap.get( csr.path.version.id ).foreach { pNode =>
-            val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KCursor[ C, V ]]]
+         val initPath = csr.path
+         nodeMap.get( initPath.version.id ).foreach { pNode =>
+            val csrs = pNode.get( colCursor ).asInstanceOf[ List[ Csr ]]
             pNode.set( colCursor, csr :: csrs )
             checkKarlheinz( pNode )
          }
          val csrL = CursorListener( csr )
+         csrL.path = initPath
          mapCsr += csr -> csrL
          csr.addListener( csrL.list )
       }
       startAnimation
    }
 
-   private def moveCursor( csr: KCursor[ C, V ], oldPath: VersionPath, newPath: VersionPath ) {
+   private def moveCursor( csr: Csr, oldPath: VersionPath, newPath: VersionPath ) {
 //println( "CURSOR DORFER " + oldPath + " -> " + newPath )
       nodeMap.get( oldPath.version.id ).foreach { pNode =>
 //println( "CURSOR DORFER REM" )
-         val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KCursor[ C, V ]]]
+         val csrs = pNode.get( colCursor ).asInstanceOf[ List[ Csr ]]
          pNode.set( colCursor, csrs.filterNot( _ == csr ))
          checkKarlheinz( pNode )
       }
       nodeMap.get( newPath.version.id ).foreach { pNode =>
 //println( "CURSOR DORFER ADD" )
-         val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KCursor[ C, V ]]]
+         val csrs = pNode.get( colCursor ).asInstanceOf[ List[ Csr ]]
          pNode.set( colCursor, csr :: csrs )
          checkKarlheinz( pNode ) // XXX should collapse karlheinzes
       }
       startAnimation
    }
 
-   private def removeCursor( csr: KCursor[ C, V ]) {
+   private def removeCursor( csr: Csr ) {
       sys.t { implicit c =>
          mapCsr.get( csr ).foreach { csrL =>
             csr.removeListener( csrL.list )
@@ -358,7 +360,7 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]( sys: KSystemLike[ C, V
          }
          val id = csr.path.version.id
          nodeMap.get( id ).foreach { pNode =>
-            val csrs = pNode.get( colCursor ).asInstanceOf[ List[ KCursor[ C, V ]]]
+            val csrs = pNode.get( colCursor ).asInstanceOf[ List[ Csr ]]
             pNode.set( colCursor, csrs.filterNot( _ == csr ))
             checkKarlheinz( pNode )
          }
@@ -393,13 +395,18 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]( sys: KSystemLike[ C, V
       }
    }
 
-   case class CursorListener( csr: KCursor[ C, V ]) {
-      val list = Model.onCommit[ C, KCursor.Update ]( tr => defer( tr.foreach {
-         case KCursor.Moved( oldPath, newPath ) => moveCursor( csr, oldPath, newPath )
-         case _ =>
-      }))
-
-//      def add( implicit c: Ctx[ _ ]) { csr.addListener( l )}
-//      def remove( implicit c: Ctx[ _ ]) { csr.removeListener( l )}
+   case class CursorListener( csr: Csr ) {
+      var path: VersionPath = _
+//      val list = Model.onCommit[ C, Cursor.Update ]( tr => defer( tr.foreach {
+//         case KCursor.Moved( oldPath, newPath ) => moveCursor( csr, oldPath, newPath )
+//         case _ =>
+//      }))
+      val list = Model.reduceOnCommit[ ECtx, Cursor.Update, VersionPath ] {
+         case (Cursor.Moved, ctx) => csr.path( ctx.eph )
+      } { newPath => defer {
+         val oldPath = path
+         path = newPath
+         moveCursor( csr, oldPath, newPath )
+      }}
    }
 }

@@ -29,48 +29,64 @@
 package de.sciss.synth.proc
 
 import de.sciss.confluent.VersionPath
+import collection.immutable.{Set => ISet}
 
-//trait Cursor[ C, V[ _ ]] {
-//   def t[ T ]( fun: Ctx[ C, V ] => T ) : T
-//   def isApplicable( implicit c: Ctx[ C, V ]) : Boolean
-//}
-
-trait Cursor[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]] {
-   def t[ R ]( fun: C => R ) : R
-//   def read[ T ]( vr: V[ T ])( implicit c: C ) : T
-//   def write[ T ]( vr: V[ T ], v: T )( implicit c: C ) : Unit
+trait Projection[ C <: Ct ] {
    def isApplicable( implicit c: C ) : Boolean
 }
 
-//trait KAccess[ S <: System, C, V[ _ ]] {
-//   def range[ T ]( vr: V[ T ], start: Int, stop: Int )( implicit c: C ) : Traversable[ T ]
-//}
-//
-//trait CursorProvider[ S <: System ] {
-//   sys: S =>
-//   def cursor : Cursor[ S, sys.Ctx, sys.Var ]
-//}
-//
-//trait KAccessProvider[ S <: System ] {
-//   sys: S =>
-//   def kaccess : KAccess[ S, ECtx, sys.Var ]
-//}
-
-object KCursor {
+object Cursor {
    sealed trait Update
-   case class Moved( oldPath: VersionPath, newPath: VersionPath ) extends Update
+   case object Moved extends Update
+}
+trait Cursor[ C <: Ct ] extends Projection[ C ] with Model[ ECtx, Cursor.Update ] {
+   def dispose( implicit C: ECtx ) : Unit
 }
 
-trait KCursor[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]
-extends Cursor[ C, V ] with Model[ C, KCursor.Update ] {
-//   def path( implicit c: ECtx ) : VersionPath
+trait EProjection[ C <: Ct ] extends Projection[ C ] {
+   def t[ R ]( fun: C => R ) : R
 }
 
-object PCursor {
-   sealed trait Update
+trait ECursor[ C <: Ct ] extends EProjection[ C ] with Cursor[ C ]
+
+//trait Projector[ Dim, CsrType, ProjType ] {
+//   def cursorIn( v: Dim ) : CsrType
+//   def projectIn( v: Dim ) : ProjType
+//}
+
+trait KProjector[ C <: Ct, +Proj, +Csr ] {
+   def cursorIn( v: VersionPath )( implicit c: ECtx ) : Csr
+   def projectIn( v: VersionPath ) : Proj
+   def cursorsInK( implicit c: ECtx ) : Iterable[ Csr ]  // Set doesn't work because of variance...
+//   def cursorIn( v: VersionPath )( implicit c: ECtx ) : ECursor[ C ] with KProjection[ C ]
+//   def projectIn( v: VersionPath )( implicit c: ECtx ) : EProjection[ C ] with KProjection[ C ]
+//   def in[ R ]( v: VersionPath )( fun: C => R ) : Unit
+//   def range[ T ]( vr: V[ T ], interval: (VersionPath, VersionPath) )( implicit c: ECtx ) : Traversable[ T ]
+}
+
+trait KEProjector[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]
+extends KProjector[ C, EProjection[ C ] with KProjection[ C ], ECursor[ C ] with KProjection[ C ]] {
+   def in[ R ]( v: VersionPath )( fun: C => R ) : R
+   def range[ T ]( vr: V[ T ], interval: (VersionPath, VersionPath) )( implicit c: ECtx ) : Traversable[ T ]
+}
+
+//object KCursor {
+//   sealed trait Update
 //   case class Moved( oldPath: VersionPath, newPath: VersionPath ) extends Update
+//}
+
+//trait KCursor[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ]]
+//extends KProjector[ C, V ] with Cursor[ C ] with Model[ C, KCursor.Update ]
+
+trait KProjection[ C <: Ct ] {
+   def path( implicit c: ECtx ) : VersionPath
 }
 
-trait PCursor[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]
-extends Cursor[ C, V ] with Model[ C, PCursor.Update ] {
-}
+//object PCursor {
+//   sealed trait Update
+////   case class Moved( oldPath: VersionPath, newPath: VersionPath ) extends Update
+//}
+//
+//trait PCursor[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]
+//extends Cursor[ C, V ] with Model[ C, PCursor.Update ] {
+//}

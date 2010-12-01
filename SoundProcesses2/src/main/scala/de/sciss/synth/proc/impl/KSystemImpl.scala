@@ -1,30 +1,30 @@
 /*
- *  KSystemImpl.scala
- *  (SoundProcesses)
- *
- *  Copyright (c) 2009-2010 Hanns Holger Rutz. All rights reserved.
- *
- *	 This software is free software; you can redistribute it and/or
- *	 modify it under the terms of the GNU General Public License
- *	 as published by the Free Software Foundation; either
- *	 version 2, june 1991 of the License, or (at your option) any later version.
- *
- *	 This software is distributed in the hope that it will be useful,
- *	 but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- *	 General Public License for more details.
- *
- *	 You should have received a copy of the GNU General Public
- *	 License (gpl.txt) along with this software; if not, write to the Free Software
- *	 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- *
- *	 For further information, please contact Hanns Holger Rutz at
- *	 contact@sciss.de
- *
- *
- *  Changelog:
- */
+*  KSystemImpl.scala
+*  (SoundProcesses)
+*
+*  Copyright (c) 2009-2010 Hanns Holger Rutz. All rights reserved.
+*
+*	 This software is free software; you can redistribute it and/or
+*	 modify it under the terms of the GNU General Public License
+*	 as published by the Free Software Foundation; either
+*	 version 2, june 1991 of the License, or (at your option) any later version.
+*
+*	 This software is distributed in the hope that it will be useful,
+*	 but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+*	 General Public License for more details.
+*
+*	 You should have received a copy of the GNU General Public
+*	 License (gpl.txt) along with this software; if not, write to the Free Software
+*	 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+*
+*	 For further information, please contact Hanns Holger Rutz at
+*	 contact@sciss.de
+*
+*
+*  Changelog:
+*/
 
 package de.sciss.synth.proc
 package impl
@@ -36,9 +36,9 @@ import collection.immutable.{Set => ISet}
 object KSystemImpl {
    def apply() : KSystem = new Sys
 
-   private class Sys extends KSystem with ModelImpl[ KCtx, KSystem.Update[ KCtx, KSystem.Var ]] {
+   private class Sys extends KSystem with ModelImpl[ ECtx, KSystemLike.Update[ KCtx, KSystem.Cursor ]] {
       sys =>
-      
+
       override def toString = "KSystem"
 
       val dagRef = {
@@ -48,26 +48,31 @@ object KSystemImpl {
          Ref( fat1 )
       }
 
-      val cursorsRef = Ref( ISet.empty[ KCursor[ KCtx, KSystem.Var ]])
+      val cursorsRef = Ref( ISet.empty[ KSystem.Cursor ])
 
       def dag( implicit c: ECtx ) : LexiTrie[ OracleMap[ VersionPath ]] = dagRef.get( c.txn ).trie
-      def kcursors( implicit c: ECtx ) : ISet[ KCursor[ KCtx, KSystem.Var ]] = cursorsRef.get( c.txn )
+      def cursorsInK( implicit c: ECtx ) : Iterable[ KSystem.Cursor ] = cursorsRef.get( c.txn )
 
-      def addKCursor( implicit c: KCtx ) : KCursor[ KCtx, KSystem.Var ] = {
-         val csr = new CursorImpl( sys, c.path )
+      def projectIn( vp: VersionPath ) : KSystem.Projection = new CursorImpl( sys, vp )
+
+      def cursorIn( vp: VersionPath )( implicit c: ECtx ) : KSystem.Cursor = {
+         val csr = new CursorImpl( sys, vp )
          cursorsRef.transform( _ + csr )( c.txn )
-         sys.fireUpdate( KSystem.CursorAdded[ KCtx, KSystem.Var ]( csr ))
+         sys.fireUpdate( KSystemLike.CursorAdded[ KCtx, KSystem.Cursor ]( csr ))
          csr
       }
 
-      def removeKCursor( cursor: KCursor[ KCtx, KSystem.Var ])( implicit c: KCtx ) {
+      def removeKCursor( cursor: KSystem.Cursor )( implicit c: ECtx ) {
          cursorsRef.transform( _ - cursor )( c.txn )
-         sys.fireUpdate( KSystem.CursorRemoved[ KCtx, KSystem.Var ]( cursor ))
+         sys.fireUpdate( KSystemLike.CursorRemoved[ KCtx, KSystem.Cursor ]( cursor ))
       }
 
       def in[ R ]( version: VersionPath )( fun: KCtx => R ) : R = STM.atomic { tx =>
          fun( new Ctx( sys, tx, version ))
       }
+
+      def range[ T ]( vr: KSystem.Var[ T ], interval: (VersionPath, VersionPath) )( implicit c: ECtx ) : Traversable[ T ] =
+         error( "NOT YET IMPLEMENTED" )
 
       def t[ R ]( fun: ECtx => R ) : R = Factory.esystem.t( fun )
 
@@ -93,12 +98,12 @@ object KSystemImpl {
          Ref( fat1 ) -> m.toString
       }
 
-      def newBranch( v: VersionPath )( implicit c: KCtx ) : VersionPath = {
+      def newBranch( v: VersionPath )( implicit c: ECtx ) : VersionPath = {
          val pw = v.newBranch
          dagRef.transform( _.assign( pw.path, pw ))( c.txn )
-         fireUpdate( KSystem.NewBranch[ KCtx, KSystem.Var ]( v, pw ))
+         fireUpdate( KSystemLike.NewBranch[ KCtx, KSystem.Cursor ]( v, pw ))
          pw
-      } 
+      }
    }
 
    private class Ctx( system: Sys, val txn: Txn, initPath: VersionPath )
@@ -120,7 +125,7 @@ object KSystemImpl {
       private[proc] def writePath : VersionPath = {
          val p = pathRef.get( txn )
          if( p == initPath ) {
-            val pw = system.newBranch( p )( ctx ) // p.newBranch
+            val pw = system.newBranch( p )( ctx.eph ) // p.newBranch
             pathRef.set( pw )( txn )
 //            system.dagRef.transform( _.assign( pw.path, pw ))( txn )
 //            system.fireUpdate( KTemporal.NewBranch( p, pw ))( ctx )  // why NewBranch here without type parameter?
@@ -172,7 +177,9 @@ object KSystemImpl {
    }
 
    private class CursorImpl( sys: Sys, initialPath: VersionPath )
-   extends KCursor[ KCtx, KSystem.Var ] with ModelImpl[ KCtx, KCursor.Update ] {
+   extends ECursor[ KCtx ] with KProjection[ KCtx ] with ModelImpl[ ECtx, Cursor.Update ] {
+      csr =>
+      
       private val vRef = Ref( initialPath )
 
       private val txnInitiator = new TxnLocal[ Boolean ] {
@@ -181,6 +188,10 @@ object KSystemImpl {
 
       def isApplicable( implicit c: KCtx ) = txnInitiator.get( c.txn )
       def path( implicit c: ECtx ) : VersionPath = vRef.get( c.txn )
+
+      def dispose( implicit c: ECtx ) {
+         sys.removeKCursor( csr )
+      }
 
       def t[ R ]( fun: KCtx => R ) : R = {
          // XXX todo: should add t to KTemporalSystemLike and pass txn to in
@@ -195,7 +206,7 @@ object KSystemImpl {
                val newPath = c.path
                if( newPath != oldPath ) {
                   vRef.set( newPath )( c.txn )
-                  fireUpdate( KCursor.Moved( oldPath, newPath ))
+                  fireUpdate( Cursor.Moved )( c.eph )
                }
                txnInitiator.set( false )( t )
                res

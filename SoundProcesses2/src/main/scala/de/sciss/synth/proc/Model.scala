@@ -58,6 +58,27 @@ object Model {
             }
          }
       }
+
+   def reduceOnCommit[ C <: Ct, T, U ]( pf: PartialFunction[ (T, C), U ])( committed: U => Unit ) =
+      new Listener[ C, T ] {
+         val lifted = pf.lift
+         val queueRef = new TxnLocal[ U ] {
+            override protected def initialValue( txn: Txn ) = null.asInstanceOf[ U ]
+         }
+         def updated( update: T )( implicit c: C ) {
+            lifted( update -> c ).foreach { u =>
+               val txn  = c.txn
+               val q0   = queueRef.get( txn )
+               queueRef.set( u )( txn )
+               if( q0 == null ) {
+                  txn.beforeCommit( txn => {
+                     val q1 = queueRef.get( txn )
+                     txn.afterCommit( _ => committed( q1 ))
+                  }, Int.MaxValue )
+               }
+            }
+         }
+      }
 }
 
 trait Model[ C, T ] {

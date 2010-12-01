@@ -34,7 +34,7 @@ import event.{ChangeEvent, ChangeListener}
 import GUIUtils._
 
 class MomentaryProcView[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( sys: System[ C, V ],
-                                                        p: Proc[ C, V ], csr: Cursor[ C, V ]) {
+                                                        p: Proc[ C, V ], csr: ECursor[ C ]) {
 
    val frame = {
       val f          = new JFrame( "Proc : " + p.name )
