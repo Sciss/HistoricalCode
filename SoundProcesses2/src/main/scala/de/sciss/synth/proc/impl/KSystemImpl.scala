@@ -36,7 +36,7 @@ import collection.immutable.{Set => ISet}
 object KSystemImpl {
    def apply() : KSystem = new Sys
 
-   private class Sys extends KSystem with ModelImpl[ CtxLike, KSystemLike.Update ] {
+   private class Sys extends KSystem with ModelImpl[ ECtx, KSystemLike.Update ] {
       sys =>
 
       override def toString = "KSystem"
@@ -72,7 +72,7 @@ object KSystemImpl {
          Ref( fat1 ) -> m.toString
       }
 
-      def newBranch( v: VersionPath )( implicit c: CtxLike ) : VersionPath = {
+      def newBranch( v: VersionPath )( implicit c: ECtx ) : VersionPath = {
          val pw = v.newBranch
          dagRef.transform( _.assign( pw.path, pw ))( c.txn )
          fireUpdate( KSystemLike.NewBranch( v, pw ))
@@ -81,7 +81,8 @@ object KSystemImpl {
 
       def dag( implicit c: CtxLike ) : LexiTrie[ OracleMap[ VersionPath ]] = dagRef.get( c.txn ).trie
 
-      def kProjector = KEProjImpl
+      def kProjector    = KEProjImpl
+      def keProjector   = KEProjImpl
 
       object KEProjImpl extends KEProjector[ KCtx, KSystem.Var ]
       with ModelImpl[ ECtx, Projector.Update[ KCtx, KSystem.Cursor ]] {

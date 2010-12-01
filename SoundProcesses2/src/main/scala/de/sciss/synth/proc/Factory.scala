@@ -39,5 +39,6 @@ object Factory {
 
    def esystem : ESystem = ESystemImpl
    def ksystem : KSystem = KSystemImpl()
-//   def psystem : PSystem = PSystemImpl()
+   def psystem : PSystem = error( "NOT YET IMPLEMENTED" ) // PSystemImpl()
+   def bsystem : BSystem = error( "NOT YET IMPLEMENTED" ) // BSystemImpl()
 }
