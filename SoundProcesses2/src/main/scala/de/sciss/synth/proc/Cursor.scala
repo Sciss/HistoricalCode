@@ -82,7 +82,7 @@ trait PProjector[ C <: Ct, +Proj, +Csr <: Cursor[ C ]] extends Projector[ C, Csr
 }
 
 trait PProjection[ C <: Ct ] extends Projection[ C ] {
-   def period( implicit c: ECtx ) : Period
+   def period( implicit c: CtxLike ) : Period
 //   def interval( implicit c: ECtx ) : Interval
 }
 
@@ -90,5 +90,5 @@ trait PEProjector[ C <: Ct, V[ ~ ] <: PVar[ C, ~ ]]
 extends PProjector[ C, EProjection[ C ] with PProjection[ C ], ECursor[ C ] with PProjection[ C ]] {
    def at[ R ]( p: Period )( fun: C => R ) : R
 //   def during[ R ]( ival: Interval )( fun: C => R ) : R
-   def range[ T ]( vr: V[ T ], interval: Interval )( implicit c: ECtx ) : Traversable[ (Period, T) ]
+   def range[ T ]( vr: V[ T ], interval: Interval )( implicit c: CtxLike ) : Traversable[ (Period, T) ]
 }

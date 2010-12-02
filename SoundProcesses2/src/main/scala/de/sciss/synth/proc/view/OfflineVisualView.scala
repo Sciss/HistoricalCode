@@ -54,7 +54,7 @@ class OfflineVisualView[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( sys: System[ C, V ],
       val cp               = f.getContentPane()
       val timelineAxis     = new Axis( Axis.HORIZONTAL, Axis.TIMEFORMAT )
       timelineAxis.minimum = viewSpan.start.v
-      timelineAxis.maximum = viewSpan.end.v
+      timelineAxis.maximum = viewSpan.stop.v
 //      timelineAxis.setPreferredSize( new Dimension( 40, 40 ))
       val tracksPanel      = new JScrollPane( SPC.VERTICAL_SCROLLBAR_ALWAYS, SPC.HORIZONTAL_SCROLLBAR_ALWAYS )
       tracksPanel.setBorder( null )
