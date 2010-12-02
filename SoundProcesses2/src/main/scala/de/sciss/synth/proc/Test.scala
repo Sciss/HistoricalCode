@@ -39,14 +39,14 @@ object Test {
 
    def test5 {
     EventQueue.invokeLater( new Runnable { def run {
-//       type MyCtx = KCtx
-//       type MyVar[~] = KSystem.Var[~]
-//       type MyCsr = KSystem.Cursor
-//       implicit val sys = Factory.ksystem // BitemporalSystem()
-      type MyCtx = BCtx
-      type MyVar[~] = BSystem.Var[~]
-      type MyCsr = BSystem.KCursor
-      implicit val sys = Factory.bsystem // BitemporalSystem()
+       type MyCtx = KCtx
+       type MyVar[~] = KSystem.Var[~]
+       type MyCsr = KSystem.Cursor
+       implicit val sys = Factory.ksystem // BitemporalSystem()
+//      type MyCtx = BCtx
+//      type MyVar[~] = BSystem.Var[~]
+//      type MyCsr = BSystem.KCursor
+//      implicit val sys = Factory.bsystem // BitemporalSystem()
 
        // bloody hell
        val pg = sys.keProjector.in( VersionPath.init ) { implicit c => Factory.group[ MyCtx, MyVar ]( "g1" )( sys, c )}
@@ -74,7 +74,7 @@ object Test {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
                case (path, csr :: Nil) :: Nil => sys.keProjector.in( path ) { implicit c =>
-//                  new GroupView[ MyCtx, MyVar ]( sys, pg, csr )
+                  new GroupView[ MyCtx, MyVar ]( sys, pg, csr )
                }
                case _ =>
             }
@@ -84,7 +84,7 @@ object Test {
          def actionPerformed( e: ActionEvent ) {
             vv.selection match {
                case (path, csr :: Nil) :: Nil => sys.keProjector.in( path ) { implicit c =>
-//                  new OfflineVisualView[ MyCtx, MyVar ]( sys, pg, csr )
+                  new OfflineVisualView[ MyCtx, MyVar ]( sys, pg, csr )
                }
                case _ =>
             }
