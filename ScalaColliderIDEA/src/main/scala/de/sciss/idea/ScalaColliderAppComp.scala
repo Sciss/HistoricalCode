@@ -6,7 +6,7 @@ import com.intellij.openapi.ui.Messages
 class ScalaColliderAppComp extends ApplicationComponent {
     def initComponent {
         // TODO: insert component initialization logic here
-//        Messages.showMessageDialog( "Welcome to ScalaCollider", "ScalaCollider", null )
+        Messages.showMessageDialog( "Welcome to //// ScalaCollider", "ScalaCollider", null )
     }
 
     def disposeComponent {
