@@ -1,30 +1,35 @@
-package de.sciss.idea
+package de.sciss.idea.actions
 
 import com.intellij.openapi.ui.Messages
-import com.intellij.openapi.actionSystem.{DataConstants, AnActionEvent, AnAction}
+import org.jetbrains.plugins.scala.lang.psi.api.ScalaFile
+import com.intellij.openapi.actionSystem.{DataKey, LangDataKeys, AnActionEvent, AnAction}
 
 class ExecuteInInterpreterAction extends AnAction( "Execute-In-Interpreter Action" ) {
+   Console.err.println( "---HERE----")
+
    override def update(e: AnActionEvent): Unit = {
-      val presentation = e.getPresentation
-      def enable {
-         presentation.setEnabled( true )
-         presentation.setVisible( true )
-      }
-      def disable {
-         presentation.setEnabled( false )
-         presentation.setVisible( false )
-      }
-      try {
-         val dataContext = e.getDataContext
-         val file = dataContext.getData( DataConstants.PSI_FILE )
-         file match {
-            case _: ScalaFile => enable
-            case _ => disable
-         }
-      }
-      catch {
-         case e: Exception => disable
-      }
+      Console.err.println( "---GAGA----")
+//      val presentation = e.getPresentation
+//      def enable {
+//         presentation.setEnabled( true )
+//         presentation.setVisible( true )
+//      }
+//      def disable {
+//         presentation.setEnabled( false )
+//         presentation.setVisible( false )
+//      }
+//      try {
+//         val dataContext = e.getDataContext
+////         val file = DataKey.get .getData( LangDataKeys.PSI_FILE )
+//         val file = LangDataKeys.PSI_FILE.getData( dataContext )
+//         file match {
+//            case _: ScalaFile => enable
+//            case _ => disable
+//         }
+//      }
+//      catch {
+//         case e: Exception => disable
+//      }
    }
 
    def actionPerformed(e: AnActionEvent): Unit = {

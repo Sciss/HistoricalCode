@@ -18,16 +18,26 @@
 
   <actions>
     <!-- Add your actions here -->
-      <action id="IDEATestPlugIn.TestAction" class="de.sciss.idea.TestAction" text="Testendorfer"
+     <!-- <action id="IDEATestPlugIn.TestAction" class="de.sciss.idea.TestAction" text="Testendorfer"
               description="Zentralitaetszentrale">
-          <!-- <add-to-group group-id="MainMenu" relative-to-action="WindowMenu" anchor="first"/> -->
           <add-to-group group-id="ToolsMenu" anchor="first"/>
+      </action> -->
+    <!--  <action id="ScalaCollider.ExecuteInInterpreter" class="de.sciss.idea.actions.ExecuteInInterpreterAction"
+          text="Execute In Interpreter" description="Executes the selected text in the Scala interpreter">
+        <keyboard-shortcut first-keystroke="meta BACK_SLASH" keymap="$default"/>
+        <add-to-group group-id="GoToCodeGroup" anchor="last"/>
+      </action> -->
+
+      <action id="ScalaCollider.ExecuteREPL" class="de.sciss.idea.actions.ExecuteREPL" text="Execute Text in REPL"
+              description="Executes the selected text in the Scala REPL">
+          <add-to-group group-id="GoToCodeGroup" anchor="last"/>
+          <keyboard-shortcut keymap="$default" first-keystroke="meta BACK_SLASH"/>
       </action>
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">
-     <toolWindow id="My Sample Tool Window" anchor="right" factoryClass="de.sciss.idea.TestToolWindowFactory">
+     <!-- <toolWindow id="My Sample Tool Window" anchor="right" factoryClass="de.sciss.idea.TestToolWindowFactory">
 
-     </toolWindow>
+     </toolWindow> -->
   </extensions>
 </idea-plugin>
