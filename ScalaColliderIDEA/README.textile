@@ -10,11 +10,5 @@ You can use @sbt update@ to install the ScalaCollider dependancy. currently comp
 
 The following files are expected in lib. Here are my symlinks for reference:
 
-lrwxr-xr-x   1 hhrutz  757317411   57  5 Mar 17:36 annotations.jar -> /Applications/IntelliJ IDEA 10 CE.app/lib/annotations.jar
-lrwxr-xr-x   1 hhrutz  757317411   56  5 Mar 17:36 extensions.jar -> /Applications/IntelliJ IDEA 10 CE.app/lib/extensions.jar
-lrwxr-xr-x   1 hhrutz  757317411   53  5 Mar 17:32 openapi.jar -> /Applications/IntelliJ IDEA 10 CE.app/lib/openapi.jar
-lrwxr-xr-x   1 hhrutz  757317411   59  5 Mar 17:36 picocontainer.jar -> /Applications/IntelliJ IDEA 10 CE.app/lib/picocontainer.jar
 lrwxr-xr-x   1 hhrutz  757317411   85  5 Mar 19:00 scala-plugin.jar -> /Users/hhrutz/Library/Application Support/IntelliJIdea10CE/Scala/lib/scala-plugin.jar
-lrwxr-xr-x   1 hhrutz  757317411   50  5 Mar 17:34 util.jar -> /Applications/IntelliJ IDEA 10 CE.app/lib/util.jar
 
-These are sufficient to compile the plugin. There is currently no dependancy yet in plugin.xml for the scala plugin, so you need to make sure that the scala plugin is installed in the IDEA sandbox.
