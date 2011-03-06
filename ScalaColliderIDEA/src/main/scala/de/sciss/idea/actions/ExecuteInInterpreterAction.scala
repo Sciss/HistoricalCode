@@ -103,7 +103,7 @@ class ExecuteInInterpreterAction extends AnAction( "Execute-In-Interpreter Actio
                         inform( "startNotified" )
                         val h       = Handler( oph, new PrintWriter( oph.getProcess.getOutputStream ))
                         replHandler = Some( h )
-                        interpret( h, editor )
+//                        interpret( h, editor )
                      }
                      def processTerminated( pe: ProcessEvent ) {
                         inform( "processTerminated" )
