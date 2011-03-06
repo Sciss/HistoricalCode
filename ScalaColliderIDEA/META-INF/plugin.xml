@@ -4,6 +4,9 @@
   <version>0.1</version>
   <vendor>Sciss</vendor>
   <idea-version since-build="8000"/>
+  <id>de.sciss.idea.scalacollider</id>
+
+  <depends>org.intellij.scala</depends>
 
   <application-components>
     <!-- Add your application components here -->
@@ -22,17 +25,20 @@
               description="Zentralitaetszentrale">
           <add-to-group group-id="ToolsMenu" anchor="first"/>
       </action> -->
-    <!--  <action id="ScalaCollider.ExecuteInInterpreter" class="de.sciss.idea.actions.ExecuteInInterpreterAction"
+    <action id="ScalaCollider.ExecuteInInterpreter" class="de.sciss.idea.actions.ExecuteInInterpreterAction"
           text="Execute In Interpreter" description="Executes the selected text in the Scala interpreter">
         <keyboard-shortcut first-keystroke="meta BACK_SLASH" keymap="$default"/>
         <add-to-group group-id="GoToCodeGroup" anchor="last"/>
-      </action> -->
+      </action>
 
-      <action id="ScalaCollider.ExecuteREPL" class="de.sciss.idea.actions.ExecuteREPL" text="Execute Text in REPL"
+      <!-- <action id="ScalaCollider.ExecuteREPL" class="ExecuteREPL" text="Execute Text in REPL"
               description="Executes the selected text in the Scala REPL">
           <add-to-group group-id="GoToCodeGroup" anchor="last"/>
           <keyboard-shortcut keymap="$default" first-keystroke="meta BACK_SLASH"/>
-      </action>
+      </action> -->
+      <!-- <action id="ExecuteREPL" class="ExecuteREPL" text="FuckYouAction">
+          <add-to-group group-id="GoToCodeGroup" anchor="last"/>
+      </action> -->
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">

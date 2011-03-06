@@ -1,4 +1,4 @@
-package de.sciss.idea.actions;
+//package de.sciss.idea.actions;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
