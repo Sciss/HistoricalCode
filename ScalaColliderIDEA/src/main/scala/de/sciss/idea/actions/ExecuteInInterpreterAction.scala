@@ -92,6 +92,9 @@ class ExecuteInInterpreterAction extends AnAction( "Execute-In-Interpreter Actio
    }
 
    private def prepareConsole( editor: Editor, project: Project ) {
+//         val am = ActionManager.getInstance
+//         val actionRunConsole = am.getAction( "Scala.RunConsole" )
+//         inform( "FOUND : " + actionRunConsole )
       inform( "prepare console" )
       replHandler match {
          case Some( h ) => interpret( h, editor )

@@ -1,4 +1,4 @@
-package de.sciss.idea
+package de.sciss.idea.components
 
 import com.intellij.openapi.components.ApplicationComponent
 import com.intellij.openapi.ui.Messages

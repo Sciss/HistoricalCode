@@ -11,7 +11,7 @@
   <application-components>
     <!-- Add your application components here -->
       <component>
-          <implementation-class>de.sciss.idea.ScalaColliderAppComp</implementation-class>
+          <implementation-class>de.sciss.idea.components.ScalaColliderAppComp</implementation-class>
       </component>
   </application-components>
 
@@ -42,8 +42,8 @@
   </actions>
 
   <extensions defaultExtensionNs="com.intellij">
-     <!-- <toolWindow id="My Sample Tool Window" anchor="right" factoryClass="de.sciss.idea.TestToolWindowFactory">
+     <toolWindow id="ScalaCollider Online Status" anchor="bottom" factoryClass="de.sciss.idea.windows.OnlineWindowFactory">
 
-     </toolWindow> -->
+     </toolWindow>
   </extensions>
 </idea-plugin>
