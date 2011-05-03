@@ -1,0 +1,171 @@
+// in kontur
+
+object Eisenkraut {
+   private type Listener2 = PartialFunction[ de.sciss.osc.OSCMessage, Unit ]
+   type Listener = PartialFunction[ List[ Any ], Unit ]
+}
+class Eisenkraut {
+   import Eisenkraut._
+   private case class AddListener( l: Listener2 )
+   private case class Query( path: String, props: Seq[ String ], fun: Listener )
+   private case class TimeOut( l: Listener2, fun: Listener )
+   private case object Cancel
+
+   private lazy val actor = {
+      var list = collection.immutable.IndexedSeq.empty[ Listener2 ]
+      var sync = 0
+      lazy val mainActor: actors.DaemonActor = new actors.DaemonActor {
+         def act { loop { react {
+            case msg: de.sciss.osc.OSCMessage =>
+               val (handle, not) = list.partition( _.isDefinedAt( msg ))
+               list = not
+               handle.foreach( l => try { l( msg )} catch { case e => e.printStackTrace() })
+            case AddListener( l ) => list :+= l
+            case Query( path, props, fun ) =>
+               val id = sync
+               sync += 1
+               lazy val timeOut: actors.DaemonActor = new actors.DaemonActor {
+                  def act { reactWithin( 4000 ) {
+                     case Cancel =>
+                     case actors.TIMEOUT => mainActor ! TimeOut( l, fun )
+                  }}
+               }
+               lazy val l: Listener2 = {
+                  case de.sciss.osc.OSCMessage( "/query.reply", `id`, propRes @ _* ) =>
+                     timeOut ! Cancel
+                     defer( fun( propRes.toList ))
+               }
+               timeOut.start
+               list :+= l
+               eisk ! de.sciss.osc.OSCMessage( path, ("query" +: id +: props): _* )
+            case TimeOut( l, fun ) =>
+               list = list.filterNot( _ == l )
+               defer( fun( Nil ))
+         }}}
+      }
+      mainActor.start
+      mainActor
+   }
+   
+   private def defer( code: => Unit ) : Unit = java.awt.EventQueue.invokeLater( new Runnable { def run = code })
+             
+   private lazy val eisk: de.sciss.osc.OSCClient = {
+      val res = de.sciss.osc.OSCClient( de.sciss.osc.TCP, 0, true )
+      res.target = new java.net.InetSocketAddress( "127.0.0.1", 17737 )
+      res.action = (msg, addr, time) => actor ! msg
+      res.start
+      res
+   }
+   
+   def query( path: String, props: String* )( fun: Listener ) {
+      actor ! Query( path, props, fun )
+   }
+   
+   def dispose {
+      eisk.dispose
+   }
+   
+   def activeFileAndSelection( fun: Function1[ Option[ (java.io.File, de.sciss.io.Span) ], Unit ]) {
+      query( "/doc/active", "id", "file" ) {
+         case List( id: Int, file: String ) => query( "/doc/id/" + id + "/timeline", "selectionStart", "selectionStop"  ) {
+            case List( start: Int, stop: Int ) => fun( Some( new java.io.File( file ), new de.sciss.io.Span( start, stop )))
+            case Nil => println( "TIMEOUT" ); fun( None )
+         }
+         case Nil => println( "TIMEOUT" ); fun( None )
+      }
+   }
+
+   def !( msg: de.sciss.osc.OSCMessage ) : Unit = eisk ! msg
+}
+
+lazy val eisk = new Eisenkraut
+// eisk.activeFileAndSelection { case Some( data ) => println( data )}
+// eisk.dispose
+
+
+def timeline = doc.timelines.get(0).get
+
+def audioFile( path: java.io.File ) : AudioFileElement = {
+   val afs = doc.audioFiles
+   afs.find( _.path == path ).getOrElse {
+      val afe = AudioFileElement.fromPath( doc, path )
+      val ce = afs.editBegin( "Add Audiofile" )
+      afs.editInsert( ce, afs.size, afe )
+      afs.editEnd( ce )
+      afe
+   }
+}
+
+def findAllEmpty( span: de.sciss.io.Span ) : Option[ AudioTrack ] = {
+   timeline.tracks.toList.collect({ case at: AudioTrack => at }).find( _.trail.getRange( span ).isEmpty )
+}
+
+
+def stereoDiffusion = {
+   def m = Seq( Seq( 1f, 0f ), Seq( 0f, 1f ))
+   val dif = doc.diffusions
+   dif.toList.collect({ case md: MatrixDiffusion => md }).find( _.matrix.toSeq == m ).getOrElse {
+      val df = new MatrixDiffusion( doc )
+      df.matrix = de.sciss.kontur.util.Matrix2D.fromSeq( m )
+      val ce = dif.editBegin( "Add Diffusion" )
+      dif.editInsert( ce, dif.size, df )
+      dif.editEnd( ce )
+      df
+   }
+}
+
+
+def getAllEmpty( span: de.sciss.io.Span ) : AudioTrack = findAllEmpty( span ).getOrElse {
+   val ts = timeline.tracks
+   val at = new AudioTrack( doc )
+   at.diffusion = Some( stereoDiffusion )
+   at.name = {
+      val set = ts.map( _.name ).toSet
+      var i = 0
+      var n = ""
+      do {
+         i += 1
+         n = "Tr" + i
+      } while( set.contains( n ))
+      n
+   }
+   val ed = ts.editor.get
+   val ce = ed.editBegin( "Add Track" )
+   ed.editInsert( ce, ts.size, at )
+   ed.editEnd( ce )
+   at
+}
+
+// either max coverage or (start, number of loops)
+def eiskLoop( cover: Either[ de.sciss.io.Span, (Long, Int) ], space: Long = 0L ) {
+   eisk.activeFileAndSelection { case Some( (file, span) ) =>
+      val afe  = audioFile( file )
+      val off = span.getStart
+      val loopLen = span.getLength
+      val winStep = loopLen + space
+      val (start, num) = cover match {
+         case Left( span2 )          => (span2.getStart, ((span2.getLength + space) / winStep).toInt)
+         case Right( (start, num) )  => (start, num)
+      }
+      val cov2 = new de.sciss.io.Span( start, start + loopLen * num )
+      val at = getAllEmpty( cov2 )
+      val trail = at.trail
+      val ars = for( i <- 0 until num ) yield {
+         val st = start + i * winStep
+         val sp = new de.sciss.io.Span( st, st + loopLen )
+         new AudioRegion( sp, afe.name + "-" + (i+1), afe, off )
+      }
+      val ce = trail.editBegin( "Add Regions" )
+      trail.editAdd( ce, ars: _* )
+      trail.editEnd( ce )
+   case None =>
+   }
+}
+
+//eiskLoop( Right( 5 * 44100L, 10 ))
+//eiskLoop( Left( timeline.span.replaceStart( 44100L )))
+//eiskLoop( Left( timeline.span.replaceStart( 44100L )), space = 44100L )
+
+// /Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse9.aif:92179:190529
+// /Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse13.aif:737689:793678
+// /Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse18.aif:600491:698811
