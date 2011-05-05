@@ -302,3 +302,35 @@ def permLoop( start: Long, files: Seq[ java.io.File ]) {
    trail.editEnd( ce )
 }
 
+/*
+val pre = "/Users/hhrutz/Desktop/new_projects/Lighthouse/audio_work/lighthouse6edCutLoop"
+val num = 20
+val files = (pre +: Seq.tabulate(20)( i => pre + "-permx" + (i+1) )).map( p => new java.io.File( p + ".aif" ))
+permLoop( 33 * 44100L, files )
+*/
+
+
+
+def permLoop2( start: Long, files: Seq[ java.io.File ], refs: Seq[ java.io.File ]) {
+   val afes     = files.map( audioFile( _ ))
+   val loopLens = refs.map( f => { val af = de.sciss.io.AudioFile.openAsRead( f ); af.close; af.getDescr.length })
+   val loopSpans= (loopLens.scanLeft( start )( (a, b) => a + b ).sliding( 2, 1 ).map { case Seq( start, stop ) => new de.sciss.io.Span( start, stop )}).toIndexedSeq
+//   val cov2     = new de.sciss.io.Span( loopSpans.head.start, loopSpans.last.stop )
+   afes.zip(loopSpans).foreach { case (afe, span0) =>
+      val span  = new de.sciss.io.Span( span0.start, span0.start + afe.numFrames )
+      val at    = getAllEmpty( span )
+      val trail = at.trail
+      val ce = trail.editBegin( "Add Regions" )
+      trail.editAdd( ce, new AudioRegion( span, afe.name, afe ))
+      trail.editEnd( ce )
+   }
+}
+
+
+/*
+val pre = "/Users/hhrutz/Desktop/new_projects/Lighthouse/audio_work/lighthouse6edCutLoop"
+val num = 20
+val refs  = (pre +: Seq.tabulate(num)( i => pre + "-permx" + (i+1) )).map( p => new java.io.File( p + ".aif" ))
+val files = (pre +: Seq.tabulate(num)( i => pre + "-permx" + (i+1) + "Rvb" )).map( p => new java.io.File( p + ".aif" ))
+permLoop2( 33 * 44100L, files, refs )
+*/

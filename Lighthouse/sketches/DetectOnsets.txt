@@ -1,0 +1,35 @@
+val id = 1
+
+val inPath  = "/Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse" + id + "ed.aif"
+val outPath = "/Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse-Marks" + id + ".aif"
+
+val nrto = new ServerOptionsBuilder
+nrto.nrtInputPath    = Some( inPath )
+nrto.nrtOutputPath   = outPath
+nrto.nrtSampleFormat = SampleFormat.Int8 // since we just record the impulses
+val nrtFile = java.io.File.createTempFile( "tmp", ".osc" )
+nrto.nrtCommandPath = nrtFile.getAbsolutePath
+
+val nrt = Server.dummy( "NRT", nrto )
+val df = SynthDef( "Ana" ) {
+   val buf      = "fftbuf".ir
+   val thresh   = "thresh".kr( 0.5 )
+   val algo     = "algo".ir( 3 )
+   val decay    = "decay".kr( 1 )
+   val floor    = "floor".kr( 0.1 )
+   val chanOff  = NumOutputBuses.ir
+   val sig      = In.ar( chanOff ) + In.ar( chanOff + 1 )
+   val fft      = FFT( buf, sig )
+   val det      = Onsets.kr( fft, thresh, algo, decay, floor )
+   Out.ar( 0, K2A.ar( det ))
+}
+val buf = Buffer( nrt )
+val synth = Synth( nrt )
+val bndl1 = OSCBundle.secs( 0.0,
+   df.recvMsg
+   buf.allocMsg( 1024 )
+   synth.newMsg( df.name, nrt.rootNode, Seq( "buf" -> buf.id ))
+}
+val bndl2 = OSCBundle.secs( dur, synth.freeMsg )
+
+...

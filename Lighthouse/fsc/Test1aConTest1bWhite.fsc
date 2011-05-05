@@ -1,0 +1,15 @@
+#Created by FScape; do not edit manually!
+#Mon May 02 22:28:00 CEST 2011
+Class=de.sciss.fscape.gui.BleachDlg
+Inverse=false
+FltInFile=
+Gain=-0.2,785
+AnaInFile=/Users/hhrutz/Desktop/new_projects/Lighthouse/audio_work/Test1aConTest1b.aif
+FilterClip=18.0,785
+OutputFile=/Users/hhrutz/Desktop/new_projects/Lighthouse/audio_work/Test1aConTest1bWhite.aif
+OutputReso=1
+GainType=0
+FeedbackGain=-52.0,785
+UseAnaAsFilter=true
+OutputType=0
+FilterLength=256.0,0
