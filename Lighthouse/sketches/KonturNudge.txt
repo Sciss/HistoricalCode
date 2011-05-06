@@ -1,0 +1,17 @@
+// in kontur
+
+
+def selectedAudioRegions : Map[ AudioTrail, IndexedSeq[ AudioRegion ]] = {
+   val tlf = collection.JavaConversions.JIteratorWrapper( app.getWindowHandler.getWindows ).collect({ case tf: de.sciss.kontur.gui.TimelineFrame => tf }).find( _.document == doc ).get
+   val tp = tlf.tracksPanel
+   val tpl = tp.toList
+   val tv  = tpl.map( _.trailView )
+   val t   = tv.map( _.trail )
+   val mapped = t zip tv
+   val sel = mapped.collect({ case (at: AudioTrail, tv) =>
+      val seq = tv.selectedStakes.toIndexedSeq
+      val seqa = seq.collect({ case ar: AudioRegion => ar })
+      at -> seqa
+   }).toMap
+   sel
+}

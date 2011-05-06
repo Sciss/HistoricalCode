@@ -1,7 +1,14 @@
-val id = 1
+// in scalacollider-swing
 
-val inPath  = "/Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse" + id + "ed.aif"
-val outPath = "/Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse-Marks" + id + ".aif"
+def markName( id: Int ) : String = "/Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse-Marks" + id + ".aif"
+def edName( id: Int ) : String = "/Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse" + id + "ed.aif"
+
+def render( id: Int )( done: => Unit ) {
+val numThresh = 6
+val threshs = Seq.tabulate( numThresh )( i => 0.5.pow( i * 0.5 ))
+
+val inPath  = edName( id )
+val outPath = markName( id )
 
 val spec = AudioFile.readSpec( inPath )
 val nrto = new ServerOptionsBuilder
@@ -12,28 +19,28 @@ val nrtFile = java.io.File.createTempFile( "tmp", ".osc" )
 nrto.nrtCommandPath = nrtFile.getAbsolutePath
 nrto.inputBusChannels = spec.numChannels
 nrto.sampleRate = spec.sampleRate.toInt
-nrto.outputBusChannels = 1
+nrto.outputBusChannels = numThresh
+nrto.blockSize = 1
 
 val nrt = Server.dummy( "NRT", nrto )
 val df = SynthDef( "Ana" ) {
-   val buf      = "fftbuf".ir
-   val thresh   = "thresh".kr( 0.5 )
+   val buf      = (0 until numThresh)
+   val thresh   = threshs // "thresh".kr( 0.5 )
    val algo     = "algo".ir( 3 )
    val decay    = "decay".kr( 1 )
    val floor    = "floor".kr( 0.1 )
    val chanOff  = NumOutputBuses.ir
    val sig      = In.ar( chanOff ) + In.ar( chanOff + 1 )
    val fft      = FFT( buf, sig )
-   val det      = Onsets.kr( fft, thresh, algo, decay, floor )
+   val det0     = Onsets.kr( fft, thresh, algo, decay, floor )
+   val det      = 2 * HPZ1.kr( det0 ).max( 0 )
    Out.ar( 0, K2A.ar( det ))
 }
 val dur = spec.numFrames / spec.sampleRate
-val buf = Buffer( nrt )
+val bufs = Seq.tabulate( numThresh )( i => new Buffer( nrt, i ))
 val synth = Synth( nrt )
 val bndl1 = OSCBundle.secs( 0.0,
-   df.recvMsg,
-   buf.allocMsg( 1024 ),
-   synth.newMsg( df.name, nrt.rootNode, Seq( "buf" -> buf.id ))
+   (df.recvMsg +: bufs.map( _.allocMsg( 1024 )) :+ synth.newMsg( df.name, nrt.rootNode )): _*
 )
 val bndl2 = OSCBundle.secs( dur, synth.freeMsg )
 
@@ -47,10 +54,9 @@ def writeBundle( bndl: OSCBundle ) {
    f.writeInt( bb.limit ); fch.write( bb )
 }
 
+writeBundle( bndl1 )
 writeBundle( bndl2 )
 f.close
-
-"--"
 
 def runNRT {
     import java.io._
@@ -74,8 +80,11 @@ def runNRT {
          } finally {
             println( "scsynth terminated (" + p.exitValue +")" )
 //            actor ! ServerConnection.Aborted
+            defer( done )
          }
       }
+      
+      def defer( thunk: => Unit ) : Unit = java.awt.EventQueue.invokeLater( new Runnable { def run = thunk })
 
       def start {
          val inReader   = new BufferedReader( new InputStreamReader( p.getInputStream ))
@@ -99,4 +108,41 @@ def runNRT {
     start
 }
 
-// runNRT
+runNRT
+}
+
+def postProcess( id: Int ) {
+   val inPath     = markName( id )
+   val af         = AudioFile.openRead( inPath )
+   val numFrames  = af.numFrames.toInt
+   val buf        = af.frameBuffer( numFrames ) // well...
+   af.readFrames( buf )
+   af.close
+   val tol        = (0.05 * af.sampleRate + 0.5).toInt // time jitter tolerance across thresholds (channels)
+   val minChan    = buf.last
+   val otherChans = buf.init.reverse
+   val offsets    = (512 until numFrames).filter( minChan( _ ) > 0 )
+   
+   def detectAndErase( i: Int, bch: Array[ Float ]) = {
+      val i0  = math.max( 0, i - tol )
+      val i1  = math.min( numFrames, i + tol )
+      val res = bch.view.slice( i0, i1 ).indexWhere( _ > 0 )
+      if( res >= 0 ) bch( res ) = 0f
+      res
+   }
+   
+   val res = offsets.map( i => i -> otherChans.map( detectAndErase( i, _ )).prefixLength( _ >= 0 ))
+   println( res )
+}
+
+val ids = ((1 to 4) ++ (6 to 20)).toList
+def renderLoop( ids: List[ Int ]) {
+   ids.headOption.foreach { id =>
+      println( "RENDERING : " + id )
+      render( id ) {
+         postProcess( id )
+         renderLoop( ids.tail )
+      }
+   }
+}
+renderLoop( ids )
