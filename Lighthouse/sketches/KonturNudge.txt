@@ -12,6 +12,6 @@ def selectedAudioRegions : Map[ AudioTrail, IndexedSeq[ AudioRegion ]] = {
       val seq = tv.selectedStakes.toIndexedSeq
       val seqa = seq.collect({ case ar: AudioRegion => ar })
       at -> seqa
-   }).toMap
+   }).toMap.filter( _._2.nonEmpty )
    sel
 }
