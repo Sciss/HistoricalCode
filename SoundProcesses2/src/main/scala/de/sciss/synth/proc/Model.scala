@@ -29,7 +29,7 @@
 package de.sciss.synth.proc
 
 import collection.immutable.{Queue => IQueue}
-import edu.stanford.ppl.ccstm.{TxnLocal, Ref, Txn}
+import concurrent.stm.{Txn, TxnLocal}
 
 object Model {
    trait Listener[ -C, -T ] {
@@ -41,19 +41,18 @@ object Model {
 
    def filterOnCommit[ C <: Ct, T ]( filter: Function2[ T, C, Boolean ])( committed: Traversable[ T ] => Unit ) =
       new Listener[ C, T ] {
-         val queueRef = new TxnLocal[ IQueue[ T ]] {
-            override protected def initialValue( txn: Txn ) = IQueue.empty
-         }
+         val queueRef = TxnLocal[ IQueue[ T ]]( init = IQueue.empty )
+
          def updated( update: T )( implicit c: C ) {
             if( filter( update, c )) {
                val txn  = c.txn
                val q0   = queueRef.get( txn )
                queueRef.set( q0 enqueue update )( txn )
                if( q0.isEmpty ) {
-                  txn.beforeCommit( txn => {
+                  Txn.beforeCommit( txn => {
                      val q1 = queueRef.get( txn )
-                     txn.afterCommit( _ => committed( q1 ))
-                  }, Int.MaxValue )
+                     Txn.afterCommit( _ => committed( q1 ))( txn )
+                  })( txn ) // , Int.MaxValue
                }
             }
          }
@@ -62,19 +61,18 @@ object Model {
    def reduceOnCommit[ C <: Ct, T, U ]( pf: PartialFunction[ (T, C), U ])( committed: U => Unit ) =
       new Listener[ C, T ] {
          val lifted = pf.lift
-         val queueRef = new TxnLocal[ U ] {
-            override protected def initialValue( txn: Txn ) = null.asInstanceOf[ U ]
-         }
+         val queueRef = TxnLocal[ U ]( init = null.asInstanceOf[ U ])
+
          def updated( update: T )( implicit c: C ) {
             lifted( update -> c ).foreach { u =>
                val txn  = c.txn
                val q0   = queueRef.get( txn )
                queueRef.set( u )( txn )
                if( q0 == null ) {
-                  txn.beforeCommit( txn => {
+                  Txn.beforeCommit( txn => {
                      val q1 = queueRef.get( txn )
-                     txn.afterCommit( _ => committed( q1 ))
-                  }, Int.MaxValue )
+                     Txn.afterCommit( _ => committed( q1 ))( txn )
+                  })( txn ) // , Int.MaxValue
                }
             }
          }

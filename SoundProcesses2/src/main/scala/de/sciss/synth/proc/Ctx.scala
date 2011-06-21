@@ -28,11 +28,11 @@
 
 package de.sciss.synth.proc
 
-import edu.stanford.ppl.ccstm.Txn
 import de.sciss.confluent.VersionPath
+import concurrent.stm.InTxn
 
 trait CtxLike {
-   def txn: Txn
+   def txn: InTxn
    def eph : ECtx
 }
 

@@ -28,9 +28,9 @@
 
 package de.sciss.synth.proc.impl
 
-import edu.stanford.ppl.ccstm.Ref
 import collection.immutable.{Queue => IQueue}
 import de.sciss.synth.proc.{CtxLike, ECtx, Model}
+import concurrent.stm.Ref
 
 trait ModelImpl[ C <: CtxLike, T ] extends Model[ C, T ] {
    import Model._

@@ -29,6 +29,7 @@
 package de.sciss.synth.proc
 
 import impl._
+import sys.error
 
 object Factory {
    def proc[ C <: Ct, V[ ~ ] <: Vr[ C, ~ ]]( name: String )( implicit sys: System[ C, V ], c: C ) : Proc[ C, V ] =

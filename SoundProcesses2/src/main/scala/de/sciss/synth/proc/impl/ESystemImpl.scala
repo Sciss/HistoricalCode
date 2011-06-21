@@ -29,12 +29,12 @@
 package de.sciss.synth.proc
 package impl
 
-import edu.stanford.ppl.ccstm.{Ref, Txn, STM}
+import concurrent.stm.{TxnExecutor, InTxn, Ref}
 
 object ESystemImpl extends ESystem {
    override def toString = "ESystem"
 
-   def t[ T ]( fun: ECtx => T ) : T = STM.atomic( tx => fun( new Ctx( tx )))
+   def t[ T ]( fun: ECtx => T ) : T = TxnExecutor.defaultAtomic( tx => fun( new Ctx( tx )))
 
    def v[ T ]( init: T )( implicit m: ClassManifest[ T ], c: ECtx ) : EVar[ ECtx, T ] =
       new Var( Ref( init ), m.toString )
@@ -45,9 +45,9 @@ object ESystemImpl extends ESystem {
    def userVar[ T ]( init: T )( user: (ECtx, T) => Unit )( implicit m: ClassManifest[ T ], c: ECtx ) : EVar[ ECtx, T ] =
       new UserVar( Ref( init ), m.toString, user )
 
-   def join( txn: Txn ) : ECtx = new Ctx( txn )
+   def join( txn: InTxn ) : ECtx = new Ctx( txn )
 
-   private class Ctx( val txn: Txn ) extends ECtx {
+   private class Ctx( val txn: InTxn ) extends ECtx {
       override def toString = "ECtx"
       def eph : ECtx = this
    }

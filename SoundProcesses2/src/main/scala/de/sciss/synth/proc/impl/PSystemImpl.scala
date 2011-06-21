@@ -29,9 +29,10 @@
 package de.sciss.synth.proc
 package impl
 
-import edu.stanford.ppl.ccstm.{TxnLocal, Txn, Ref, STM}
 import collection.immutable.{Set => ISet, SortedMap => ISortedMap}
 import Double.{PositiveInfinity => dinf}
+import concurrent.stm.{TxnExecutor, TxnLocal, InTxn, Ref}
+import sys.error
 
 object PSystemImpl {
    def apply() : PSystem = new Sys
@@ -97,7 +98,7 @@ object PSystemImpl {
             fireUpdate( Projector.CursorRemoved[ PCtx, PSystem.Cursor ]( cursor ))
          }
 
-         def at[ R ]( p: Period )( fun: PCtx => R ) : R = STM.atomic { tx =>
+         def at[ R ]( p: Period )( fun: PCtx => R ) : R = TxnExecutor.defaultAtomic { tx =>
             fun( new Ctx( sys, tx, Interval( p, p )))
          }
 
@@ -106,15 +107,13 @@ object PSystemImpl {
       }
    }
 
-   private class Ctx( system: Sys, val txn: Txn, initIVal: Interval )
+   private class Ctx( system: Sys, val txn: InTxn, initIVal: Interval )
    extends PCtx {
       ctx =>
 
       override def toString = "PCtx"
 
-      private val intervalRef = new TxnLocal[ Interval ] {
-         override protected def initialValue( txn: Txn ) = initIVal
-      }
+      private val intervalRef = TxnLocal[ Interval ]( init = initIVal )
 
       def period : Period     = interval.start
       def interval : Interval = intervalRef.get( txn )
@@ -195,7 +194,7 @@ object PSystemImpl {
 
       def t[ R ]( fun: PCtx => R ) : R = {
          // XXX todo: should add t to KTemporalSystemLike and pass txn to in
-         STM.atomic { t =>
+         TxnExecutor.defaultAtomic { t =>
             sys.pProjector.at( ivalRef.get( t ).start ) { implicit c =>
                fun( c )
             }

@@ -50,6 +50,7 @@ import GUIUtils._
 import prefuse.action.assignment.{StrokeAction, ColorAction}
 import java.awt.{BasicStroke, Color}
 import prefuse.data.expression.{AbstractPredicate}
+import sys.error
 
 class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ], Csr <: KProjection[ C ] with Cursor[ C ]]( sys: KSystemLike[ C, V, _, Csr ]) {
    private val grpGraph    = "graph"
@@ -224,7 +225,7 @@ class VersionGraphView[ C <: Ct, V[ ~ ] <: KVar[ C, ~ ], Csr <: KProjection[ C ]
 
    def selection : List[ Selection ] = {
       val tupT = vis.getGroup( Visualization.FOCUS_ITEMS ).tuples.asInstanceOf[ java.util.Iterator[ Tuple ]]
-      val iter = collection.JavaConversions.asIterator( tupT )
+      val iter = collection.JavaConversions.asScalaIterator( tupT )
       iter.map( t => {
          val vp   = VersionPath.wrap( t.get( colPath ).asInstanceOf[ Vector[ Version ]])
          val csr  = t.get( colCursor ).asInstanceOf[ List[ Csr ]]

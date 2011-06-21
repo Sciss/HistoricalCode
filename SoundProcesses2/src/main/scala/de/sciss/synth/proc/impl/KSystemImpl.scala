@@ -29,9 +29,10 @@
 package de.sciss.synth.proc
 package impl
 
-import edu.stanford.ppl.ccstm.{TxnLocal, Txn, Ref, STM}
 import de.sciss.confluent.{LexiTrie, OracleMap, FatValue, VersionPath}
 import collection.immutable.{Set => ISet}
+import concurrent.stm.{TxnExecutor, TxnLocal, InTxn, Ref}
+import sys.error
 
 object KSystemImpl {
    def apply() : KSystem = new Sys
@@ -104,7 +105,7 @@ object KSystemImpl {
             fireUpdate( Projector.CursorRemoved[ KCtx, KSystem.Cursor ]( cursor ))
          }
 
-         def in[ R ]( version: VersionPath )( fun: KCtx => R ) : R = STM.atomic { tx =>
+         def in[ R ]( version: VersionPath )( fun: KCtx => R ) : R = TxnExecutor.defaultAtomic { tx =>
             fun( new Ctx( sys, tx, version ))
          }
 
@@ -113,15 +114,13 @@ object KSystemImpl {
       }
    }
 
-   private class Ctx( system: Sys, val txn: Txn, initPath: VersionPath )
+   private class Ctx( system: Sys, val txn: InTxn, initPath: VersionPath )
    extends KCtx {
       ctx =>
 
       override def toString = "KCtx"
 
-      private val pathRef = new TxnLocal[ VersionPath ] {
-         override protected def initialValue( txn: Txn ) = initPath
-      }
+      private val pathRef = TxnLocal[ VersionPath ]( init = initPath )
 
       def path : VersionPath = pathRef.get( txn )
 
@@ -189,9 +188,7 @@ object KSystemImpl {
       
       private val vRef = Ref( initialPath )
 
-      private val txnInitiator = new TxnLocal[ Boolean ] {
-         override protected def initialValue( txn: Txn ) = false
-      }
+      private val txnInitiator = TxnLocal[ Boolean ]( init = false )
 
       def isApplicable( implicit c: KCtx ) = txnInitiator.get( c.txn )
       def path( implicit c: CtxLike ) : VersionPath = vRef.get( c.txn )
@@ -205,7 +202,7 @@ object KSystemImpl {
          // variant so we don't call atomic twice
          // (although that is ok and the existing transaction is joined)
          // ; like BitemporalSystem.inRef( vRef.getTxn( _ )) { ... } ?
-         STM.atomic { t =>
+         TxnExecutor.defaultAtomic { t =>
             val oldPath = vRef.get( t )
             txnInitiator.set( true )( t )
             sys.kProjector.in( oldPath ) { implicit c =>
