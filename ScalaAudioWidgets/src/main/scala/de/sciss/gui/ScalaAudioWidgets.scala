@@ -30,6 +30,7 @@ import javax.swing.{Timer, JFrame, WindowConstants}
 import java.awt.event.{WindowEvent, WindowAdapter, ActionEvent, ActionListener}
 import swing.event.{WindowClosing, WindowOpened}
 import swing.{Swing, BorderPanel, MainFrame, Frame, SimpleSwingApplication, SwingApplication}
+import collection.immutable.{IndexedSeq => IIdxSeq}
 
 object ScalaAudioWidgets extends SimpleSwingApplication {
    val name          = "ScalaAudioWidgets"
@@ -45,8 +46,12 @@ object ScalaAudioWidgets extends SimpleSwingApplication {
    lazy val top = new MainFrame {
       title = name
 
-      val m = new PeakMeter
-      m.ticks  = 60
+      val m = new PeakMeter {
+         numChannels    = 2
+         ticks          = 101 // 50
+         hasCaption     = true
+         borderVisible  = true
+      }
       contents = new BorderPanel {
          add( m, BorderPanel.Position.West )
          border = Swing.EmptyBorder( 20, 20, 20, 20 )
@@ -54,12 +59,16 @@ object ScalaAudioWidgets extends SimpleSwingApplication {
 
       val t = new Timer( 30, new ActionListener {
          val rnd  = new util.Random()
-         var peak = 0.5f
-         var rms  = 0f
+         var peak1 = 0.5f
+         var rms1  = 0f
+         var peak2 = 0.5f
+         var rms2  = 0f
          def actionPerformed( e: ActionEvent ) {
-            peak = math.max( 0f, math.min( 1f, peak + math.pow( rnd.nextFloat() * 0.5, 2 ).toFloat * (if( rnd.nextBoolean() ) 1 else -1) ))
-            rms  = math.max( 0f, math.min( peak, rms * 0.98f + (rnd.nextFloat() * 0.02f * (if( rnd.nextBoolean() ) 1 else -1) )))
-            m.update( peak, rms )
+            peak1 = math.max( 0f, math.min( 1f, peak1 + math.pow( rnd.nextFloat() * 0.5, 2 ).toFloat * (if( rnd.nextBoolean() ) 1 else -1) ))
+            rms1  = math.max( 0f, math.min( peak1, rms1 * 0.98f + (rnd.nextFloat() * 0.02f * (if( rnd.nextBoolean() ) 1 else -1) )))
+            peak2 = math.max( 0f, math.min( 1f, peak2 + math.pow( rnd.nextFloat() * 0.5, 2 ).toFloat * (if( rnd.nextBoolean() ) 1 else -1) ))
+            rms2  = math.max( 0f, math.min( peak2, rms2 * 0.98f + (rnd.nextFloat() * 0.02f * (if( rnd.nextBoolean() ) 1 else -1) )))
+            m.update( IIdxSeq( peak1, rms1, peak2, rms2 ))
          }
       })
       reactions += {
