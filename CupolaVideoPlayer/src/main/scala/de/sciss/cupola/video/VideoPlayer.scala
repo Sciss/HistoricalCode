@@ -25,9 +25,8 @@
 
 package de.sciss.cupola.video
 
-import swing.event.ButtonClicked
 import collection.immutable.{IndexedSeq => IIdxSeq}
-import swing.{ScrollPane, ListView, Orientation, Button, BoxPanel, BorderPanel, SimpleSwingApplication, MainFrame}
+import swing.{ScrollPane, ListView, Orientation, BoxPanel, BorderPanel, SimpleSwingApplication, MainFrame}
 
 object VideoPlayer extends SimpleSwingApplication {
 //   lazy val videoViewer = ToolFactory.makeViewer( IMediaViewer.Mode.VIDEO_ONLY )
