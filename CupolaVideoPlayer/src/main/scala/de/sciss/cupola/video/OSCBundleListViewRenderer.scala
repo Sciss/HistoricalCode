@@ -27,25 +27,15 @@ package de.sciss.cupola.video
 
 import de.sciss.osc.{OSCMessage, OSCBundle}
 import swing.{Alignment, Label, ListView}
-import java.awt.Font
+import java.awt.{Color, Font}
 
 class OSCBundleListViewRenderer extends ListView.AbstractRenderer[ OSCBundle, Label ]( new Label ) {
    component.horizontalAlignment = Alignment.Leading
    component.font = new Font( "Menlo", Font.PLAIN, 10 )
+   component.foreground = Color.white
 
    def configure( list: ListView[ _ ], isSelected: Boolean, hasFocus: Boolean, a: OSCBundle, index: Int ) {
-      val millis0 = (OSCBundle.timetagToSecs( a.timetag ) * 1000).toInt
-      val secs0   = millis0 / 1000
-      val mins0   = secs0 / 60
-      val millis  = millis0 % 1000
-      val secs    = secs0 % 60
-      val mins    = mins0 % 60
-      val hours   = mins0 / 60
-      val timeStr =
-         (hours  +  100).toString.substring( 1 ) + ":" +
-         (mins   +  100).toString.substring( 1 ) + ":" +
-         (secs   +  100).toString.substring( 1 ) + "." +
-         (millis + 1000).toString.substring( 1 ) + "  "
+      val timeStr = Util.formatTimeString( OSCBundle.timetagToSecs( a.timetag ))
       val text    = timeStr + (a.headOption match {
          case Some( OSCMessage( name, args @ _* )) => args.mkString( name + ", ", ", ", "" )
          case _ => ""

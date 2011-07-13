@@ -20,4 +20,23 @@ object Util {
       }
       sb.toString
    }
+
+   def unifiedLook( f: Frame ) {
+      f.peer.getRootPane.putClientProperty( "apple.awt.brushMetalLook", java.lang.Boolean.TRUE )
+   }
+
+   def formatTimeString( secs: Double ) : String = {
+      val millis0 = (secs * 1000).toInt
+      val secs0   = millis0 / 1000
+      val mins0   = secs0 / 60
+      val millis  = millis0 % 1000
+      val secs1   = secs0 % 60
+      val mins    = mins0 % 60
+      val hours   = mins0 / 60
+
+      (hours  +  100).toString.substring( 1 ) + ":" +
+      (mins   +  100).toString.substring( 1 ) + ":" +
+      (secs1  +  100).toString.substring( 1 ) + "." +
+      (millis + 1000).toString.substring( 1 ) + "  "
+   }
 }

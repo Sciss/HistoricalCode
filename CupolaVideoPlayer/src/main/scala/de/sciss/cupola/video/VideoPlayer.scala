@@ -55,6 +55,8 @@ object VideoPlayer extends SimpleSwingApplication {
       frame =>
 
       title = "Cupola Video Player"
+      Util.unifiedLook( this )
+
 //      IMediaReader reader = ToolFactory.makeReader("videofile.flv");
 //      val videoPanel = new Label( "test" )
 
@@ -62,6 +64,7 @@ object VideoPlayer extends SimpleSwingApplication {
          renderer = new MediaListViewRenderer
          peer.setVisibleRowCount( 8 )
          fixedCellWidth = 80
+         selection.intervalMode = ListView.IntervalMode.Single
       }
 
       val buttonPanel = new BoxPanel( Orientation.Horizontal ) {
@@ -105,14 +108,4 @@ object VideoPlayer extends SimpleSwingApplication {
 //         }
 //      }).start()
 //   }
-
-   private case class NiceButton( label: String )( reaction: Button => Unit ) extends Button( label ) {
-      peer.putClientProperty( "JButton.buttonType", "bevel" )
-      peer.putClientProperty( "JComponent.sizeVariant", "small" )
-      focusable = false
-      listenTo( this )
-      reactions += {
-         case ButtonClicked( _ ) => reaction( this )
-      }
-   }
 }

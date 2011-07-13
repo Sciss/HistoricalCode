@@ -21,3 +21,7 @@ slf4j-api.jar -> ../../xuggler/share/java/jars/slf4j-api.jar
 xuggle-xuggler.jar -> ../../xuggler/share/java/jars/xuggle-xuggler.jar
 
 Run the project from the shell via @sbt run@.
+
+h3. useful resources
+
+* "Movie Caption Translator Blog":http://www.thomaslilogan.com/category/movie-caption-translator-blog/ -- deals with several Xuggler issues
