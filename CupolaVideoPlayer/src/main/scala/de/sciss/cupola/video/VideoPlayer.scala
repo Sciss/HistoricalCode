@@ -47,6 +47,7 @@ object VideoPlayer extends SimpleSwingApplication {
    private def openVideo( file: File ) {
       val videoViewer = ToolFactory.makeViewer( IMediaViewer.Mode.VIDEO_ONLY )
       val reader = ToolFactory.makeReader( file.toURI.toURL.toString )
+//      updateInfo( reader.getContainer.getDuration )
       reader.addListener( videoViewer )
       (new Thread {
          override def run() {
