@@ -25,12 +25,12 @@
 
 package de.sciss.gui
 
-import java.awt.{EventQueue, BorderLayout}
-import javax.swing.{Timer, JFrame, WindowConstants}
-import java.awt.event.{WindowEvent, WindowAdapter, ActionEvent, ActionListener}
+import java.awt.event.{ActionEvent, ActionListener}
 import swing.event.{WindowClosing, WindowOpened}
-import swing.{Swing, BorderPanel, MainFrame, Frame, SimpleSwingApplication, SwingApplication}
 import collection.immutable.{IndexedSeq => IIdxSeq}
+import java.awt.{Color}
+import swing.{Component, Label, GridPanel, Swing, BorderPanel, MainFrame, SimpleSwingApplication}
+import javax.swing.{Box, Timer}
 
 object ScalaAudioWidgets extends SimpleSwingApplication {
    val name          = "ScalaAudioWidgets"
@@ -45,6 +45,7 @@ object ScalaAudioWidgets extends SimpleSwingApplication {
 
    lazy val top = new MainFrame {
       title = name
+      peer.getRootPane.putClientProperty( "apple.awt.brushMetalLook", java.lang.Boolean.TRUE )
 
       val m = new PeakMeter {
          numChannels    = 2
@@ -52,8 +53,39 @@ object ScalaAudioWidgets extends SimpleSwingApplication {
          hasCaption     = true
          borderVisible  = true
       }
+
+      val lcdColors     = IndexedSeq(
+         (Some( Color.darkGray ), None),
+         (Some( new Color( 205, 232, 254 )), Some( new Color( 15, 42, 64 ))),
+         (Some( Color.darkGray ), Some( Color.lightGray )),
+         (Some( new Color( 60, 30, 20 )), Some( new Color( 200, 100, 100 ))),
+         (Some( new Color( 0xE0, 0xE0, 0xE0 )), Some( new Color( 0x20, 0x20, 0x20 ))))
+      val lcdLbs = lcdColors.zipWithIndex.map { case ((fg, _), idx) =>
+         new Label {
+            text = "00:00:0" + idx
+            peer.putClientProperty( "JComponent.sizeVariant", "small" )
+            fg.foreach( foreground = _ )
+         }
+      }
+      val lcds = lcdColors.zip( lcdLbs ).zipWithIndex.map { case (((fg, bg), lb), idx) =>
+         new LCDPanel {
+            bg.foreach( background = _ )
+            contents += lb
+         }
+      }
+      val lcdGrid = new GridPanel( lcdColors.size, 1 ) {
+         vGap     = 6
+         contents ++= lcds
+      }
+
       contents = new BorderPanel {
-         add( m, BorderPanel.Position.West )
+         import BorderPanel.Position._
+         add( m, West )
+//         add( Component.wrap( Box.createHorizontalStrut( 20 )), Center )
+         add( new BorderPanel {
+            add( lcdGrid, North )
+            border = Swing.EmptyBorder( 0, 20, 0, 0 )
+         }, East )
          border = Swing.EmptyBorder( 20, 20, 20, 20 )
       }
 
@@ -71,9 +103,22 @@ object ScalaAudioWidgets extends SimpleSwingApplication {
             m.update( IIdxSeq( peak1, rms1, peak2, rms2 ))
          }
       })
+      val t2  = new Timer( 1000, new ActionListener {
+         val lb1 = lcdLbs.head
+         var cnt  = 0
+         def actionPerformed( e: ActionEvent ) {
+            cnt += 1
+            val secs    = cnt % 60
+            val mins    = (cnt / 60) % 60
+            val hours   = (cnt / 3600) % 100
+            lb1.text = (hours + 100).toString.substring( 1 ) + ":" +
+                       (mins + 100).toString.substring( 1 ) + ":" +
+                       (secs + 100).toString.substring( 1 )
+         }
+      })
       reactions += {
-         case WindowOpened( top )   => t.start()
-         case WindowClosing( top )  => t.stop()
+         case WindowOpened( _ )   => t.start(); t2.start()
+         case WindowClosing( _ )  => t.stop(); t2.stop()
       }
    }
 }
