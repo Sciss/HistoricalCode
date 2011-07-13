@@ -53,7 +53,9 @@ object OSCStream {
          }
          OSCBundle.secs( time, OSCMessage( msgName, msgArgs: _* ))
       }
-      new OSCStream( bundles.toIndexedSeq )
+      val bndlSeq = bundles.toIndexedSeq
+      source.close()
+      new OSCStream( bndlSeq )
    }
 }
 class OSCStream( val bundles: IIdxSeq[ OSCBundle ])

@@ -26,12 +26,8 @@
 package de.sciss.cupola.video
 
 import swing.event.ButtonClicked
-import java.awt.FileDialog
-import java.io.File
-import com.xuggle.mediatool.{ToolFactory, IMediaViewer}
-import io.Source
-import de.sciss.osc.OSCBundle
-import swing.{ScrollPane, ListView, Orientation, Button, Label, BoxPanel, BorderPanel, SimpleSwingApplication, MainFrame}
+import collection.immutable.{IndexedSeq => IIdxSeq}
+import swing.{ScrollPane, ListView, Orientation, Button, BoxPanel, BorderPanel, SimpleSwingApplication, MainFrame}
 
 object VideoPlayer extends SimpleSwingApplication {
 //   lazy val videoViewer = ToolFactory.makeViewer( IMediaViewer.Mode.VIDEO_ONLY )
@@ -45,11 +41,14 @@ object VideoPlayer extends SimpleSwingApplication {
 //      case None         => xuggleLib
 //   }
 
-   private val oscList = new ListView[ OSCBundle ] {
-      renderer = new OSCBundleListViewRenderer
-      peer.setVisibleRowCount( 16 )
-      fixedCellHeight = 160
-      fixedCellHeight = 16
+   lazy val mediaList = {
+      try {
+         MediaList.read( "medialist.xml" )
+      } catch {
+         case e =>
+            Util.displayError( null, "List Media List", e )
+            IIdxSeq.empty[ MediaList.Entry ]
+      }
    }
 
    val top = new MainFrame {
@@ -59,22 +58,32 @@ object VideoPlayer extends SimpleSwingApplication {
 //      IMediaReader reader = ToolFactory.makeReader("videofile.flv");
 //      val videoPanel = new Label( "test" )
 
+      val mediaListView = new ListView( mediaList ) {
+         renderer = new MediaListViewRenderer
+         peer.setVisibleRowCount( 8 )
+         fixedCellWidth = 80
+      }
+
       val buttonPanel = new BoxPanel( Orientation.Horizontal ) {
-         contents += NiceButton( "Open..." ) { b =>
-            val fDlg = new FileDialog( frame.peer, b.text )
-            fDlg.setVisible( true )
-            val fileName   = fDlg.getFile
-            val dirName    = fDlg.getDirectory
-            if( fileName != null && dirName != null ) {
-               val file = new File( dirName, fileName )
+         contents += NiceButton( "Load Entry" ) { b =>
+//            val fDlg = new FileDialog( frame.peer, b.text )
+//            fDlg.setVisible( true )
+//            val fileName   = fDlg.getFile
+//            val dirName    = fDlg.getDirectory
+//            if( fileName != null && dirName != null ) {
+//               val file = new File( dirName, fileName )
 //               openVideo( file )
-               openOSC( file )
+//               openOSC( file )
+
+            mediaListView.selection.items.headOption.foreach { entry =>
+               MediaListEntryFrame.load( frame, entry )
             }
+//            }
          }
       }
       contents = new BorderPanel {
          import BorderPanel.Position._
-         add( new ScrollPane( oscList ) {
+         add( new ScrollPane( mediaListView ) {
             import ScrollPane.BarPolicy._
             horizontalScrollBarPolicy  = Never
             verticalScrollBarPolicy    = Always
@@ -84,23 +93,18 @@ object VideoPlayer extends SimpleSwingApplication {
       }
    }
 
-   private def openOSC( file: File ) {
-      val osc = OSCStream.fromSource( Source.fromFile( file, "UTF-8" ))
-      oscList.listData = osc.bundles
-   }
-
-   private def openVideo( file: File ) {
-      val videoViewer = ToolFactory.makeViewer( IMediaViewer.Mode.VIDEO_ONLY )
-      val reader = ToolFactory.makeReader( file.toURI.toURL.toString )
-//      updateInfo( reader.getContainer.getDuration )
-      reader.addListener( videoViewer )
-      (new Thread {
-         override def run() {
-            while( reader.readPacket() == null ) {}
-            println( "aqui" )
-         }
-      }).start()
-   }
+//   private def openVideo( file: File ) {
+//      val videoViewer = ToolFactory.makeViewer( IMediaViewer.Mode.VIDEO_ONLY )
+//      val reader = ToolFactory.makeReader( file.toURI.toURL.toString )
+////      updateInfo( reader.getContainer.getDuration )
+//      reader.addListener( videoViewer )
+//      (new Thread {
+//         override def run() {
+//            while( reader.readPacket() == null ) {}
+//            println( "aqui" )
+//         }
+//      }).start()
+//   }
 
    private case class NiceButton( label: String )( reaction: Button => Unit ) extends Button( label ) {
       peer.putClientProperty( "JButton.buttonType", "bevel" )
