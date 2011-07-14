@@ -19,9 +19,10 @@
   </entry>
   <entry name="10-July-11">
     <video>
-      <file>/Users/hhrutz/Documents/Cupola/video_w_tracking/VIS SYSTEM1.ogg</file>
+      <file>/Users/hhrutz/Documents/Cupola/video_w_tracking/VIS_SYSTEM1.avi</file>
     </video>
     <osc>
+      <offset>-11.23</offset>
       <file>/Users/hhrutz/Documents/Cupola/video_w_tracking/SentMessagesLogVID1.txt</file>
     </osc>
   </entry>

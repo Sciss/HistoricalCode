@@ -6,7 +6,7 @@ A helper project for the Cupola project, providing synchronized video and OSC st
 
 h3. requirements / installation
 
-Currently "Xuggler":http://xuggle.com/xuggler/ is used for playback. The viewer seems pretty unstable though, so this might change. To prepare Xuggler, make sure the following environment variables are set (e.g. in @~/.bash_profile@):
+Currently "Xuggler":http://xuggle.com/xuggler/ is used for playback. To prepare Xuggler, make sure the following environment variables are set (e.g. in @~/.bash_profile@):
 
 pre. export XUGGLE_HOME=???
 export DYLD_LIBRARY_PATH=$XUGGLE_HOME/lib:$DYLD_LIBRARY_PATH
