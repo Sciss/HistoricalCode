@@ -38,7 +38,7 @@ object MediaListEntryFrame {
       (new Thread {
          override def run() {
             try {
-               val osc = OSCStream.fromSource( Source.fromFile( entry.oscPath ))
+               val osc = OSCStream.fromSource( Source.fromFile( entry.oscPath ), entry.oscOffset )
                val vid = VideoHandle.open( new File( entry.videoPath ).toURI.toURL )
                Swing.onEDT( new MediaListEntryFrame( entry.name, osc, vid ))
             } catch {
@@ -54,6 +54,12 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
 
    private var seekedTime = -1.0
 
+   private val selReact: PartialFunction[ AnyRef, Unit ] = {
+         case /* sel @ */ ListSelectionChanged( _, _, _ ) =>
+//println( "sel : " + selection.items.headOption )
+            oscList.selection.items.headOption.foreach( seek( _ ))
+      }
+
    private val oscList = new ListView( osc.bundles ) {
       renderer = new OSCBundleListViewRenderer
       peer.setVisibleRowCount( 16 )
@@ -64,11 +70,7 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
 
       listenTo( selection )
       selection.intervalMode = ListView.IntervalMode.Single
-      selection.reactions += {
-         case /* sel @ */ ListSelectionChanged( _, _, _ ) =>
-//println( "sel : " + selection.items.headOption )
-            selection.items.headOption.foreach( seek( _ ))
-      }
+      selection.reactions += selReact
    }
 
    private val lbTime = new Label {
@@ -92,7 +94,11 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
    private val videoView = new ImageView
    videoView.preferredSize = new Dimension( vid.width, vid.height )
    vid.videoView  = Some( videoView )
-   vid.timeView   = Some( lbTime )
+//   vid.timeView   = Some( lbTime )
+   vid.timeView = (secs, playing) => Swing.onEDT {
+      lbTime.text = Util.formatTimeString( secs )
+      if( playing ) seekOSCList( secs )
+   }
 
    private implicit val bundleToTag = (b: OSCBundle) => b.timetag
 
@@ -122,13 +128,23 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
 
    def seek( secs: Double ) {
       seekIgnoreList( secs )
+      seekOSCList( secs )
+   }
+
+   private def seekOSCList( secs: Double ) {
       val tag  = OSCBundle.secsToTimetag( secs )
       val pos0 = Util.binarySearch( osc.bundles, tag )
       val pos = if( pos0 >= 0 ) pos0 else -(pos0 + 2)
-      if( pos >= 0 ) {
-         oscList.selectIndices( pos )
-      } else {
-         oscList.selectIndices()
+      try {
+         oscList.selection.reactions -= selReact
+         if( pos >= 0 ) {
+            oscList.selectIndices( pos )
+         } else {
+            oscList.selectIndices()
+         }
+         oscList.peer.ensureIndexIsVisible( pos )
+      } finally {
+         oscList.selection.reactions += selReact
       }
    }
 

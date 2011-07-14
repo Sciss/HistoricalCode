@@ -78,6 +78,11 @@ object Util {
       f.peer.getRootPane.putClientProperty( "apple.awt.brushMetalLook", java.lang.Boolean.TRUE )
    }
 
+   def formatSignedTimeString( secs: Double ) : String = {
+      val ts = formatTimeString( math.abs( secs ))
+      (if( secs < 0 ) "-" else " ") + ts
+   }
+
    def formatTimeString( secs: Double ) : String = {
       val millis0 = (secs * 1000).toInt
       val secs0   = millis0 / 1000

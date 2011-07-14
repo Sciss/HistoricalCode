@@ -5,6 +5,7 @@
       <file>/Users/hhrutz/Documents/Cupola/video_w_tracking/runthrough1.avi</file>
     </video>
     <osc>
+      <offset>-128.6</offset>
       <file>/Users/hhrutz/Documents/Cupola/video_w_tracking/runthrough1.txt</file>
     </osc>
   </entry>

@@ -35,7 +35,7 @@ class OSCBundleListViewRenderer extends ListView.AbstractRenderer[ OSCBundle, La
    component.foreground = Color.white
 
    def configure( list: ListView[ _ ], isSelected: Boolean, hasFocus: Boolean, a: OSCBundle, index: Int ) {
-      val timeStr = Util.formatTimeString( OSCBundle.timetagToSecs( a.timetag ))
+      val timeStr = Util.formatSignedTimeString( OSCBundle.timetagToSecs( a.timetag ))
       val text    = timeStr + (a.headOption match {
          case Some( OSCMessage( name, args @ _* )) => args.mkString( name + ", ", ", ", "" )
          case _ => ""

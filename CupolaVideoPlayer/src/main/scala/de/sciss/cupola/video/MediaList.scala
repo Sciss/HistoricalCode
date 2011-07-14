@@ -9,12 +9,17 @@ object MediaList {
       val xml = XML.loadFile( file )
       require( xml.label == "list" )
       (xml \ "entry").map( e => {
-         val name = (e \ "@name").text
-         val vid  = ((e \ "video").head \ "file").text
-         val osc  = ((e \ "osc").head \ "file").text
-         Entry( name, vid, osc )
+         val name       = (e \ "@name").text
+         val vidFile    = ((e \ "video").head \ "file").text
+         val oscNode    = (e \ "osc").head
+         val oscFile    = (oscNode \ "file").text
+         val oscOffset  = {
+            val txt = (oscNode \ "offset").text
+            if( txt == "" ) 0.0 else txt.toDouble
+         }
+         Entry( name, vidFile, oscFile, oscOffset )
       })( breakOut )
    }
 
-   case class Entry( name: String, videoPath: String, oscPath: String )
+   case class Entry( name: String, videoPath: String, oscPath: String, oscOffset: Double )
 }

@@ -38,13 +38,17 @@ object VideoHandle {
 class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCoder,
                            conv: IConverter, resampler: IVideoResampler ) {
    @volatile private var videoViewVar : ImageView = null
-   @volatile private var timeViewVar : Label = null
+//   @volatile private var timeViewVar : Label = null
+   @volatile private var timeViewVar = (secs: Double, playing: Boolean) => ()
 
    def videoView = Option( videoViewVar )
    def videoView_=( v: Option[ ImageView ]) { videoViewVar = v.orNull }
 
-   def timeView = Option( timeViewVar )
-   def timeView_=( v: Option[ Label ]) { timeViewVar = v.orNull }
+//   def timeView = Option( timeViewVar )
+//   def timeView_=( v: Option[ Label ]) { timeViewVar = v.orNull }
+
+   def timeView = timeViewVar
+   def timeView_=( fun: (Double, Boolean) => Unit ) { timeViewVar = fun }
 
    def width : Int   = dec.getWidth
    def height : Int  = dec.getHeight
@@ -95,19 +99,20 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
             }
          }
 
-         def aDisplay( secs: Double ) {
+         def aDisplay( secs: Double, playing: Boolean ) {
             val vv = videoViewVar
             if( vv != null ) vv.image = conv.toImage( picOut )
-            val tv = timeViewVar
-            if( tv != null ) {
-//println( Util.formatTimeString( secs ))
-               tv.text = Util.formatTimeString( secs )
-            }
+//            val tv = timeViewVar
+//            if( tv != null ) {
+////println( Util.formatTimeString( secs ))
+//               tv.text = Util.formatTimeString( secs )
+//            }
+            timeViewVar( secs, playing )
          }
 
          def aSeek( secs: Double ) : Boolean = {
             val succ = aSeekNoDisplay( secs )
-            if( succ ) aDisplay( secs )
+            if( succ ) aDisplay( secs, false )
             succ
          }
 
@@ -139,7 +144,8 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
                   val vidStart   = vidCurrent
 
                   def displayCurrent() {
-                     aDisplay( (vidCurrent - vidStart) * 1.0e-6 )
+//                     aDisplay( (vidCurrent - vidStart) * 1.0e-6, true )
+                     aDisplay( vidCurrent * 1.0e-6, true )  // XXX assumes stream begins at zero!
                   }
 
                   loopWhile( playing ) { reactWithin( delay ) {
