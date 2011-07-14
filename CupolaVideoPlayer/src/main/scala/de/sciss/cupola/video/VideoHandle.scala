@@ -18,7 +18,7 @@ object VideoHandle {
       require( dec.open() >= 0, "Could not open video decoder for container: "  + file )
 
       val pixType       = dec.getPixelType
-      val convName      = "native_to_" + pixType.name
+//      val convName      = "native_to_" + pixType.name
       val width         = dec.getWidth
       val height        = dec.getHeight
       val (conv, resampler: IVideoResampler) = pixType match {
@@ -36,10 +36,12 @@ object VideoHandle {
    }
 }
 class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCoder,
-                           conv: IConverter, resampler: IVideoResampler ) {
+                           conv: IConverter, resampler: IVideoResampler ) extends TemporalHandle {
+   handle =>
+
    @volatile private var videoViewVar : ImageView = null
 //   @volatile private var timeViewVar : Label = null
-   @volatile private var timeViewVar = (secs: Double, playing: Boolean) => ()
+   @volatile private var timeViewVar = (source: AnyRef, secs: Double, playing: Boolean) => ()
 
    def videoView = Option( videoViewVar )
    def videoView_=( v: Option[ ImageView ]) { videoViewVar = v.orNull }
@@ -48,7 +50,7 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
 //   def timeView_=( v: Option[ Label ]) { timeViewVar = v.orNull }
 
    def timeView = timeViewVar
-   def timeView_=( fun: (Double, Boolean) => Unit ) { timeViewVar = fun }
+   def timeView_=( fun: (AnyRef, Double, Boolean) => Unit ) { timeViewVar = fun }
 
    def width : Int   = dec.getWidth
    def height : Int  = dec.getHeight
@@ -58,14 +60,8 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
 
 //println( " TIME BASE = " + timeBase + " dur = " + stream.getDuration )
 
-   private case class Seek( secs: Double )
-   private case object Play
-   private case object Stop
-   private case object Dispose
-
-   private object VideoActor extends DaemonActor {
-      start
-
+   protected val actor = new DaemonActor {
+      import TemporalHandle._
       def act() {
          var time    = 0L
          val packet  = IPacket.make()
@@ -99,7 +95,7 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
             }
          }
 
-         def aDisplay( secs: Double, playing: Boolean ) {
+         def aDisplay( source: AnyRef, secs: Double, playing: Boolean ) {
             val vv = videoViewVar
             if( vv != null ) vv.image = conv.toImage( picOut )
 //            val tv = timeViewVar
@@ -107,12 +103,12 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
 ////println( Util.formatTimeString( secs ))
 //               tv.text = Util.formatTimeString( secs )
 //            }
-            timeViewVar( secs, playing )
+            timeViewVar( source, secs, playing )
          }
 
-         def aSeek( secs: Double ) : Boolean = {
+         def aSeek( source: AnyRef, secs: Double ) : Boolean = {
             val succ = aSeekNoDisplay( secs )
-            if( succ ) aDisplay( secs, false )
+            if( succ ) aDisplay( source, secs, false )
             succ
          }
 
@@ -134,7 +130,7 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
          }
 
          loopWhile( open ) { react {
-            case Seek( secs ) => aSeek( secs )
+            case Seek( source, secs ) => aSeek( source, secs )
 
             case Play =>
                if( vidCurrent != Global.NO_PTS || aSeekNoDisplay( 0.0 )) {
@@ -145,7 +141,7 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
 
                   def displayCurrent() {
 //                     aDisplay( (vidCurrent - vidStart) * 1.0e-6, true )
-                     aDisplay( vidCurrent * 1.0e-6, true )  // XXX assumes stream begins at zero!
+                     aDisplay( handle, vidCurrent * 1.0e-6, true )  // XXX assumes stream begins at zero!
                   }
 
                   loopWhile( playing ) { reactWithin( delay ) {
@@ -163,9 +159,9 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
                      case Stop =>
                         displayCurrent()
                         playing = false
-                     case Seek( secs ) =>
+                     case Seek( source, secs ) =>
                         playing = false
-                        aSeek( secs )
+                        aSeek( source, secs )
                      case Dispose =>
                         playing = false
                         aDispose()
@@ -175,21 +171,5 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
             case Dispose => aDispose()
          }}
       }
-   }
-
-   def seek( secs: Double ) {
-      VideoActor ! Seek( secs )
-   }
-
-   def play() {
-      VideoActor ! Play
-   }
-
-   def stop() {
-      VideoActor ! Stop
-   }
-
-   def dispose() {
-      VideoActor ! Dispose
    }
 }

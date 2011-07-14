@@ -95,9 +95,9 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
    videoView.preferredSize = new Dimension( vid.width, vid.height )
    vid.videoView  = Some( videoView )
 //   vid.timeView   = Some( lbTime )
-   vid.timeView = (secs, playing) => Swing.onEDT {
+   vid.timeView = (source, secs, playing) => Swing.onEDT {
       lbTime.text = Util.formatTimeString( secs )
-      if( playing ) seekOSCList( secs )
+      if( !(source eq oscList) ) seekOSCList( secs )
    }
 
    private implicit val bundleToTag = (b: OSCBundle) => b.timetag
@@ -115,7 +115,7 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
    }
 
    pack().open()
-   seek( 0.0 )
+   seek( this, 0.0 )
 
    override def closeOperation() {
       vid.dispose()
@@ -123,12 +123,12 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
    }
 
    def seek( b: OSCBundle ) {
-      seekIgnoreList( OSCBundle.timetagToSecs( b.timetag ))
+      seekIgnoreList( oscList, OSCBundle.timetagToSecs( b.timetag ))
    }
 
-   def seek( secs: Double ) {
-      seekIgnoreList( secs )
-      seekOSCList( secs )
+   def seek( source: AnyRef, secs: Double ) {
+      seekIgnoreList( source, secs )
+      if( !(source eq oscList) ) seekOSCList( secs )
    }
 
    private def seekOSCList( secs: Double ) {
@@ -148,10 +148,9 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
       }
    }
 
-   private def seekIgnoreList( secs: Double ) {
+   private def seekIgnoreList( source: AnyRef, secs: Double ) {
       if( secs == seekedTime ) return
       seekedTime = secs
-//      lbTime.text = Util.formatTimeString( secs )
-      vid.seek( secs )
+      vid.seek( source, secs )
    }
 }
