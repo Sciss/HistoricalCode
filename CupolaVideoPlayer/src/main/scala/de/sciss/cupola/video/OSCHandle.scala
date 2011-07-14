@@ -20,7 +20,7 @@ class OSCHandle private( val stream: OSCStream, client: OSCClient ) extends Temp
 
    import OSCHandle._
 
-   @volatile private var bundleHitViewVar = (source: AnyRef, secs: Double, playing: Boolean) => ()
+   @volatile private var bundleHitViewVar = (idx: Int) => ()
    def bundleHitView = bundleHitViewVar
    def bundleHitView_=( fun: (Int) => Unit ) { bundleHitViewVar = fun }
 
@@ -85,6 +85,9 @@ class OSCHandle private( val stream: OSCStream, client: OSCClient ) extends Temp
                      if( client.isActive ) try {
                         client ! stream.bundles( oscIdx )
                      } catch { case e => println( e )}
+
+                     bundleHitViewVar( oscIdx )
+
                      oscIdx += 1
                      if( oscIdx < stream.bundles.size ) {
                         calcDelay()
@@ -93,8 +96,8 @@ class OSCHandle private( val stream: OSCStream, client: OSCClient ) extends Temp
                      }
 
                   case Stop => playing = false
+                  case Connect => aConnect()
                   case Disconnect => aDisconnect()
-                  case Dispose => aDispose()
                   case Seek( source, secs ) =>
                      playing = false
                      aSeek( source, secs )

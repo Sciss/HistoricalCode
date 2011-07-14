@@ -109,7 +109,10 @@ class MediaListEntryFrame( name: String, oscH: OSCHandle, vidH: VideoHandle ) ex
 //   vidH.bundleHitView   = Some( lbTime )
    vidH.timeView = (source, secs, playing) => Swing.onEDT {
       lbTime.text = Util.formatTimeString( secs )
-      if( !(source eq oscList) ) seekOSCList( secs )
+//      if( !(source eq oscList) ) seekOSCList( secs )
+   }
+   oscH.bundleHitView = (idx ) => Swing.onEDT {
+      seekOSCListIdx( idx )
    }
 
    contents = new BorderPanel {
@@ -149,6 +152,10 @@ class MediaListEntryFrame( name: String, oscH: OSCHandle, vidH: VideoHandle ) ex
       val tag  = OSCBundle.secsToTimetag( secs )
       val pos0 = Util.binarySearch( oscH.stream.bundles, tag )( OSCStream.bundleToTag )
       val pos = if( pos0 >= 0 ) pos0 else -(pos0 + 2)
+      seekOSCListIdx( pos )
+   }
+
+   private def seekOSCListIdx( pos: Int ) {
       try {
          oscList.selection.reactions -= selReact
          if( pos >= 0 ) {
