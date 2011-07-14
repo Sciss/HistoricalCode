@@ -30,9 +30,13 @@ import de.sciss.osc.{OSCBundle, OSCMessage}
 import collection.immutable.{IndexedSeq => IIdxSeq}
 
 object OSCStream {
+   val BOOL_TO_INT   = true
+
    private val intEx    = """(\d+)""".r
    private val floatEx  = """(\d?\.\d+)""".r
    private val boolEx   = """([Tt]rue|[Ff]alse)""".r
+
+   val bundleToTag = (b: OSCBundle) => b.timetag
 
    def fromSource( source: Source, offset: Double = 0.0 ) : OSCStream = {
 //      var tOff = if( beginAtZero ) Double.PositiveInfinity else 0.0
@@ -49,7 +53,9 @@ object OSCStream {
          val msgArgs = msgArgsS.tail.map {
             case intEx( i )   => i.toInt
             case floatEx( f ) => f.toFloat
-            case boolEx( b )  => b.toBoolean
+            case boolEx( b )  =>
+               val bv = b.toBoolean
+               if( BOOL_TO_INT ) { if( bv ) 1 else 0 } else bv
             case s            => s
          }
 //         if( tOff == Double.PositiveInfinity ) {

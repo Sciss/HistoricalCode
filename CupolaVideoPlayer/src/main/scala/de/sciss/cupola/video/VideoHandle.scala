@@ -46,8 +46,8 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
    def videoView = Option( videoViewVar )
    def videoView_=( v: Option[ ImageView ]) { videoViewVar = v.orNull }
 
-//   def timeView = Option( timeViewVar )
-//   def timeView_=( v: Option[ Label ]) { timeViewVar = v.orNull }
+//   def bundleHitView = Option( timeViewVar )
+//   def bundleHitView_=( v: Option[ Label ]) { timeViewVar = v.orNull }
 
    def timeView = timeViewVar
    def timeView_=( fun: (AnyRef, Double, Boolean) => Unit ) { timeViewVar = fun }
@@ -60,7 +60,7 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
 
 //println( " TIME BASE = " + timeBase + " dur = " + stream.getDuration )
 
-   protected val actor = new DaemonActor {
+   protected lazy val actor = new DaemonActor {
       import TemporalHandle._
       def act() {
          var time    = 0L
@@ -168,6 +168,7 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
                   }}
                }
 
+            case Stop =>
             case Dispose => aDispose()
          }}
       }

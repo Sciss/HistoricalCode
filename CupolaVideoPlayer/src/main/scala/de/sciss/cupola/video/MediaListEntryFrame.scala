@@ -28,19 +28,21 @@ package de.sciss.cupola.video
 import io.Source
 import swing.event.ListSelectionChanged
 import de.sciss.gui.LCDPanel
-import swing.{Label, Button, FlowPanel, ScrollPane, BorderPanel, Swing, Dialog, ListView, Frame}
-import de.sciss.osc.OSCBundle
 import java.io.File
-import java.awt.{Dimension, Color, Font}
+import java.awt.{Point, Dimension, Color, Font}
+import java.net.SocketAddress
+import de.sciss.osc.{OSCTransport, OSCBundle}
+import swing.{Component, Label, Button, FlowPanel, ScrollPane, BorderPanel, Swing, Dialog, ListView, Frame}
 
 object MediaListEntryFrame {
-   def load( parent: Frame, entry: MediaList.Entry ) {
+   def load( parent: Frame, entry: MediaList.Entry, oscSocket: SocketAddress, oscTransport: OSCTransport ) {
       (new Thread {
          override def run() {
             try {
-               val osc = OSCStream.fromSource( Source.fromFile( entry.oscPath ), entry.oscOffset )
-               val vid = VideoHandle.open( new File( entry.videoPath ).toURI.toURL )
-               Swing.onEDT( new MediaListEntryFrame( entry.name, osc, vid ))
+               val osc  = OSCStream.fromSource( Source.fromFile( entry.oscPath ), entry.oscOffset )
+               val oscH = OSCHandle( osc, oscSocket, oscTransport )
+               val vidH = VideoHandle.open( new File( entry.videoPath ).toURI.toURL )
+               Swing.onEDT( new MediaListEntryFrame( entry.name, oscH, vidH ))
             } catch {
                case e => Util.displayError( parent, "Load Media Entry", e )
             }
@@ -48,7 +50,7 @@ object MediaListEntryFrame {
       }).start()
    }
 }
-class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) extends Frame {
+class MediaListEntryFrame( name: String, oscH: OSCHandle, vidH: VideoHandle ) extends Frame {
    title = "Entry : " + name
    Util.unifiedLook( this )
 
@@ -60,7 +62,7 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
             oscList.selection.items.headOption.foreach( seek( _ ))
       }
 
-   private val oscList = new ListView( osc.bundles ) {
+   private val oscList = new ListView( oscH.stream.bundles ) {
       renderer = new OSCBundleListViewRenderer
       peer.setVisibleRowCount( 16 )
       fixedCellWidth    = 160
@@ -80,11 +82,21 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
 
    private val transportBar = new FlowPanel {
       hGap = 6
+
+      contents += NiceToggle( "Connect" ) { b =>
+//println( "CONNECT : " + b.selected )
+         if( b.selected ) oscH.connect() else oscH.disconnect()
+      }
+      contents += new Label {
+         preferredSize = new Dimension( 20, 10 )
+      }
       contents += NiceButton( "Play" ) { b =>
-         vid.play
+         vidH.play
+         oscH.play
       }
       contents += NiceButton( "Stop" ) { b =>
-         vid.stop
+         vidH.stop
+         oscH.stop
       }
       contents += new LCDPanel {
          contents += lbTime
@@ -92,15 +104,13 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
    }
 
    private val videoView = new ImageView
-   videoView.preferredSize = new Dimension( vid.width, vid.height )
-   vid.videoView  = Some( videoView )
-//   vid.timeView   = Some( lbTime )
-   vid.timeView = (source, secs, playing) => Swing.onEDT {
+   videoView.preferredSize = new Dimension( vidH.width, vidH.height )
+   vidH.videoView  = Some( videoView )
+//   vidH.bundleHitView   = Some( lbTime )
+   vidH.timeView = (source, secs, playing) => Swing.onEDT {
       lbTime.text = Util.formatTimeString( secs )
       if( !(source eq oscList) ) seekOSCList( secs )
    }
-
-   private implicit val bundleToTag = (b: OSCBundle) => b.timetag
 
    contents = new BorderPanel {
       import BorderPanel.Position._
@@ -114,11 +124,15 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
       }, South )
    }
 
-   pack().open()
+   pack()
+   centerOnScreen()
+   location = new Point( location.x, 0 )
+   open()
    seek( this, 0.0 )
 
    override def closeOperation() {
-      vid.dispose()
+      vidH.dispose()
+      oscH.dispose()
       dispose()
    }
 
@@ -133,7 +147,7 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
 
    private def seekOSCList( secs: Double ) {
       val tag  = OSCBundle.secsToTimetag( secs )
-      val pos0 = Util.binarySearch( osc.bundles, tag )
+      val pos0 = Util.binarySearch( oscH.stream.bundles, tag )( OSCStream.bundleToTag )
       val pos = if( pos0 >= 0 ) pos0 else -(pos0 + 2)
       try {
          oscList.selection.reactions -= selReact
@@ -151,6 +165,7 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
    private def seekIgnoreList( source: AnyRef, secs: Double ) {
       if( secs == seekedTime ) return
       seekedTime = secs
-      vid.seek( source, secs )
+      vidH.seek( source, secs )
+      oscH.seek( source, secs )
    }
 }

@@ -25,8 +25,8 @@
 
 package de.sciss.cupola.video
 
-import swing.Button
 import swing.event.ButtonClicked
+import swing.{ToggleButton, TextField, ComboBox, Label, Button}
 
 case class NiceButton( label: String )( reaction: Button => Unit ) extends Button( label ) {
    peer.putClientProperty( "JButton.buttonType", "bevel" )
@@ -36,4 +36,30 @@ case class NiceButton( label: String )( reaction: Button => Unit ) extends Butto
    reactions += {
       case ButtonClicked( _ ) => reaction( this )
    }
+}
+
+case class NiceToggle( label: String )( reaction: ToggleButton => Unit ) extends ToggleButton( label ) {
+   peer.putClientProperty( "JButton.buttonType", "bevel" )
+   peer.putClientProperty( "JComponent.sizeVariant", "small" )
+   focusable = false
+   listenTo( this )
+   reactions += {
+      case ButtonClicked( _ ) => reaction( this )
+   }
+}
+
+case class NiceLabel( label: String ) extends Label {
+   text = label
+   peer.putClientProperty( "JComponent.sizeVariant", "small" )
+}
+
+case class NiceTextField( initial: String )( columns: Int = initial.length ) extends TextField( initial, columns ) {
+   peer.putClientProperty( "JComponent.sizeVariant", "small" )
+}
+
+case class NiceCombo[ A ]( items: Seq[ A ], default: A ) extends ComboBox[ A ]( items ) {
+   peer.putClientProperty( "JComponent.sizeVariant", "small" )
+   peer.putClientProperty( "JComboBox.isSquare", java.lang.Boolean.TRUE )
+   focusable = false
+   selection.item = default
 }

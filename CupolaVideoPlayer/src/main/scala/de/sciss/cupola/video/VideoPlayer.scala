@@ -26,9 +26,14 @@
 package de.sciss.cupola.video
 
 import collection.immutable.{IndexedSeq => IIdxSeq}
-import swing.{ScrollPane, ListView, Orientation, BoxPanel, BorderPanel, SimpleSwingApplication, MainFrame}
+import swing.{FlowPanel, ScrollPane, ListView, Orientation, BoxPanel, BorderPanel, SimpleSwingApplication, MainFrame}
+import java.net.{InetSocketAddress, InetAddress}
+import de.sciss.osc.{OSCTransport, TCP, UDP}
 
 object VideoPlayer extends SimpleSwingApplication {
+   val DEFAULT_PORT        = 1201
+   val DEFAULT_TRANSPORT   = TCP
+
 //   lazy val videoViewer = ToolFactory.makeViewer( IMediaViewer.Mode.VIDEO_ONLY )
 
 //   private val xuggleHome  = new File( new File( new File( sys.props( "user.home" ), "Documents" ), "devel" ), "xuggler" )
@@ -63,14 +68,18 @@ object VideoPlayer extends SimpleSwingApplication {
 //      IMediaReader reader = ToolFactory.makeReader("videofile.flv");
 //      val videoPanel = new Label( "test" )
 
-      val mediaListView = new ListView( mediaList ) {
+      private val mediaListView = new ListView( mediaList ) {
          renderer = new MediaListViewRenderer
          peer.setVisibleRowCount( 8 )
          fixedCellWidth = 80
          selection.intervalMode = ListView.IntervalMode.Single
       }
 
-      val buttonPanel = new BoxPanel( Orientation.Horizontal ) {
+      private val oscHost  = NiceTextField( try { InetAddress.getLocalHost.getHostAddress } catch { case e => "127.0.0.1" })()
+      private val oscPort  = NiceTextField( DEFAULT_PORT.toString )()
+      private val oscTrnsp = NiceCombo[ OSCTransport ]( TCP :: UDP :: Nil, DEFAULT_TRANSPORT )
+
+      private val buttonPanel = new BoxPanel( Orientation.Horizontal ) {
          contents += NiceButton( "Load Entry" ) { b =>
 //            val fDlg = new FileDialog( frame.peer, b.text )
 //            fDlg.setVisible( true )
@@ -80,13 +89,26 @@ object VideoPlayer extends SimpleSwingApplication {
 //               val file = new File( dirName, fileName )
 //               openVideo( file )
 //               openOSC( file )
-
-            mediaListView.selection.items.headOption.foreach { entry =>
-               MediaListEntryFrame.load( frame, entry )
+            try {
+               val addr = new InetSocketAddress( oscHost.text, oscPort.text.toInt )
+               mediaListView.selection.items.headOption.foreach { entry =>
+                  MediaListEntryFrame.load( frame, entry, addr, oscTrnsp.selection.item )
+               }
+            } catch {
+               case e => Util.displayError( frame, b.text, e )
             }
 //            }
          }
       }
+
+      private val oscPanel = new FlowPanel {
+         hGap = 4
+         contents += NiceLabel( "OSC Server:" )
+         contents += oscHost
+         contents += oscPort
+         contents += oscTrnsp
+      }
+
       contents = new BorderPanel {
          import BorderPanel.Position._
          add( new ScrollPane( mediaListView ) {
@@ -96,6 +118,7 @@ object VideoPlayer extends SimpleSwingApplication {
             border                     = null
          }, Center )
          add( buttonPanel, South )
+         add( oscPanel, North )
       }
    }
 
