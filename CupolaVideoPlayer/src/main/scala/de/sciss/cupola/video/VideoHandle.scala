@@ -52,6 +52,8 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
    private val stream    = container.getStream( streamIdx )
    private val timeBase  = stream.getTimeBase.getDouble
 
+//println( " TIME BASE = " + timeBase + " dur = " + stream.getDuration )
+
    private case class Seek( secs: Double )
    private case object Play
    private case object Stop
@@ -83,9 +85,13 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
                      offset   = pSize // error -- break loop
                   }
                }
-               picDone && (resampler == null) || {
+               val succ = picDone && (resampler == null) || {
                   resampler.resample( picOut, picIn ) >= 0 && picOut.getPixelType == IPixelFormat.Type.BGR24
                }
+               if( succ ) {
+                  vidCurrent = picIn.getTimeStamp   // WARNING : this is microseconds, not re timebase !!!
+               }
+               succ
             }
          }
 
@@ -93,7 +99,10 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
             val vv = videoViewVar
             if( vv != null ) vv.image = conv.toImage( picOut )
             val tv = timeViewVar
-            if( tv != null ) tv.text = Util.formatTimeString( secs )
+            if( tv != null ) {
+//println( Util.formatTimeString( secs ))
+               tv.text = Util.formatTimeString( secs )
+            }
          }
 
          def aSeek( secs: Double ) : Boolean = {
@@ -104,12 +113,8 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
 
          def aSeekNoDisplay( secs: Double ) : Boolean = {
             time = (secs / timeBase).toLong
-            container.seekKeyFrame( streamIdx, time, IContainer.SEEK_FLAG_ANY )
-            val succ = tryRead()
-            if( succ ) {
-               vidCurrent = picIn.getTimeStamp
-            }
-            succ
+            container.seekKeyFrame( streamIdx, time, IContainer.SEEK_FLAG_BACKWARDS ) // .SEEK_FLAG_ANY )
+            tryRead()
          }
 
          var open = true
@@ -134,7 +139,7 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
                   val vidStart   = vidCurrent
 
                   def displayCurrent() {
-                     aDisplay( (vidCurrent - vidStart) * timeBase )
+                     aDisplay( (vidCurrent - vidStart) * 1.0e-6 )
                   }
 
                   loopWhile( playing ) { reactWithin( delay ) {
@@ -144,12 +149,8 @@ class VideoHandle private (container: IContainer, streamIdx: Int, dec: IStreamCo
                         if( playing ) {
                            val sysCurrent = System.currentTimeMillis()
                            val sysMillis  = sysCurrent - sysStart
-                           // compute how long for this frame since the first frame in the
-                           // stream.
-                           // remember that IVideoPicture and IAudioSamples timestamps are
-                           // always in MICROSECONDS,
-                           // so we divide by 1000 to get milliseconds.
-                           val vidMillis = ((vidCurrent - vidStart) * timeBase * 1000).toLong
+//println( "dv " + (vidCurrent - vidStart) )
+                           val vidMillis = ((vidCurrent - vidStart) * 1.0e-3).toLong
                            delay = math.max( 0L, vidMillis - sysMillis )
                         }
 

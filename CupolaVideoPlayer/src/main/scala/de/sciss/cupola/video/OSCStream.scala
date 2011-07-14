@@ -34,14 +34,15 @@ object OSCStream {
    private val floatEx  = """(\d?\.\d+)""".r
    private val boolEx   = """([Tt]rue|[Ff]alse)""".r
 
-   def fromSource( source: Source ) : OSCStream = {
+   def fromSource( source: Source, beginAtZero: Boolean = true ) : OSCStream = {
+      var tOff = if( beginAtZero ) Double.PositiveInfinity else 0.0
       val bundles = source.getLines().map { l =>
          val idx     = l.indexOf( ' ' )
          val timeStr = l.substring( 0, idx )
          val hours   = timeStr.substring( 0, 2 ).toInt
          val mins    = timeStr.substring( 3, 5 ).toInt
          val secs    = timeStr.substring( 6 ).toDouble
-         val time    = hours * 3600 + mins * 60 + secs
+         val time0   = hours * 3600 + mins * 60 + secs
          val msgStr  = l.substring( idx + 1 )
          val msgArgsS= msgStr.split( ", " )
          val msgName = msgArgsS.head
@@ -51,6 +52,11 @@ object OSCStream {
             case boolEx( b )  => b.toBoolean
             case s            => s
          }
+         if( tOff == Double.PositiveInfinity ) {
+//println( "tOff = " + -time0 )
+            tOff = -time0
+         }
+         val time = time0 + tOff
          OSCBundle.secs( time, OSCMessage( msgName, msgArgs: _* ))
       }
       val bndlSeq = bundles.toIndexedSeq
