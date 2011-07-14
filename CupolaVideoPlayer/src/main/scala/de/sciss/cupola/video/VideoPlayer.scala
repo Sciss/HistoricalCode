@@ -40,6 +40,10 @@ object VideoPlayer extends SimpleSwingApplication {
 //      case None         => xuggleLib
 //   }
 
+   // prevent actor starvation!!!
+   // --> http://scala-programming-language.1934581.n4.nabble.com/Scala-Actors-Starvation-td2281657.html
+   sys.props.put( "actors.enableForkJoin", "false" )
+
    lazy val mediaList = {
       try {
          MediaList.read( "medialist.xml" )

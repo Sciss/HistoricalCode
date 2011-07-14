@@ -52,6 +52,8 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
    title = "Entry : " + name
    Util.unifiedLook( this )
 
+   private var seekedTime = -1.0
+
    private val oscList = new ListView( osc.bundles ) {
       renderer = new OSCBundleListViewRenderer
       peer.setVisibleRowCount( 16 )
@@ -63,9 +65,9 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
       listenTo( selection )
       selection.intervalMode = ListView.IntervalMode.Single
       selection.reactions += {
-         case ListSelectionChanged( _, _, _ ) => selection.items.headOption.foreach { b =>
-            seek( b )
-         }
+         case /* sel @ */ ListSelectionChanged( _, _, _ ) =>
+//println( "sel : " + selection.items.headOption )
+            selection.items.headOption.foreach( seek( _ ))
       }
    }
 
@@ -77,10 +79,10 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
    private val transportBar = new FlowPanel {
       hGap = 6
       contents += NiceButton( "Play" ) { b =>
-         println( b.text )
+         vid.play
       }
       contents += NiceButton( "Stop" ) { b =>
-         println( b.text )
+         vid.stop
       }
       contents += new LCDPanel {
          contents += lbTime
@@ -89,6 +91,10 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
 
    private val videoView = new ImageView
    videoView.preferredSize = new Dimension( vid.width, vid.height )
+   vid.videoView  = Some( videoView )
+   vid.timeView   = Some( lbTime )
+
+   private implicit val bundleToTag = (b: OSCBundle) => b.timetag
 
    contents = new BorderPanel {
       import BorderPanel.Position._
@@ -103,16 +109,16 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
    }
 
    pack().open()
+   seek( 0.0 )
 
    override def closeOperation() {
+      vid.dispose()
       dispose()
    }
 
    def seek( b: OSCBundle ) {
       seekIgnoreList( OSCBundle.timetagToSecs( b.timetag ))
    }
-
-   private implicit val bundleToTag = (b: OSCBundle) => b.timetag
 
    def seek( secs: Double ) {
       seekIgnoreList( secs )
@@ -127,6 +133,9 @@ class MediaListEntryFrame( name: String, osc: OSCStream, vid: VideoHandle ) exte
    }
 
    private def seekIgnoreList( secs: Double ) {
-      lbTime.text = Util.formatTimeString( secs )
+      if( secs == seekedTime ) return
+      seekedTime = secs
+//      lbTime.text = Util.formatTimeString( secs )
+      vid.seek( secs )
    }
 }

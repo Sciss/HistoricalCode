@@ -35,6 +35,8 @@ class ImageView extends Component {
    var scale   = false
    var aspect  = true
 
+//   cursor = null
+
    override lazy val peer : JComponent = new JComponent {
       override def paintComponent( g: Graphics ) {
          val i = imageVar
@@ -74,7 +76,7 @@ class ImageView extends Component {
 
       override def getPreferredSize = {
          val i = image
-         if( i == null ) new Dimension( 320, 240 ) else new Dimension( i.getWidth( this ), i.getHeight( this ))
+         if( i == null ) super.getPreferredSize /* new Dimension( 320, 240 ) */ else new Dimension( i.getWidth( this ), i.getHeight( this ))
       }
    }
 
