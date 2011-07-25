@@ -78,6 +78,12 @@ object ScalaAudioWidgets extends SimpleSwingApplication {
          contents ++= lcds
       }
 
+      val axis = new Axis {
+         format   = Axis.Format.Time()
+         minimum  = 0.0
+         maximum  = 34.56
+      }
+
       contents = new BorderPanel {
          import BorderPanel.Position._
          add( m, West )
@@ -86,6 +92,10 @@ object ScalaAudioWidgets extends SimpleSwingApplication {
             add( lcdGrid, North )
             border = Swing.EmptyBorder( 0, 20, 0, 0 )
          }, East )
+         add( new BorderPanel {
+            add( axis, North )
+            border = Swing.EmptyBorder( 0, 0, 20, 0 )
+         }, North )
          border = Swing.EmptyBorder( 20, 20, 20, 20 )
       }
 
