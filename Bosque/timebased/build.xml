@@ -11,7 +11,7 @@
 	<property name="resources.dir"	value="resources"/>
 	<property name="main-class"		value="de.sciss.timebased.Main"/>
 	<property name="lib.dir"		value="libraries"/>
-	<property name="libraries"		value="${lib.dir}/MRJAdapter.jar:${lib.dir}/SwingOSC.jar"/>
+	<property name="libraries"		value="${lib.dir}/SwingOSC.jar"/>
 	<property name="version"		value="0.12"/>
 	<property name="debug"			value="true"/>
 

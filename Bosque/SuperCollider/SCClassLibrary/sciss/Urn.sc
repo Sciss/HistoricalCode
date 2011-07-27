@@ -15,16 +15,17 @@
  *	(refill) the urn, i.e. put all memorized items back into the urn.
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.12, 26-Jan-07
+ *	@version	0.13, 22-Aug-09
  */
 Urn {
-	var mem, urn;
+	var mem, urn, results;
 	
 	/**
 	 *	(Boolean) whether the urn is automatically
 	 *	refilled or not. defaults to 'false'
 	 */
-	var <autoReset = false;
+	var <autoReset     = false;
+	var <>avoidRepeats = 0;
 
 	/**
 	 *	Creates a new empty urn.
@@ -51,6 +52,7 @@ Urn {
 	 */
 	reset {
 		urn = mem.copy;
+		if( results.size > 0, {Êresults = results.drop( results.size - avoidRepeats )});
 	}
 	
 	/**
@@ -73,13 +75,27 @@ Urn {
 	 *	@return	a new random item from the urn, or 'nil' if the urn is empty.
 	 */
 	next {
-		var result;
+		var result, inProgress = true;
 		
-		if( urn.isEmpty, { ^nil });
-		result = urn.removeAt( urn.size.rand );
-		if( urn.isEmpty && autoReset, {
-			this.reset;
+		while({ inProgress }, {
+			if( urn.isEmpty, { ^nil });
+			result		= urn.removeAt( urn.size.rand );
+			inProgress	= false;
+			if( avoidRepeats > 0, {
+				block {Êarg break;
+					min( results.size, min( mem.size - 1, avoidRepeats )).do({ arg i;
+						if( results[ results.size - i - 1 ] == result, {
+							inProgress = true;
+							break.value;
+						});
+					});
+				};
+			});
+			if( urn.isEmpty && autoReset, {
+				this.reset;
+			});
 		});
+		results = results.add( result );
 		^result;
 	}
 	

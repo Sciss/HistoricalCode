@@ -4,7 +4,7 @@
  *
  *	Class dependancies: TypeSafe
  *
- *	@version	0.25, 26-May-09
+ *	@version	0.26, 15-Aug-09
  *	@author	Hanns Holger Rutz
  */
 ScissUtil
@@ -20,35 +20,45 @@ ScissUtil
 		^str.collect(_.toLower);
 	}
 
-	*speakerTest { arg numChannels = 8, channelOffset = 0, volume = 0.1;
-		var s, w, b, fTask, fStop, synth, d, rout;
+	*speakerTest { arg numChannels = 8, channelOffset = 0, volume = 0.1, channels, loop = false;
+		var s, w, ggPlay, ggLoop, lbChan, fTask, fStop, synth, rout;
 	
 		s = Server.default;
+		if( channels.isNil, {
+			channels = Array.series( numChannels, channelOffset );
+		});
 		
 		fStop = {
 			rout.stop; rout = nil;
 			synth.free; synth = nil;
 		};
-		w = GUI.window.new( "Pink Noise", Rect( 40, 200, 250, 64 ));
+		w = Window( "Pink Noise", Rect( 40, 200, 250, 64 ));
 		w.view.decorator = FlowLayout( w.view.bounds );
-		b = GUI.button.new( w, Rect( 0, 0, 100, 30 ));
-		b.states = [["Play", Color.black, Color.white ], ["Stop", Color.white, Color.red]];
-		d = GUI.staticText.new( w, Rect( 0, 0, 100, 30 ));
-		fTask = {
-			numChannels.do({ arg i;
-				var ch = i + channelOffset;
-				{ d.string = "Channel " ++ (ch + 1); }.defer;
-				synth = Synth.new( \speakerTest, [ \ch, ch, \vol, volume ], s.asTarget, \addToTail );
-				0.5.wait;
-				synth.free;
-				0.2.wait;
+		ggPlay = Button( w, Rect( 0, 0, 100, 30 ))
+			.states_([[ "Play", Color.black, Color.white ], [ "Stop", Color.white, Color.red ]])
+			.action_({ arg view;
+				if( view.value == 1, {
+					rout = fTask.fork;
+				}, fStop );
 			});
-			{ b.value = 0; d.string = ""; }.defer;
-		};
-		b.action = {
-			if( b.value == 1, {
-				rout = fTask.fork;
-			}, fStop );
+		ggLoop = Button( w, Rect( 0, 0, 100, 30 ))
+			.states_([[ "Loop" ], [ "Loop", Color.white, Color( 1.0, 0.5, 0.0 )]])
+			.value_( loop.binaryValue )
+			.action_({ arg view; loop = view.value == 1 });
+		lbChan = StaticText( w, Rect( 0, 0, 100, 30 ));
+		fTask = {
+			doWhile {
+				channels.do({ arg ch, i;
+					{ lbChan.string = "Channel %".format( ch + 1 )}.defer;
+					synth = Synth.new( \speakerTest, [ \ch, ch, \vol, volume ], s.asTarget, \addToTail );
+					0.5.wait;
+					synth.free;
+					0.2.wait;
+				});
+			} {
+				loop;
+			};
+			{ ggPlay.value = 0; lbChan.string = "" }.defer;
 		};
 		s.waitForBoot({
 			SynthDef( \speakerTest, { arg ch, vol = 0.1;

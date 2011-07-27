@@ -6,7 +6,7 @@
  *		04-Feb-08 - not overwriting Main:recvOSCmessage any more
  *
  *	@author	Hanns Holger Rutz
- *	@version	0.21, 26-Apr-09
+ *	@version	0.24, 12-Sep-09
  */
 
 /**
@@ -126,17 +126,26 @@
 
 + Condition {
 	waitTimeOut { arg timeout = 0.0;
-		var cancel;
+		var cancel, me;
+		me = thisThread;
 		if( timeout > 0.0, {
-			cancel = Task({
+			cancel = Routine({
 				timeout.wait;
 				cancel = nil;
-				this.unhang;
-			}, SystemClock );
-			cancel.start;
+				this.unhangOne( me );
+			}).play( me.clock );
 		});
 		this.wait;
 		cancel.stop;
+	}
+
+	hasWaitingThreads { ^(waitingThreads.size > 0) }
+
+	unhangOne { arg thread;
+		thread = waitingThreads.remove( thread );
+		if( thread.notNil, {
+			thread.clock.sched( 0, thread );
+		});
 	}
 }
 
@@ -177,5 +186,30 @@
 				e.reportError;
 			};
 		});
+	}
+	
+	// like 'while', but with the condition
+	// checked at the end of the first loop, so
+	// like a do {Ê} while statement in java.
+	// note how the receiver and argument are swapped!
+	doWhile { arg test;
+		this.value;
+		^test.while( this );
+	}
+}
+
++ Node {
+	onEnd_ { arg func;
+		UpdateListener.newFor( this.register, { arg upd, node;
+			upd.remove;
+			func.value( node );
+		}, \n_end );
+	}
+	
+	waitForEnd {
+		var cond;
+		cond = Condition.new;
+		this.onEnd = { cond.test = true; cond.signal };
+		cond.wait;
 	}
 }
