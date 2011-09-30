@@ -34,7 +34,7 @@ import de.sciss.synth.io.{SampleFormat, AudioFileType}
 import de.sciss.synth.ugen.{Silent, DiskOut, In}
 import java.util.{Date, Locale}
 import de.sciss.synth.proc.{RichBus, RichAudioBus, DSL, ProcDemiurg, RichGroup, ProcTxn, Ref, Proc}
-import de.sciss.synth.{Server, addAfter, Group}
+import de.sciss.synth.{AudioBus, Server, addAfter, Group}
 
 object NuagesRecorder {
    private val df = new SimpleDateFormat( "'rec'yyMMdd'_'HHmmss'.irc'", Locale.US )
@@ -48,7 +48,7 @@ object NuagesRecorder {
       def filenameGenerator : Settings => File
       def fileType : AudioFileType
       def sampleFormat : SampleFormat
-      def bus : RichAudioBus
+      def bus : AudioBus // RichAudioBus
    }
 
    final case class SettingsBuilder() extends SettingsLike {
@@ -60,14 +60,14 @@ object NuagesRecorder {
       var filenameGenerator : Settings => File = DefaultFilenameGenerator
       var fileType : AudioFileType = AudioFileType.IRCAM
       var sampleFormat : SampleFormat = SampleFormat.Float
-      var bus : RichAudioBus = RichBus.soundOut( Server.default, 2 )
+      var bus : AudioBus = AudioBus( Server.default, 0, 2 ) // RichAudioBus = RichBus.soundOut( Server.default, 2 )
 
       def build : Settings = SettingsImpl( folder, filenameGenerator, fileType, sampleFormat, bus )
    }
 
    private final case class SettingsImpl( folder: File, filenameGenerator: Settings => File,
                                           fileType: AudioFileType, sampleFormat: SampleFormat,
-                                          bus: RichAudioBus )
+                                          bus: /* Rich */ AudioBus )
    extends Settings
 
    object Settings {
@@ -84,9 +84,18 @@ class NuagesRecorder private ( val settings: NuagesRecorder.Settings ) {
       if( mitRef().isDefined ) return false
       val fact = ProcDemiurg.factories.find( _.name == "$mitschnitt" ).getOrElse {
          import DSL._
-         val res = diff( "$mitschnitt" ) {
-            pAudioIn( "in", Some( settings.bus ))
-            graph { in: In =>
+//         val res = diff( "$mitschnitt" ) {
+//            pAudioIn( "in" ) // , Some( settings.bus )
+//            graph { in: In =>
+//               val recPath = settings.filenameGenerator( settings )
+//               val buf     = bufRecord( recPath.getAbsolutePath, in.numChannels, settings.fileType, settings.sampleFormat )
+//               DiskOut.ar( buf.id, in )
+//               Silent.ar   // ouch
+//            }
+//         }
+         val res = gen( "$mitschnitt" ) {
+            graph {
+               val in      = In.ar( settings.bus.index, settings.bus.numChannels )
                val recPath = settings.filenameGenerator( settings )
                val buf     = bufRecord( recPath.getAbsolutePath, in.numChannels, settings.fileType, settings.sampleFormat )
                DiskOut.ar( buf.id, in )
@@ -101,6 +110,7 @@ class NuagesRecorder private ( val settings: NuagesRecorder.Settings ) {
       g.play( RichGroup.default( settings.bus.server ), addAfter )
       p.group = g
       p.play
+//      p.audioInput( "in" ).bus = Some( settings.bus )
       mitRef.set( Some( p ))
       true
    }
