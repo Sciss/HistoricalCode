@@ -31,193 +31,196 @@ package de.sciss.nuages
 import java.awt.event.{ComponentEvent, ComponentAdapter}
 import de.sciss.gui.j.PeakMeter
 import java.io.PrintStream
-import java.awt.{Font, Color}
 import javax.swing._
 import de.sciss.scalainterpreter.LogPane
+import java.awt.{Dimension, EventQueue, Font, Color}
 
 //import Setup._
 //import de.sciss.synth.proc.ProcTxn
 import collection.immutable.{IndexedSeq => IIdxSeq}
 
-class ControlPanel( masterNumChannels: Int ) /* ( tapesPanel: JComponent ) */ extends BasicPanel {
+object ControlPanel {
+   sealed trait SettingsLike {
+      def numOutputChannels : Int
+      def numInputChannels : Int
+      def clock : Boolean
+      def log : Boolean
+      def repl : Boolean
+
+      /**
+       * A function invoked when the clock is about to be
+       * started (first argument is `true`) or
+       * stopped (first argument is `false`). The function
+       * should decided whether it wants to veto or allow
+       * the action to happen in the GUI. The latter is done by invoking
+       * `apply` on the second argument.
+       */
+      def clockAction : (Boolean, () => Unit) => Unit
+   }
+
+   object Settings {
+      implicit def fromBuilder( b: SettingsBuilder ) : Settings = b.build
+   }
+   sealed trait Settings extends SettingsLike
+
+   final case class SettingsBuilder() extends SettingsLike {
+      var numOutputChannels : Int   = 2
+      var numInputChannels : Int    = 0
+      var clock : Boolean           = true
+      var clockAction : (Boolean, () => Unit) => Unit = (_, fun) => fun()
+      var log : Boolean             = true
+      var repl : Boolean            = true
+
+      def build : Settings = SettingsImpl( numOutputChannels, numInputChannels, clock, clockAction, log, repl )
+   }
+
+   private final case class SettingsImpl( numOutputChannels: Int, numInputChannels: Int, clock: Boolean,
+                                          clockAction: (Boolean, () => Unit) => Unit, log: Boolean, repl: Boolean )
+   extends Settings
+}
+
+class ControlPanel( settings: ControlPanel.Settings = ControlPanel.SettingsBuilder().build )
+extends BasicPanel {
    panel =>
 
-   private val masterMeterPanel  = new PeakMeter()
-// XXX TODO
-//   private val peopleOffset      = masterBus.numChannels << 1
-//   private val peopleMeterPanel: Option[ PeakMeter ] =
-//      if( PEOPLE_CHANGROUPS.nonEmpty ) Some( new PeakMeter() ) else None
-   
-   private var interpreter : Option[ ScalaInterpreterFrame ] = None
+   private def makeMeter( numChannels: Int ) : Option[ PeakMeter ] = if( numChannels > 0 ) {
+      val p = new PeakMeter()
+      p.orientation = SwingConstants.HORIZONTAL
+      p.numChannels = numChannels
+      p.borderVisible = true
+      val d = p.getPreferredSize
+      val dn = 30 / numChannels
+      d.height = numChannels * dn + 7
+      p.setMaximumSize( d )
+      p.setPreferredSize( d )
+      Some( p )
+   } else None
 
-   private val ggClock = new Wallclock
+   private val outMeterPanel  = makeMeter( settings.numOutputChannels )
+   private val inMeterPanel   = makeMeter( settings.numInputChannels  )
+   private val inDataOffset   = settings.numOutputChannels << 1
+
+   private var interpreter : Option[ ScalaInterpreterFrame ] = None
 
    private def space( width: Int = 8 ) {
       panel.add( Box.createHorizontalStrut( width ))
    }
 
-  val logPane = {
-     val res = new LogPane( 2, 30 )
-     res.init()
-     val scroll = res.getComponent( 0 ).asInstanceOf[ JScrollPane ]
-     scroll.setBorder( null )
-     scroll.getViewport.getView.setFont( new Font( "Menlo", Font.PLAIN, 8 ))
-     val printStream = new PrintStream( res.outputStream )
+  private val logPane = if( settings.log ) {
+     val p = new LogPane( 2, 30 )
+     p.init()
+     val scroll = p.getComponent( 0 ) match {
+        case scroll: JScrollPane =>
+           scroll.setBorder( null )
+           scroll.getViewport.getView.setFont( new Font( "Menlo", Font.PLAIN, 8 ))
+        case _ =>
+     }
+     val printStream = new PrintStream( p.outputStream )
      System.setErr( printStream )
      System.setOut( printStream )
-//      ggLog.writer.write( "Make noise.\n" )
-     Console.setErr( res.outputStream )
-     Console.setOut( res.outputStream )
-     res
-  }
+     Console.setErr( p.outputStream )
+     Console.setOut( p.outputStream )
+     val d = outMeterPanel.orElse( inMeterPanel ).map( _.getPreferredSize ).getOrElse( new Dimension( 0, 36 ))
+     val d1 = p.getPreferredSize
+     d1.height = d.height
+     p.setPreferredSize( d1 )
+     Some( p )
+  } else None
 
-   {
-      panel.setLayout( new BoxLayout( panel, BoxLayout.X_AXIS ))
+   private val clock = if( settings.clock ) Some( new Wallclock ) else None
 
-      val ggRecStart = BasicButton( "\u25B6" ) {
-// XXX TODO
-//         ProcTxn.spawnAtomic { implicit tx =>
-//            if( Nuages.startRecorder ) tx.afterCommit( _ => defer {
-               ggClock.reset()
-               ggClock.start()
-//            })
-//         }
-      }
+   private val repl = if( settings.repl ) {
+      Some( BasicToggleButton( "REPL" )( if( _ ) openREPL() else closeREPL() ))
+   } else None
+
+   // ---- constructor ----
+
+   panel.setLayout( new BoxLayout( panel, BoxLayout.X_AXIS ))
+
+   clock.foreach { ggClock =>
+      val ggRecStart = BasicButton( "\u25B6" ) { startClock() }
       ggRecStart.setBackground( Color.black )
       ggRecStart.setForeground( Color.white )
       panel.add( ggRecStart )
-      val ggRecStop = BasicButton( "\u25FC" ) {
-// XXX TODO
-//         ProcTxn.spawnAtomic { implicit tx =>
-//            Nuages.stopRecorder
-//            tx.afterCommit( _ => defer {
-               ggClock.stop()
-//            })
-//         }
-      }
+      val ggRecStop = BasicButton( "\u25FC" ) { stopClock() }
       ggRecStop.setBackground( Color.black )
       ggRecStop.setForeground( Color.white )
       panel.add( ggRecStop )
       panel.add( ggClock )
       space()
-
-//      val ggTapes = new JToggleButton( "Tapes" )
-//      ggTapes.setUI( new BasicToggleButtonUI )
-//      ggTapes.putClientProperty( "JButton.buttonType", "bevel" )
-//      ggTapes.putClientProperty( "JComponent.sizeVariant", "small" )
-//      ggTapes.setFocusable( false )
-//      ggTapes.addActionListener( new ActionListener {
-//         def actionPerformed( e: ActionEvent ) {
-//            val sel = ggTapes.isSelected
-//            tapesPanel.setVisible( sel )
-//            if( sel ) tapesPanel.toFront()
-//         }
-//      })
-//      tapesPanel.addComponentListener( new ComponentAdapter {
-//         override def componentHidden( e: ComponentEvent ) {
-//            ggTapes.setSelected( false )
-//         }
-//      })
-
-//      val ggTapes = BasicButton( "Tapes" ) {
-//         val p = Nuages.f.panel
-//         val x = (p.getWidth - tapesPanel.getWidth) >> 1
-//         val y = (p.getHeight - tapesPanel.getHeight) >> 1
-//         p.showOverlayPanel( tapesPanel, new Point( x, y ))
-//      }
-//
-////      panel.add( Box.createHorizontalStrut( 4 ))
-//      panel.add( ggTapes )
-//      panel.add( Box.createHorizontalStrut( 4 ))
-
-//      val m1 = new PeakMeter( SwingConstants.HORIZONTAL )
-//      val m2 = new PeakMeter( SwingConstants.HORIZONTAL )
-//      val mg = new PeakMeterGroup( Array( m1, m2 ))
-//      panel.add( m1 )
-//      panel.add( m2 )
-
-//      val numCh = masterBus.numChannels
-     val numCh = masterNumChannels
-      masterMeterPanel.orientation = SwingConstants.HORIZONTAL
-      masterMeterPanel.numChannels = numCh
-      masterMeterPanel.borderVisible = true
-      val d = masterMeterPanel.getPreferredSize
-      val dn = 30 / numCh
-      d.height = numCh * dn + 7
-      masterMeterPanel.setPreferredSize( d )
-      masterMeterPanel.setMaximumSize( d )
-      panel.add( masterMeterPanel )
-
-// XXX TODO
-//      peopleMeterPanel.foreach { p =>
-////         p.setOrientation( SwingConstants.HORIZONTAL )
-//         p.orientation = SwingConstants.HORIZONTAL
-////         p.setNumChannels( PEOPLE_CHANGROUPS.size )
-//         p.numChannels = PEOPLE_CHANGROUPS.size
-////         p.setBorder( true )
-//         p.borderVisible = true
-//         val d = p.getPreferredSize
-//         val dn = 30 / numCh
-//         d.height = numCh * dn + 7
-//         p.setPreferredSize( d )
-//         p.setMaximumSize( d )
-//         panel.add( p )
-//      }
-
-      val d1 = logPane.getPreferredSize
-      d1.height = d.height
-      logPane.setPreferredSize( d1 )
-      space()
-      panel.add( logPane )
-//      space( 16 )
-
-      val glue = Box.createHorizontalGlue()
-glue.setBackground( Color.black )
-//      glue.setBackground( Color.darkGray )
-      panel.add( glue )
-
-      lazy val ggInterp: JToggleButton = BasicToggleButton( "REPL" ) { sel =>
-         if( sel ) {
-            val f = interpreter.getOrElse {
-               val res = new ScalaInterpreterFrame( /* support */ /* ntp */ )
-               interpreter = Some( res )
-               res.setAlwaysOnTop( true )
-               res.setDefaultCloseOperation( WindowConstants.HIDE_ON_CLOSE )
-               res.addComponentListener( new ComponentAdapter {
-                  override def componentHidden( e: ComponentEvent ) {
-                     ggInterp.setSelected( false )
-                  }
-               })
-               // for some reason the console is lost,
-               // this way restores it
-               Console.setErr( System.err )
-               Console.setOut( System.out )
-               res
-            }
-            f.setVisible( true )
-         } else interpreter.foreach( _.setVisible( false ))
-      }
-      panel.add( ggInterp )
    }
 
-//   private def defer( code: => Unit ) { EventQueue.invokeLater( new Runnable { def run() { code }})}
+   outMeterPanel.foreach( panel.add( _ ))
+   inMeterPanel.foreach( panel.add( _ ))
 
-   def makeWindow : JFrame = makeWindow()
+   logPane.foreach { p =>
+      space()
+      panel.add( p )
+   }
+
+   repl.foreach { p =>
+      val glue = Box.createHorizontalGlue()
+      glue.setBackground( Color.black )
+      panel.add( glue )
+      panel.add( p )
+   }
+
+   def startClock() {
+      clock.foreach { ggClock =>
+         settings.clockAction( true, () => defer {
+            ggClock.reset()
+            ggClock.start()
+         })
+      }
+   }
+
+   def stopClock() {
+      clock.foreach { ggClock =>
+         settings.clockAction( false, () => defer {
+            ggClock.stop()
+         })
+      }
+   }
+
+   def openREPL() {
+      repl.foreach { ggREPL =>
+         val f = interpreter.getOrElse {
+            val res = new ScalaInterpreterFrame( /* support */ /* ntp */ )
+            interpreter = Some( res )
+            res.setAlwaysOnTop( true )
+            res.setDefaultCloseOperation( WindowConstants.HIDE_ON_CLOSE )
+            res.addComponentListener( new ComponentAdapter {
+               override def componentHidden( e: ComponentEvent ) {
+                  ggREPL.setSelected( false )
+               }
+            })
+            // for some reason the console is lost,
+            // this way restores it
+            Console.setErr( System.err )
+            Console.setOut( System.out )
+            res
+         }
+         f.setVisible( true )
+      }
+   }
+
+   def closeREPL() {
+      interpreter.foreach( _.setVisible( false ))
+   }
+
+   private def defer( code: => Unit ) { EventQueue.invokeLater( new Runnable { def run() { code }})}
+
    def makeWindow( undecorated: Boolean = true ) : JFrame = {
       val f = new JFrame( "Nuages Controls" )
       if( undecorated ) f.setUndecorated( true )
-//      val cp = f.getContentPane()
-//      cp.add( panel, BorderLayout.CENTER )
       f.setContentPane( panel )
       f.pack()
       f
    }
 
    def meterUpdate( peakRMSPairs: IIdxSeq[ Float ]) {
-      val tim = System.currentTimeMillis 
-//      masterMeterPanel.meterUpdate( peakRMSPairs, 0, tim )
-      masterMeterPanel.update( peakRMSPairs, 0, tim )
-// XXX TODO
-//      peopleMeterPanel.foreach( _.update( peakRMSPairs, peopleOffset, tim ))
+      val tim = System.currentTimeMillis
+      outMeterPanel.foreach( _.update( peakRMSPairs, 0, tim ))
+      inMeterPanel.foreach(  _.update( peakRMSPairs, inDataOffset, tim ))
    }
 }

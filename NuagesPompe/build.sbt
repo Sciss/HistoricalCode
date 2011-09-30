@@ -8,8 +8,8 @@ scalaVersion := "2.9.1"
 
 libraryDependencies ++= Seq(
    "de.sciss" %% "wolkenpumpe" % "0.30-SNAPSHOT",
-   "de.sciss" %% "scalacolliderswing" % "0.30-SNAPSHOT",
-   "de.sciss" %% "fscapejobs" % "0.16"
+   "de.sciss" %% "scalacolliderswing" % "0.30-SNAPSHOT"
+//   "de.sciss" %% "fscapejobs" % "0.16"
 )
 
 retrieveManaged := true
