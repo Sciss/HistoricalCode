@@ -1,0 +1,43 @@
+<module version="4" type="JAVA_MODULE">
+  <component name="FacetManager">
+    <facet name="Scala" type="scala">
+      <configuration>
+        <option name="compilerLibraryLevel" value="Project"></option>
+        <option name="compilerLibraryName" value="scala-2.9.1"></option>
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/../target/scala-2.9.1/classes"></output>
+    <output-test url="file://$MODULE_DIR$/../target/scala-2.9.1/test-classes"></output-test>
+    <exclude-output></exclude-output>
+    <content url="file:///Users/hhrutz/Documents/devel/NuagesPompe">
+      <sourceFolder url="file://$MODULE_DIR$/../src/main/scala" isTestSource="false"></sourceFolder>
+      <sourceFolder url="file://$MODULE_DIR$/../src/main/java" isTestSource="false"></sourceFolder>
+      <sourceFolder url="file://$MODULE_DIR$/../src/main/resources" isTestSource="false"></sourceFolder>
+      <sourceFolder url="file://$MODULE_DIR$/../src/test/scala" isTestSource="true"></sourceFolder>
+      <sourceFolder url="file://$MODULE_DIR$/../src/test/java" isTestSource="true"></sourceFolder>
+      <sourceFolder url="file://$MODULE_DIR$/../src/test/resources" isTestSource="true"></sourceFolder>
+      <excludeFolder url="file://$MODULE_DIR$/../target"></excludeFolder>
+    </content>
+    <orderEntry type="inheritedJdk"></orderEntry>
+    <orderEntry type="sourceFolder" forTests="false"></orderEntry>
+    <orderEntry level="project" name="org.scala-lang_scala-library_2.9.1" type="library"></orderEntry>
+    <orderEntry level="project" name="de.sciss_wolkenpumpe_2.9.1_0.30-SNAPSHOT" type="library"></orderEntry>
+    <orderEntry level="project" name="de.sciss_prefuse-core_0.21" type="library"></orderEntry>
+    <orderEntry level="project" name="de.sciss_scalacollider_2.9.1_0.30-SNAPSHOT" type="library"></orderEntry>
+    <orderEntry level="project" name="de.sciss_scalaosc_2.9.1_0.30-SNAPSHOT" type="library"></orderEntry>
+    <orderEntry level="project" name="de.sciss_scalaaudiofile_2.9.1_0.20" type="library"></orderEntry>
+    <orderEntry level="project" name="de.sciss_soundprocesses_2.9.1_0.30-SNAPSHOT" type="library"></orderEntry>
+    <orderEntry level="project" name="org.scala-tools_scala-stm_2.9.1_0.3" type="library"></orderEntry>
+    <orderEntry level="project" name="org.scalatest_scalatest_2.9.1_1.6.1" type="library"></orderEntry>
+    <orderEntry level="project" name="de.sciss_scalacolliderswing_2.9.1_0.30-SNAPSHOT" type="library"></orderEntry>
+    <orderEntry level="project" name="de.sciss_scalainterpreterpane_2.9.1_0.18" type="library"></orderEntry>
+    <orderEntry level="project" name="jsyntaxpane_jsyntaxpane_0.9.5-b29" type="library"></orderEntry>
+    <orderEntry level="project" name="org.scala-lang_scala-compiler_2.9.1" type="library"></orderEntry>
+    <orderEntry level="project" name="de.sciss_scalaaudiowidgets_2.9.1_0.10" type="library"></orderEntry>
+    <orderEntry level="project" name="de.sciss_audiowidgets_2.9.1_0.10" type="library"></orderEntry>
+    <orderEntry level="project" name="org.scala-lang_scala-swing_2.9.1" type="library"></orderEntry>
+    <orderEntry level="project" name="de.sciss_fscapejobs_2.9.1_0.16" type="library"></orderEntry>
+  </component>
+</module>
