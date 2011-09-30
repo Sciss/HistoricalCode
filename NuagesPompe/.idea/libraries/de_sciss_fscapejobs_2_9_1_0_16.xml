@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="de.sciss_fscapejobs_2.9.1_0.16">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib_managed/jars/de.sciss/fscapejobs_2.9.1/fscapejobs_2.9.1-0.16.jar!/"></root>
+      <root url="jar://$PROJECT_DIR$/lib_managed/jars/de.sciss/fscapejobs_2.9.1/fscapejobs_2.9.1-0.16.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$PROJECT_DIR$/lib_managed/docs/de.sciss/fscapejobs_2.9.1/fscapejobs_2.9.1-0.16-javadoc.jar!/"></root>
+      <root url="jar://$PROJECT_DIR$/lib_managed/docs/de.sciss/fscapejobs_2.9.1/fscapejobs_2.9.1-0.16-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$PROJECT_DIR$/lib_managed/srcs/de.sciss/fscapejobs_2.9.1/fscapejobs_2.9.1-0.16-sources.jar!/"></root>
+      <root url="jar://$PROJECT_DIR$/lib_managed/srcs/de.sciss/fscapejobs_2.9.1/fscapejobs_2.9.1-0.16-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
