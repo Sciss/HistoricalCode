@@ -63,7 +63,21 @@ object ControlPanel {
    }
    sealed trait Settings extends SettingsLike
 
-   final case class SettingsBuilder() extends SettingsLike {
+   object SettingsBuilder {
+      def fromSettings( s: SettingsLike ) : SettingsBuilder = {
+         val b = apply()
+         b.numOutputChannels  = s.numOutputChannels
+         b.numInputChannels   = s.numInputChannels
+         b.clock              = s.clock
+         b.clockAction        = s.clockAction
+         b.log                = s.log
+         b.repl               = s.repl
+         b
+      }
+
+      def apply() : SettingsBuilder = new SettingsBuilder()
+   }
+   final class SettingsBuilder private () extends SettingsLike {
       var numOutputChannels : Int   = 2
       var numInputChannels : Int    = 0
       var clock : Boolean           = true
