@@ -29,16 +29,15 @@
 package de.sciss.nuages
 
 import de.sciss.scalainterpreter.ScalaInterpreterPane
-import tools.nsc.interpreter.NamedParam
 import java.awt.event.KeyEvent
 import java.awt.{Toolkit, GraphicsEnvironment}
 import javax.swing._
 
-/**
- *    @version 0.11, 04-Jun-10
- */
-class ScalaInterpreterFrame // ( support: REPLSupport /* s: Server, ntp: NodeTreePanel*/ )
-extends JFrame( "Scala Interpreter" ) {
+object InterpreterFrame {
+   def apply( title: String = "Scala Interpreter" ) : InterpreterFrame = new InterpreterFrame( title )
+}
+class InterpreterFrame private( title: String ) // ( support: REPLSupport /* s: Server, ntp: NodeTreePanel*/ )
+extends JFrame( title ) {
    val pane = new ScalaInterpreterPane
 //   private val sync = new AnyRef
 //   private var inCode: Option[ Interpreter => Unit ] = None

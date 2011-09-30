@@ -77,9 +77,11 @@ object ControlPanel {
    private final case class SettingsImpl( numOutputChannels: Int, numInputChannels: Int, clock: Boolean,
                                           clockAction: (Boolean, () => Unit) => Unit, log: Boolean, repl: Boolean )
    extends Settings
+
+   def apply( settings: Settings = SettingsBuilder().build ) : ControlPanel = new ControlPanel( settings )
 }
 
-class ControlPanel( settings: ControlPanel.Settings = ControlPanel.SettingsBuilder().build )
+class ControlPanel private ( val settings: ControlPanel.Settings )
 extends BasicPanel {
    panel =>
 
@@ -100,7 +102,7 @@ extends BasicPanel {
    private val inMeterPanel   = makeMeter( settings.numInputChannels  )
    private val inDataOffset   = settings.numOutputChannels << 1
 
-   private var interpreter : Option[ ScalaInterpreterFrame ] = None
+   private var interpreter : Option[ InterpreterFrame ] = None
 
    private def space( width: Int = 8 ) {
       panel.add( Box.createHorizontalStrut( width ))
@@ -127,7 +129,7 @@ extends BasicPanel {
      Some( p )
   } else None
 
-   private val clock = if( settings.clock ) Some( new Wallclock ) else None
+   private val clock = if( settings.clock ) Some( Wallclock() ) else None
 
    private val repl = if( settings.repl ) {
       Some( BasicToggleButton( "REPL" )( if( _ ) openREPL() else closeREPL() ))
@@ -185,7 +187,7 @@ extends BasicPanel {
    def openREPL() {
       repl.foreach { ggREPL =>
          val f = interpreter.getOrElse {
-            val res = new ScalaInterpreterFrame( /* support */ /* ntp */ )
+            val res = InterpreterFrame()
             interpreter = Some( res )
             res.setAlwaysOnTop( true )
             res.setDefaultCloseOperation( WindowConstants.HIDE_ON_CLOSE )

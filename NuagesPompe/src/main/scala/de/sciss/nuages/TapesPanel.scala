@@ -28,18 +28,18 @@
 
 package de.sciss.nuages
 
-import javax.swing._
-import java.awt.event._
 import collection.breakOut
 import collection.immutable.{IndexedSeq => IIdxSeq}
-import table._
 import java.text.SimpleDateFormat
 import java.util.{Locale, Date, Comparator}
-import java.awt._
 import java.io.File
 import javax.swing.event.{ListSelectionListener, ListSelectionEvent}
 import de.sciss.synth.Model
 import de.sciss.synth.io.{AudioFile, AudioFileSpec}
+import javax.swing.table.{AbstractTableModel, TableRowSorter, DefaultTableCellRenderer, TableCellRenderer}
+import javax.swing.{JComponent, KeyStroke, AbstractAction, JScrollPane, ScrollPaneConstants, JTable, SwingConstants}
+import java.awt.event.{ActionEvent, KeyEvent, MouseAdapter, MouseEvent}
+import java.awt.{Point, Toolkit, Dimension, Color, BorderLayout}
 
 object TapesPanel {
    case class SelectionChanged( selection: TapeInfo* )
@@ -87,7 +87,7 @@ object TapesPanel {
 
    case class TapeInfo( file: File, spec: AudioFileSpec )
 
-   def fromFolder( folder: File, title: String = "Tapes", sizeVariant: String = "small" ) = {
+   def fromFolder( folder: File, title: String = "Tapes", sizeVariant: String = "small" ) : TapesPanel = {
       val files = folder.listFiles()
       val infos: IIdxSeq[ TapeInfo ] = if( files != null ) files.collect({
          case x if( x.isFile && (try { AudioFile.identify( x ).isDefined } catch { case e => false })) =>
@@ -95,12 +95,15 @@ object TapesPanel {
       })( breakOut ) else IIdxSeq.empty
       new TapesPanel( infos, title, sizeVariant )
    }
+
+   def apply( infos: IIdxSeq[ TapesPanel.TapeInfo ], title: String = "Tapes", sizeVariant: String = "small" ) : TapesPanel =
+      new TapesPanel( infos, title, sizeVariant )
 }
 
-class TapesPanel( infos: IIdxSeq[ TapesPanel.TapeInfo ], title: String, sizeVariant: String = "small" )
+class TapesPanel private ( infos: IIdxSeq[ TapesPanel.TapeInfo ], title: String, sizeVariant: String )
 extends OverlayPanel // extends JFrame( title )
 with Model {
-   panel =>
+   tapes =>
 
    import TapesPanel._
 
@@ -165,7 +168,7 @@ with Model {
       ggTable.setRowSorter( rowSorter )
       ggTable.addMouseListener( new MouseAdapter {
          override def mouseClicked( e: MouseEvent ) {
-            if( e.getClickCount == 2 ) getParent.remove( panel )
+            if( e.getClickCount == 2 ) getParent.remove( tapes )
          }
       })
       ggTable.getSelectionModel.addListSelectionListener( new ListSelectionListener {
@@ -179,8 +182,8 @@ with Model {
       ggTable.setForeground( Color.white )
       val ggScroll = new JScrollPane( ggTable,
          ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS )
-      panel.setLayout( new BorderLayout() )
-      panel.add( ggScroll, BorderLayout.CENTER )
+      tapes.setLayout( new BorderLayout() )
+      tapes.add( ggScroll, BorderLayout.CENTER )
 //      queryFrame.addListener( frameListener )
 //      search.addListener( searchListener )
 //      pack()
@@ -210,5 +213,24 @@ with Model {
 //            null
 //         }
       }
+   }
+
+   def installOn( frame: NuagesFrame )( action: List[ TapeInfo ] => Unit ) {
+      tapes.addListener {
+         case TapesPanel.SelectionChanged( sel @ _* ) => action( sel.toList )
+      }
+
+      val p       = frame.panel
+      val imap    = p.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW )
+      val amap    = p.getActionMap
+      val tpName  = "tapes"
+      imap.put( KeyStroke.getKeyStroke( KeyEvent.VK_T, Toolkit.getDefaultToolkit.getMenuShortcutKeyMask ), tpName )
+      amap.put( tpName, new AbstractAction( tpName ) {
+         def actionPerformed( e: ActionEvent ) {
+            val x = (p.getWidth - tapes.getWidth) >> 1
+            val y = (p.getHeight - tapes.getHeight) >> 1
+            p.showOverlayPanel( tapes, new Point( x, y ))
+         }
+      })
    }
 }

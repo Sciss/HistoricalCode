@@ -33,7 +33,10 @@ import java.util.{TimerTask, Timer}
 import java.awt.{EventQueue, Graphics, Color, Font}
 import de.sciss.gui.j.RecessedBorder
 
-class Wallclock extends JLabel {
+object Wallclock {
+   def apply() : Wallclock = new Wallclock()
+}
+class Wallclock private () extends JLabel {
    private var secs = 0
    private var timer: Option[ Timer ] = None
    private val sb = new StringBuilder( 6 )
