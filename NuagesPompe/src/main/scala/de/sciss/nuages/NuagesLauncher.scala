@@ -1,3 +1,31 @@
+/*
+ *  NuagesLauncher.scala
+ *  (NuagesPompe)
+ *
+ *  Copyright (c) 2010-2011 Hanns Holger Rutz. All rights reserved.
+ *
+ *  This software is free software; you can redistribute it and/or
+ *  modify it under the terms of the GNU General Public License
+ *  as published by the Free Software Foundation; either
+ *  version 2, june 1991 of the License, or (at your option) any later version.
+ *
+ *  This software is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ *  General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public
+ *  License (gpl.txt) along with this software; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ *
+ *  For further information, please contact Hanns Holger Rutz at
+ *  contact@sciss.de
+ *
+ *
+ *  Changelog:
+ */
+
 package de.sciss.nuages
 
 import de.sciss.synth.swing.j.JServerStatusPanel
@@ -20,7 +48,11 @@ object NuagesLauncher {
       def tapeFolder: Option[ File ]
       def tapeAction: List[ TapesPanel.TapeInfo ] => Unit
       def beforeShutdown: () => Unit
-      def procInit : ProcTxn => Unit
+
+      /**
+       * This is invoked after booting and setting up nuages, on the event dispatcher thread.
+       */
+      def doneAction : Ready => Unit
       def controlSettings: ControlPanel.SettingsLike
       def antiAliasing : Boolean
    }
@@ -33,7 +65,15 @@ object NuagesLauncher {
    }
 
    final case class SettingsBuilder() extends SettingsLike {
-      var serverOptions    = new ServerOptionsBuilder
+      var serverOptions    = {
+         val b = new ServerOptionsBuilder
+         // some more sane settings
+         b.audioBusChannels   = 512
+         b.loadSynthDefs      = false
+         b.memorySize         = 65536
+         b.zeroConf           = false
+         b
+      }
       var masterChannels   = Option( IIdxSeq( 0, 1 ))
       var soloChannels     = Option.empty[ IIdxSeq[ Int ]]
       var recordPath       = Option.empty[ String ]
@@ -43,14 +83,14 @@ object NuagesLauncher {
       var tapeFolder       = Option.empty[ File ]
       var tapeAction: List[ TapesPanel.TapeInfo ] => Unit = list => ()
       var beforeShutdown: () => Unit = () => ()
-      var procInit : ProcTxn => Unit = tx => ()
+      var doneAction : Ready => Unit = r => ()
       var controlSettings  = ControlPanel.SettingsBuilder()
       var antiAliasing     = false
 
       def build : Settings = SettingsImpl(
          serverOptions.build,
          masterChannels, soloChannels, recordPath, meters, collector, fullScreenKey, tapeFolder, tapeAction,
-         beforeShutdown, procInit, controlSettings.build, antiAliasing )
+         beforeShutdown, doneAction, controlSettings.build, antiAliasing )
    }
 
    private final case class SettingsImpl( serverOptions: ServerOptions,
@@ -59,14 +99,28 @@ object NuagesLauncher {
                                           recordPath: Option[ String ],
                                           meters: Boolean, collector: Boolean, fullScreenKey: Boolean,
                                           tapeFolder: Option[ File ], tapeAction: List[ TapesPanel.TapeInfo ] => Unit,
-                                          beforeShutdown: () => Unit, procInit: ProcTxn => Unit,
+                                          beforeShutdown: () => Unit, doneAction: Ready => Unit,
                                           controlSettings: ControlPanel.Settings, antiAliasing: Boolean )
    extends Settings
 
    def apply( settings: Settings = SettingsBuilder().build ) : NuagesLauncher =
       new NuagesLauncher( settings )
+
+   sealed trait Ready {
+      def server : Server
+      def frame : NuagesFrame
+      def launcher : NuagesLauncher
+      def controlPanel : ControlPanel
+      def tapesPanel : Option[ TapesPanel ]
+   }
+
+   private final case class ReadyImpl( server: Server, frame: NuagesFrame, launcher: NuagesLauncher,
+                                       controlPanel: ControlPanel, tapesPanel: Option[ TapesPanel ])
+   extends Ready
 }
 final class NuagesLauncher private( val settings: NuagesLauncher.Settings ) {
+   launcher =>
+
    launch()
 
    private def defer( code: => Unit ) { EventQueue.invokeLater( new Runnable { def run() { code }})}
@@ -137,12 +191,19 @@ final class NuagesLauncher private( val settings: NuagesLauncher.Settings ) {
       ctrlB.add( ctrl )
       ctrlB.add( Box.createHorizontalStrut( 4 ))
 
-      settings.tapeFolder.foreach { folder =>
+      val tapes = settings.tapeFolder.map { folder =>
          val p = TapesPanel.fromFolder( folder )
          p.installOn( f )( settings.tapeAction( _ ))
+         p
       }
 
-      ProcTxn.atomic( settings.procInit( _ ))
+//      ProcTxn.atomic( settings.procInit( _ ))
+      val res = NuagesLauncher.ReadyImpl( s, f, launcher, ctrl, tapes )
+      try {
+         settings.doneAction( res )
+      } catch {
+         case e => e.printStackTrace()
+      }
    }
 
    private def shutdown( booting: ServerConnection ) {
