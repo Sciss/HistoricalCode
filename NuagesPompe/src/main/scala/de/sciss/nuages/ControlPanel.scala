@@ -46,6 +46,7 @@ object ControlPanel {
       def clock : Boolean
       def log : Boolean
       def repl : Boolean
+      def replSettings : InterpreterFrame.SettingsLike
 
       /**
        * A function invoked when the clock is about to be
@@ -61,7 +62,9 @@ object ControlPanel {
    object Settings {
       implicit def fromBuilder( b: SettingsBuilder ) : Settings = b.build
    }
-   sealed trait Settings extends SettingsLike
+   sealed trait Settings extends SettingsLike {
+      def replSettings : InterpreterFrame.Settings
+   }
 
    object SettingsBuilder {
       def fromSettings( s: SettingsLike ) : SettingsBuilder = {
@@ -72,6 +75,7 @@ object ControlPanel {
          b.clockAction        = s.clockAction
          b.log                = s.log
          b.repl               = s.repl
+         b.replSettings       = InterpreterFrame.SettingsBuilder.fromSettings( s.replSettings )
          b
       }
 
@@ -84,12 +88,15 @@ object ControlPanel {
       var clockAction : (Boolean, () => Unit) => Unit = (_, fun) => fun()
       var log : Boolean             = true
       var repl : Boolean            = true
+      var replSettings : InterpreterFrame.SettingsBuilder = InterpreterFrame.SettingsBuilder()
 
-      def build : Settings = SettingsImpl( numOutputChannels, numInputChannels, clock, clockAction, log, repl )
+      def build : Settings = SettingsImpl( numOutputChannels, numInputChannels, clock, clockAction, log,
+                                           repl, replSettings.build )
    }
 
    private final case class SettingsImpl( numOutputChannels: Int, numInputChannels: Int, clock: Boolean,
-                                          clockAction: (Boolean, () => Unit) => Unit, log: Boolean, repl: Boolean )
+                                          clockAction: (Boolean, () => Unit) => Unit, log: Boolean, repl: Boolean,
+                                          replSettings: InterpreterFrame.Settings )
    extends Settings
 
    def apply( settings: Settings = SettingsBuilder().build ) : ControlPanel = new ControlPanel( settings )
@@ -125,7 +132,7 @@ extends BasicPanel {
   private val logPane = if( settings.log ) {
      val p = new LogPane( 2, 30 )
      p.init()
-     val scroll = p.getComponent( 0 ) match {
+     /* val scroll = */ p.getComponent( 0 ) match {
         case scroll: JScrollPane =>
            scroll.setBorder( null )
            scroll.getViewport.getView.setFont( new Font( "Menlo", Font.PLAIN, 8 ))
@@ -201,10 +208,10 @@ extends BasicPanel {
    def openREPL() {
       repl.foreach { ggREPL =>
          val f = interpreter.getOrElse {
-            val res = InterpreterFrame()
+            val res = InterpreterFrame( settings.replSettings )
             interpreter = Some( res )
             res.setAlwaysOnTop( true )
-            res.setDefaultCloseOperation( WindowConstants.HIDE_ON_CLOSE )
+//            res.setDefaultCloseOperation( WindowConstants.HIDE_ON_CLOSE )
             res.addComponentListener( new ComponentAdapter {
                override def componentHidden( e: ComponentEvent ) {
                   ggREPL.setSelected( false )

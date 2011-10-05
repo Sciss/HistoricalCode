@@ -32,12 +32,87 @@ import de.sciss.scalainterpreter.ScalaInterpreterPane
 import java.awt.event.KeyEvent
 import java.awt.{Toolkit, GraphicsEnvironment}
 import javax.swing._
+import tools.nsc.interpreter.NamedParam
+import collection.immutable.{IndexedSeq => IIdxSeq}
 
 object InterpreterFrame {
-   def apply( title: String = "Scala Interpreter" ) : InterpreterFrame = new InterpreterFrame( title )
+   def apply( settings: Settings = SettingsBuilder().build ) : InterpreterFrame = new InterpreterFrame( settings )
+
+   sealed trait SettingsLike {
+      /**
+       * Value bindings for the interpreter.
+       */
+      def bindings : IIdxSeq[ NamedParam ]
+
+      /**
+       * Packages initially imported when the interpreter starts up.
+       */
+      def imports: IIdxSeq[ String ]
+
+      /**
+       * Text initially placed in the pane widget.
+       */
+      def text: String
+
+      /**
+       * Initial code to execute upon interpreter startup. Use an empty string
+       * to skip initial code execution.
+       */
+      def code: String
+
+      /**
+       * Title of the frame.
+       */
+      def title : String
+
+      /**
+       * Close operation of the frame.
+       */
+      def closeOperation : Int
+
+   }
+
+   sealed trait Settings extends SettingsLike
+
+   object SettingsBuilder {
+      def apply() : SettingsBuilder = new SettingsBuilder()
+      def fromSettings( s: SettingsLike ) : SettingsBuilder = {
+         val b             = new SettingsBuilder()
+         b.bindings        = s.bindings
+         b.imports         = s.imports
+         b.text            = s.text
+         b.code            = s.code
+         b.title           = s.title
+         b.closeOperation  = s.closeOperation
+         b
+      }
+   }
+
+   final class SettingsBuilder private () extends SettingsLike {
+      var bindings         = IIdxSeq.empty[ NamedParam ]
+      var imports          = IIdxSeq(
+         "math._",
+         "de.sciss.synth._",
+         "de.sciss.synth.ugen._",
+         "de.sciss.synth.swing._",
+         "de.sciss.synth.proc._",
+         "de.sciss.synth.proc.DSL._"
+      )
+      var title            = "Scala Interpreter"
+      var closeOperation   = WindowConstants.HIDE_ON_CLOSE
+      var text             = ""
+      var code             = ""
+
+      def build : Settings = SettingsImpl( bindings, imports, text, code, title, closeOperation )
+   }
+
+   private final case class SettingsImpl( bindings: IIdxSeq[ NamedParam ],
+                                          imports: IIdxSeq[ String ], text: String, code: String,
+                                          title: String, closeOperation: Int )
+   extends Settings
 }
-class InterpreterFrame private( title: String ) // ( support: REPLSupport /* s: Server, ntp: NodeTreePanel*/ )
-extends JFrame( title ) {
+class InterpreterFrame private( val settings: InterpreterFrame.Settings )
+extends JFrame( settings.title ) {
    val pane = new ScalaInterpreterPane
 //   private val sync = new AnyRef
 //   private var inCode: Option[ Interpreter => Unit ] = None
@@ -56,22 +131,11 @@ extends JFrame( title ) {
 """// Press '""" + KeyEvent.getKeyModifiersText( txnKeyStroke.getModifiers ) + " + " +
       KeyEvent.getKeyText( txnKeyStroke.getKeyCode ) + """' to execute transactionally.
 
-"""
+""" + settings.text
 
-      pane.initialCode = Some(
-"""
-import math._
-import de.sciss.synth._
-import de.sciss.synth.ugen._
-import de.sciss.synth.swing._
-import de.sciss.synth.proc._
-import de.sciss.synth.proc.DSL._
-// XXX TODO import support._
-"""
-      )
-
-// XXX TODO
-//      pane.customBindings = Seq( NamedParam( "support", support ))
+      pane.initialCode     = if( settings.code.isEmpty ) None else Some( settings.code )
+      pane.customBindings  = settings.bindings
+      pane.customImports   = settings.imports
 
 // XXX TODO
 //      pane.out = Some( Setup.logPane.writer )
@@ -89,7 +153,7 @@ import de.sciss.synth.proc.DSL._
 //      sp.setDividerLocation( b.height * 2 / 3 )
       setLocationRelativeTo( null )
 //    setLocation( x, getY )
-      setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE )
+      setDefaultCloseOperation( settings.closeOperation )
 //    setVisible( true )
    }
 

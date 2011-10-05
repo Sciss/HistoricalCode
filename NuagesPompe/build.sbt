@@ -1,6 +1,6 @@
 name := "nuagespompe"
 
-version := "0.10-SNAPSHOT"
+version := "0.10"
 
 organization := "de.sciss"
 
@@ -9,7 +9,6 @@ scalaVersion := "2.9.1"
 libraryDependencies ++= Seq(
    "de.sciss" %% "wolkenpumpe" % "0.30-SNAPSHOT",
    "de.sciss" %% "scalacolliderswing" % "0.30-SNAPSHOT"
-//   "de.sciss" %% "fscapejobs" % "0.16"
 )
 
 retrieveManaged := true
