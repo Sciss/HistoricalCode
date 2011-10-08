@@ -126,9 +126,15 @@ final class NuagesLauncher private( val settings: NuagesLauncher.Settings ) {
    private def defer( code: => Unit ) { EventQueue.invokeLater( new Runnable { def run() { code }})}
 
    private def launch() {
+      // Dummy call to initialize AWT.
+      // Technically we don't need EDT here --
+      // but that way the icon doesn't bounce forever in the OS X dock
+      // (which is probably due to the first other process being scsynth otherwise)
+      EventQueue.isDispatchThread
+
       // prevent actor starvation!!!
       // --> http://scala-programming-language.1934581.n4.nabble.com/Scala-Actors-Starvation-td2281657.html
-      sys.props += "actors.enableForkJoin" -> "false"
+//      sys.props += "actors.enableForkJoin" -> "false"
 
       val booting = Server.boot( options = settings.serverOptions ) {
          case ServerConnection.Running( s ) => defer( running( s ))
