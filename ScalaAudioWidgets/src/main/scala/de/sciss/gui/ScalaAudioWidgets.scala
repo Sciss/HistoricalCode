@@ -29,14 +29,14 @@ import java.awt.event.{ActionEvent, ActionListener}
 import swing.event.{WindowClosing, WindowOpened}
 import collection.immutable.{IndexedSeq => IIdxSeq}
 import java.awt.{Color}
-import swing.{Component, Label, GridPanel, Swing, BorderPanel, MainFrame, SimpleSwingApplication}
-import javax.swing.{Box, Timer}
+import swing.{Label, GridPanel, Swing, BorderPanel, MainFrame, SimpleSwingApplication}
+import javax.swing.Timer
 
 object ScalaAudioWidgets extends SimpleSwingApplication {
    val name          = "ScalaAudioWidgets"
    val version       = 0.10
    val copyright     = "(C)opyright 2011 Hanns Holger Rutz"
-   val isSnapshot    = true
+   val isSnapshot    = false
 
    def versionString = {
       val s = (version + 0.001).toString.substring( 0, 4 )
