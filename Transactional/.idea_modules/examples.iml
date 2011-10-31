@@ -1,0 +1,28 @@
+<module version="4" type="JAVA_MODULE">
+  <component name="FacetManager">
+    <facet name="Scala" type="scala">
+      <configuration>
+        <option name="compilerLibraryLevel" value="Project"></option>
+        <option name="compilerLibraryName" value="scala-2.9.1"></option>
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/../examples/target/scala-2.9.1/classes"></output>
+    <output-test url="file://$MODULE_DIR$/../examples/target/scala-2.9.1/test-classes"></output-test>
+    <exclude-output></exclude-output>
+    <content url="file://$MODULE_DIR$/../examples">
+      <sourceFolder url="file://$MODULE_DIR$/../examples/src/main/scala" isTestSource="false"></sourceFolder>
+      <sourceFolder url="file://$MODULE_DIR$/../examples/src/main/java" isTestSource="false"></sourceFolder>
+      <sourceFolder url="file://$MODULE_DIR$/../examples/src/main/resources" isTestSource="false"></sourceFolder>
+      <sourceFolder url="file://$MODULE_DIR$/../examples/src/test/scala" isTestSource="true"></sourceFolder>
+      <sourceFolder url="file://$MODULE_DIR$/../examples/src/test/java" isTestSource="true"></sourceFolder>
+      <sourceFolder url="file://$MODULE_DIR$/../examples/src/test/resources" isTestSource="true"></sourceFolder>
+      <excludeFolder url="file://$MODULE_DIR$/../examples/target"></excludeFolder>
+    </content>
+    <orderEntry type="inheritedJdk"></orderEntry>
+    <orderEntry type="sourceFolder" forTests="false"></orderEntry>
+    <orderEntry level="project" name="org.scala-lang_scala-library_2.9.1" type="library"></orderEntry>
+    <orderEntry type="module" module-name="simpleExamples" exported=""></orderEntry>
+  </component>
+</module>
