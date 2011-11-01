@@ -24,7 +24,11 @@ object PluginBuild extends Build {
    lazy val annotation = Project(
       "annotation",
       file( "annotation" ),
-      settings = buildSettings
+      settings = buildSettings ++ Seq(
+         libraryDependencies <++= scalaVersion { sv => Seq(
+            "org.scala-tools" %% "scala-stm" % "0.3"
+         )}
+      )
    )
 
    lazy val plugin = Project(
@@ -57,9 +61,7 @@ object PluginBuild extends Build {
 //            "-verbose",
 //          "-usejavacp",
 //          "-nobootcp",
-//            "-Xprint:txn.annotations",
 //          "-Xprint:lazyvals",
-            "-Ylog:txn.annotations",
 //          "-Ylog:lambdalift",
 //          "-Ydebug",
 //          "-Yshow-syms"
@@ -69,6 +71,8 @@ object PluginBuild extends Build {
 //          "-Yshow-trees"
 //          "-Xplugin-list"
 //          "-Xshow-phases"
+            "-Xprint:txn.annotations",
+            "-Ylog:txn.annotations",
             "-Xplugin-require:transactional"
          )
       )
