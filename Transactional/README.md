@@ -12,8 +12,7 @@ Transactional builds with sbt 0.11 against Scala 2.9.1.
 
 Imagine a simple data structure, like a linked
 
-<!-- language: scala -->
-
+```scala
     @txn trait SkipList[ A ] {
        @txn def contains( v: A ) : Boolean
        @txn def add( v: A ) : Boolean
