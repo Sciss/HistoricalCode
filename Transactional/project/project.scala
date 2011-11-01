@@ -58,13 +58,13 @@ object PluginBuild extends Build {
             jar => "-Xplugin:%s" format jar._2.getAbsolutePath
          ),
          scalacOptions ++= Seq(
-            "-verbose",
+//            "-verbose",
 //          "-usejavacp",
 //          "-nobootcp",
 //          "-Xprint:lazyvals",
 //          "-Ylog:lambdalift",
 //          "-Ydebug",
-            "-Yshow-syms",
+//            "-Yshow-syms",
             "-Ycheck:txn.annotations",
 //          "-Ycheck:lazyvals"
 //          "-Ybrowse:lazyvals"

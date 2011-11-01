@@ -8,7 +8,8 @@ import nsc.transform.{Transform, TypingTransformers}
 
 final class TransformAnnotations( plugin: TransactionalPlugin, val global: Global )
 extends PluginComponent with Transform with TypingTransformers {
-   val runsAfter  = List( "typer" )  // "refchecks"  "namer"
+//   val runsAfter  = List( "typer" )  // "refchecks"  "namer"
+   override val runsBefore = "namer"
    val phaseName  = "txn.annotations"
 
    /**
@@ -71,7 +72,42 @@ extends PluginComponent with Transform with TypingTransformers {
          cpy
       }
 
-      private def mkTxnClass( cd: ClassDef ) : ClassDef = {
+      private def mkTxnClass( orig: ClassDef ) : ClassDef = {
+         val name    = newTypeName( "Txn" + orig.name )
+         val mods    = orig.mods | Flags.SYNTHETIC
+         val tp      = List.empty[ TypeDef ] // mkTxnTParams( orig.symbol, orig.tparams ) // List.empty[ TypeDef ] // orig.tparams
+         val parents = orig.impl.parents
+         val self    = orig.impl.self
+         val body    = orig.impl.body.take(1) // List.empty[ Tree ] // orig.impl.body
+         val newImpl = treeCopy.Template( orig.impl, parents, self, body )
+         val res     = treeCopy.ClassDef( orig, mods, name, tp, newImpl )
+         val owner   = orig.symbol.owner
+         val symbol  = new TypeSymbol( owner, NoPosition, name )
+         res.setSymbol( symbol )
+//         symbol.setFlag( Flags.SYNTHETIC )
+//         symbol.setFlag( Flags.ABSTRACT )
+//         symbol.resetFlag( Flags.INTERFACE )
+//         symbol.resetFlag( Flags.TRAIT )  // ?
+         symbol.flags = orig.symbol.flags | Flags.SYNTHETIC
+         owner.info.decls.enter( symbol )
+         res
+      }
+
+//      private def chown( t: Tree ) : Tree = t match {
+//
+//      }
+
+      private def mkTxnTParams( orig: Symbol, tparams: List[ TypeDef ]) : List[ TypeDef ] = tparams.map { tp =>
+         if( tp.symbol == orig ) {
+            val symbol  = new TypeSymbol( orig.owner, NoPosition, tp.name )
+            symbol.flags= orig.flags
+            val res     = treeCopy.TypeDef( tp, tp.mods, tp.name, mkTxnTParams( tp.symbol, tp.tparams ), tp.rhs )
+            res.setSymbol( symbol )
+            res
+         } else tp
+      }
+
+      private def mkTxnClassGaga( cd: ClassDef ) : ClassDef = {
          val txnName = (("Txn" + cd.name) : Name).toTypeName
 //         val txnImpl = Template( parents, self, constrMods, vparamss, argss ) // mkTxnClassImpl( cd.impl )
 //         val txnParents = List[ Symbol ]( definitions.getClass( "java.lang.Object" ), definitions.getClass( "ScalaObject" ))
