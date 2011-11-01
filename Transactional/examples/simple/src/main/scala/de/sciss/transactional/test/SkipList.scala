@@ -139,7 +139,7 @@ object SkipList {
     */
    def maxKey : A
 
-   implicit final def maxKeyHolder : MaxKey[ A ] = MaxKey( maxKey )
+//   implicit final def maxKeyHolder : MaxKey[ A ] = MaxKey( maxKey )
 
    /**
     * The ordering used for the keys of this list.

@@ -3,6 +3,7 @@ package de.sciss.transactional.plugin
 import tools.nsc
 import nsc.plugins.PluginComponent
 import nsc.Global
+import nsc.symtab.Flags
 import nsc.transform.{Transform, TypingTransformers}
 
 final class TransformAnnotations( plugin: TransactionalPlugin, val global: Global )
@@ -29,19 +30,75 @@ extends PluginComponent with Transform with TypingTransformers {
       /*
        * This simply removes the txn annotation.
        */
-      private def mkPlainClass( cd: ClassDef ) : ClassDef = {
-//         cd.symbol.removeAnnotation( annotationClass )
-         val cpy = cd // treeCopy.ClassDef( cd, cd.mods, cd.name, cd.tparams, cd.impl )
-         cpy.symbol.removeAnnotation( annotationClass )
+      private def cleanPlainClass( cd: ClassDef ) {
+         // check parents! cd.impl.parents
+
+//         val impl = cd.impl
+//         val plainImpl = treeCopy.Template( impl, impl.parents, impl.self, impl.body.map( transformPlainBody ))
+//         val cpy = treeCopy.ClassDef( cd, cd.mods, cd.name, cd.tparams, plainImpl )
+//         cpy.symbol.removeAnnotation( annotationClass )
+//         cpy
+         cd.symbol.removeAnnotation( annotationClass )
+         cd.impl.body.foreach( cleanPlainClassBody )
+      }
+
+      private def cleanPlainClassBody( t: Tree ) { t match {
+         case dd: DefDef if( dd.symbol.hasAnnotation( annotationClass )) =>
+            dd.symbol.removeAnnotation( annotationClass )
+         case _ =>
+      }}
+
+//      private def transformPlainBody( t: Tree ) : Tree = t match {
+//         case dd: DefDef if( dd.symbol.hasAnnotation( annotationClass )) =>
+////            log( "defdef: " + name )
+//            val cpy = treeCopy.DefDef( dd, dd.mods, dd.name, dd.tparams, dd.vparamss, dd.tpt, dd.rhs )
+//            cpy.symbol.removeAnnotation( annotationClass )
+//            cpy
+//         case _ => t
+//      }
+
+      private def mkTxnClassX( cd: ClassDef ) : ClassDef = {
+         val txnName = (("Txn" + cd.name) : Name).toTypeName
+         val txnImpl = mkTxnClassImpl( cd.impl )
+         val txnMods = cd.mods | Flags.SYNTHETIC
+         val cpy = treeCopy.ClassDef( cd, txnMods, txnName, Nil /* cd.tparams */, txnImpl )
+         val txnSym = cd.symbol.owner.newClass( txnName )
+         txnSym.flags = cd.symbol.flags | Flags.SYNTHETIC
+         log( "Txn -- ValDef " + cd.impl.self )
+//         cpy.symbol.removeAnnotation( annotationClass )
+//         cpy.symbol.name = txnName
+         cpy.symbol = txnSym
          cpy
       }
 
       private def mkTxnClass( cd: ClassDef ) : ClassDef = {
          val txnName = (("Txn" + cd.name) : Name).toTypeName
-         val cpy = treeCopy.ClassDef( cd, cd.mods, txnName, cd.tparams, cd.impl )
-         cpy.symbol.removeAnnotation( annotationClass )
-         cpy.symbol.name = txnName
+//         val txnImpl = Template( parents, self, constrMods, vparamss, argss ) // mkTxnClassImpl( cd.impl )
+//         val txnParents = List[ Symbol ]( definitions.getClass( "java.lang.Object" ), definitions.getClass( "ScalaObject" ))
+         val txnParents = List.empty[ Tree ]// TypeTree( definitions.getClass( "java.lang.Object" ).getType )
+         val txnSelf = ValDef( mods = NoMods, name = "", tpt = EmptyTree, rhs = EmptyTree ) // ???
+         val txnConstrMods = NoMods
+         val txnVParamss = List.empty[ List[ ValDef ]]
+         val txnArgss = List.empty[ List[ Tree ]]
+         val txnBody = List.empty[ Tree ]
+         val txnSuperPos = NoPosition
+         val txnImpl = Template( txnParents, txnSelf, txnConstrMods, txnVParamss, txnArgss, txnBody, txnSuperPos ) // mkTxnClassImpl( cd.impl )
+         val txnMods = cd.mods | Flags.SYNTHETIC
+         val txnTParams = List.empty[ TypeDef ]
+         val cpy = ClassDef( txnMods, txnName, txnTParams, txnImpl )
+         val txnSym = cd.symbol.owner.newClass( txnName )
+         txnSym.flags = cd.symbol.flags | Flags.SYNTHETIC
+         cpy.symbol = txnSym
          cpy
+      }
+
+      private def mkTxnClassImpl( orig: Template ) : Template = {
+         val txnBody = List.empty[ Tree ]
+//         val txnSelf = orig.self // treeCopy.ValDef( ... )
+         val v = orig.self
+//         treeCopy.ValDef(tree, mods, name, tpt, rhs )
+         val txnSelf = treeCopy.ValDef( v, v.mods, v.name, v.tpt, v.rhs )
+         treeCopy.Template( orig, orig.parents, txnSelf, txnBody )
       }
 
       private object AnnotatedClasses {
@@ -67,8 +124,13 @@ extends PluginComponent with Transform with TypingTransformers {
       private class AnnotatedClasses private( val cds: List[ Either[ ClassDef, Tree ]]) {
          def flatTransform : List[ Tree ] = {
             cds.flatMap {
-               case Left( cd )   => List( mkPlainClass( cd ), mkTxnClass( cd ))
-               case Right( t )   => List( t )
+               case Left( cd )   =>
+                  val txn = mkTxnClass( cd )
+                  cleanPlainClass( cd )
+//                  List( cd )
+                  List( cd, txn )
+               case Right( t ) =>
+                  List( t )
             }
          }
       }
