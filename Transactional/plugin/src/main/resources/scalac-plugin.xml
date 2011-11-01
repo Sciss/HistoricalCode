@@ -1,0 +1,4 @@
+<plugin>
+  <name>transactional</name>
+  <classname>de.sciss.transactional.plugin.TransactionalPlugin</classname>
+</plugin>

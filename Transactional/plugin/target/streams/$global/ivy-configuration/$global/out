@@ -1,8 +1,7 @@
 [debug] Other repositories:
 [debug] Default repositories:
-[debug] 	Raw(ProjectResolver(inter-project, mapped: de.sciss#annotation_2.9.1;2.9.1))
-[debug] 	FileRepository(local,FileConfiguration(true,None),sbt.Patterns@785727)
-[debug] 	Scala-Tools Maven2 Snapshots Repository: http://scala-tools.org/repo-snapshots
+[debug] 	Raw(ProjectResolver(inter-project, mapped: de.sciss#annotation_2.9.1;0.10))
+[debug] 	FileRepository(local,FileConfiguration(true,None),sbt.Patterns@350105)
 [debug] 	public: http://repo1.maven.org/maven2/
 [debug] 	Scala-Tools Maven2 Repository: http://scala-tools.org/repo-releases
 [debug] Using inline dependencies specified in Scala.
