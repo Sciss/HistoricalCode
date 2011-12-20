@@ -21,9 +21,6 @@
  *
  *  For further information, please contact Hanns Holger Rutz at
  *  contact@sciss.de
- *
- *
- *  Changelog:
  */
 
 package de.sciss.nuages
@@ -33,7 +30,7 @@ import java.io.File
 import de.sciss.synth.io.{SampleFormat, AudioFileType}
 import de.sciss.synth.ugen.{Silent, DiskOut, In}
 import java.util.{Date, Locale}
-import de.sciss.synth.proc.{RichBus, RichAudioBus, DSL, ProcDemiurg, RichGroup, ProcTxn, Ref, Proc}
+import de.sciss.synth.proc.{DSL, ProcDemiurg, RichGroup, ProcTxn, Ref, Proc}
 import de.sciss.synth.{AudioBus, Server, addAfter, Group}
 
 object NuagesRecorder {

@@ -21,9 +21,6 @@
  *
  *  For further information, please contact Hanns Holger Rutz at
  *  contact@sciss.de
- *
- *
- *  Changelog:
  */
 
 package de.sciss.nuages
@@ -173,8 +170,9 @@ with Model {
       })
       ggTable.getSelectionModel.addListSelectionListener( new ListSelectionListener {
          def valueChanged( e: ListSelectionEvent ) {
-            val smps = ggTable.getSelectedRows.map( idx =>
-               infos( ggTable.convertRowIndexToModel( idx )))
+            val smps = ggTable.getSelectedRows.map { (idx: Int) =>
+               infos( ggTable.convertRowIndexToModel( idx ))
+            }
             dispatch( SelectionChanged( smps: _* ))
          }
       })

@@ -1,6 +1,6 @@
 name := "nuagespompe"
 
-version := "0.10"
+version := "0.11-SNAPSHOT"
 
 organization := "de.sciss"
 
@@ -9,8 +9,8 @@ scalaVersion := "2.9.1"
 resolvers += "Clojars Repository" at "http://clojars.org/repo"
 
 libraryDependencies ++= Seq(
-   "de.sciss" %% "wolkenpumpe" % "0.30",
-   "de.sciss" %% "scalacolliderswing" % "0.30"
+   "de.sciss" %% "wolkenpumpe" % "0.32-SNAPSHOT",
+   "de.sciss" %% "scalacolliderswing" % "0.32-SNAPSHOT"
 )
 
 retrieveManaged := true

@@ -21,9 +21,6 @@
  *
  *  For further information, please contact Hanns Holger Rutz at
  *  contact@sciss.de
- *
- *
- *  Changelog:
  */
 
 package de.sciss.nuages
@@ -33,12 +30,12 @@ import java.io.File
 import de.sciss.synth.proc.{ProcTxn, ProcDemiurg}
 import javax.swing.Box
 import java.awt.{EventQueue, GraphicsEnvironment}
-import de.sciss.synth.{ServerOptionsLike, ServerOptionsBuilder, ServerOptions, ServerConnection, Server}
+import de.sciss.synth.{ServerConnection, Server}
 import collection.immutable.{IndexedSeq => IIdxSeq}
 
 object NuagesLauncher {
    sealed trait SettingsLike {
-      def serverOptions : ServerOptionsLike
+      def serverConfig : Server.ConfigLike
       def masterChannels: Option[ IIdxSeq[ Int ]]
       def soloChannels: Option[ IIdxSeq[ Int ]]
       def recordPath: Option[ String ]
@@ -61,12 +58,12 @@ object NuagesLauncher {
       implicit def fromBuilder( b: SettingsBuilder ) : Settings = b.build
    }
    sealed trait Settings extends SettingsLike {
-      def serverOptions : ServerOptions
+      def serverConfig : Server.Config
    }
 
    final case class SettingsBuilder() extends SettingsLike {
-      var serverOptions    = {
-         val b = new ServerOptionsBuilder
+      var serverConfig    = {
+         val b = Server.Config()
          // some more sane settings
          b.audioBusChannels   = 512
          b.loadSynthDefs      = false
@@ -88,12 +85,12 @@ object NuagesLauncher {
       var antiAliasing     = false
 
       def build : Settings = SettingsImpl(
-         serverOptions.build,
+         serverConfig.build,
          masterChannels, soloChannels, recordPath, meters, collector, fullScreenKey, tapeFolder, tapeAction,
          beforeShutdown, doneAction, controlSettings.build, antiAliasing )
    }
 
-   private final case class SettingsImpl( serverOptions: ServerOptions,
+   private final case class SettingsImpl( serverConfig: Server.Config,
                                           masterChannels: Option[ IIdxSeq[ Int ]],
                                           soloChannels: Option[ IIdxSeq[ Int ]],
                                           recordPath: Option[ String ],
@@ -136,7 +133,7 @@ final class NuagesLauncher private( val settings: NuagesLauncher.Settings ) {
       // --> http://scala-programming-language.1934581.n4.nabble.com/Scala-Actors-Starvation-td2281657.html
 //      sys.props += "actors.enableForkJoin" -> "false"
 
-      val booting = Server.boot( options = settings.serverOptions ) {
+      val booting = Server.boot( config = settings.serverConfig ) {
          case ServerConnection.Running( s ) => defer( running( s ))
       }
       sys.runtime.addShutdownHook( new Thread { override def run() { shutdown( booting )}})
