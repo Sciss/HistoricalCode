@@ -91,7 +91,7 @@ class ButtonUI extends BasicButtonUI with ButtonPainter {
       g2.drawRoundRect( 0, 0, w, h, 11, 11 )
       g2.setStroke( strkOrig )
 
-      paintButtonText( b, g2, colrBg )
+      paintButtonText( b, g2, Color.black ) // colrBg )
    }
 
    def paintX( g: Graphics, c: JComponent ) {
