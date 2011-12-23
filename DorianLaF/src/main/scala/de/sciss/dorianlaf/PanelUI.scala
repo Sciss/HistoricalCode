@@ -45,7 +45,12 @@ class PanelUI extends BasicPanelUI {
 //      super.paint( g, c )
    }
 
-   private def paintPanelBackground( c: JComponent , g: Graphics, x: Int, y: Int, w: Int, h: Int ) {
+   private def paintPanelBackground( c: JComponent, g: Graphics, x: Int, y: Int, w: Int, h: Int ) {
+      g.setColor( new Color( 25, 25, 25, 255 ))
+      g.fillRect( x, y, w, h )
+   }
+
+   private def paintPanelBackgroundX( c: JComponent, g: Graphics, x: Int, y: Int, w: Int, h: Int ) {
       val start   = UIManager.getColor( "Panel.startBackground" )
       val end     = UIManager.getColor( "Panel.endBackground" )
 //val start = new Color( 35, 35, 35 )

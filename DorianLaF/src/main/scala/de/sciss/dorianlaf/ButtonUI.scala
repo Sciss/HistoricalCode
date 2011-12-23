@@ -64,6 +64,37 @@ class ButtonUI extends BasicButtonUI with ButtonPainter {
    private val pasOutline : Shape = new GeneralPath()
 
    override def paint( g: Graphics, c: JComponent ) {
+      val b    = c.asInstanceOf[ AbstractButton ]
+      val g2   = g.asInstanceOf[ Graphics2D ]
+      val w    = b.getWidth()
+      val h    = b.getHeight()
+
+      val paint1  = new LinearGradientPaint( 0, 0, 0, h - 1,
+         Array[ Float ]( 0.0f, 0.15f, 0.46f, 0.5f, 0.501f, 0.64f, 0.85f, 1.0f ),
+//         Array[ Color ]( new Color(   0,   0,   0, 255), new Color(  30,  30,  30, 255 ), new Color(  20,  20,  20, 255 ),
+//                         new Color(   0,   0,   0, 255), new Color(  44,  44,  44, 255 ), new Color(  26,  26,  26, 255 ),
+//                         new Color(  26,  26,  26, 255), new Color( 110, 110, 110, 255 )))
+         Array[ Color ]( new Color( 110, 110, 110, 255 ), new Color(  26,  26,  26, 255),
+                         new Color(  26,  26,  26, 255 ), new Color(  44,  44,  44, 255 ),
+                         new Color(   0,   0,   0, 255 ), new Color(  20,  20,  20, 255 ),
+                         new Color(  30,  30,  30, 255 ), new Color(   0,   0,   0, 255 )))
+//      val shape   = new RoundRectangle2D.Float( 0, 0, w, h, 11.5f, 11.5f )
+      g2.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON )
+      g2.setPaint( paint1 )
+//      g2.fill( shape )
+      g2.fillRoundRect( 0, 0, w, h, 11, 11 )
+      val stroke  = new BasicStroke( 0.5f ) // , BasicStroke.CAP_BUTT, 0, 4.0f, null, 0.0f )
+      g2.setColor( Color.white )
+      val strkOrig = g2.getStroke
+      g2.setStroke( stroke )
+//      g2.draw( shape )
+      g2.drawRoundRect( 0, 0, w, h, 11, 11 )
+      g2.setStroke( strkOrig )
+
+      paintButtonText( b, g2, colrBg )
+   }
+
+   def paintX( g: Graphics, c: JComponent ) {
       val b       = c.asInstanceOf[ AbstractButton ]
       val g2      = g.asInstanceOf[ Graphics2D ]
 //      val aaOld   = g2.getRenderingHint( RenderingHints.KEY_ANTIALIASING )
@@ -111,8 +142,49 @@ class ButtonUI extends BasicButtonUI with ButtonPainter {
 ////      g2.setRenderingHint( RenderingHints.KEY_ANTIALIASING, aaOld )
 //   }
 
-   // XXX TODO : remove references to sun class SwingUtilities2 
    private def paintText2( g2: Graphics2D, b: AbstractButton, fm: FontMetrics, textRect: Rectangle, text: String, colrBG: Color ) {
+      val gc      = g2.getDeviceConfiguration()
+//      val img     = b.createImage( textRect.width, textRect.height )
+      val img     = gc.createCompatibleImage( textRect.width, textRect.height )
+      val imgG    = img.getGraphics()
+      val imgG2   = imgG.asInstanceOf[ Graphics2D ]
+//      val aaOld   = g2.getRenderingHint( RenderingHints.KEY_ANTIALIASING )
+      val bm      = b.getModel
+      val pressed = bm.isArmed && bm.isPressed
+//      val colr = /* if( pressed ) Color.red else */ new Color( 0x80, 0x80, 0x80 )
+      imgG2.setColor( colrBG )
+      imgG2.fillRect( 0, 0, textRect.width, textRect.height )
+      imgG2.setFont( g2.getFont )
+      imgG2.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON )
+
+//      super.paintText( imgG, b, new Rectangle( 0, 0, textRect.width, textRect.height ), text )
+      val mnemo = b.getDisplayedMnemonicIndex()
+      if( bm.isEnabled() ) {
+          imgG2.setColor( UIManager.getColor( "Button.textForeground" ))
+          SwingUtilities2.drawStringUnderlineCharAt( b, imgG2, text, mnemo,
+             0 /* textRect.x */ /* + getTextShiftOffset() */,
+             /* textRect.y + */ fm.getAscent() /* + getTextShiftOffset() */)
+      } else {
+          imgG2.setColor( b.getBackground().brighter() )
+          SwingUtilities2.drawStringUnderlineCharAt( b, imgG2, text, mnemo,
+             /* textRect.x */ 0, /*textRect.y + */ fm.getAscent() )
+          imgG2.setColor( b.getBackground().darker() )
+          SwingUtilities2.drawStringUnderlineCharAt( b, imgG2, text, mnemo,
+             /* textRect.x */ - 1, /* textRect.y + */ fm.getAscent() - 1 )
+      }
+
+//      g2.drawImage( img, textRect.x, textRect.y, b )
+//      val kernel = new Kernel( 3, 3, Array( 0f, -0.5f, 0f, -0.5f, 2f, -0.5f, 0f, -0.5f, 0f ))
+//      val op = new ConvolveOp( kernel )
+      val op = if( pressed ) ButtonPainter.opShine else ButtonPainter.opSharpen
+      g2.drawImage( img, op, textRect.x, textRect.y )
+      img.flush()
+
+//      g2.setRenderingHint( RenderingHints.KEY_ANTIALIASING, aaOld )
+   }
+
+   // XXX TODO : remove references to sun class SwingUtilities2 
+   private def paintText2XX( g2: Graphics2D, b: AbstractButton, fm: FontMetrics, textRect: Rectangle, text: String, colrBG: Color ) {
       val gc      = g2.getDeviceConfiguration()
 //      val img     = b.createImage( textRect.width, textRect.height )
       val img     = gc.createCompatibleImage( textRect.width, textRect.height )
