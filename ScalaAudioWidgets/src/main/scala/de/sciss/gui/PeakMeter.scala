@@ -2,7 +2,7 @@
  *  PeakMeter.scala
  *  (AudioWidgets)
  *
- *  Copyright (c) 2011 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2011-2012 Hanns Holger Rutz. All rights reserved.
  *
  *	This software is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -27,7 +27,7 @@ package de.sciss.gui
 
 import j.{PeakMeter => JPeakMeter, PeakMeterLike}
 import collection.immutable.{IndexedSeq => IIdxSeq}
-import swing.{Alignment, Orientable, Orientation, Component}
+import swing.{Alignment, Orientation, Component}
 
 class PeakMeter extends Component with PeakMeterLike {
    override lazy val peer: JPeakMeter = new JPeakMeter with SuperMixin
