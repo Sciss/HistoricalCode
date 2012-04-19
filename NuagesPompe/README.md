@@ -6,7 +6,7 @@ A bit of glue on top of [Wolkenpumpe](http://github.com/Sciss/Wolkenpumpe/) so t
 
 ### requirements
 
-Builds with xsbt (sbt 0.11) against Scala 2.9.1. Depends on [Wolkenpumpe](http://github.com/Sciss/Wolkenpumpe) and [ScalaCollider-Swing](http://github.com/Sciss/ScalaColliderSwing). Standard sbt targets are `clean`, `update`, `compile`, `package`, `doc`, `publish-local`.
+Builds with xsbt (sbt 0.11) against Scala 2.9.2. Depends on [Wolkenpumpe](http://github.com/Sciss/Wolkenpumpe) and [ScalaCollider-Swing](http://github.com/Sciss/ScalaColliderSwing). Standard sbt targets are `clean`, `update`, `compile`, `package`, `doc`, `publish-local`.
 
 ### creating an IntelliJ IDEA project
 
