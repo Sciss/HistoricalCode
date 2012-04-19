@@ -1,0 +1,31 @@
+digraph G {
+	ScalaOSC [label="\"scalaosc\" % \"0.33\"", shape=box];
+	ScalaAudioFile [label="\"scalaaudiofile\" % \"0.20\"", shape=box];
+	FScapeJobs [label="\"fscapejobs\" % \"0.18\"", shape=box];
+	AudioWidgets [label="\"audiowidgets\" % \"0.11\"", shape=box];
+	ScalaAudioWidgets [label="\"scalaaudiowidgets\" % \"0.11\"", shape=box];
+	SbtAppbundle [label="\"sbt-appbundle\" % \"0.13\"", shape=Box, color=blue];
+	ScissDSP [label="\"scissdsp\" % \"0.11\"", shape=Box, color=green];
+	SonogramOverview [label="\"sonogramoverview\" % \"0.17\"", shape=Box];
+	ScalaCollider [label="\"scalacollider\" % \"0.34\"", shape=Box];
+	Strugatzki [label="\"strugatzki\" % \"0.18\"", shape=Box];
+	ScalaInterpreterPane [label="\scalainterpreterpane\" % \"0.21\"", shape=Box];
+	PrefuseCore [label="\"prefuse-core\" % \"0.21\"", shape=Box, color=green];
+	ScalaColliderSwing [label="\"scalacolliderswing\" % \"0.34\"", shape=Box];
+	
+	FScapeJobs -> ScalaOSC;
+	FScapeJobs -> ScalaAudioFile;
+	ScalaAudioWidgets -> AudioWidgets;
+	SonogramOverview -> ScalaAudioFile;
+	SonogramOverview -> ScissDSP;
+	ScalaCollider -> ScalaOSC;
+	ScalaCollider -> ScalaAudioFile;
+	Strugatzki -> ScalaCollider;
+	ScalaInterpreterPane -> SbtAppbundle;
+	ScalaColliderSwing -> SbtAppbundle;
+	ScalaColliderSwing -> ScalaCollider;
+	ScalaColliderSwing -> ScalaInterpreterPane;
+	ScalaColliderSwing -> PrefuseCore;
+	ScalaColliderSwing -> ScalaAudioWidgets;
+}
+
