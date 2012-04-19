@@ -12,6 +12,7 @@ digraph G {
 	ScalaInterpreterPane [label="\scalainterpreterpane\" % \"0.21\"", shape=Box];
 	PrefuseCore [label="\"prefuse-core\" % \"0.21\"", shape=Box, color=green];
 	ScalaColliderSwing [label="\"scalacolliderswing\" % \"0.34\"", shape=Box];
+	SoundProcesses [label="\"soundprocesses\" % \"0.34\"", shape=Box];
 	
 	FScapeJobs -> ScalaOSC;
 	FScapeJobs -> ScalaAudioFile;
@@ -27,5 +28,6 @@ digraph G {
 	ScalaColliderSwing -> ScalaInterpreterPane;
 	ScalaColliderSwing -> PrefuseCore;
 	ScalaColliderSwing -> ScalaAudioWidgets;
+	SoundProcesses -> ScalaCollider;
 }
 
