@@ -1,7 +1,7 @@
 digraph G {
 	ScalaOSC [label="\"scalaosc\" % \"0.33\"", shape=box];
 	ScalaAudioFile [label="\"scalaaudiofile\" % \"0.20\"", shape=box];
-	FScapeJobs [label="\"fscapejobs\" % \"0.18\"", shape=box];
+	FScapeJobs [label="\"fscapejobs\" % \"0.17\"", shape=box];
 	AudioWidgets [label="\"audiowidgets\" % \"0.11\"", shape=box];
 	ScalaAudioWidgets [label="\"scalaaudiowidgets\" % \"0.11\"", shape=box];
 	SbtAppbundle [label="\"sbt-appbundle\" % \"0.13\"", shape=Box, color=blue];
@@ -13,6 +13,16 @@ digraph G {
 	PrefuseCore [label="\"prefuse-core\" % \"0.21\"", shape=Box, color=green];
 	ScalaColliderSwing [label="\"scalacolliderswing\" % \"0.34\"", shape=Box];
 	SoundProcesses [label="\"soundprocesses\" % \"0.34\"", shape=Box];
+	Wolkenpumpe [label="\"wolkenpumpe\" % \"0.34\"", shape=Box];
+	NuagesPompe [label="\"nuagespompe\" % \"0.34\"", shape=Box];
+	NuagesApp [label="\"nuagesapp\" % \"0.34\"", shape=Box];
+	ScissLib [label="\"scisslib\" % \"0.15\"", shape=Box, color=green];
+	Kontur [label="\"kontur\" % \"0.19\"", shape=Box];
+	FingerTree [label="\"fingertree\" % \"0.20\"", shape=Box];
+	ScalaColliderUGens [label="\"scalacolliderugens\" % \"0.15\"", shape=Box];
+	LucreSTM [label="\"lucrestm\" % \"0.23\"", shape=Box];
+	LucreData [label="\"lucredata\" % \"0.23\"", shape=Box];
+	TemporalObjects [label="\"temporalobjects\" % \"0.32\"", shape=Box, style=dotted];
 	
 	FScapeJobs -> ScalaOSC;
 	FScapeJobs -> ScalaAudioFile;
@@ -29,5 +39,18 @@ digraph G {
 	ScalaColliderSwing -> PrefuseCore;
 	ScalaColliderSwing -> ScalaAudioWidgets;
 	SoundProcesses -> ScalaCollider;
+	Wolkenpumpe -> SoundProcesses;
+	NuagesPompe -> Wolkenpumpe;
+	NuagesPompe -> ScalaColliderSwing;
+	NuagesApp -> SbtAppbundle;
+	NuagesApp -> NuagesPompe;
+	NuagesApp -> FScapeJobs;
+	Kontur -> SbtAppbundle;
+	Kontur -> ScalaColliderSwing;
+	Kontur -> ScissDSP;
+	Kontur -> ScissLib;
+	LucreData -> LucreSTM;
+	TemporalObjects -> FingerTree;
+	TemporalObjects -> LucreData;
 }
 
