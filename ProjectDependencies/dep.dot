@@ -20,9 +20,12 @@ digraph G {
 	Kontur [label="\"kontur\" % \"0.19\"", shape=Box];
 	FingerTree [label="\"fingertree\" % \"0.20\"", shape=Box];
 	ScalaColliderUGens [label="\"scalacolliderugens\" % \"0.15\"", shape=Box];
-	LucreSTM [label="\"lucrestm\" % \"0.23\"", shape=Box];
-	LucreData [label="\"lucredata\" % \"0.23\"", shape=Box];
-	TemporalObjects [label="\"temporalobjects\" % \"0.32\"", shape=Box, style=dotted];
+	LucreSTM [label="\"lucrestm\" % \"0.33\"", shape=Box];
+	LucreExpr [label="\"lucreexpr\" % \"0.33\"", shape=Box];
+	LucreData [label="\"lucredata\" % \"0.33\"", shape=Box];
+	TemporalObjects [label="\"temporalobjects\" % \"0.33\"", shape=Box, style=dotted];
+	SoundProcesses3 [label="\"soundprocesses\" % \"0.40-SNAPSHOT\"", shape=Box];
+
 	
 	FScapeJobs -> ScalaOSC;
 	FScapeJobs -> ScalaAudioFile;
@@ -49,8 +52,12 @@ digraph G {
 	Kontur -> ScalaColliderSwing;
 	Kontur -> ScissDSP;
 	Kontur -> ScissLib;
+   LucreExpr -> LucreSTM;
 	LucreData -> LucreSTM;
 	TemporalObjects -> FingerTree;
 	TemporalObjects -> LucreData;
+	SoundProcesses3 -> ScalaCollider;
+	SoundProcesses3 -> TemporalObjects;
+	SoundProcesses3 -> LucreExpr;
 }
 
