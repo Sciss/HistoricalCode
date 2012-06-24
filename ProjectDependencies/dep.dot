@@ -22,7 +22,7 @@ digraph G {
 	ScalaColliderUGens [label="\"scalacolliderugens\" % \"0.15\"", shape=Box];
 	LucreSTM [label="\"lucrestm\" % \"0.33\"", shape=Box];
 	LucreExpr [label="\"lucreexpr\" % \"0.33\"", shape=Box];
-	LucreData [label="\"lucredata\" % \"0.33\"", shape=Box];
+	LucreData [label="\"lucredata\" % \"0.33\"", shape=Box, style=dotted];
 	TemporalObjects [label="\"temporalobjects\" % \"0.33\"", shape=Box, style=dotted];
 	SoundProcesses3 [label="\"soundprocesses\" % \"0.40-SNAPSHOT\"", shape=Box];
 
