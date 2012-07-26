@@ -10,11 +10,11 @@ homepage := Some( url( "https://github.com/Sciss/ScalaAudioWidgets" ))
 
 licenses := Seq( "GPL v2+" -> url( "http://www.gnu.org/licenses/gpl-2.0.txt" ))
 
-scalaVersion := "2.9.2"
+scalaVersion := "2.10.0-M6"
 
 libraryDependencies ++= Seq(
    "de.sciss" %% "audiowidgets" % "0.11",
-   "org.scala-lang" % "scala-swing" % "2.9.2"
+   "org.scala-lang" % "scala-swing" % "2.10.0-M6"
 )
 
 retrieveManaged := true
