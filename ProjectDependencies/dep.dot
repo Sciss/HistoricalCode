@@ -18,10 +18,10 @@ digraph G {
 	NuagesApp [label="\"nuagesapp\" % \"0.34\"", shape=Box];
 	ScissLib [label="\"scisslib\" % \"0.15\"", shape=Box, color=green];
 	Kontur [label="\"kontur\" % \"0.19\"", shape=Box];
-	FingerTree [label="\"fingertree\" % \"0.20\"", shape=Box];
+	FingerTree [label="\"fingertree\" % \"0.20\"", shape=Box, style=dotted];
 	ScalaColliderUGens [label="\"scalacolliderugens\" % \"0.15\"", shape=Box];
-	LucreSTM [label="\"lucrestm\" % \"0.33\"", shape=Box];
-	LucreExpr [label="\"lucreexpr\" % \"0.33\"", shape=Box];
+	LucreSTM [label="\"lucrestm\" % \"0.33\"", shape=Box, style=dotted];
+	LucreExpr [label="\"lucreexpr\" % \"0.33\"", shape=Box, style=dotted];
 	LucreData [label="\"lucredata\" % \"0.33\"", shape=Box, style=dotted];
 	TemporalObjects [label="\"temporalobjects\" % \"0.33\"", shape=Box, style=dotted];
 	SoundProcesses3 [label="\"soundprocesses\" % \"0.40-SNAPSHOT\"", shape=Box];
@@ -52,8 +52,8 @@ digraph G {
 	Kontur -> ScalaColliderSwing;
 	Kontur -> ScissDSP;
 	Kontur -> ScissLib;
-   LucreExpr -> LucreSTM;
 	LucreData -> LucreSTM;
+   LucreExpr -> LucreData;
 	TemporalObjects -> FingerTree;
 	TemporalObjects -> LucreData;
 	SoundProcesses3 -> ScalaCollider;
