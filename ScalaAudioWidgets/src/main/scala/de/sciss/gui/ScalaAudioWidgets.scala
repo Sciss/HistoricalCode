@@ -29,14 +29,14 @@ import java.awt.event.{ActionEvent, ActionListener}
 import swing.event.{WindowClosing, WindowOpened}
 import collection.immutable.{IndexedSeq => IIdxSeq}
 import java.awt.Color
-import swing.{Label, GridPanel, Swing, BorderPanel, MainFrame, SimpleSwingApplication}
+import swing.{Component, Label, GridPanel, Swing, BorderPanel, MainFrame, SimpleSwingApplication}
 import javax.swing.Timer
 
 object ScalaAudioWidgets extends SimpleSwingApplication {
    val name          = "ScalaAudioWidgets"
-   val version       = 0.11
+   val version       = 0.12
    val copyright     = "(C)opyright 2011-2012 Hanns Holger Rutz"
-   val isSnapshot    = false
+   val isSnapshot    = true
 
    def versionString = {
       val s = (version + 0.001).toString.substring( 0, 4 )
@@ -84,6 +84,13 @@ object ScalaAudioWidgets extends SimpleSwingApplication {
          maximum  = 34.56
       }
 
+      lazy val trnspActions = Seq(
+         Transport.GoToBegin, Transport.Play, Transport.Stop, Transport.GoToEnd, Transport.Loop ).map {
+         case l @ Transport.Loop => l.apply { trnsp.button( l ).foreach( b => b.selected = !b.selected )}
+         case e => e.apply {}
+      }
+      lazy val trnsp: Component with Transport.ButtonStrip = Transport.makeButtonStrip( trnspActions )
+
       contents = new BorderPanel {
          import BorderPanel.Position._
          add( m, West )
@@ -96,6 +103,7 @@ object ScalaAudioWidgets extends SimpleSwingApplication {
             add( axis, North )
             border = Swing.EmptyBorder( 0, 0, 20, 0 )
          }, North )
+         add( trnsp, South )
          border = Swing.EmptyBorder( 20, 20, 20, 20 )
       }
 
