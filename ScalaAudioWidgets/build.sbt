@@ -1,6 +1,6 @@
 name := "ScalaAudioWidgets"
 
-version := "0.12-SNAPSHOT"
+version := "0.13"
 
 organization := "de.sciss"
 
@@ -15,7 +15,7 @@ scalaVersion := "2.9.2"
 crossScalaVersions := Seq( "2.10.0-M6", "2.9.2" )
 
 libraryDependencies ++= Seq(
-   "de.sciss" %% "audiowidgets" % "0.12-SNAPSHOT"
+   "de.sciss" %% "audiowidgets" % "0.13"
 )
 
 libraryDependencies <+= scalaVersion { sv =>
