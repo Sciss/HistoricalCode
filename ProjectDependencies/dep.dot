@@ -2,8 +2,8 @@ digraph G {
 	ScalaOSC [label="\"scalaosc\" % \"0.33\"", shape=box];
 	ScalaAudioFile [label="\"scalaaudiofile\" % \"0.20\"", shape=box];
 	FScapeJobs [label="\"fscapejobs\" % \"0.17\"", shape=box];
-	AudioWidgets [label="\"audiowidgets\" % \"0.11\"", shape=box];
-	ScalaAudioWidgets [label="\"scalaaudiowidgets\" % \"0.11\"", shape=box];
+	AudioWidgets [label="\"audiowidgets\" % \"0.13\"", shape=box];
+	ScalaAudioWidgets [label="\"scalaaudiowidgets\" % \"0.13\"", shape=box];
 	SbtAppbundle [label="\"sbt-appbundle\" % \"0.13\"", shape=Box, color=blue];
 	ScissDSP [label="\"scissdsp\" % \"0.11\"", shape=Box, color=green];
 	SonogramOverview [label="\"sonogramoverview\" % \"0.17\"", shape=Box];
@@ -18,14 +18,14 @@ digraph G {
 	NuagesApp [label="\"nuagesapp\" % \"0.34\"", shape=Box];
 	ScissLib [label="\"scisslib\" % \"0.15\"", shape=Box, color=green];
 	Kontur [label="\"kontur\" % \"0.19\"", shape=Box];
-	FingerTree [label="\"fingertree\" % \"0.20\"", shape=Box, style=dotted];
+	FingerTree [label="\"fingertree\" % \"0.21\"", shape=Box];
 	ScalaColliderUGens [label="\"scalacolliderugens\" % \"0.15\"", shape=Box];
-	LucreSTM [label="\"lucrestm\" % \"0.33\"", shape=Box, style=dotted];
-	LucreExpr [label="\"lucreexpr\" % \"0.33\"", shape=Box, style=dotted];
-	LucreData [label="\"lucredata\" % \"0.33\"", shape=Box, style=dotted];
-	TemporalObjects [label="\"temporalobjects\" % \"0.33\"", shape=Box, style=dotted];
-	SoundProcesses3 [label="\"soundprocesses\" % \"0.40-SNAPSHOT\"", shape=Box];
-
+	LucreSTM [label="\"lucrestm\" % \"0.34\"", shape=Box];
+	LucreData [label="\"lucredata\" % \"0.34\"", shape=Box];
+	LucreExpr [label="\"lucreexpr\" % \"0.34\"", shape=Box];
+	TemporalObjects [label="\"temporalobjects\" % \"0.34\"", shape=Box];
+	SoundProcesses3 [label="\"soundprocesses\" % \"0.40-SNAPSHOT\"", shape=Box, style=dotted];
+	Mellite [label="\"mellite\" % \"0.10-SNAPSHOT\"", shape=Box, style=dotted];
 	
 	FScapeJobs -> ScalaOSC;
 	FScapeJobs -> ScalaAudioFile;
@@ -59,5 +59,7 @@ digraph G {
 	SoundProcesses3 -> ScalaCollider;
 	SoundProcesses3 -> TemporalObjects;
 	SoundProcesses3 -> LucreExpr;
+	Mellite -> SoundProcesses3;
+	Mellite -> ScalaAudioWidgets;
 }
 
