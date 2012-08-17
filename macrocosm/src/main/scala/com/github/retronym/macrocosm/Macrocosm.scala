@@ -1,7 +1,8 @@
 package com.github.retronym.macrocosm
 
 import scala.reflect.makro.Context
-import language.experimental.macros
+import language._
+import experimental.macros
 
 object Macrocosm {
   /**
@@ -26,7 +27,7 @@ object Macrocosm {
   def assert1Impl(c: Context)(cond: c.Expr[Boolean]) = {
     import c.universe._
     val condCode = c.Expr[String](Literal(Constant(show(cond.tree))))
-    c.reify {
+    reify {
       assert(cond.splice, condCode.splice)
       ()
     }
@@ -42,7 +43,7 @@ object Macrocosm {
   def logImpl[A: c.TypeTag](c: Context)(a: c.Expr[A]): c.Expr[A] = {
     import c.universe._
     val aCode = c.Expr[String](Literal(Constant(show(a.tree))))
-    c.reify {
+    reify {
       val result = a.splice
       println(aCode.splice + " = " + result)
       result
@@ -122,7 +123,7 @@ object Macrocosm {
     s.tree match {
       case Literal(Constant(string: String)) =>
         string.r // just to check
-        c.reify(s.splice.r)
+        reify(s.splice.r)
     }
   }
 
@@ -141,7 +142,7 @@ object Macrocosm {
         val exprCode = c.Expr[String](Literal(Constant(show(t))))
         val exprTpe  = c.Expr[String](Literal(Constant(show(t.tpe))))
 
-        (c.reify {
+        (reify {
           val result = expr.splice
           println("%s = %s: %s".format(exprCode.splice, result, exprTpe.splice))
           result
@@ -187,48 +188,57 @@ object Macrocosm {
 
   object NumericOps {
     def +[T](c: Context)(rhs: c.Expr[T]) = {
+      import c.universe._
       val (numeric, lhs) = extractNumericAndLhs[T](c)
-      c.reify(numeric.splice.plus(lhs.splice, rhs.splice))
+      reify(numeric.splice.plus(lhs.splice, rhs.splice))
     }
 
     def -[T](c: Context)(rhs: c.Expr[T]) = {
+      import c.universe._
       val (numeric, lhs) = extractNumericAndLhs[T](c)
-      c.reify(numeric.splice.minus(lhs.splice, rhs.splice))
+      reify(numeric.splice.minus(lhs.splice, rhs.splice))
     }
 
     def *[T](c: Context)(rhs: c.Expr[T]) = {
+      import c.universe._
       val (numeric, lhs) = extractNumericAndLhs[T](c)
-      c.reify(numeric.splice.times(lhs.splice, rhs.splice))
+      reify(numeric.splice.times(lhs.splice, rhs.splice))
     }
 
     def unary_-[T](c: Context)() = {
+      import c.universe._
       val (numeric, lhs) = extractNumericAndLhs[T](c)
-      c.reify(numeric.splice.negate(lhs.splice))
+      reify(numeric.splice.negate(lhs.splice))
     }
 
     def abs[T](c: Context)() = {
+      import c.universe._
       val (numeric, lhs) = extractNumericAndLhs[T](c)
-      c.reify(numeric.splice.abs(lhs.splice))
+      reify(numeric.splice.abs(lhs.splice))
     }
 
     def signum[T](c: Context)() = {
+      import c.universe._
       val (numeric, lhs) = extractNumericAndLhs[T](c)
-      c.reify(numeric.splice.signum(lhs.splice))
+      reify(numeric.splice.signum(lhs.splice))
     }
 
     def toInt[T](c: Context)() = {
+      import c.universe._
       val (numeric, lhs) = extractNumericAndLhs[T](c)
-      c.reify(numeric.splice.toInt(lhs.splice))
+      reify(numeric.splice.toInt(lhs.splice))
     }
 
     def toLong[T](c: Context)() = {
+      import c.universe._
       val (numeric, lhs) = extractNumericAndLhs[T](c)
-      c.reify(numeric.splice.toLong(lhs.splice))
+      reify(numeric.splice.toLong(lhs.splice))
     }
 
     def toDouble[T](c: Context)() = {
+      import c.universe._
       val (numeric, lhs) = extractNumericAndLhs[T](c)
-      c.reify(numeric.splice.toDouble(lhs.splice))
+      reify(numeric.splice.toDouble(lhs.splice))
     }
 
     def extractNumericAndLhs[T](c: Context): (c.Expr[Numeric[T]], c.Expr[T]) = {
@@ -265,7 +275,7 @@ object Macrocosm {
                          (act: c.Expr[A => Unit]): c.Expr[Unit] = {
     import c.universe._
 
-    val e = c.reify {
+    val e = reify {
       val i = iterator.splice
       while(i.hasNext) {
         val elem = i.next()
@@ -306,7 +316,7 @@ object Macrocosm {
                                (f: c.Expr[(A, Int) => Unit]): c.Expr[Unit] = {
     import c.universe._
 
-    val expr = c.reify {
+    val expr = reify {
       val a = array.splice
       var i = 0
       val len = a.length
@@ -347,7 +357,7 @@ object Macrocosm {
               (act: c.Expr[A => Unit]): c.Expr[Unit] = {
     import c.universe._
 
-    val t = c.reify {
+    val t = reify {
       var elem: A = zero.splice
       while(okay.splice(elem)) {
         act.splice(elem)
