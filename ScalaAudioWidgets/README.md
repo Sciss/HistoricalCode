@@ -6,11 +6,13 @@ ScalaAudioWidgets provides Scala-Swing wrappers for the [AudioWidgets](http://gi
 
 ### requirements / installation
 
-ScalaAudioWidgets currently compiles against Scala 2.9.2 and requires Java 1.6. It builds with xsbt (sbt 0.11).
+ScalaAudioWidgets currently compiles against Scala 2.9.2 and requires Java 1.6. It builds with sbt 0.12.0.
 
 To use the library in your project:
 
-    "de.sciss" %% "scalaaudiowidgets" % "0.13"
+    "de.sciss" %% "scalaaudiowidgets" % "1.0.+"
+
+To run the demo: `sbt test:run`
 
 ### creating an IntelliJ IDEA project
 
@@ -20,10 +22,7 @@ If you want to develop the library, you can set up an IntelliJ IDEA project, usi
 
     addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.0.0")
 
-Then to create the IDEA project, run the following two commands from the xsbt shell:
-
-    > set ideaProjectName := "ScalaAudioWidgets"
-    > gen-idea
+Then to create the IDEA project, run `sbt gen-idea`.
 
 ### download
 

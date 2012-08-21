@@ -1,6 +1,6 @@
 name := "ScalaAudioWidgets"
 
-version := "0.13"
+version := "1.0.0"
 
 organization := "de.sciss"
 
@@ -12,10 +12,10 @@ licenses := Seq( "GPL v2+" -> url( "http://www.gnu.org/licenses/gpl-2.0.txt" ))
 
 scalaVersion := "2.9.2"
 
-crossScalaVersions := Seq( "2.10.0-M6", "2.9.2" )
+// crossScalaVersions := Seq( "2.10.0-M6", "2.9.2" )
 
 libraryDependencies ++= Seq(
-   "de.sciss" %% "audiowidgets" % "0.13"
+   "de.sciss" %% "audiowidgets" % "1.0.+"
 )
 
 libraryDependencies <+= scalaVersion { sv =>
@@ -25,6 +25,19 @@ libraryDependencies <+= scalaVersion { sv =>
 retrieveManaged := true
 
 scalacOptions ++= Seq( "-deprecation", "-unchecked" )
+
+// ---- build info ----
+
+buildInfoSettings
+
+sourceGenerators in Compile <+= buildInfo
+
+buildInfoKeys := Seq( name, organization, version, scalaVersion, description,
+   BuildInfoKey.map( homepage ) { case (k, opt) => k -> opt.get },
+   BuildInfoKey.map( licenses ) { case (_, Seq( (lic, _) )) => "license" -> lic }
+)
+
+buildInfoPackage := "de.sciss.gui"
 
 // ---- publishing ----
 
