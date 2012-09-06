@@ -20,10 +20,10 @@ digraph G {
 	Kontur [label="\"kontur\" % \"0.19\"", shape=Box];
 	FingerTree [label="\"fingertree\" % \"1.0.0\"", shape=Box];
 	ScalaColliderUGens [label="\"scalacolliderugens\" % \"0.15\"", shape=Box];
-	LucreSTM [label="\"lucrestm\" % \"0.34\"", shape=Box];
-	LucreData [label="\"lucredata\" % \"0.34\"", shape=Box];
-	LucreExpr [label="\"lucreexpr\" % \"0.34\"", shape=Box];
-	TemporalObjects [label="\"temporalobjects\" % \"0.34\"", shape=Box];
+	LucreSTM [label="\"lucrestm\" % \"1.0.0\"", shape=Box];
+	LucreData [label="\"lucredata\" % \"1.0.0\"", shape=Box];
+	LucreExpr [label="\"lucreexpr\" % \"1.0.0\"", shape=Box];
+	TemporalObjects [label="\"temporalobjects\" % \"1.0.0\"", shape=Box];
 	SoundProcesses3 [label="\"soundprocesses\" % \"0.40-SNAPSHOT\"", shape=Box, style=dotted];
 	Mellite [label="\"mellite\" % \"0.10-SNAPSHOT\"", shape=Box, style=dotted];
 	
