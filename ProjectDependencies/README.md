@@ -6,3 +6,4 @@ Small graphviz project for me to keep track of my libraries at [GitHub](https://
  - Scala projects have black outline, Sbt plugins have blue outline, Java projects have green outline
  - Arrows point from dependent to dependency
  - Versions refer to latest stable. If a newer snapshow exists, outline is dotted
+ - Test-only dependencies have dotted arrows.
