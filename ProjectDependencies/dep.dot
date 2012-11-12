@@ -12,7 +12,7 @@ digraph G {
 	ScalaInterpreterPane [label="\scalainterpreterpane\" % \"1.2.0\"", shape=Box];
 	PrefuseCore [label="\"prefuse-core\" % \"0.21\"", shape=Box, color=green];
 	ScalaColliderSwing [label="\"scalacolliderswing\" % \"1.1.1\"", shape=Box];
-	SoundProcesses [label="\"soundprocesses\" % \"0.34\"", shape=Box, color=red];
+	SoundProcesses_OLD [label="\"soundprocesses\" % \"0.34\"", shape=Box, color=red];
 	Wolkenpumpe [label="\"wolkenpumpe\" % \"0.34\"", shape=Box];
 	NuagesPompe [label="\"nuagespompe\" % \"0.34\"", shape=Box, color=red];
 	NuagesApp [label="\"nuagesapp\" % \"0.34\"", shape=Box, color=red];
@@ -26,7 +26,7 @@ digraph G {
 	LucreExpr [label="\"lucreexpr\" % \"1.4.0\"", shape=Box];
 	LucreConfluent [label="\"lucreconfluent\" % \"1.4.0\"", shape=Box];
 	ConfluentReactive [label="\"confluentreactive\" % \"1.4.0\"", shape=Box];
-	SoundProcesses3 [label="\"soundprocesses\" % \"1.1.2\"", shape=Box];
+	SoundProcesses [label="\"soundprocesses\" % \"1.1.2\"", shape=Box];
 	Mellite [label="\"mellite\" % \"0.10-SNAPSHOT\"", shape=Box, style=dotted, color=red];
 	
 	FScapeJobs -> ScalaOSC;
@@ -43,8 +43,8 @@ digraph G {
 	ScalaColliderSwing -> ScalaInterpreterPane;
 	ScalaColliderSwing -> PrefuseCore;
 	ScalaColliderSwing -> ScalaAudioWidgets;
-	SoundProcesses -> ScalaCollider;
-	Wolkenpumpe -> SoundProcesses;
+	SoundProcesses_OLD -> ScalaCollider;
+	Wolkenpumpe -> SoundProcesses_OLD;
 	NuagesPompe -> Wolkenpumpe;
 	NuagesPompe -> ScalaColliderSwing;
 	NuagesApp -> SbtAppbundle;
@@ -63,10 +63,12 @@ digraph G {
 //	LucreConfluent -> LucreExpr [style=dotted];
 	ConfluentReactive -> LucreConfluent;
 	ConfluentReactive -> LucreEvent;
-	SoundProcesses3 -> ScalaCollider;
-	SoundProcesses3 -> ConfluentReactive;
-	SoundProcesses3 -> LucreExpr;
-	Mellite -> SoundProcesses3;
+	SoundProcesses -> ScalaCollider;
+	SoundProcesses -> ConfluentReactive;
+	SoundProcesses -> LucreExpr;
+	Mellite -> SoundProcesses;
 	Mellite -> ScalaAudioWidgets;
+	Mellite -> PrefuseCore;
+	Mellite -> ScalaInterpreterPane;
 }
 
