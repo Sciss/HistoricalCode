@@ -3,7 +3,7 @@ package impl
 
 import de.sciss.lucre.{data, DataOutput, stm, DataInput, geom}
 import data.SkipOctree
-import geom.{IntPointN, IntHyperCubeN, IntSpace}
+import geom.{IntHyperRectangleN, IntPointN, IntHyperCubeN, IntSpace}
 import data.SpaceSerializers
 import collection.immutable.{IndexedSeq => IIdxSeq}
 import IntSpace.NDim
@@ -12,7 +12,8 @@ object FigureImpl {
    private val SER_VERSION = 0
 
    private implicit val space : NDim = NDim( 4 )
-   private val hyper = IntHyperCubeN( IIdxSeq( 0, 0, 0, 0 ), 0x40000000 )
+   private final val hyperExt = 0x40000000
+   private final val hyper    = IntHyperCubeN( IIdxSeq( 0, 0, 0, 0 ), hyperExt )
 
    private implicit def elementToPoint( elem: Element, tx: S#Tx ) : NDim#PointLike = {
       val r = elem.bounds
@@ -51,8 +52,22 @@ object FigureImpl {
       def name( implicit tx: S#Tx ) : Ex[ String ] = nameRef.get
       def name_=( value: Ex[ String ])( implicit tx: S#Tx ) { nameRef.set( value )}
 
-      def elements( within: Rectangle )( implicit tx: S#Tx ) : IIdxSeq[ Element ] = {
-         oct.rangeQuery( ??? ).toIndexedSeq
+      def elements( overlapping: Rectangle )( implicit tx: S#Tx ) : IIdxSeq[ Element ] = {
+         // - the four components stored per element are left, top, right, bottom
+         // - we are asking for all elements overlapping the query rectangle qr
+         // - thus we need to filter elements e where
+         //   e.left <= qr.right && e.top <= qr.bottom && e.right >= qr.left && e.bottom >= qr.top
+         // - in other words the query shape must implement the following intervals
+         //   1st dimension : [-inf, qr.right)
+         //   2nd dimension : [-inf, qr.bottom)
+         //   3rd dimension : (qr.left, +inf]
+         //   4th dimension : (qr.top, +inf]
+         val c    = IIdxSeq( -hyperExt        -> overlapping.right,
+                             -hyperExt        -> overlapping.bottom,
+                             overlapping.left -> (hyperExt - 1),
+                             overlapping.top  -> (hyperExt - 1) )
+         val qr   = IntHyperRectangleN( c )
+         oct.rangeQuery( qr ).toIndexedSeq
       }
 
       def dispose()( implicit tx: S#Tx ) {

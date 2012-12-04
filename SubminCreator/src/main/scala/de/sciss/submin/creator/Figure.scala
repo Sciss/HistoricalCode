@@ -15,5 +15,5 @@ trait Figure extends stm.Mutable[ S#ID, S#Tx ] {
 
 //   def elements: expr.LinkedList.Modifiable[ S, Element, Unit ]
 
-   def elements( within: Rectangle )( implicit tx: S#Tx ) : IIdxSeq[ Element ]
+   def elements( overlapping: Rectangle )( implicit tx: S#Tx ) : IIdxSeq[ Element ]
 }

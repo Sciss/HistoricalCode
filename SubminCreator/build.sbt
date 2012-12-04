@@ -15,7 +15,7 @@ licenses := Seq( "GPL v2+" -> url( "http://www.gnu.org/licenses/gpl-2.0.txt" ))
 resolvers += "Oracle Repository" at "http://download.oracle.com/maven"  // required for sleepycat
 
 libraryDependencies ++= Seq(
-   "de.sciss" %% "lucredata-core" % "1.4.1+",
+   "de.sciss" %% "lucredata-core" % "1.4.2+",
    "de.sciss" %% "lucreexpr" % "1.4.+"
 )
 

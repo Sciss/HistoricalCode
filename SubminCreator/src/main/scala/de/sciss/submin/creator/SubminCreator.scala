@@ -1,5 +1,11 @@
 package de.sciss.submin.creator
 
-object SubminCreator extends App {
+import swing.Swing
 
+object SubminCreator extends App {
+   val doc = Document()
+
+   Swing.onEDT {
+      new MainFrame( doc )
+   }
 }
