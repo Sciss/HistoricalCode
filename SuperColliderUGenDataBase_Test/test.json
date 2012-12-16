@@ -19,11 +19,11 @@
          "name": {"default": "rate", "scala": "speed"},
          "default": 1.0,
          "summary": "relative speed of the playback",
-         "detail": "`1.0` advances the play head by the server's sample rate each second, so `2.0` means doubling speed (and pitch), and `0.5` means half speed (and half pitch). Negative numbers can be used for backwards playback. If the underlying buffer represents a sound at a different sample rate, the rate should be multiplied by {$ugen BufRateScale} for the given buffer to obtain the correct speed."
+         "detail": "`1.0` advances the play head by the server's sample rate each second, so `2.0` means doubling speed (and pitch), and `0.5` means half speed (and half pitch). Negative numbers can be used for backwards playback. If the underlying buffer represents a sound at a different sample rate, the rate should be multiplied by ${ugen BufRateScale} for the given buffer to obtain the correct speed."
       }, {
          "name": {"default": "trigger", "scala": "trig"},
          "default": 1,
-         "summary": "a trigger which causes a jump to the given {$arg startPos}",
+         "summary": "a trigger which causes a jump to the given ${arg startPos}",
          "detail": "A trigger occurs when a signal changes from non-positive to positive (e.g. <= 0 to >0)."
       }, {
          "name": "startPos", 
@@ -41,7 +41,7 @@
          "summary": "what to do when the play head reaches the buffer end"
       }],
       "summary": "A UGen to play back samples from a buffer in memory",
-      "detail": "{$ugen PlayBuf} provides a kind of high-level interface to sample-playback, whereas {$ugen BufRd} represents a kind of lower-level access. While {$ugen BufRd} has a random-access-pointer in the form of a phase input, {$ugen PlayBuf} advances the phase automatically based on a given playback speed. {$ugen PlayBuf} uses cubic interpolation.",
+      "detail": "${ugen PlayBuf} provides a kind of high-level interface to sample-playback, whereas ${ugen BufRd} represents a kind of lower-level access. While ${ugen BufRd} has a random-access-pointer in the form of a phase input, ${ugen PlayBuf} advances the phase automatically based on a given playback speed. ${ugen PlayBuf} uses cubic interpolation.",
       "links": [ "ugen.BufRd", "ugen.DiskIn", "ugen.RecordBuf", "ugen.Done", "ugen.BufRateScale", "ugen.BufFrames" ]
    }, {
       "name": "DelayN",
