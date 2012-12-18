@@ -1,6 +1,6 @@
 name := "ScalaAudioWidgets"
 
-version := "1.0.0"
+version := "1.1.0-SNAPSHOT"
 
 organization := "de.sciss"
 
@@ -12,10 +12,8 @@ licenses := Seq( "GPL v2+" -> url( "http://www.gnu.org/licenses/gpl-2.0.txt" ))
 
 scalaVersion := "2.9.2"
 
-// crossScalaVersions := Seq( "2.10.0-M6", "2.9.2" )
-
 libraryDependencies ++= Seq(
-   "de.sciss" %% "audiowidgets" % "1.0.+"
+   "de.sciss" %% "audiowidgets" % "1.1.+"
 )
 
 libraryDependencies <+= scalaVersion { sv =>
