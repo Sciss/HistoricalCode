@@ -1,3 +1,5 @@
+__Note:__ ScalaAudioWidgets is now obsolete; instead use sub-project audiowidgets-swing in project [AudioWidgets](https://github.com/Sciss/AudioWidgets)!
+
 ## ScalaAudioWidgets
 
 ### statement
