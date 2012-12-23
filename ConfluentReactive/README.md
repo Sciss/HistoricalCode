@@ -1,3 +1,5 @@
+__Note:__ ConfluentReactive is now obsolete; instead use sub-project lucreconfluent-event in project [LucreConfluent](https://github.com/Sciss/LucreConfluent)!
+
 ## ConfluentReactive
 
 ### statement
