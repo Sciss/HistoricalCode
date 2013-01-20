@@ -26,11 +26,11 @@
 package de.sciss.nuages
 
 import java.awt.event.{ComponentEvent, ComponentAdapter}
-import de.sciss.gui.j.PeakMeter
 import java.io.PrintStream
 import javax.swing._
 import de.sciss.scalainterpreter.LogPane
 import java.awt.{Dimension, EventQueue, Font, Color}
+import de.sciss.audiowidgets.j.PeakMeter
 
 //import Setup._
 //import de.sciss.synth.proc.ProcTxn
@@ -127,9 +127,12 @@ extends BasicPanel {
    }
 
   private val logPane = if( settings.log ) {
-     val p = new LogPane( 2, 30 )
-     p.init()
-     /* val scroll = */ p.getComponent( 0 ) match {
+     val lps = LogPane.Settings()
+     lps.columns  = 30
+     lps.rows     = 2
+     val p = LogPane( lps )
+//     p.init()
+     /* val scroll = */ p.component match {
         case scroll: JScrollPane =>
            scroll.setBorder( null )
            scroll.getViewport.getView.setFont( new Font( "Menlo", Font.PLAIN, 8 ))
@@ -141,9 +144,9 @@ extends BasicPanel {
      Console.setErr( p.outputStream )
      Console.setOut( p.outputStream )
      val d = outMeterPanel.orElse( inMeterPanel ).map( _.getPreferredSize ).getOrElse( new Dimension( 0, 36 ))
-     val d1 = p.getPreferredSize
+     val d1 = p.component.getPreferredSize // getPreferredSize
      d1.height = d.height
-     p.setPreferredSize( d1 )
+     p.component.setPreferredSize( d1 )
      Some( p )
   } else None
 
@@ -175,7 +178,7 @@ extends BasicPanel {
 
    logPane.foreach { p =>
       space()
-      panel.add( p )
+      panel.add( p.component )
    }
 
    repl.foreach { p =>

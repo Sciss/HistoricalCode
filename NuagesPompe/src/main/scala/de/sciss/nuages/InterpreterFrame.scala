@@ -25,12 +25,12 @@
 
 package de.sciss.nuages
 
-import de.sciss.scalainterpreter.ScalaInterpreterPane
 import java.awt.event.KeyEvent
 import java.awt.{Toolkit, GraphicsEnvironment}
 import javax.swing._
 import tools.nsc.interpreter.NamedParam
 import collection.immutable.{IndexedSeq => IIdxSeq}
+import de.sciss.scalainterpreter.{CodePane, Interpreter, InterpreterPane}
 
 object InterpreterFrame {
    def apply( settings: Settings = SettingsBuilder().build ) : InterpreterFrame = new InterpreterFrame( settings )
@@ -110,41 +110,63 @@ object InterpreterFrame {
 }
 class InterpreterFrame private( val settings: InterpreterFrame.Settings )
 extends JFrame( settings.title ) {
-   val pane = new ScalaInterpreterPane
-//   private val sync = new AnyRef
-//   private var inCode: Option[ Interpreter => Unit ] = None
-//   private var interpreter: Option[ Interpreter ] = None
-
    private val txnKeyStroke = {
       val ms = Toolkit.getDefaultToolkit.getMenuShortcutKeyMask
       KeyStroke.getKeyStroke( KeyEvent.VK_T, ms )
    }
 
+   private val codePane = {
+      val cCfg = CodePane.Config()
+      cCfg.text = """// Press '""" + KeyEvent.getKeyModifiersText( txnKeyStroke.getModifiers ) + " + " +
+         KeyEvent.getKeyText( txnKeyStroke.getKeyCode ) + """' to execute transactionally.
+
+""" + settings.text
+      cCfg.keyMap += txnKeyStroke -> (() => txnExecute())
+      CodePane( cCfg )
+   }
+
+   private val intp = {
+      val iCfg = Interpreter.Config()
+      iCfg.bindings  = settings.bindings
+      iCfg.imports   = settings.imports
+      Interpreter( iCfg )
+   }
+
+   val pane = {
+      val cfg  = InterpreterPane.Config()
+      if( settings.code.length > 0 ) cfg.code = settings.code
+//      InterpreterPane( cfg, iCfg, cCfg )
+      InterpreterPane.wrap( intp, codePane )
+   }
+//   private val sync = new AnyRef
+//   private var inCode: Option[ Interpreter => Unit ] = None
+//   private var interpreter: Option[ Interpreter ] = None
+
    // ---- constructor ----
    {
       val cp = getContentPane
 
-      pane.initialText = pane.initialText +
-"""// Press '""" + KeyEvent.getKeyModifiersText( txnKeyStroke.getModifiers ) + " + " +
-      KeyEvent.getKeyText( txnKeyStroke.getKeyCode ) + """' to execute transactionally.
+//      pane.initialText = pane.initialText +
+//"""// Press '""" + KeyEvent.getKeyModifiersText( txnKeyStroke.getModifiers ) + " + " +
+//      KeyEvent.getKeyText( txnKeyStroke.getKeyCode ) + """' to execute transactionally.
+//
+//""" + settings.text
 
-""" + settings.text
-
-      pane.initialCode     = if( settings.code.isEmpty ) None else Some( settings.code )
-      pane.customBindings  = settings.bindings
-      pane.customImports   = settings.imports
+//      pane.initialCode     = if( settings.code.isEmpty ) None else Some( settings.code )
+//      pane.customBindings  = settings.bindings
+//      pane.customImports   = settings.imports
 
 // XXX TODO
 //      pane.out = Some( Setup.logPane.writer )
 
-      pane.customKeyMapActions += txnKeyStroke -> (() => txnExecute())
+//      pane.customKeyMapActions += txnKeyStroke -> (() => txnExecute())
 
-      pane.init()
+//      pane.init()
 //      val sp = new JSplitPane( SwingConstants.HORIZONTAL )
 //      sp.setTopComponent( pane )
 //      sp.setBottomComponent( lp )
 //      cp.add( sp )
-      cp.add( pane )
+      cp.add( pane.component )
       val b = GraphicsEnvironment.getLocalGraphicsEnvironment.getMaximumWindowBounds
       setSize( b.width / 2, b.height * 7 / 8 )
 //      sp.setDividerLocation( b.height * 2 / 3 )
@@ -157,7 +179,7 @@ extends JFrame( settings.title ) {
    private var txnCount = 0
 
    def txnExecute() {
-      pane.getSelectedTextOrCurrentLine.foreach( txt => {
+      codePane.getSelectedTextOrCurrentLine.foreach( txt => {
          val txnId  = txnCount
          txnCount += 1
          val txnTxt = """class _txnBody""" + txnId + """( implicit t: ProcTxn ) {
@@ -168,7 +190,7 @@ import _txnRes""" + txnId + """._
 """
 
 //         println( txnTxt )
-         pane.interpret( txnTxt )
+         intp.interpret( txnTxt )
       })
    }
 

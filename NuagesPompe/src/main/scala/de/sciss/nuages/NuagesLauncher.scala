@@ -32,6 +32,7 @@ import javax.swing.Box
 import java.awt.{EventQueue, GraphicsEnvironment}
 import de.sciss.synth.{ServerConnection, Server}
 import collection.immutable.{IndexedSeq => IIdxSeq}
+import util.control.NonFatal
 
 object NuagesLauncher {
    sealed trait SettingsLike {
@@ -205,7 +206,7 @@ final class NuagesLauncher private( val settings: NuagesLauncher.Settings ) {
       try {
          settings.doneAction( res )
       } catch {
-         case e => e.printStackTrace()
+         case NonFatal( e ) => e.printStackTrace()
       }
    }
 
@@ -213,14 +214,14 @@ final class NuagesLauncher private( val settings: NuagesLauncher.Settings ) {
       try {
          settings.beforeShutdown()
       } catch {
-         case e => e.printStackTrace()
+         case NonFatal( e ) => e.printStackTrace()
       }
       val s = Server.default
       if( (s != null) && (s.condition != Server.Offline) ) {
-         s.quit
-         s.dispose
+         s.quit()
+         s.dispose()
       } else {
-         booting.abort
+         booting.abort()
       }
    }
 }

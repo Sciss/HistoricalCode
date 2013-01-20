@@ -2,11 +2,11 @@
 
 ### statement
 
-A bit of glue on top of [Wolkenpumpe](http://github.com/Sciss/Wolkenpumpe/) so that set-up of standalone applications is simple. NuagesPompe is (C)opyright 2008-2012 by Hanns Holger Rutz. All rights reserved. It is released under the [GNU General Public License](http://github.com/Sciss/NuagesPompe/blob/master/licenses/NuagesPompe-License.txt) and comes with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`.
+A bit of glue on top of [Wolkenpumpe](http://github.com/Sciss/Wolkenpumpe/) so that set-up of standalone applications is simple. NuagesPompe is (C)opyright 2008-2013 by Hanns Holger Rutz. All rights reserved. It is released under the [GNU General Public License](http://github.com/Sciss/NuagesPompe/blob/master/licenses/NuagesPompe-License.txt) and comes with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`.
 
 ### requirements
 
-Builds with xsbt (sbt 0.11) against Scala 2.9.2. Depends on [Wolkenpumpe](http://github.com/Sciss/Wolkenpumpe) and [ScalaCollider-Swing](http://github.com/Sciss/ScalaColliderSwing). Standard sbt targets are `clean`, `update`, `compile`, `package`, `doc`, `publish-local`.
+Builds with sbt 0.12.1 against Scala 2.10.0. Depends on [Wolkenpumpe](http://github.com/Sciss/Wolkenpumpe) and [ScalaCollider-Swing](http://github.com/Sciss/ScalaColliderSwing). Standard sbt targets are `clean`, `update`, `compile`, `package`, `doc`, `publish-local`.
 
 ### creating an IntelliJ IDEA project
 

@@ -1,6 +1,6 @@
 name := "NuagesPompe"
 
-version := "0.34"
+version := "0.35.0-SNAPSHOT"
 
 organization := "de.sciss"
 
@@ -10,13 +10,11 @@ description := "Some common elements for building SoundProcesses and Wolkenpumpe
 
 licenses := Seq( "GPL v2+" -> url( "http://www.gnu.org/licenses/gpl-2.0.txt" ))
 
-scalaVersion := "2.9.2"
-
-resolvers += "Clojars Repository" at "http://clojars.org/repo"
+scalaVersion := "2.10.0"
 
 libraryDependencies ++= Seq(
-   "de.sciss" %% "wolkenpumpe" % "0.34",
-   "de.sciss" %% "scalacolliderswing" % "0.34"
+   "de.sciss" %% "wolkenpumpe" % "0.35.+",
+   "de.sciss" %% "scalacolliderswing" % "1.3.+"
 )
 
 retrieveManaged := true

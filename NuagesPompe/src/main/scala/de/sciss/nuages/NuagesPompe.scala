@@ -27,14 +27,8 @@ package de.sciss.nuages
 
 object NuagesPompe {
   val name          = "NuagesPompe"
-  val version       = 0.34
-  val copyright     = "(C)opyright 2010-2012 Hanns Holger Rutz"
-  val isSnapshot    = false
-
-  def versionString = {
-     val s = (version + 0.001).toString.substring( 0, 4 )
-     if( isSnapshot ) s + "-SNAPSHOT" else s
-  }
+  val version       = "0.35.0"
+  val copyright     = "(C)opyright 2010-2013 Hanns Holger Rutz"
 
   def main( args: Array[ String ]) {
 //    if( args == Array( "--test" )) {
@@ -46,7 +40,7 @@ object NuagesPompe {
   }
 
   def printInfo() {
-     println( "\n" + name + " v" + versionString + "\n" + copyright + ". All rights reserved.\n" +
+     println( "\n" + name + " v" + version + "\n" + copyright + ". All rights reserved.\n" +
         "This is a library which cannot be executed directly.\n" )
   }
 }

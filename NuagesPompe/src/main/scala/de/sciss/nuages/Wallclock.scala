@@ -31,7 +31,7 @@ package de.sciss.nuages
 import javax.swing.{BorderFactory, JLabel}
 import java.util.{TimerTask, Timer}
 import java.awt.{EventQueue, Graphics, Color, Font}
-import de.sciss.gui.j.RecessedBorder
+import de.sciss.audiowidgets.j.RecessedBorder
 
 object Wallclock {
    def apply() : Wallclock = new Wallclock()
