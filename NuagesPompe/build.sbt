@@ -1,6 +1,6 @@
 name := "NuagesPompe"
 
-version := "0.35.0-SNAPSHOT"
+version := "0.35.0"
 
 organization := "de.sciss"
 
