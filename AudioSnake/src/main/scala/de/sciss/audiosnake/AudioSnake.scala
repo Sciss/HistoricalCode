@@ -108,12 +108,21 @@ object AudioSnake {
     x1 = 0f
     prg = 0
 
+    var dcMem0 = 0.0
+    var dcMem1 = 0.0
+    var xInteg = 0.0
+
     def flushOut() {
       var i = 0; while (i < bufOff) {
         val x0 = cb(i)
-        val y0 = x0 + x1
-        x1 = x0
-        cb(i) = y0
+//        val y0 = x0 + x1
+//        x1 = x0
+      // ---- integrate and remove DC ----
+        xInteg += x0
+        val y0 = xInteg - dcMem0 + 0.99 * dcMem1
+        dcMem0 = xInteg
+        dcMem1 = y0
+        cb(i) = y0.toFloat
       i += 1}
       out.write(buf, 0, bufOff)
       bufOff = 0
