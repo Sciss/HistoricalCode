@@ -70,12 +70,14 @@ object AudioSnake {
     println("Building suffix tree...")
     val buf = in.buffer(8192)
     val cb  = buf(0)
-    val ctx = ContextTree.empty[Float]
+    val ctx = ContextTree.empty[Int]
     var off = 0L
     var prg = 0
     val numFrames = in.numFrames
 
     var x1 = 0f
+
+    val quant = 1 << 13
 
     while (off < numFrames) {
       val chunk = math.min(8192, numFrames - off).toInt
@@ -89,7 +91,12 @@ object AudioSnake {
         cb(i) = y0
       i += 1}}
 
-      ctx.appendAll(if (chunk == 8192) cb else cb.view(0, chunk))
+      { var i = 0; while (i < chunk) {
+        val x0 = cb(i)
+        val j  = (x0 * quant).toInt
+        ctx += j
+      i += 1 }}
+//      ctx.appendAll(if (chunk == 8192) cb else cb.view(0, chunk))
       off += chunk
       val prgNew = ((off * 40) / numFrames).toInt
       while (prg < prgNew) {
@@ -137,9 +144,10 @@ object AudioSnake {
       val sq = snake.successors.take(10).to[Vector]
       val sz = sq.size
       if (sz > 0) {
-        val e = if (sz == 1) sq.head else sq(rnd.nextInt(sz))
-        snake += e
-        cb(bufOff) = e
+        val j  = if (sz == 1) sq.head else sq(rnd.nextInt(sz))
+        snake += j
+        val x0 = j.toFloat / quant
+        cb(bufOff) = x0
         bufOff += 1
         if (bufOff == 8192) flushOut()
         off += 1
