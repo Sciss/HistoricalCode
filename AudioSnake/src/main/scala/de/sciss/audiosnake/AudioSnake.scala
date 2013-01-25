@@ -1,6 +1,6 @@
 package de.sciss.audiosnake
 
-import de.sciss.synth.io.{AudioFileType, AudioFile}
+import de.sciss.synth.io.{SampleFormat, AudioFileType, AudioFile}
 import java.io.File
 import de.sciss.contextsnake.ContextTree
 
@@ -8,7 +8,15 @@ object AudioSnake {
   def main(args: Array[String]) {
     var inPath    = ""
     var outPath   = ""
-    var duration  = 5.0
+    var dur       = 10.0
+    var quant     = 10000
+    var floatFmt  = false
+    var gain      = 1.0
+    var backMin   = 5
+    var seed      = new (() => Long) {
+      override def toString() = "system clock"
+      def apply() = System.currentTimeMillis()
+    }
 
 //    val p = new org.sellmerfud.optparse.OptionParser
 //    p.banner = "AudioSnake [options] input"
@@ -20,7 +28,12 @@ object AudioSnake {
 //    }
 
     val parser = new scopt.mutable.OptionParser("AudioSnake") {
-      doubleOpt("l", "length", "<value>",     "maximum output duration in seconds (default: 5.0)", { v: Double => duration = v })
+      opt(           "float",                 "use floating point output", { floatFmt = true })
+      intOpt(   "b", "back", "<value>",      s"minimum sequence length in backtracking (default: ${backMin}})", { v: Int => backMin = v })
+      intOpt(   "q", "quantize", "<value>",  s"quantization steps (default: ${quant}})", { v: Int => quant = v })
+      intOpt(   "r", "rand", "<value>",      s"random seed value (default: ${seed})", { v: Int => seed = () => v.toLong })
+      doubleOpt("l", "length", "<value>",    s"maximum output duration in seconds (default: ${dur})", { v: Double => dur = v })
+      doubleOpt("g", "gain", "<value>",      s"linear output amplitude factor (default: ${gain})", { v: Double => gain = v })
       opt(      "o", "output", "<file>",      "output audio file", { v: String => outPath = v })
       arg(                     "<inputfile>", "input audio file",  { v: String => inPath  = v })
     }
@@ -30,7 +43,9 @@ object AudioSnake {
         parser.showUsage
         sys.exit(1)
       }
-      run(inPath, outPath, duration)
+      val rand = new util.Random(seed())
+      run(inPath = inPath, outPath = outPath, dur = dur, quant = quant, gain = gain.toFloat,
+        floatFmt = floatFmt, backMin = backMin, rand = rand)
 
     } else {
       sys.exit(1)
@@ -45,7 +60,8 @@ object AudioSnake {
     }
   }
 
-  def run(inPath: String, outPath: String, dur: Double) {
+  def run(inPath: String, outPath: String, dur: Double, quant: Int, gain: Float, floatFmt: Boolean, backMin: Int,
+          rand: util.Random) {
     val afIn = AudioFile.openRead(inPath)
     try {
       require(afIn.numChannels == 1, "Currently requires input to be monophonic (found " + afIn.numChannels + " channels)")
@@ -53,11 +69,15 @@ object AudioSnake {
       val outTpe  = if (ext == "") afIn.fileType else {
         AudioFileType.writable.find( _.extensions.contains(ext)).getOrElse(afIn.fileType)
       }
-      val outSpec = afIn.spec.copy(fileType = outTpe, byteOrder = None, numFrames = 0L)
+      val outSpec = afIn.spec.copy(fileType = outTpe,
+                                   sampleFormat = if (floatFmt) SampleFormat.Float else afIn.sampleFormat,
+                                   byteOrder = None,
+                                   numFrames = 0L)
       val afOut = AudioFile.openWrite(outPath, outSpec)
       try {
         val maxFrames = (afOut.sampleRate * dur + 0.5).toLong
-        perform(afIn, afOut, maxFrames)
+        perform(in = afIn, out = afOut, maxFrames = maxFrames, quant = quant, gain = gain, backMin = backMin,
+                rand = rand)
       } finally {
         afOut.close()
       }
@@ -66,7 +86,8 @@ object AudioSnake {
     }
   }
 
-  private def perform(in: AudioFile, out: AudioFile, maxFrames: Long) {
+  private def perform(in: AudioFile, out: AudioFile, maxFrames: Long, quant: Int, gain: Float, backMin: Int,
+                      rand: util.Random) {
     println("Building suffix tree...")
     val buf = in.buffer(8192)
     val cb  = buf(0)
@@ -77,7 +98,9 @@ object AudioSnake {
 
     var x1 = 0f
 
-    val quant = 1 << 13
+//    val quant = 1 << 13
+    val gainIn  = quant*0.5f
+    val gainOut = gain / gainIn
 
     while (off < numFrames) {
       val chunk = math.min(8192, numFrames - off).toInt
@@ -93,7 +116,7 @@ object AudioSnake {
 
       { var i = 0; while (i < chunk) {
         val x0 = cb(i)
-        val j  = (x0 * quant).toInt
+        val j  = (x0 * gainIn).toInt
         ctx += j
       i += 1 }}
 //      ctx.appendAll(if (chunk == 8192) cb else cb.view(0, chunk))
@@ -109,11 +132,10 @@ object AudioSnake {
     println("Generating output...")
 
     val snake = ctx.snake(ctx(0) :: Nil)
-    val rnd = new util.Random()
-    off = 0L
-    var bufOff = 0
-    x1 = 0f
-    prg = 0
+    off         = 0L
+    var bufOff  = 0
+    x1          = 0f
+    prg         = 0
 
     var dcMem0 = 0.0
     var dcMem1 = 0.0
@@ -140,21 +162,39 @@ object AudioSnake {
       }
     }
 
+//    val maxSingleChoice = 40 // 100
+//    val resetSingleChoice = maxSingleChoice * 100
+//    var singleChoice = 0
+
     while (off < maxFrames && snake.nonEmpty) {
-      val sq = snake.successors.take(10).to[Vector]
+      val sq = snake.successors.take(20).to[Vector]
       val sz = sq.size
       if (sz > 0) {
-        val j  = if (sz == 1) sq.head else sq(rnd.nextInt(sz))
-        snake += j
-        val x0 = j.toFloat / quant
-        cb(bufOff) = x0
-        bufOff += 1
-        if (bufOff == 8192) flushOut()
-        off += 1
+        if (sz == 1 && snake.size > backMin) {
+          snake.trimStart(1) // math.min(snake.size - 1, 2))
+        } else {
+          val j  = if (sz == 1) sq.head else sq(rand.nextInt(sz))
+          snake += j
+  //        if (sz == 1) {
+  //          singleChoice += 1
+  //          if (singleChoice >= resetSingleChoice) singleChoice = 0
+  //        } else {
+  //          singleChoice = 0
+  //        }
+  //        if (sz > 1 || singleChoice < maxSingleChoice) {
+            val x0 = j.toFloat * gainOut
+            cb(bufOff) = x0
+            bufOff += 1
+            if (bufOff == 8192) flushOut()
+            off += 1
+  //        }
+        }
+      } else {
+        snake.trimStart(1)
       }
-      if (sz == 0 || (sz == 1 && snake.size > 1)) snake.trimStart(1)
     }
 
     if (bufOff > 0) flushOut()
+    println()
   }
 }
