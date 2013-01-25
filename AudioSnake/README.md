@@ -18,6 +18,19 @@ This will print the usage. Examples
     > run -l 60.0 audio_work/WindspielRec1Cut-M.aif -o audio_work/windspiel_snake2.aif -b 24 -q 16384
     > run -l 60.0 -g 1.0 -q 8192 -b 5 -o audio_work/tagesschau_snake.aif audio_work/tagesschau891109.aif
 
+FScape FFT example. Assumes that the input file was forward transformed.
+
+    > run audio_work/WindspielRec1Cut-MFT.aif  -o audio_work/wind_fft_re.aif -b 12 -q 16384 -l 95.10893424036281 --float --rand 0
+    > run audio_work/WindspielRec1Cut-MFTi.aif -o audio_work/wind_fft_im.aif -b 12 -q 16384 -l 95.10893424036281 --float --rand 0
+
+(and then invert the FFT)
+
+Wavetlet example. This is actually quite amazing. Assumes that the input has been forward transformed, e.g. with Daubechies 16:
+
+    > run audio_work/WindspielRec1Cut-MWT.aif -o audio_work/wind_wt_snake.aif -b 12 -q 16384 -l 95.10893424036281 --float --rand 0
+
+(and then invert the WT)
+
 ### notes
 
 - uses an in-memory data structure. give sbt `-Xmx2048m` heap memory at least.
@@ -25,4 +38,10 @@ This will print the usage. Examples
 - works with monophonic inputs only at the moment
 - markov problem is small frequencies. therefore quantisation is used. this is a trade-off with fidelity / quantisation noise.
 - to address the frequency problem, the input should be around 1 or 2 minutes long. longer is fine but you may run into out-of-memory errors.
-- back tracking only happens at the head of the snake; in a future version this should include the tail to improve context richness.
+- back tracking only happens at the head of the snake; in a future version this should include the tail to improve context richness.a
+
+### ideas
+
+- when adding a fuzzy selector to the context tree, perhaps we could define an increase in fuzziness towards the snake's head
+- allow complex numbers (see FFT example above)
+- run on feature vectors (e.g. MFCC)
