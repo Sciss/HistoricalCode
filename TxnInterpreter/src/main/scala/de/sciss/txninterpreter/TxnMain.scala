@@ -196,13 +196,10 @@ final class TxnMain(set: nsc.Settings) extends IMain(set) {
       }
 
       val preamble = """
-        |class %s_C(implicit tx: concurrent.stm.InTxn) extends de.sciss.txninterpreter.HasSchoko {
+        |object %s extends de.sciss.txninterpreter.HasSchoko {
         |%s%s%s
       """.stripMargin.format(lineRep.readName, envLines.map("  " + _ + ";\n").mkString, importsPreamble, formatting.indentCode(toCompute))
-      val postamble = importsTrailer + "\n}" +
-        """
-          |val %s = concurrent.stm.atomic(new %s_C(_))
-        """.stripMargin.format(lineRep.readName, lineRep.readName)
+      val postamble = importsTrailer + "\n}"
       val generate = (m: MemberHandler) => m extraCodeToEvaluate request
     }
 
@@ -221,6 +218,7 @@ final class TxnMain(set: nsc.Settings) extends IMain(set) {
       // initial "" so later code can uniformly be: + etc
       val preamble = """
       |object %s {
+      |  println("EVAL")
       |  %s
       |  val %s: String = %s {
       |    %s
