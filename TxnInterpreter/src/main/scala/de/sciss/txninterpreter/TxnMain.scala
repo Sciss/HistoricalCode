@@ -6,7 +6,45 @@ import interpreter.{IMain, IR, isReplDebug, isReplPower}
 
 final class TxnMain(set: nsc.Settings) extends IMain(set) {
   def interpretTxn(line: String): IR.Result = {
-    interpret(line)
+    interpretTxn(line, synthetic = false)
+  }
+
+  def interpretTxn(line: String, synthetic: Boolean): IR.Result = {
+    def loadAndRunReq(req: Request) = {
+      classLoader.setAsContext()
+      val (result, succeeded) = req.loadAndRun
+
+      /** To our displeasure, ConsoleReporter offers only printMessage,
+       *  which tacks a newline on the end.  Since that breaks all the
+       *  output checking, we have to take one off to balance.
+       */
+      if (succeeded) {
+        if (printResultsTxn && result != "")
+          reporter.printMessage(result stripSuffix "\n")
+        else if (isReplDebug) // show quiet-mode activity
+          reporter.printMessage(result.trim.lines map ("[quiet] " + _) mkString "\n")
+
+        // Book-keeping.  Have to record synthetic requests too,
+        // as they may have been issued for information, e.g. :type
+        recordRequest(req)
+        IR.Success
+      }
+      else {
+        // don't truncate stack traces
+        reporter.withoutTruncating(reporter.printMessage(result))
+        IR.Error
+      }
+    }
+
+    if (global == null) IR.Error
+    else requestFromTxnLine(line, synthetic) match {
+      case Left(result) => result
+      case Right(req)   =>
+        // null indicates a disallowed statement type; otherwise compile and
+        // fail if false (implying e.g. a type error)
+        if (req == null || !req.compile) IR.Error
+        else loadAndRunReq(req)
+    }
   }
 
 //  override protected def parentClassLoader: ClassLoader = classOf[TxnMain].getClassLoader
@@ -16,6 +54,18 @@ final class TxnMain(set: nsc.Settings) extends IMain(set) {
   private def echo(msg: String) { Console println msg }
   private def repldbg(msg: => String) { if (isReplDebug) echo(msg) }
   private def tquoted(s: String) = "\"\"\"" + s + "\"\"\""
+  private var printResultsTxn = true
+
+  /** Temporarily be quiet */
+  override def beQuietDuring[T](body: => T): T = {
+    val saved = printResultsTxn
+    printResultsTxn = false
+    try {
+      super.beQuietDuring(body)
+    } finally {
+      printResultsTxn = saved
+    }
+  }
 
   private def safePos(t: global.Tree, alt: Int): Int =
     try t.pos.startOrPoint
@@ -146,7 +196,7 @@ final class TxnMain(set: nsc.Settings) extends IMain(set) {
       }
 
       val preamble = """
-        |object %s {
+        |object %s extends de.sciss.txninterpreter.HasSchoko {
         |%s%s%s
       """.stripMargin.format(lineRep.readName, envLines.map("  " + _ + ";\n").mkString, importsPreamble, formatting.indentCode(toCompute))
       val postamble = importsTrailer + "\n}"

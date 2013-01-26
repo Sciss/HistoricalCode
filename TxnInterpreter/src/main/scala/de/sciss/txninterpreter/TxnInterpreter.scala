@@ -21,7 +21,7 @@ object TxnInterpreter extends App with Runnable {
     val res = intp.interpretTxn(
       """
         |val r = Ref(33)
-        |val v = r()
+        |val v = schoko() // r()
         |v
       """.stripMargin)
     println(res)
