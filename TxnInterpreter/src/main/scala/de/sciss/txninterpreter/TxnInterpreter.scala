@@ -14,7 +14,7 @@ object TxnInterpreter extends App with Runnable {
 //    set.classpath.value += File.pathSeparator + sys.props( "java.class.path" )
     val intp = new TxnMain(set)
     intp.initializeSynchronous()
-    intp.quietImport("concurrent.stm._")
+    intp.quietImport("concurrent.stm._", "de.sciss.txninterpreter.TxnProvider._")
 
     println("Ok.")
 
