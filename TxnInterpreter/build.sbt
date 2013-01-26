@@ -1,5 +1,11 @@
 name := "TxnInterpreter"
 
+organization := "de.sciss"
+
+description := "Some experiments wrapping Scala interpreter calls into a STM transaction"
+
+homepage := Some(url("https://github.com/Sciss/TxnInterpreter"))
+
 version := "0.0.1-SNAPSHOT"
 
 scalaVersion := "2.10.0"

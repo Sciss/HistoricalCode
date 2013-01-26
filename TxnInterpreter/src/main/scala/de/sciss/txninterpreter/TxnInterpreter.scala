@@ -1,7 +1,6 @@
 package de.sciss.txninterpreter
 
 import tools.nsc
-import java.io.File
 
 object TxnInterpreter extends App with Runnable {
   run()
