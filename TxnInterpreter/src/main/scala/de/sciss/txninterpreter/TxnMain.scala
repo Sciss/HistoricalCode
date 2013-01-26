@@ -196,7 +196,7 @@ final class TxnMain(set: nsc.Settings) extends IMain(set) {
       }
 
       val preamble = """
-        |object %s extends de.sciss.txninterpreter.HasSchoko {
+        |object %s {
         |%s%s%s
       """.stripMargin.format(lineRep.readName, envLines.map("  " + _ + ";\n").mkString, importsPreamble, formatting.indentCode(toCompute))
       val postamble = importsTrailer + "\n}"
@@ -218,9 +218,8 @@ final class TxnMain(set: nsc.Settings) extends IMain(set) {
       // initial "" so later code can uniformly be: + etc
       val preamble = """
       |object %s {
-      |  println("EVAL")
       |  %s
-      |  val %s: String = %s {
+      |  val %s: String = concurrent.stm.atomic { _ => %s {
       |    %s
       |    (""
       """.stripMargin.format(
@@ -230,7 +229,7 @@ final class TxnMain(set: nsc.Settings) extends IMain(set) {
 
       val postamble = """
       |    )
-      |  }
+      |  }}
       |}
       """.stripMargin
       val generate = (m: MemberHandler) => m resultExtractionCode request

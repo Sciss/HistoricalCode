@@ -1,5 +1,5 @@
-package de.sciss.txninterpreter
-
-trait HasSchoko {
-  def schoko() = 33
-}
+//package de.sciss.txninterpreter
+//
+//trait HasSchoko {
+//  def schoko() = 33
+//}
