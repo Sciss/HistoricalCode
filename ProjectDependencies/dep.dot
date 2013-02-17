@@ -7,12 +7,12 @@ digraph G {
 	SbtAppbundle [label="\"sbt-appbundle\" % \"1.0.0\"", shape=Box, color=blue];
 	ScissDSP [label="\"scissdsp\" % \"1.1.0\"", shape=Box];
 	SonogramOverview [label="\"sonogramoverview\" % \"1.2.0\"", shape=Box];
-	ScalaCollider [label="\"scalacollider\" % \"1.3.1\"", shape=Box];
+	ScalaCollider [label="\"scalacollider\" % \"1.4.0\"", shape=Box];
 	Strugatzki [label="\"strugatzki\" % \"1.3.0\"", shape=Box];
 	JSyntaxPane [label="\"jsyntaxpane\" % \"1.0.0\"", shape=Box, color=green];
-	ScalaInterpreterPane [label="\scalainterpreterpane\" % \"1.3.0\"", shape=Box];
+	ScalaInterpreterPane [label="\scalainterpreterpane\" % \"1.4.0\"", shape=Box];
 	PrefuseCore [label="\"prefuse-core\" % \"0.21\"", shape=Box, color=green];
-	ScalaColliderSwing [label="\"scalacolliderswing\" % \"1.3.1\"", shape=Box];
+	ScalaColliderSwing [label="\"scalacolliderswing\" % \"1.4.0\"", shape=Box];
 	SoundProcesses_OLD [label="\"soundprocesses\" % \"0.35.0\"", shape=Box];
 	Wolkenpumpe [label="\"wolkenpumpe\" % \"0.35.0\"", shape=Box];
 	NuagesPompe [label="\"nuagespompe\" % \"0.35.0\"", shape=Box];
@@ -21,13 +21,13 @@ digraph G {
 	Kontur [label="\"kontur\" % \"1.0.0\"", shape=Box];
 	FingerTree [label="\"fingertree\" % \"1.2.0\"", shape=Box];
 	ScalaColliderUGens [label="\"scalacolliderugens\" % \"0.15\"", shape=Box];
-	LucreSTM [label="\"lucrestm\" % \"1.7.0-SNAPSHOT\"", shape=Box, style=dotted];
-	LucreEvent [label="\"lucreevent\" % \"1.7.0-SNAPSHOT\"", shape=Box, style=dotted];
-	LucreData [label="\"lucredata\" % \"1.7.0-SNAPSHOT\"", shape=Box, style=dotted];
+	LucreSTM [label="\"lucrestm\" % \"1.7.0\"", shape=Box];
+	LucreEvent [label="\"lucreevent\" % \"1.7.0\"", shape=Box];
+	LucreData [label="\"lucredata\" % \"1.7.0\"", shape=Box];
 //	LucreExpr [label="\"lucreexpr\" % \"1.4.0\"", shape=Box];
-	LucreConfluent [label="\"lucreconfluent\" % \"1.7.0-SNAPSHOT\"", shape=Box, style=dotted];
+	LucreConfluent [label="\"lucreconfluent\" % \"1.7.0\"", shape=Box];
 //	ConfluentReactive [label="\"confluentreactive\" % \"1.5.0\"", shape=Box];
-	SoundProcesses [label="\"soundprocesses\" % \"1.4.0\"", shape=Box, style=dotted];
+	SoundProcesses [label="\"soundprocesses\" % \"1.4.0\"", shape=Box];
 	Mellite [label="\"mellite\" % \"0.10-SNAPSHOT\"", shape=Box, style=dotted];
 	
 	FScapeJobs -> ScalaOSC;
@@ -37,7 +37,7 @@ digraph G {
 	SonogramOverview -> ScissDSP;
 	ScalaCollider -> ScalaOSC;
 	ScalaCollider -> ScalaAudioFile;
-	Strugatzki -> ScalaCollider;
+	Strugatzki -> ScalaCollider [color=red];
 	ScalaInterpreterPane -> JSyntaxPane;
 	ScalaInterpreterPane -> SbtAppbundle [color=blue];
 	ScalaColliderSwing -> SbtAppbundle [color=blue];
@@ -45,15 +45,15 @@ digraph G {
 	ScalaColliderSwing -> ScalaInterpreterPane;
 	ScalaColliderSwing -> PrefuseCore;
 	ScalaColliderSwing -> AudioWidgets;
-	SoundProcesses_OLD -> ScalaCollider;
+	SoundProcesses_OLD -> ScalaCollider [color=red];
 	Wolkenpumpe -> SoundProcesses_OLD;
 	NuagesPompe -> Wolkenpumpe;
-	NuagesPompe -> ScalaColliderSwing;
+	NuagesPompe -> ScalaColliderSwing [color=red];
 	NuagesApp -> SbtAppbundle;
 	NuagesApp -> NuagesPompe;
 	NuagesApp -> FScapeJobs;
 	Kontur -> SbtAppbundle [color=blue];
-	Kontur -> ScalaColliderSwing;
+	Kontur -> ScalaColliderSwing [color=red];
 	Kontur -> ScissDSP;
 	Kontur -> ScissLib;
 	LucreEvent -> LucreSTM;
@@ -69,9 +69,8 @@ digraph G {
 	SoundProcesses -> ScalaCollider;
 	SoundProcesses -> LucreConfluent;
 	SoundProcesses -> LucreEvent;
-	Mellite -> SoundProcesses [color=red];
-	Mellite -> AudioWidgets [color=red];
-	Mellite -> PrefuseCore;
-	Mellite -> ScalaInterpreterPane [color=red];
+	Mellite -> SoundProcesses;
+	Mellite -> ScalaColliderSwing;
+	Mellite -> LucreSTM;
 }
 
