@@ -31,6 +31,7 @@ digraph G {
 //	ConfluentReactive [label="\"confluentreactive\" % \"1.5.0\"", shape=Box];
 	SoundProcesses [label="\"soundprocesses\" % \"1.5.0\"", shape=Box];
 	Mellite [label="\"mellite\" % \"0.10-SNAPSHOT\"", shape=Box, style=dotted];
+	ScalaMIDI [label="\"scalamidi\" % \"0.1.0\"", shape=Box];
 	
 	FScapeJobs -> ScalaOSC;
 	FScapeJobs -> ScalaAudioFile;
