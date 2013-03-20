@@ -90,15 +90,29 @@ object NoteUtil {
     var chords  = Vector.empty[Chord]
     val pairs   = stabs.sliding(2, 1)
 
+//println(s"First ten raw     notes ${notes.take(10).mkString(", ")}")
+//println(s"First ten cleaned notes ${notes.take(10).mkString(", ")}")
+//println(s"First ten stabs         ${stabs.take(10).mkString(", ")}")
+
     // initially put all notes into the sequential bin, then
     // as chords are detected remove them from this set
     var seqSet  = Set(notes:_ *)
 
+//var i = 0
+
     pairs.foreach {
       case IIdxSeq(start, stop) =>
-        val par = notes.filter { n =>
+//i += 1
+        val par0 = notes.filter { n =>
           n.offset - minChordDuration <= start && n.stop + minChordDuration >= stop
         }
+        val par = par0.filter { n1 =>
+          par0.exists(n2 => n1 != n2 && {
+            (n1.offset < n2.stop && (n1.stop - n2.offset > minChordDuration)) ||
+            (n2.offset < n1.stop && (n2.stop - n1.offset > minChordDuration))
+          })
+        }
+//if (i < 20) println(f"$start%1.3f ... $stop%1.3f : $par")
         if (par.size >= 2) {
           val segm = par.map { n0 =>
             val n1 = if (start - n0.offset > minChordDuration) n0.replaceStart(start) else n0
@@ -112,6 +126,7 @@ object NoteUtil {
 
     val seq   = seqSet.to[Vector].sortBy(_.offset)
     chords    = chords.sortBy(_.minOffset)
+println(s"Now we've got ${seq.size} sequential and ${chords.size} parallel entries")
 
     var seqIdx      = 0
     var chordIdx    = 0

@@ -103,7 +103,9 @@ final case class OffsetNote(offset: Double, /* channel: Int, */ pitch: Pitch, du
 
   def dropOffset: Note = Note(/* channel = channel, */ pitch = pitch, duration = duration, velocity = velocity)
 
-  def toMIDI(channel: Int = 0)(implicit tickRate: TickRate): List[midi.Event] = {
+  def toMIDI(implicit tickRate: TickRate): List[midi.Event] = toMIDI(0)
+
+  def toMIDI(channel: Int)(implicit tickRate: TickRate): List[midi.Event] = {
     val tps       = tickRate.value
     val startTick = (offset * tps + 0.5).toLong
     val stopTick  = (stop   * tps + 0.5).toLong
