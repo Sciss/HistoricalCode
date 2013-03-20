@@ -35,7 +35,7 @@ import midi.TickRate
  * A chord made of a sequence of notes. Notes must be in ascending order with respect to their
  * pitches.
  */
-final case class Chord(notes: IIdxSeq[OffsetNote]) {
+final case class Chord(notes: IIdxSeq[OffsetNote]) extends ConvertibleToMIDI {
   require(notes.isSortedBy(_.pitch))
 
   def minOffset: Double = notes.minBy(_.offset).offset
@@ -94,8 +94,6 @@ final case class Chord(notes: IIdxSeq[OffsetNote]) {
     loop(pitches.toList)
     b.result().sorted
   }
-
-  def toMIDI(implicit tickRate: TickRate): List[midi.Event] = toMIDI(0)
 
   def toMIDI(channel: Int)(implicit tickRate: TickRate): List[midi.Event] =
     notes.flatMap(_.toMIDI(channel))(breakOut)

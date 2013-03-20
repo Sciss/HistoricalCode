@@ -81,7 +81,7 @@ final case class Note(/* channel: Int, */ pitch: Pitch, duration: Double, veloci
 }
 
 final case class OffsetNote(offset: Double, /* channel: Int, */ pitch: Pitch, duration: Double, velocity: Int /*, release: Int = 0 */)
-  extends NoteLike {
+  extends NoteLike with ConvertibleToMIDI {
 
   override def toString = {
     s"$productPrefix($pitch, off = $offsetString, dur = $durationString, vel = $velocity)"
@@ -102,8 +102,6 @@ final case class OffsetNote(offset: Double, /* channel: Int, */ pitch: Pitch, du
   def stop: Double = offset + duration
 
   def dropOffset: Note = Note(/* channel = channel, */ pitch = pitch, duration = duration, velocity = velocity)
-
-  def toMIDI(implicit tickRate: TickRate): List[midi.Event] = toMIDI(0)
 
   def toMIDI(channel: Int)(implicit tickRate: TickRate): List[midi.Event] = {
     val tps       = tickRate.value

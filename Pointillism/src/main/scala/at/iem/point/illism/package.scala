@@ -28,10 +28,12 @@ package at.iem.point
 import java.awt.EventQueue
 import java.text.DecimalFormat
 import java.math.RoundingMode
+import collection.breakOut
 import collection.mutable
 import collection.generic.CanBuildFrom
 import collection.immutable.{IndexedSeq => IIdxSeq}
 import de.sciss.midi
+import midi.TickRate
 import language.higherKinds
 
 package object illism {
@@ -59,6 +61,17 @@ package object illism {
   implicit final class IllismIterable[A](val it: Iterable[A]) extends AnyVal {
     def intervals(implicit ev: A <:< Pitch): IIdxSeq[DirectedInterval] =
       it.sliding(2,1).map({ case Seq(low, high) => high interval low }).toIndexedSeq
+
+    def play()(implicit ev: A <:< ConvertibleToMIDI) {
+      implicit val rate = TickRate.tempo(120, 1024)
+      val events0: IIdxSeq[midi.Event] = it.flatMap(_.toMIDI)(breakOut)
+      val min     = events0.minBy(_.tick).tick
+      val events  = events0.map(e => e.copy(tick = e.tick - min))
+      val track   = midi.Track(events)
+      val seq     = midi.Sequence(Vector(track))
+      val player  = midi.Sequencer.open()
+      player.play(seq)
+    }
 
     def meanVariance(implicit num: Fractional[A]): (A, A) = {
       var sum   = num.zero
@@ -94,6 +107,10 @@ package object illism {
 
   def defer(thunk: => Unit) {
     if (EventQueue.isDispatchThread) thunk else EventQueue.invokeLater(new Runnable { def run() { thunk }})
+  }
+
+  def stopSequencer() {
+    midi.Sequencer.open().stop()
   }
 
   private lazy val dfRound3 = {

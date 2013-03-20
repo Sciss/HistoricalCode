@@ -114,11 +114,12 @@ object NoteUtil {
         }
 //if (i < 20) println(f"$start%1.3f ... $stop%1.3f : $par")
         if (par.size >= 2) {
-          val segm = par.map { n0 =>
-            val n1 = if (start - n0.offset > minChordDuration) n0.replaceStart(start) else n0
-            val n2 = if (n1.stop - stop    > minChordDuration) n1.replaceStop (stop ) else n1
-            n2
-          }
+          val segm = par
+//          par.map { n0 =>
+//            val n1 = if (start - n0.offset > minChordDuration) n0.replaceStart(start) else n0
+//            val n2 = if (n1.stop - stop    > minChordDuration) n1.replaceStop (stop ) else n1
+//            n2
+//          }
           chords :+= Chord(segm.sortBy(_.pitch))
           seqSet --= par
         }
