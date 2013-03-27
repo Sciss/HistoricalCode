@@ -102,17 +102,25 @@ object NoteUtil {
 
     pairs.foreach {
       case IIdxSeq(start, stop) =>
-//i += 1
+        // first condition: given a stabbing span, a note must begin no later than the span start
+        // plus the tolerence, and it must end no earlier than the span stop minus the tolerance.
         val par0 = notes.filter { n =>
           n.offset - minChordDuration <= start && n.stop + minChordDuration >= stop
         }
+        // second condition: for each note candidate, there must be a different note
+        // which overlaps more than 50% with that note.
         val par = par0.filter { n1 =>
-          par0.exists(n2 => n1 != n2 && {
-            (n1.offset < n2.stop && (n1.stop - n2.offset > minChordDuration)) ||
-            (n2.offset < n1.stop && (n2.stop - n1.offset > minChordDuration))
+          n1.duration >= minChordDuration && par0.exists(n2 => n1 != n2 && {
+            val start = math.max(n1.offset, n2.offset)
+            val stop  = math.min(n1.stop,   n2.stop  )
+            val over  = math.max(0.0, stop - start)
+            val rel   = over / n1.duration
+            rel > 0.5
+
+//            (n1.offset < n2.stop && (n1.stop - n2.offset > minChordDuration)) ||
+//            (n2.offset < n1.stop && (n2.stop - n1.offset > minChordDuration))
           })
         }
-//if (i < 20) println(f"$start%1.3f ... $stop%1.3f : $par")
         if (par.size >= 2) {
           val segm = par
 //          par.map { n0 =>
@@ -127,7 +135,7 @@ object NoteUtil {
 
     val seq   = seqSet.to[Vector].sortBy(_.offset)
     chords    = chords.sortBy(_.minOffset)
-println(s"Now we've got ${seq.size} sequential and ${chords.size} parallel entries")
+//println(s"Now we've got ${seq.size} sequential and ${chords.size} parallel entries")
 
     var seqIdx      = 0
     var chordIdx    = 0
