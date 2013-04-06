@@ -13,11 +13,11 @@ digraph G {
 	LucreSTM [label="\"lucrestm\" % \"2.0.0-SNAPSHOT\"", shape=Box, style=dotted];
 	LucreSTM_BDB [label="\"lucrestm-bdb\" % \"2.0.0-SNAPSHOT\"", shape=Box, style=dotted];
 	Mellite [label="\"mellite\" % \"0.10-SNAPSHOT\"", shape=Box, style=dotted];
-	Model [label="\"model\" % \"0.2.0\"", shape=Box];
+	Model [label="\"model\" % \"0.2.1\"", shape=Box];
 	NuagesApp [label="\"nuagesapp\" % \"0.35.0\"", shape=Box];
 	NuagesPompe [label="\"nuagespompe\" % \"0.35.0\"", shape=Box];
 	PrefuseCore [label="\"prefuse-core\" % \"0.21\"", shape=Box, color=green];
-	Processor [label="\"processor\" % \"0.1.0\"", shape=Box];
+	Processor [label="\"processor\" % \"0.1.1\"", shape=Box];
 	SbtAppbundle [label="\"sbt-appbundle\" % \"1.0.1\"", shape=Box, color=blue];
 	ScalaOSC [label="\"scalaosc\" % \"1.1.1\"", shape=box];
 	ScalaAudioFile [label="\"scalaaudiofile\" % \"1.4.0\"", shape=box];
@@ -26,7 +26,7 @@ digraph G {
 	ScalaColliderUGens [label="\"scalacolliderugens\" % \"1.5.0\"", shape=Box];
 	ScalaInterpreterPane [label="\scalainterpreterpane\" % \"1.4.0\"", shape=Box];
 	ScalaMIDI [label="\"scalamidi\" % \"0.1.0\"", shape=Box];
-	ScissDSP [label="\"scissdsp\" % \"1.1.0\"", shape=Box];
+	ScissDSP [label="\"scissdsp\" % \"1.2.0\"", shape=Box];
 	ScissLib [label="\"scisslib\" % \"0.15\"", shape=Box, color=green];
 	Serial [label="\"serial\" % \"1.0.0\"", shape=Box];
 	SonogramOverview [label="\"sonogramoverview\" % \"1.4.0-SNAPSHOT\"", shape=Box, style=dotted];
@@ -42,7 +42,7 @@ digraph G {
 	Kontur -> Desktop;
 	Kontur -> SbtAppbundle [color=blue];
 	Kontur -> ScalaColliderSwing;
-	Kontur -> ScissDSP;
+	Kontur -> ScissDSP [color=red];
 	Kontur -> ScissLib;
 	Kontur -> Span;
 	LucreConfluent -> FingerTree;
@@ -77,7 +77,7 @@ digraph G {
 	SonogramOverview -> IntensityPalette;
 	SonogramOverview -> Processor;
 	SonogramOverview -> ScalaAudioFile;
-	SonogramOverview -> ScissDSP;
+	SonogramOverview -> ScissDSP [color=red];
 	SonogramOverview -> Span;
 	SoundProcesses -> ScalaCollider [color=red];
 	SoundProcesses -> LucreConfluent [color=red];
