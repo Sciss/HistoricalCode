@@ -1,0 +1,34 @@
+digraph G {
+	AudioWidgets [label="\"audiowidgets\" % \"1.1.0\"", shape=box];
+	FScapeJobs [label="\"fscapejobs\" % \"1.2.0\"", shape=box, color=red];
+	JSyntaxPane [label="\"jsyntaxpane\" % \"1.0.0\"", shape=box];
+	NuagesApp [label="\"nuagesapp\" % \"0.35.0\"", shape=Box];
+	NuagesPompe [label="\"nuagespompe\" % \"0.35.0\"", shape=Box];
+	PrefuseCore [label="\"prefuse-core\" % \"0.21\"", shape=Box, color=green];
+	ScalaAudioFile [label="\"scalaaudiofile\" % \"1.2.0\"", shape=Box, color=red];
+	ScalaCollider [label="\"scalacollider\" % \"1.3.1\"", shape=Box, color=red];
+	ScalaColliderSwing [label="\"scalacolliderswing\" % \"1.3.1\"", shape=Box, color=red];
+	ScalaInterpreterPane [label="\"scalainterpreterpane\" % \"1.3.0\"", shape=Box, color=red];
+	ScalaOSC [label="\"scalaosc\" % \"1.1.1\"", shape=Box];
+	ScissLib [label="\"scisslib\" % \"0.15\"", shape=Box, color=green];
+	SoundProcesses [label="\"soundprocesses\" % \"0.35.0\"", shape=Box, color=red];
+	Wolkenpumpe [label="\"wolkenpumpe\" % \"0.35.0\"", shape=Box];
+
+	FScapeJobs -> ScalaAudioFile;	
+	FScapeJobs -> ScalaOSC;
+	NuagesApp -> FScapeJobs;
+	NuagesApp -> NuagesPompe;
+	NuagesPompe -> ScalaColliderSwing;
+	NuagesPompe -> Wolkenpumpe;
+	ScalaCollider -> ScalaAudioFile;
+	ScalaCollider -> ScalaOSC;
+	ScalaColliderSwing -> AudioWidgets;
+	ScalaColliderSwing -> PrefuseCore;
+	ScalaColliderSwing -> ScalaCollider;
+	ScalaColliderSwing -> ScalaInterpreterPane;
+	ScalaInterpreterPane -> JSyntaxPane;
+	SoundProcesses -> ScalaCollider;
+	Wolkenpumpe -> PrefuseCore;
+	Wolkenpumpe -> SoundProcesses;
+}
+
