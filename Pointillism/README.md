@@ -8,9 +8,17 @@ Pointillism is a utility library for the IEM POINT project. It is (C)opyright 20
 
 To link to this library:
 
-    libraryDependencies += "de.sciss" %% "pointillism" % v
+    "de.sciss" %% "pointillism" % v
 
-The current version `v` is `"0.1.+"`
+Or just the core layer
+
+    "de.sciss" %% "pointillism-core" % v
+
+Or just the views layer
+
+    "de.sciss" %% "pointillism-views" % v
+
+The current version `v` is `"0.2.+"`
 
 ## building
 

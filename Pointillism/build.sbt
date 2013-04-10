@@ -1,35 +1,31 @@
 name := "Pointillism"
 
-version := "0.1.0-SNAPSHOT"
+version in ThisBuild := "0.2.0-SNAPSHOT"
 
-organization := "de.sciss"
+organization in ThisBuild := "de.sciss"
 
-scalaVersion := "2.10.1"
+scalaVersion in ThisBuild := "2.10.1"
 
-description := "A library for working with notated (instrumental) music"
+description in ThisBuild := "A library for working with notated (instrumental) music"
 
-homepage <<= name { n => Some(url("https://github.com/iem-projects/" + n)) }
+homepage in ThisBuild <<= name { n => Some(url("https://github.com/iem-projects/" + n)) }
 
-licenses := Seq("GPL v2+" -> url("http://www.gnu.org/licenses/gpl-2.0.txt"))
+licenses in ThisBuild := Seq("GPL v2+" -> url("http://www.gnu.org/licenses/gpl-2.0.txt"))
 
-libraryDependencies in ThisBuild ++= Seq(
-  "de.sciss" %% "scalamidi" % "0.1.+"
-)
+retrieveManaged in ThisBuild := true
 
-retrieveManaged := true
+scalacOptions in ThisBuild ++= Seq("-deprecation", "-unchecked", "-feature")
 
-scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
-
-initialCommands in console :=
+initialCommands in console in ThisBuild :=
 """import de.sciss.midi
   |import at.iem.point.illism._
 """.stripMargin
 
 // ---- publishing ----
 
-publishMavenStyle := true
+publishMavenStyle in ThisBuild := true
 
-publishTo <<= version { (v: String) =>
+publishTo in ThisBuild <<= version { (v: String) =>
   Some(if (v endsWith "-SNAPSHOT")
     "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
   else
@@ -39,9 +35,9 @@ publishTo <<= version { (v: String) =>
 
 publishArtifact in Test := false
 
-pomIncludeRepository := { _ => false }
+pomIncludeRepository in ThisBuild := { _ => false }
 
-pomExtra <<= name { n =>
+pomExtra in ThisBuild <<= name { n =>
 <scm>
   <url>git@github.com:iem-projects/{n}.git</url>
   <connection>scm:git:git@github.com:iem-projects/{n}.git</connection>
@@ -54,4 +50,3 @@ pomExtra <<= name { n =>
    </developer>
 </developers>
 }
-

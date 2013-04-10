@@ -27,6 +27,7 @@ package at.iem.point.illism
 
 import de.sciss.midi
 import midi.TickRate
+import collection.immutable.{IndexedSeq => IIdxSeq}
 
 sealed trait NoteLike {
 //  /**
@@ -70,7 +71,9 @@ sealed trait NoteLike {
  * @param duration  the duration __in seconds__
  * @param velocity    the attack velocity
  */
-final case class Note(/* channel: Int, */ pitch: Pitch, duration: Double, velocity: Int /*, release: Int = 0 */) extends NoteLike {
+final case class Note(/* channel: Int, */ pitch: Pitch, duration: Double, velocity: Int /*, release: Int = 0 */)
+  extends NoteLike {
+
   override def toString = {
     s"$productPrefix($pitch, dur = $durationString, vel = $velocity})"
   }
@@ -81,7 +84,7 @@ final case class Note(/* channel: Int, */ pitch: Pitch, duration: Double, veloci
 }
 
 final case class OffsetNote(offset: Double, /* channel: Int, */ pitch: Pitch, duration: Double, velocity: Int /*, release: Int = 0 */)
-  extends NoteLike with ConvertibleToMIDI {
+  extends NoteLike with ConvertibleToMIDI with ConvertibleToNotes {
 
   override def toString = {
     s"$productPrefix($pitch, off = $offsetString, dur = $durationString, vel = $velocity)"
@@ -109,4 +112,6 @@ final case class OffsetNote(offset: Double, /* channel: Int, */ pitch: Pitch, du
     val stopTick  = (stop   * tps + 0.5).toLong
     midi.Event(startTick, noteOn(channel)) :: midi.Event(stopTick, noteOff(channel)) :: Nil
   }
+
+  def toNotes = IIdxSeq(this)
 }
