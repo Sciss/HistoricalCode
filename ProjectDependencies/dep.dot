@@ -15,6 +15,7 @@ digraph G {
 	Mellite [label="\"mellite\" % \"0.10-SNAPSHOT\"", shape=Box, style=dotted];
 	Model [label="\"model\" % \"0.2.2\"", shape=Box];
 	PrefuseCore [label="\"prefuse-core\" % \"0.21\"", shape=Box, color=green];
+	Pointillism [label="\"pointillism\" % \"0.2.0-SNAPSHOT\"", shape=Box, style=dotted];
 	Processor [label="\"processor\" % \"0.1.1\"", shape=Box];
 	SbtAppbundle [label="\"sbt-appbundle\" % \"1.0.1\"", shape=Box, color=blue];
 	ScalaOSC [label="\"scalaosc\" % \"1.1.1\"", shape=box];
