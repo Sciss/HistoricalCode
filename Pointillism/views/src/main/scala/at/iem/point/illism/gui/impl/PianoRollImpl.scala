@@ -27,29 +27,41 @@ package at.iem.point.illism
 package gui
 package impl
 
-import java.awt.{RenderingHints, Color, Graphics2D}
+import java.awt.{Dimension, Graphics, RenderingHints, Color, Graphics2D}
 import collection.immutable.{IndexedSeq => IIdxSeq}
 
-private object PianoRollImpl {
-  implicit val noteSpace        = (n: OffsetNote) => (n.offset, n.stop)
-  val defaultTimeRange          = (0.0, 60.0)
-  val defaultPitchRange         = (21, 109)
-  var defaultKeyWidth           = 48
-  var defaultKeyHeight          = 8 // 12 // 24
+object PianoRollImpl {
+  class JComponent extends javax.swing.JComponent with PianoRollImpl{
+    override def paintComponent(g: Graphics) {
+      paint(g.asInstanceOf[Graphics2D], 0, 0, getWidth, getHeight)
+    }
+
+    override def getPreferredSize: Dimension = {
+      if (isPreferredSizeSet) return super.getPreferredSize
+      val pw = keyWidth + ((timeRange._2 - timeRange._1) * 24).toInt
+      new Dimension(pw, preferredHeight)
+    }
+  }
+
+  private implicit val noteSpace        = (n: OffsetNote) => (n.offset, n.stop)
+  private final val defaultTimeRange    = (0.0, 60.0)
+  private final val defaultPitchRange   = (21, 109)
+  private final val defaultKeyWidth     = 48
+  private final val defaultKeyHeight    = 8 // 12 // 24
 
   private def isBlack(pch: Int) = {
     val c = pch % 12
     c == 1 || c == 3 || c == 6 || c == 8 || c == 10
   }
 
-  val colrGridLines     = new Color(0xD0, 0xD0, 0xD0)
-  val colrGridWhite     = Color.white
-  val colrGridBlack     = new Color(0xE8, 0xE8, 0xE8)
-  val colrNotes         = new Color(0x40, 0x80, 0xFF)
-  val colrChords        = new Color(0xFF, 0x20, 0x40)
-  val colrChordOutline  = new Color(0xC0, 0x20, 0x40)
+  private final val colrGridLines     = new Color(0xD0, 0xD0, 0xD0)
+  private final val colrGridWhite     = Color.white
+  private final val colrGridBlack     = new Color(0xE8, 0xE8, 0xE8)
+  private final val colrNotes         = new Color(0x40, 0x80, 0xFF)
+  private final val colrChords        = new Color(0xFF, 0x20, 0x40)
+  private final val colrChordOutline  = new Color(0xC0, 0x20, 0x40)
 }
-private[gui] trait PianoRollImpl extends PianoRoll {
+/* private[gui] */ trait PianoRollImpl extends PianoRoll {
   import PianoRollImpl._
   import PianoRoll.NoteDecoration
 
@@ -69,7 +81,7 @@ private[gui] trait PianoRollImpl extends PianoRoll {
 
   recalcKeySize()
 
-  def notes = _notes
+  final def notes = _notes
   def notes_=(value: IIdxSeq[OffsetNote]) {
     _notes = value
     // _notesTree    = RangedSeq[OffsetNote, Double](value: _*)
@@ -83,7 +95,7 @@ private[gui] trait PianoRollImpl extends PianoRoll {
     repaint()
   }
 
-  def chords = _chords
+  final def chords = _chords
   def chords_=(value: IIdxSeq[Chord]) {
     _chords = value
     if (_autoRange && !value.isEmpty) {
@@ -94,7 +106,7 @@ private[gui] trait PianoRollImpl extends PianoRoll {
     repaint()
   }
 
-  def pitchRange = _pitchRange
+  final def pitchRange = _pitchRange
   def pitchRange_=(value: (Int, Int)) {
     if (_pitchRange != value) {
       _pitchRange = value
@@ -102,7 +114,7 @@ private[gui] trait PianoRollImpl extends PianoRoll {
     }
   }
 
-  def timeRange = _timeRange
+  final def timeRange = _timeRange
   def timeRange_=(value: (Double, Double)) {
     _autoRange = false
     if (_timeRange != value) {
@@ -111,13 +123,13 @@ private[gui] trait PianoRollImpl extends PianoRoll {
     }
   }
 
-  def decoration = _decoration
+  final def decoration = _decoration
   def decoration_=(value: Map[OffsetNote, NoteDecoration]) {
     _decoration = value
     if (_notes.nonEmpty) repaint()
   }
 
-  def keyWidth = _keyWidth
+  final def keyWidth = _keyWidth
   def keyWidth_=(value: Int) {
     if (_keyWidth != value) {
       _keyWidth = value
@@ -125,7 +137,7 @@ private[gui] trait PianoRollImpl extends PianoRoll {
     }
   }
 
-  def keyHeight = _keyHeight
+  final def keyHeight = _keyHeight
   def keyHeight_=(value: Int) {
     val even = value & ~1
     if (_keyHeight != even) {

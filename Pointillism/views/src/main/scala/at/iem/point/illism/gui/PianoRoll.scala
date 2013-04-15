@@ -35,17 +35,7 @@ object PianoRoll {
   def apply(): PianoRoll = new Impl {
     protected def repaint() {}
   }
-  def j(): JComponent with PianoRoll = new JComponent with Impl {
-    override def paintComponent(g: Graphics) {
-      paint(g.asInstanceOf[Graphics2D], 0, 0, getWidth, getHeight)
-    }
-
-    override def getPreferredSize: Dimension = {
-      if (isPreferredSizeSet) return super.getPreferredSize
-      val pw = keyWidth + ((timeRange._2 - timeRange._1) * 24).toInt
-      new Dimension(pw, preferredHeight)
-    }
-  }
+  def j(): JComponent with PianoRoll = new Impl.JComponent
 
   final case class NoteDecoration(color: Option[Color] = None)
 }
