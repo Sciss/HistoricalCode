@@ -142,8 +142,10 @@ object NoteUtil {
     var seqSpan     = Vector.empty[OffsetNote]
     var chordSpan   = Vector.empty[Chord]
 
-    def isExhausted = seqIdx == seq.size || chordIdx == chords.size
-    def isHoriz     = seq(seqIdx).offset < chords(chordIdx).minOffset
+    def isExhausted = seqIdx == seq.size && chordIdx == chords.size
+    def isHoriz     = seqIdx < seq.size && {
+      chordIdx == chords.size || seq(seqIdx).offset < chords(chordIdx).minOffset
+    }
 
     def flush() {
       if (seqSpan.nonEmpty) {
@@ -182,7 +184,7 @@ object NoteUtil {
       }
     }
 
-    if (!isExhausted) { if (isHoriz) horizontal() else vertical() }
+    if (isHoriz) horizontal() else if (!isExhausted) vertical()
     flush()
 
     (resSeq, resChords)
