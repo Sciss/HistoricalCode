@@ -1,6 +1,6 @@
 digraph G {
 	AudioWidgets [label="\"audiowidgets\" % \"1.2.0\"", shape=box];
-	Desktop [label="\"desktop\" % \"0.3.0\"", shape=Box];
+	Desktop [label="\"desktop\" % \"0.3.1\"", shape=Box];
 	FileCache [label="\"filecache\" % \"0.2.0\"", shape=Box];
 	FingerTree [label="\"fingertree\" % \"1.4.0\"", shape=Box];
 	FScapeJobs [label="\"fscapejobs\" % \"1.3.0\"", shape=box];
@@ -30,7 +30,9 @@ digraph G {
 	SonogramOverview [label="\"sonogramoverview\" % \"1.6.0\"", shape=Box];
 	SoundProcesses [label="\"soundprocesses\" % \"1.6.0-SNAPSHOT\"", shape=Box, style=dotted];
    Span [label="\"span\" % \"1.2.0\"", shape=box];
-	Strugatzki [label="\"strugatzki\" % \"1.8.0\"", shape=Box, color=red];
+	Strugatzki [label="\"strugatzki\" % \"1.9.0\"", shape=Box];
+	
+	SysSon [label="\"sysson\" % \"0.1.0-SNAPSHOT\"", shape=Box, style=dotted];
 
    Desktop -> Model;	
 	FileCache -> Serial;
@@ -80,8 +82,8 @@ digraph G {
 	SoundProcesses -> Span;
 	Span -> Serial;
 	Strugatzki -> IntensityPalette;
-	Strugatzki -> Processor [color=red];
-	Strugatzki -> ScalaCollider [color=red];
+	Strugatzki -> Processor;
+	Strugatzki -> ScalaCollider;
 	Strugatzki -> Span;
 }
 
