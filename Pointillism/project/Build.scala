@@ -4,13 +4,13 @@ import Keys._
 object Build extends sbt.Build {
   def baseName      = "pointillism"
   def midiVersion   = "0.1.+"
-  def fingerVersion = "1.4.+"
+  def fingerVersion = "1.5.+"
 
   lazy val root: Project = Project(
     id            = baseName,
     base          = file("."),
-    aggregate     = Seq(core, views),
-    dependencies  = Seq(core, views), // i.e. root = full sub project. if you depend on root, will draw all sub modules.
+    aggregate     = Seq(core, rhythm, views),
+    dependencies  = Seq(core, rhythm, views), // i.e. root = full sub project. if you depend on root, will draw all sub modules.
     settings      = Project.defaultSettings ++ Seq(
       publishArtifact in (Compile, packageBin) := false, // there are no binaries
       publishArtifact in (Compile, packageDoc) := false, // there are no javadocs
