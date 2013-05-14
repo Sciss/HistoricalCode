@@ -2,7 +2,7 @@
 
 ## statement
 
-Pointillism is a utility library for the IEM POINT project. It is (C)opyright 2013 by Hanns Holger Rutz. All rights reserved. Pointillism is released under the [GNU General Public License](https://raw.github.com/iem-projects/Pointillism/master/LICENSE) and comes with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
+Pointillism is a utility library for the IEM POINT project. It is (C)opyright 2013 by Hanns Holger Rutz. All rights reserved. Pointillism is released under the [GNU General Public License](https://raw.github.com/iem-projects/Pointillism/master/LICENSE) v2+ and comes with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
 
 ## linking
 
@@ -13,6 +13,10 @@ To link to this library:
 Or just the core layer
 
     "de.sciss" %% "pointillism-core" % v
+
+Or just the rhythm layer
+
+    "de.sciss" %% "pointillism-rhythm" % v
 
 Or just the views layer
 

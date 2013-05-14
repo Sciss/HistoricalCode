@@ -28,6 +28,17 @@ object Build extends sbt.Build {
     )
   )
 
+  lazy val rhythm = Project(
+    id            = baseName + "-rhythm",
+    base          = file("rhythm"),
+    dependencies  = Seq(core),
+    settings      = Project.defaultSettings /* ++ buildInfoSettings */ ++ Seq(
+      libraryDependencies ++= Seq(
+        "org.spire-math" %% "spire" % "0.4.0"   // e.g. Rational numbers
+      )
+    )
+  )
+
   lazy val views = Project(
     id            = baseName + "-views",
     base          = file("views"),
