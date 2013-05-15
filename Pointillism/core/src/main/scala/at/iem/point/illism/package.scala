@@ -93,7 +93,10 @@ package object illism {
     }
 
     def isSortedBy[B](fun: A => B)(implicit ord: Ordering[B]): Boolean = {
-      it.sliding(2, 1).forall { case Seq(a, b) => ord.lteq(fun(a), fun(b)) }
+      it.sliding(2, 1).forall {
+        case Seq(a, b) => ord.lteq(fun(a), fun(b))
+        case _ => true  // happens when it size == 1
+      }
     }
 
     def histogram: Map[A, Int] = {
