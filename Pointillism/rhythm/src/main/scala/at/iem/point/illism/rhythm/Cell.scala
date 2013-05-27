@@ -25,9 +25,30 @@
 
 package at.iem.point.illism.rhythm
 
-import spire.math.Rational
+import spire.math._
 import collection.immutable.{IndexedSeq => IIdxSeq}
+import scala.annotation.tailrec
+import spire.syntax._
 
+object Cell {
+  private val durationMap = Map(
+    1 -> "64", /* r"3/2" -> "64.", */ 2 -> "32", 3 -> "32.", 4 -> "16", 6 -> "16.", 8 -> "8",
+    12 -> "8.", 16 -> "4", 24 -> "4.", 32 -> "2", 48 -> "2.", 64 -> "1", 96 -> "1."
+  )
+
+  private def lilyDurations(dur: Int): IIdxSeq[String] = {
+ 		require(dur <= 96, s"Rhythmic value $dur exceeds 96")
+ 		durationMap.get(dur) match {
+      case Some(single) => Vector(single)
+      case _ =>
+        // e.g. 13 = 8 + 4 + 1
+        val c = (6 to 0 by -1).map(1 << _).collect {
+          case i if (dur & i) != 0 => i
+        }
+        c.map(durationMap)
+    }
+ 	}
+}
 final case class Cell(id: Int, elements: IIdxSeq[NoteOrRest], dur: Rational) {
   override def toString = s"Cell#$id($prettyElements}, dur = $dur)"
 
@@ -51,4 +72,77 @@ final case class Cell(id: Int, elements: IIdxSeq[NoteOrRest], dur: Rational) {
 
   /** Scales the total duration of the cell by a given factor */
   def * (factor: Rational): Cell = copy(dur = dur * factor)
+
+  /** 'Unnormalizes' this cell, so that the elements are all integers, possibly multiplying
+    * them by the least common multiple.
+    */
+  def usingIntegers: Cell = {
+    val durs    = elements.map(_.dur)
+    val denoms  = durs.map(_.denominator)
+    val k       = denoms.reduce(lcm(_, _))
+    if (k == 1) return this
+    val elemsM  = elements.map(_ * k)
+    copy(elements = elemsM)
+  }
+
+  private[Cell] def factor: Int = {
+    val sum   = elements.map(_.dur).sum
+    val dur64 = dur * 64
+
+    @tailrec def loop(f: Int): Int = if (sum * f < dur64) f else loop(f << 1)
+
+    loop(1)
+  }
+
+  private[Cell] def adjusted: IIdxSeq[NoteOrRest] = {
+    val f = factor
+    elements.map(_ * f)
+  }
+
+  private[Cell] def tuplet: Rational = {
+    val adj   = adjusted
+    val dur64 = dur * 64
+    val r1    = adj.map(_.dur).sum / dur64
+
+    @tailrec def loop(r: Rational): Rational = if (r <= 2) r else loop(r / 2)
+
+    loop(r1)
+  }
+
+  private[Cell] def hasTuplet: Boolean = tuplet != 1
+
+  /** Produces a string representation of this cell, suitable for rendering with Lilypond.
+    * For example, a cell with elements (12, 5, 11) and duration of 21/32, will result in the following string:
+    *
+    * {{
+    *     \times 2/3 { c'8.   c'16 ~ c'64   c'8 ~ c'32 ~ c'64 }
+    * }}
+    *
+    * (This is mostly adapted from LilyCollider)
+    *
+    *
+    * @return
+    */
+  def toLilypondString(timeSig: Boolean = true): String = {
+    val cell      = this.usingIntegers
+    val ns        = cell.adjusted.map { n =>
+      val d = n.dur
+      val i = d.toInt
+      assert(d == i)
+      val s = if (n.isRest) "r" else "c'"
+      Cell.lilyDurations(i).map(ds => s"$s$ds").mkString(" ~ ")
+    }
+    val nss = ns.mkString(" ")
+    val tup = if (cell.hasTuplet) {
+      s"\\times ${cell.tuplet} { $nss }"
+    } else {
+      nss
+    }
+
+    if (timeSig) {
+      s"\\time $dur \n$tup\n"
+    } else {
+      tup
+    }
+  }
 }

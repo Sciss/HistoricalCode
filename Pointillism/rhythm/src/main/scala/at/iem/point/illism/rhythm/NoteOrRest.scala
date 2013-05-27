@@ -36,12 +36,15 @@ sealed trait NoteOrRest {
   def dur: Rational
   def toNumber: Rational
   def *(factor: Rational): NoteOrRest
+  def isRest: Boolean
 }
 final case class Note(dur: Rational) extends NoteOrRest {
   def toNumber =  dur
   def *(factor: Rational): Note = copy(dur * factor)
+  def isRest = false
 }
 final case class Rest(dur: Rational) extends NoteOrRest {
   def toNumber = -dur
   def *(factor: Rational): Rest = copy(dur * factor)
+  def isRest = true
 }
