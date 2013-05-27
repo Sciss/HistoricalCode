@@ -37,7 +37,10 @@ object Cell {
   )
 
   private def lilyDurations(dur: Int): IIdxSeq[String] = {
- 		require(dur <= 96, s"Rhythmic value $dur exceeds 96")
+    if (dur > 96) {
+      return durationMap(96) +: lilyDurations(dur - 96)
+    }
+ 		// require(dur <= 96, s"Rhythmic value $dur exceeds 96")
  		durationMap.get(dur) match {
       case Some(single) => Vector(single)
       case _ =>
