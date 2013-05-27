@@ -89,7 +89,7 @@ final case class Cell(id: Int, elements: IIdxSeq[NoteOrRest], dur: Rational) {
     val sum   = elements.map(_.dur).sum
     val dur64 = dur * 64
 
-    @tailrec def loop(f: Int): Int = if (sum * f < dur64) f else loop(f << 1)
+    @tailrec def loop(f: Int): Int = if (sum * f < dur64) loop(f << 1) else f
 
     loop(1)
   }
@@ -115,7 +115,8 @@ final case class Cell(id: Int, elements: IIdxSeq[NoteOrRest], dur: Rational) {
     * For example, a cell with elements (12, 5, 11) and duration of 21/32, will result in the following string:
     *
     * {{
-    *     \times 2/3 { c'8.   c'16 ~ c'64   c'8 ~ c'32 ~ c'64 }
+    *     \time 21/32
+    *     \times 3/4 { c'4.  c'8 ~ c'32  c'4 ~ c'16 ~ c'32 }
     * }}
     *
     * (This is mostly adapted from LilyCollider)
@@ -128,19 +129,19 @@ final case class Cell(id: Int, elements: IIdxSeq[NoteOrRest], dur: Rational) {
     val ns        = cell.adjusted.map { n =>
       val d = n.dur
       val i = d.toInt
-      assert(d == i)
+      assert(d == i, d)
       val s = if (n.isRest) "r" else "c'"
       Cell.lilyDurations(i).map(ds => s"$s$ds").mkString(" ~ ")
     }
     val nss = ns.mkString(" ")
     val tup = if (cell.hasTuplet) {
-      s"\\times ${cell.tuplet} { $nss }"
+      s"\\times ${cell.tuplet.reciprocal} { $nss }"
     } else {
       nss
     }
 
     if (timeSig) {
-      s"\\time $dur \n$tup\n"
+      s"\\time ${cell.dur} \n$tup\n"
     } else {
       tup
     }
