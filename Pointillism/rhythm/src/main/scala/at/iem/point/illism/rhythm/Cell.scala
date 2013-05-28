@@ -127,14 +127,21 @@ final case class Cell(id: Int, elements: IIdxSeq[NoteOrRest], dur: Rational) {
     *
     * @return
     */
-  def toLilypondString(timeSig: Boolean = true): String = {
+  def toLilypondString(timeSig: Boolean = true, annotation: String = ""): String = {
     val cell      = this.usingIntegers
-    val ns        = cell.adjusted.map { n =>
+    val ns0       = cell.adjusted.map { n =>
       val d = n.dur
       val i = d.toInt
       assert(d == i, d)
       val s = if (n.isRest) "r" else "c'"
       Cell.lilyDurations(i).map(ds => s"$s$ds").mkString(" ~ ")
+    }
+    val ns  = if (annotation == "") ns0 else {
+      val annotStr = raw"""\annotation "$annotation" """
+      ns0 match {
+        case head +: tail => head +: annotStr +: tail
+        case _ => ns0 :+ annotStr
+      }
     }
     val nss = ns.mkString(" ")
     val tup = if (cell.hasTuplet) {
