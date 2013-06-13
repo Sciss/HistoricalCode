@@ -4,7 +4,7 @@ version in ThisBuild := "0.2.0-SNAPSHOT"
 
 organization in ThisBuild := "de.sciss"
 
-scalaVersion in ThisBuild := "2.10.1"
+scalaVersion in ThisBuild := "2.10.2"
 
 description in ThisBuild := "A library for working with notated (instrumental) music"
 

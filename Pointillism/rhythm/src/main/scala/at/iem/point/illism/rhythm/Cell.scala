@@ -127,8 +127,19 @@ final case class Cell(id: Int, elements: IIdxSeq[NoteOrRest], dur: Rational) {
     *
     * @return
     */
-  def toLilypondString(timeSig: Boolean = true, annotation: String = ""): String = {
-    val cell      = this.usingIntegers
+  def toLilypondString(timeSig: Option[LilyTimeSignature] = Some(LilyTimeSignature.Raw),
+                       annotation: String = ""): String = {
+    val cell0       = this.usingIntegers
+    val (cell, err) = timeSig.fold(cell0 -> 0f) {
+      case sr @ LilyTimeSignature.Rounded(_) =>
+        val durIn           = cell0.dur
+        val (durOut, err)   = sr(durIn)
+        val res             = cell0 * (durOut/durIn)
+        res -> err
+
+      case _ => cell0 -> 0f
+    }
+
     val ns0       = cell.adjusted.map { n =>
       val d = n.dur
       val i = d.toInt
@@ -150,10 +161,26 @@ final case class Cell(id: Int, elements: IIdxSeq[NoteOrRest], dur: Rational) {
       nss
     }
 
-    if (timeSig) {
-      s"\\time ${cell.dur} \n$tup\n"
-    } else {
-      tup
+    timeSig.fold(tup) { sig =>
+      val dur       = cell.dur
+      val sigStr    = s"\\time ${dur.numerator}/${dur.denominator}"  // Lilypond doesn't handle integers
+      val tempoStr  = sig match {
+        case LilyTimeSignature.Rounded(_) if err != 0f =>
+          val factor = (cell0.dur / dur).toDouble - 1
+          f""" \\tempo "${if (factor > 0) "+" else "–"}${math.abs(factor)*100}%1.1f%%"""" // note: signum is inverted
+
+        case LilyTimeSignature.Decimal =>
+          val sec   = (dur * 2).toDouble  // assuming 1/4 = 120, or 1/1 = 30
+          val secS0 = f"$sec%1.2f"
+          val secS  = if (secS0.endsWith("0")) secS0.substring(0,secS0.length - 1) else secS0 // suckers never die
+
+          f""" \\override Staff.TimeSignature #'transparent = ##t
+             |\\tempo \\markup { \\concat { $secS \\char ##x201D }}""".stripMargin
+
+        case _ => ""
+      }
+
+      s"$sigStr$tempoStr \n$tup\n"
     }
   }
 }
