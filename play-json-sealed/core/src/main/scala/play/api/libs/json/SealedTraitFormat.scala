@@ -20,7 +20,9 @@ import language.experimental.macros
 //}
 
 object SealedTraitFormat {
-  def writesImpl[A: c.WeakTypeTag](c: Context)(value: c.Expr[A]): c.Expr[JsValue] = {
+  def apply[A]: Format[A] = macro applyImpl[A]
+
+  def applyImpl[A: c.WeakTypeTag](c: Context): c.Expr[Format[A]] = {
     val aTpeW   = c.weakTypeOf[A]
     val aClazz  = aTpeW.typeSymbol.asClass
     require(aClazz.isSealed, s"Type $aTpeW is not sealed")
@@ -32,11 +34,20 @@ object SealedTraitFormat {
     import c.universe._
 
     val cases = subs.toList.map { sub =>
-      val pat   = Bind(newTermName("x"), Typed(Ident("_"), Ident(sub.asClass)))
-      val body  = reify(???).tree // EmptyTree // TODO
+      val subIdent  = Ident(sub.asClass)
+      val pat       = Bind(newTermName("x"), Typed(Ident("_"), subIdent))
+      // c.inferImplicitValue()
+      val jsonTree  = Ident(typeOf[Json.type].typeSymbol.asClass)
+      val subFmt    = TypeApply(Select(jsonTree, "format"), subIdent :: Nil)
+
+      // val subFmt  = reify { Json.format[Int] }
+      // val body    = Apply(Select(Literal(Constant("schoko")), "$minus$greater"), subFmt :: Nil) // reify(???).tree // EmptyTree // TODO
+
+      val body = Apply(TypeApply(Ident("writeSub"), subIdent:: Nil), Ident("x") :: Literal(Constant("schoko")) :: subFmt :: Nil)
+
       CaseDef(pat, body)
     }
-    val m = Match(value.tree, cases)
+    val m = Match(Ident("value"), cases)
 
     //    val test = reify {
     //      ("gaga": Any) match {
@@ -55,9 +66,20 @@ object SealedTraitFormat {
 
     // println(test) // show(test))
 
+    val mExpr = c.Expr[JsValue](m)
+    val r     = reify {
+      new Format[A] {
+        private def writeSub[A](obj: A, name: String, w: Writes[A]): JsValue =
+          JsObject(Seq("class" -> JsString(name), "data" -> w.writes(obj)))
 
-    println(m)
-    c.Expr[JsValue](m)
+        def writes(value: A): JsValue = mExpr.splice
+        def reads(json: JsValue): JsResult[A] = ???
+      }
+    }
+    val t = r.tree
+
+    println(t)
+    c.Expr[Format[A]](t)
 //    val (prod: Product, sub) = foo match {
 //      case b: Bar => (b, Json.toJson(b)(barFmt))
 //      case b: Baz => (b, Json.toJson(b)(bazFmt))
@@ -65,6 +87,6 @@ object SealedTraitFormat {
 //    JsObject(Seq("class" -> JsString(prod.productPrefix), "data" -> sub))
   }
 }
-trait SealedTraitFormat[A] {
-  def writes(value: A): JsValue = macro SealedTraitFormat.writesImpl[A]
-}
+//trait SealedTraitFormat[A] {
+//  def writes(value: A): JsValue = macro SealedTraitFormat.writesImpl[A]
+//}

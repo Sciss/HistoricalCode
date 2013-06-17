@@ -1,5 +1,7 @@
 package play.api.libs.json
 
-trait AHolder {
+object AHolder extends App {
   val bar: A = AImpl.body
+
+  bar.foo()
 }
