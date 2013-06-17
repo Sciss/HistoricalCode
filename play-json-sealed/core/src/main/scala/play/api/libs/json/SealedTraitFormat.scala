@@ -4,9 +4,14 @@ import scala.reflect.macros.Context
 import language.experimental.macros
 
 object SealedTraitFormat {
-  val DEBUG = false
+  private val DEBUG   = true
+  private val PACKAGE = false
 
   def apply[A]: Format[A] = macro applyImpl[A]
+
+  private def log(what: => String) {
+    println(s"<sealed> $what")
+  }
 
   def applyImpl[A: c.WeakTypeTag](c: Context): c.Expr[Format[A]] = {
     val aTpeW   = c.weakTypeOf[A]
@@ -14,16 +19,20 @@ object SealedTraitFormat {
     require(aClazz.isSealed, s"Type $aTpeW is not sealed")
     val subs    = aClazz.knownDirectSubclasses
     require(subs.nonEmpty  , s"Type $aTpeW does not have known direct subclasses")
-    //    println("Mira Charlie:")
-    //    subs.foreach(println)
-    //    println()
+
+    if (DEBUG) {
+      log(s"Known direct subclasses of $aTpeW")
+      subs.foreach(s => log(s.toString))
+      log("")
+    }
     import c.universe._
 
     val cases = subs.toList.map { sub =>
       val subIdent  = Ident(sub.asClass)
       val pat       = Bind(newTermName("x"), Typed(Ident("_"), subIdent))
       // c.inferImplicitValue()
-      val subName   = Literal(Constant(sub.fullName))
+      val subName0  = if (PACKAGE) sub.fullName else sub.name.toString
+      val subName   = Literal(Constant(subName0))
       val body      = if (sub.isModuleClass) {
         // val jsStringTree = Ident(typeOf[JsString.type].typeSymbol.asClass)
         // Apply(Select(jsStringTree, "apply"), subName :: Nil)
@@ -62,12 +71,25 @@ object SealedTraitFormat {
           JsObject(Seq("class" -> JsString(name)))
 
         def writes(value: A): JsValue = mExpr.splice
-        def reads(json: JsValue): JsResult[A] = ???
+        def reads(json: JsValue): JsResult[A] = json match {
+          // this crashes upon macro expansion (probably a bug)
+          // case JsObject(Seq(("class", JsString(name)), rest @ _*)) => ...
+          case JsObject(sq) =>
+            sq.toList match {
+              case ("class", JsString(name)) :: ("data", data) :: Nil => ???
+              case ("class", JsString(name)) :: Nil => ???
+              case _ => JsError(s"Unexpected JSON dictionary: $json")
+            }
+          case _ => JsError(s"Not a JSON dictionary with key 'class': $json")
+        }
       }
     }
     val t = r.tree
 
-    if (DEBUG) println(t)
+    if (DEBUG) {
+      log("Tree:")
+      println(t)
+    }
     c.Expr[Format[A]](t)
   }
 }
