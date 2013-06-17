@@ -1,3 +1,28 @@
+/*
+ * SealedTraitFormat.scala
+ * (play-json-sealed)
+ *
+ * Copyright (c) 2013 Hanns Holger Rutz. All rights reserved.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ *
+ * For further information, please contact Hanns Holger Rutz at
+ * contact@sciss.de
+ */
+
 package play.api.libs.json
 
 import scala.reflect.macros.Context
@@ -29,6 +54,8 @@ object SealedTraitFormat {
     val aIdent  = Ident(aClazz)
 
     val subsAll = subs.toList.sortBy(_.name.toString)
+    // for each sub type a tuple of writer-case-body, (bool, reader-case-body) where `bool` is true
+    // if the sub type is a singleton object and false if it is a case class
     val cases   = subsAll.map { sub =>
       val subC      = sub.asClass
       val isObject  = subC.isModuleClass
@@ -48,8 +75,7 @@ object SealedTraitFormat {
         Apply(TypeApply(Ident("writeClass"), subIdent:: Nil), subName :: Ident("x"   ) :: subFmt :: Nil) ->
         Apply(Select(subFmt, "reads"), Ident("data") :: Nil)
       }
-      CaseDef(patWrite, bodyWrite) ->
-      (isObject, CaseDef(patRead, bodyRead))
+      CaseDef(patWrite, bodyWrite) -> (isObject, CaseDef(patRead, bodyRead))
     }
     val (casesWrite, casesRead) = cases.unzip
     val matchWrite      = Match(Ident("value"), casesWrite)
