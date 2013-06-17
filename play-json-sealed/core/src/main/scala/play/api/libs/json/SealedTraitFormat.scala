@@ -29,40 +29,30 @@ object SealedTraitFormat {
 
     val cases = subs.toList.map { sub =>
       val subIdent  = Ident(sub.asClass)
-      val pat       = Bind(newTermName("x"), Typed(Ident("_"), subIdent))
-      // c.inferImplicitValue()
+      val subIdentExpr = c.Expr[A](subIdent)
+      val patWrite  = Bind(newTermName("x"), Typed(Ident("_"), subIdent))
       val subName0  = if (PACKAGE) sub.fullName else sub.name.toString
       val subName   = Literal(Constant(subName0))
-      val body      = if (sub.isModuleClass) {
-        // val jsStringTree = Ident(typeOf[JsString.type].typeSymbol.asClass)
-        // Apply(Select(jsStringTree, "apply"), subName :: Nil)
-        // val subNameExpr = c.Expr[String](subName)
-        // reify { JsObject(Seq("class" -> JsString(subNameExpr.splice))) } .tree
-        Apply(Ident("writeObject"), subName :: Nil)
+      val patRead   = subName
+      val (bodyWrite, bodyRead) = if (sub.isModuleClass) {
+        Apply(Ident("writeObject"), subName :: Nil) ->
+        (reify { ??? } .tree) // (reify { JsSuccess[A](subIdentExpr.splice) }.tree)
 
       } else {
-        //        val subType     = sub.companionSymbol.typeSignature
-        //        val subUnapplyM = subType.declaration(stringToTermName("unapply")).asMethod
-        //        // Json.format does not handle case classes which have no parameters!
-        //        // Therefore, check this out here.
-        //        val unapplyReturnTypes = subUnapplyM.returnType match {
-        //          case TypeRef(_, _, Nil) =>
-        //          case _ =>
-        //
         val jsonTree  = Ident(typeOf[Json.type].typeSymbol.asClass)
         val subFmt    = TypeApply(Select(jsonTree, "format"), subIdent :: Nil)
-        Apply(TypeApply(Ident("writeClass"), subIdent:: Nil), subName :: Ident("x") :: subFmt :: Nil)
+        Apply(TypeApply(Ident("writeClass"), subIdent:: Nil), subName :: Ident("x") :: subFmt :: Nil) ->
+        (reify { ??? } .tree)
       }
-
-      // val subFmt  = reify { Json.format[Int] }
-      // val body    = Apply(Select(Literal(Constant("schoko")), "$minus$greater"), subFmt :: Nil) // reify(???).tree // EmptyTree // TODO
-
-      CaseDef(pat, body)
+      CaseDef(patWrite, bodyWrite) ->
+      CaseDef(patRead , bodyRead )
     }
-    val m = Match(Ident("value"), cases)
-
-    val mExpr = c.Expr[JsValue](m)
-    val r     = reify {
+    val (casesWrite, casesRead) = cases.unzip
+    val matchWrite      = Match(Ident("value"), casesWrite)
+    val matchWriteExpr  = c.Expr[JsValue](matchWrite)
+    val matchRead       = Match(Ident("name"), casesRead)
+    val matchReadExpr   = c.Expr[JsResult[A]](matchRead)
+    val r               = reify {
       new Format[A] {
         private def writeClass[A1](name: String, obj: A1, w: Writes[A1]): JsValue =
           JsObject(Seq("class" -> JsString(name), "data" -> w.writes(obj)))
@@ -70,14 +60,14 @@ object SealedTraitFormat {
         private def writeObject(name: String): JsValue =
           JsObject(Seq("class" -> JsString(name)))
 
-        def writes(value: A): JsValue = mExpr.splice
+        def writes(value: A): JsValue = matchWriteExpr.splice
         def reads(json: JsValue): JsResult[A] = json match {
           // this crashes upon macro expansion (probably a bug)
           // case JsObject(Seq(("class", JsString(name)), rest @ _*)) => ...
           case JsObject(sq) =>
             sq.toList match {
               case ("class", JsString(name)) :: ("data", data) :: Nil => ???
-              case ("class", JsString(name)) :: Nil => ???
+              case ("class", JsString(name)) :: Nil => matchReadExpr.splice
               case _ => JsError(s"Unexpected JSON dictionary: $json")
             }
           case _ => JsError(s"Not a JSON dictionary with key 'class': $json")
