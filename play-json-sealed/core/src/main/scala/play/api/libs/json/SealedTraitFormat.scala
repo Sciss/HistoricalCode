@@ -26,17 +26,20 @@ object SealedTraitFormat {
       log("")
     }
     import c.universe._
+    val aIdent        = Ident(aClazz)
 
     val cases = subs.toList.map { sub =>
       val subIdent  = Ident(sub.asClass)
-      val subIdentExpr = c.Expr[A](subIdent)
+      // val subIdentExpr = c.Expr[A](subIdent)
       val patWrite  = Bind(newTermName("x"), Typed(Ident("_"), subIdent))
       val subName0  = if (PACKAGE) sub.fullName else sub.name.toString
       val subName   = Literal(Constant(subName0))
       val patRead   = subName
       val (bodyWrite, bodyRead) = if (sub.isModuleClass) {
+        val jsSuccessTree = Ident(typeOf[JsSuccess.type].typeSymbol.asClass.companionSymbol.asModule) // frickin' hell
+        val subIdent2     = Ident(sub.asClass.companionSymbol.asModule)
         Apply(Ident("writeObject"), subName :: Nil) ->
-        (reify { ??? } .tree) // (reify { JsSuccess[A](subIdentExpr.splice) }.tree)
+        Apply(TypeApply(jsSuccessTree, aIdent :: Nil), subIdent2 :: Nil) // JsSuccess[A](MyCaseObject)
 
       } else {
         val jsonTree  = Ident(typeOf[Json.type].typeSymbol.asClass)
@@ -70,7 +73,7 @@ object SealedTraitFormat {
               case ("class", JsString(name)) :: Nil => matchReadExpr.splice
               case _ => JsError(s"Unexpected JSON dictionary: $json")
             }
-          case _ => JsError(s"Not a JSON dictionary with key 'class': $json")
+          case _     => JsError(s"Not a JSON dictionary: $json")
         }
       }
     }
