@@ -29,7 +29,7 @@ import scala.reflect.macros.Context
 import language.experimental.macros
 
 object SealedTraitFormat {
-  private val DEBUG   = false
+  private val DEBUG   = true
   private val PACKAGE = false
 
   def apply[A]: Format[A] = macro applyImpl[A]
@@ -39,8 +39,16 @@ object SealedTraitFormat {
   }
 
   def applyImpl[A: c.WeakTypeTag](c: Context): c.Expr[Format[A]] = {
+    import c.universe._
     val aTpeW   = c.weakTypeOf[A]
     val aClazz  = aTpeW.typeSymbol.asClass
+
+    if (!aClazz.isSealed) { // fall back to Json.format
+      return JsMacroImpl.formatImpl[A](c)
+    }
+
+    val aIdent  = Ident(aClazz)
+
     require(aClazz.isSealed, s"Type $aTpeW is not sealed")
     val subs    = aClazz.knownDirectSubclasses
     require(subs.nonEmpty  , s"Type $aTpeW does not have known direct subclasses")
@@ -50,8 +58,6 @@ object SealedTraitFormat {
       subs.foreach(s => log(s.toString))
       log("")
     }
-    import c.universe._
-    val aIdent  = Ident(aClazz)
 
     val subsAll = subs.toList.sortBy(_.name.toString)
     // for each sub type a tuple of writer-case-body, (bool, reader-case-body) where `bool` is true
@@ -70,9 +76,11 @@ object SealedTraitFormat {
         Apply(TypeApply(jsSuccessTree, aIdent :: Nil), subIdent :: Nil) // JsSuccess[A](MyCaseObject)
 
       } else {
-        val jsonTree  = Ident(typeOf[Json.type].typeSymbol.asClass)
-        val subFmt    = TypeApply(Select(jsonTree, "format"), subIdent :: Nil)
-        Apply(TypeApply(Ident("writeClass"), subIdent:: Nil), subName :: Ident("x"   ) :: subFmt :: Nil) ->
+        // val jsonTree  = Ident(typeOf[Json.type].typeSymbol.asClass)
+        // val subFmt    = TypeApply(Select(jsonTree, "format"), subIdent :: Nil)
+        val jsonTree  = Ident(typeOf[SealedTraitFormat.type].typeSymbol.asClass)
+        val subFmt    = TypeApply(Select(jsonTree, "apply"), subIdent :: Nil)
+        Apply(TypeApply(Ident("writeClass"), subIdent:: Nil), subName :: Ident("x") :: subFmt :: Nil) ->
         Apply(Select(subFmt, "reads"), Ident("data") :: Nil)
       }
       CaseDef(patWrite, bodyWrite) -> (isObject, CaseDef(patRead, bodyRead))
