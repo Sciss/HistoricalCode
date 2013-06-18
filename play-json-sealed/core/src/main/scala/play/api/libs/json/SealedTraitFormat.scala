@@ -44,12 +44,14 @@ object SealedTraitFormat {
     val aClazz  = aTpeW.typeSymbol.asClass
 
     if (!aClazz.isSealed) { // fall back to Json.format
+      if (DEBUG) log(s"Type $aTpeW is not sealed")
       return JsMacroImpl.formatImpl[A](c)
     }
 
     val aIdent  = Ident(aClazz)
 
     require(aClazz.isSealed, s"Type $aTpeW is not sealed")
+    aClazz.typeSignature  // SI-7046 !
     val subs    = aClazz.knownDirectSubclasses
     require(subs.nonEmpty  , s"Type $aTpeW does not have known direct subclasses")
 
