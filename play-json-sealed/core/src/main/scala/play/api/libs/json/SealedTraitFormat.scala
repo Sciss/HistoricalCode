@@ -29,7 +29,7 @@ import scala.reflect.macros.Context
 import language.experimental.macros
 
 object SealedTraitFormat {
-  private val DEBUG   = true
+  private val DEBUG   = false
   private val PACKAGE = false
 
   def apply[A]: Format[A] = macro applyImpl[A]
