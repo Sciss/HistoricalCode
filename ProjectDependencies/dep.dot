@@ -5,7 +5,7 @@ digraph G {
 	FileUtil [label="\"fileutil\" % \"1.0.0\"", shape=Box];
 	FingerTree [label="\"fingertree\" % \"1.5.0\"", shape=Box];
 	FScapeJobs [label="\"fscapejobs\" % \"1.4.0\"", shape=box];
-	GUIFlitz [label="\"guiflitz\" % \"0.0.1-SNAPSHOT\"", shape=Box, style=dotted];
+	GUIFlitz [label="\"guiflitz\" % \"0.0.1\"", shape=Box, style];
 	IntensityPalette [label="\"intensitypalette\" % \"1.0.0\"", shape=Box, color=green];
 	JSyntaxPane [label="\"jsyntaxpane\" % \"1.0.0\"", shape=Box, color=green];
 	JTreeTable [label="\"jtreetable\" % \"1.2.1\"", shape=Box, color=green];
@@ -35,7 +35,7 @@ digraph G {
 	SoundProcesses [label="\"soundprocesses\" % \"1.8.0\"", shape=Box];
    Span [label="\"span\" % \"1.2.0\"", shape=box];
 	Strugatzki [label="\"strugatzki\" % \"2.0.0\"", shape=Box];
-	SwingPlus [label="\"swingplus\" % \"0.0.1-SNAPSHOT\"", shape=Box, style=dotted];
+	SwingPlus [label="\"swingplus\" % \"0.0.1\"", shape=Box];
 	
 	SysSon [label="\"sysson\" % \"0.1.0-SNAPSHOT\"", shape=Box, style=dotted];
 
@@ -43,6 +43,7 @@ digraph G {
 	FileCache -> Serial;
 	FScapeJobs -> ScalaOSC;
 	FScapeJobs -> ScalaAudioFile;
+	GUIFlitz -> Model;
 	GUIFlitz -> SwingPlus;
 	Kontur -> Desktop [color=red];
 	Kontur -> SbtAppbundle [color=blue];
