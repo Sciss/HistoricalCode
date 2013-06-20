@@ -42,7 +42,7 @@ trait SchedulerModule { self: Domain =>
     private val isScheduled = new AtomicBoolean(false)
 
     private val runnable = new Runnable {
-      def run {
+      def run() {
         // TODO: do we really need to CAS twice?
         if (isScheduled.compareAndSet(true, false)) engine.runTurn()
       }
@@ -68,13 +68,13 @@ trait SchedulerModule { self: Domain =>
    */
   class ThreadPoolScheduler(pool: ExecutorService) extends ThreadSafeScheduler {
     def this() = this(Executors.newCachedThreadPool())
-    protected def schedule(r: Runnable) = pool.execute(r)
+    protected def schedule(r: Runnable) { pool.execute(r) }
   }
 
   /**
    * A scheduler running turns on the Swing event dispatcher thread (EDT).
    */
   class SwingScheduler extends ThreadSafeScheduler {
-    def schedule(r: Runnable) = SwingUtilities.invokeLater(r)
+    def schedule(r: Runnable) { SwingUtilities.invokeLater(r) }
   }
 }

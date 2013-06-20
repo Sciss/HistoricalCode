@@ -1,5 +1,4 @@
 package scala.react
-import scala.annotation.elidable
 
 /**
  * Defines all reactive classes by mixing in all reactive modules.

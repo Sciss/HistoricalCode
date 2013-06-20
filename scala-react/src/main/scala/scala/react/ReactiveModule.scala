@@ -33,7 +33,7 @@ abstract class ReactiveModule extends EngineModule { module: Domain =>
    * node.
    */
   def doLater(op: => Unit) {
-    new DoLaterNode { def react() = op }
+    new DoLaterNode { def react() { op }}
   }
 
   private abstract class DoLaterNode extends LeafNode {
@@ -48,9 +48,9 @@ abstract class ReactiveModule extends EngineModule { module: Domain =>
   }
 
   private object Node {
-    final private val TickNumMask: Long = ~(TickInvalidMask | TickMuteMask)
     final private val TickInvalidMask: Long = 1L << 63
     final private val TickMuteMask: Long = 1L << 62
+    final private val TickNumMask: Long = ~(TickInvalidMask | TickMuteMask)
   }
 
   abstract class Node extends Tickable {
@@ -144,8 +144,9 @@ abstract class ReactiveModule extends EngineModule { module: Domain =>
     /**
      * Throws an exception if accessed from a level <= the level of this node. No-op otherwise.
      */
-    def checkTopology() =
+    def checkTopology() {
       if (level >= engine.currentLevel) engine.levelMismatch(this)
+    }
 
     /**
      * Makes sure that the value of this node is consistent. Might be called multiple times in a

@@ -1,8 +1,7 @@
 package scala.react
 
-import java.util.ArrayDeque
 import java.util.concurrent.ConcurrentLinkedQueue
-import scala.collection.mutable.ArrayStack
+import scala.util.control.NonFatal
 
 abstract class EngineModule { self: Domain =>
   // Dependent stack stuff is inlined, since it needs to be as efficient as possible
@@ -35,13 +34,13 @@ abstract class EngineModule { self: Domain =>
    * Nodes that throw this exception must ensure that the dependent stack is in clean state, i.e.,
    * no leftovers on the stack. Otherwise dynamic dependency tracking goes havoc.
    */
-  private[react] object LevelMismatch extends util.control.NoStackTrace {
+  private[react] object LevelMismatch extends scala.util.control.NoStackTrace {
     var accessed: Node = _
   }
 
   @inline def runTurn(op: => Unit) {
     op
-    engine.runTurn
+    engine.runTurn()
   }
 
   @inline def runReadTurn(leaf: LeafNode) {
@@ -76,9 +75,9 @@ abstract class EngineModule { self: Domain =>
       try {
         propagate()
       } catch {
-        case e => uncaughtException(e)
+        case NonFatal(e) => uncaughtException(e)
       } finally {
-        propQueue.clear
+        propQueue.clear()
         level = 0
         debug.leaveTurn(currentTurn)
       }
@@ -93,9 +92,9 @@ abstract class EngineModule { self: Domain =>
         leaf.invalidate()
         tryTock(leaf)
       } catch {
-        case e => uncaughtException(e)
+        case NonFatal(e) => uncaughtException(e)
       } finally {
-        propQueue.clear
+        propQueue.clear()
         level = 0
         debug.leaveTurn(currentTurn)
       }
@@ -105,7 +104,7 @@ abstract class EngineModule { self: Domain =>
       val queue = propQueue
       applyTodos()
       while (!queue.isEmpty) {
-        val node = queue.dequeue
+        val node = queue.dequeue()
         assert(node.level >= level)
         if (node.level > level)
           level = node.level
@@ -140,7 +139,7 @@ abstract class EngineModule { self: Domain =>
     /**
      * Try to tock a node. Hoists the node, if on wrong level.
      */
-    protected def tryTock(dep: StrictNode) = try {
+    protected def tryTock(dep: StrictNode) { try {
       debug.logTock(dep)
       dep.tock()
     } catch {
@@ -148,7 +147,7 @@ abstract class EngineModule { self: Domain =>
         val lvl = lm.accessed.level
         debug.logLevelMismatch(dep, lm.accessed)
         hoist(dep, lvl + 1)
-    }
+    }}
 
     def levelMismatch(accessed: Node) {
       LevelMismatch.accessed = accessed
@@ -184,18 +183,18 @@ abstract class EngineModule { self: Domain =>
     // todos that can be scheduled externally, thread-safe
     private val asyncTodos = new ConcurrentLinkedQueue[AnyRef] // Runnable or ()=>Unit
     // todos that can be scheduled only inside a turn, no need for thead-safety
-    private val localTodos = new ArrayDeque[Tickable]
+    private val localTodos = new java.util.ArrayDeque[Tickable]
 
-    def schedule(r: Runnable) = {
+    def schedule(r: Runnable) {
       asyncTodos.add(r)
       scheduler.ensureTurnIsScheduled()
     }
-    def schedule(op: => Unit) = {
+    def schedule(op: => Unit) {
       asyncTodos.add(() => op)
       scheduler.ensureTurnIsScheduled()
     }
 
-    def tickNextTurn(t: Tickable) = {
+    def tickNextTurn(t: Tickable) {
       //assert(!localTodos.contains(t))
       // TODO: make localTodos a set?
       if (!localTodos.contains(t)) {

@@ -11,7 +11,7 @@ trait SignalModule { module: Domain =>
      * Creates a flow signal that runs through the given `op` once.
      */
     def flow[A](init: A)(op: SignalFlowOps[A]=>Unit @suspendable): Signal[A] = new FlowSignal(init) {
-      def body = op(this)
+      def body() = op(this)
     }
 
     /**
@@ -19,7 +19,7 @@ trait SignalModule { module: Domain =>
      * calling `halt`.
      */
     def loop[A](init: A)(op: SignalFlowOps[A]=>Unit @suspendable): Signal[A] = new FlowSignal(init) {
-      def body = while(!isDisposed) op(this)
+      def body() = while(!isDisposed) op(this)
     }
   }
 

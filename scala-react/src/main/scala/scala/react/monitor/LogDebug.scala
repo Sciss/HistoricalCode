@@ -1,13 +1,6 @@
 package scala.react
 package monitor
 
-import java.io._
-import java.nio.MappedByteBuffer
-import java.nio.BufferOverflowException
-import java.nio.channels.FileChannel
-import java.util.WeakHashMap
-import scala.collection.mutable.ArrayBuffer
-
 class LogDebug[D <: Domain](dom: D) extends AbstractDebug(dom) {
   import domain._
   import LogFormat._
@@ -15,7 +8,7 @@ class LogDebug[D <: Domain](dom: D) extends AbstractDebug(dom) {
   private val log = new PagedWriter(IO.newLogFile)
   private val header = IO.mapForWriting(log.channel, 0, 8)
 
-  private val ids = new WeakHashMap[Node, Long]
+  private val ids = new java.util.WeakHashMap[Node, Long]
   private var idCounter = 0L // 0 is reserved
   private var idSize = 1.toByte // in bytes
   private def uniqueId(n: Node): Long = {
@@ -88,12 +81,12 @@ class LogDebug[D <: Domain](dom: D) extends AbstractDebug(dom) {
     header putLong l
   }
 
-  def logEnterTurn(id: Long) = {
+  def logEnterTurn(id: Long) {
     t = time()
     log putLong id
     log putLong t
   }
-  def logLeaveTurn(id: Long) = {
+  def logLeaveTurn(id: Long) {
     t = time()
     if (t - lastSnapshot > 1000000000) {
       lastSnapshot = t
@@ -105,18 +98,18 @@ class LogDebug[D <: Domain](dom: D) extends AbstractDebug(dom) {
     writeTag(EndTurnTag)
     log putLong t
   }
-  def logTock(n: Node) = {
+  def logTock(n: Node) {
     val id = uniqueId(n)
     writeTag(TockTag)
     writeNodeId(id)
   }
-  def logLevelMismatch(accessor: Node, accessed: Node) = {
+  def logLevelMismatch(accessor: Node, accessed: Node) {
     writeTag(MismatchTag)
     writeNodeId(uniqueId(accessor))
     writeNodeId(uniqueId(accessed))
   }
   private var todoCounter = 0
-  def logTodo(t: Any) = {
+  def logTodo(t: Any) {
     todoCounter += 1
   }
 }

@@ -8,7 +8,7 @@ trait FlowModule { module: Domain =>
   trait FlowNode extends StrictNode {
     protected[react] var _continue = initialContinuation
 
-    protected def continue() = _continue()
+    protected def continue() { _continue() }
     protected def initialContinuation: () => Unit = () => reset {
       body()
       //TODO: dispose()
@@ -32,7 +32,7 @@ trait FlowModule { module: Domain =>
     /**
      * Continues with the given continuation in the next cycle.
      */
-    protected[react] def continueLater(k: => Unit) = {
+    protected[react] def continueLater(k: => Unit) {
       _continue = () => k
       engine.tickNextTurn(this)
     }
@@ -170,7 +170,7 @@ trait FlowModule { module: Domain =>
       shiftAndContinue[Unit] { exitK =>
         val latch = new scala.runtime.IntRef(2)
 
-        def cont(left: => Unit)(right: => Unit): Unit = {
+        def cont(left: => Unit)(right: => Unit) {
           val oldLatch = _join // stack joins for nested pars
           _join = latch
           val leftK = continueWith(left)
@@ -228,7 +228,7 @@ trait FlowModule { module: Domain =>
 
   object Reactor {
     def flow[A](op: FlowOps => Unit @suspendable): Reactor = new Reactor {
-      def body = op(this)
+      def body() = op(this)
     }
 
     /**
@@ -236,7 +236,7 @@ trait FlowModule { module: Domain =>
      * calling `halt`.
      */
     def loop[A](op: FlowOps => Unit @suspendable):  Reactor = new Reactor {
-      def body = while (!isDisposed) op(this)
+      def body() = while (!isDisposed) op(this)
     }
   }
 

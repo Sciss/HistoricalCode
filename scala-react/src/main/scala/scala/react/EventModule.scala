@@ -14,7 +14,7 @@ trait EventModule { module: Domain =>
      * Creates a flow event that runs through the given `op` once.
      */
     def flow[A](op: EventsFlowOps[A] => Unit @suspendable): Events[A] = new FlowEvents[A] {
-      def body = op(this)
+      def body() = op(this)
     }
 
     /**
@@ -22,7 +22,7 @@ trait EventModule { module: Domain =>
      * calling `halt`.
      */
     def loop[A](op: EventsFlowOps[A] => Unit @suspendable): Events[A] = new FlowEvents[A] {
-      def body = while (!isDisposed) op(this)
+      def body() = while (!isDisposed) op(this)
     }
 
     /**
@@ -49,7 +49,7 @@ trait EventModule { module: Domain =>
    * An event stream. Can emit in a propagation turn, but holds no value otherwise.
    */
   abstract class Events[+A] extends TotalReactive[A, Unit] with SimpleReactive[A, Unit] { outer =>
-    def getValue: Unit = ()
+    def getValue {}
 
     protected class Mapped[B](f: A => B) extends LazyEvents1[A, B](outer) {
       protected[this] def react(a: A) { emit(f(a)) }
@@ -116,7 +116,7 @@ trait EventModule { module: Domain =>
 
     protected class Scanned1[B >: A](f: (B, B) => B) extends StrictEvents1[B, B](outer) {
       private var started = false
-      protected[this] def react(a: B) = {
+      protected[this] def react(a: B) {
         if (started) emit(f(this.pulse, a))
         else {
           started = true

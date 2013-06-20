@@ -19,35 +19,35 @@ class PagedWriter(file: File, chunkSize: Int = 1000000) {
     buf = channel.map(FileChannel.MapMode.READ_WRITE, offset, chunkSize)
   }
 
-  def putLong(v: Long): Unit = try {
+  def putLong(v: Long) { try {
     buf putLong v
   } catch {
     case e: BufferOverflowException =>
       remap()
       putLong(v)
-  }
+  }}
 
-  def putByte(v: Byte): Unit = try {
+  def putByte(v: Byte) { try {
     buf put v
   } catch {
     case e: BufferOverflowException =>
       remap()
       putByte(v)
-  }
+  }}
 
-  def putShort(v: Short): Unit = try {
+  def putShort(v: Short) { try {
     buf putShort v
   } catch {
     case e: BufferOverflowException =>
       remap()
       putShort(v)
-  }
+  }}
 
-  def putInt(v: Int): Unit = try {
+  def putInt(v: Int) { try {
     buf putInt v
   } catch {
     case e: BufferOverflowException =>
       remap()
       putInt(v)
-  }
+  }}
 }

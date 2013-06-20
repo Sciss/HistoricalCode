@@ -1,5 +1,4 @@
 package scala.react
-import java.util.Arrays
 
 abstract class PropQueue[A >: Null: Manifest] {
   def clear()
@@ -35,7 +34,7 @@ abstract class PriorityQueue[A >: Null: Manifest] extends PropQueue[A] {
     array(b) = h
   }
 
-  protected def fixUp(m: Int): Unit = {
+  protected def fixUp(m: Int) {
     val as = array
     var k = m
     while (k > 1 && priority(as(k / 2)) > priority(as(k))) {
@@ -44,7 +43,7 @@ abstract class PriorityQueue[A >: Null: Manifest] extends PropQueue[A] {
     }
   }
 
-  protected def fixDown(m: Int, n: Int): Unit = {
+  protected def fixDown(m: Int, n: Int) {
     val as = array
     var k = m
     while (n >= 2 * k) {
@@ -119,7 +118,7 @@ abstract class PriorityQueue[A >: Null: Manifest] extends PropQueue[A] {
 
   }
 
-  override def toString() =
+  override def toString =
     "PrioQueue" + array.mkString("[", ",", "]")
 }
 
@@ -159,7 +158,7 @@ abstract class TopoQueue[A >: Null: Manifest] extends PropQueue[A]  {
     maxDepth = 0
     maxLevelSize = 0
     // it should be slightly faster to do this here than to adapt sizes during traversal:
-    Arrays.fill(sizes, 0)
+    java.util.Arrays.fill(sizes, 0)
   }
 
   def +=(a: A) {
@@ -209,7 +208,7 @@ abstract class TopoQueue[A >: Null: Manifest] extends PropQueue[A]  {
       val arr = maxLevel
       val oldSize = arr.length
       if (oldSize <= maxLevelSize) {
-        var newsize = oldSize * 2
+        val newsize = oldSize * 2
 
         val newArr = new Array[A](newsize)
         compat.Platform.arraycopy(arr, 0, newArr, 0, oldSize)
@@ -220,7 +219,7 @@ abstract class TopoQueue[A >: Null: Manifest] extends PropQueue[A]  {
       val arr = levels(d)
       val oldSize = arr.length
       if (oldSize <= sizes(d)) {
-        var newsize = oldSize * 2
+        val newsize = oldSize * 2
 
         val newArr = new Array[A](newsize)
         compat.Platform.arraycopy(arr, 0, newArr, 0, oldSize)
@@ -230,7 +229,7 @@ abstract class TopoQueue[A >: Null: Manifest] extends PropQueue[A]  {
     }
 
   // ensure that we have levels allocated with indices at least up to d
-  private def ensureDepthCapacity(d: Int) = {
+  private def ensureDepthCapacity(d: Int) {
     val arr = levels
     val oldSize = arr.length
     if (d >= oldSize) {
@@ -254,5 +253,5 @@ abstract class TopoQueue[A >: Null: Manifest] extends PropQueue[A]  {
     }
   }
 
-  def reinsert(elem: A) = sys.error("not implemented")
+  def reinsert(elem: A) { sys.error("not implemented") }
 }

@@ -1,9 +1,7 @@
 package scala.react
 
-import java.util.WeakHashMap
 import java.text.SimpleDateFormat
 import scala.annotation.elidable
-import scala.collection.mutable.ArrayBuffer
 
 abstract class Debug[D <: Domain](val domain: D) {
   import domain._
@@ -34,7 +32,7 @@ abstract class Debug[D <: Domain](val domain: D) {
     isInTurn = false
   }
 
-  @elidable(800) def assertInTurn() = assert(isInTurn, "This method must be run on its domain " + this)
+  @elidable(800) def assertInTurn() { assert(isInTurn, "This method must be run on its domain " + this) }
 
   @elidable(800) def logStart()
   @elidable(800) def logEnterTurn(id: Long)
@@ -60,7 +58,7 @@ class NilDebug[D <: Domain](dom: D) extends Debug(dom) {
 
 abstract class AbstractDebug[D <: Domain](dom: D) extends Debug(dom) {
   import domain._
-  private val names = new WeakHashMap[Node, String]
+  private val names = new java.util.WeakHashMap[Node, String]
   def setName(node: Node, name: String) { names.put(node, name) }
   def getName(node: Node): String = names.get(node)
 }
@@ -80,14 +78,16 @@ abstract class PrintDebug[D <: Domain](dom: D) extends AbstractDebug(dom) {
     startTime = time()
     log("Start domain " + domain + " at " + dateFormat.format(startTime))
   }
-  def logEnterTurn(id: Long) = log(timePrefix + "enter turn " + id)
-  def logLeaveTurn(id: Long) = log(timePrefix + "leave turn " + id)
-  def logTock(n: Node) = log("Tock " + n)
-  def logLevelMismatch(accessor: Node, accessed: Node) = log("Level mismatch when " + accessor + " accessed " + accessed)
-  def logTodo(t: Any) = log("Todo " + t)
+  def logEnterTurn(id: Long) { log(timePrefix + "enter turn " + id) }
+  def logLeaveTurn(id: Long) { log(timePrefix + "leave turn " + id) }
+  def logTock(n: Node) { log("Tock " + n) }
+  def logLevelMismatch(accessor: Node, accessed: Node) {
+    log("Level mismatch when " + accessor + " accessed " + accessed)
+  }
+  def logTodo(t: Any) { log("Todo " + t) }
 }
 
 
 class ConsoleDebug[D <: Domain](dom: D) extends PrintDebug(dom) {
-  def log(s: String) = println(s)
+  def log(s: String) { println(s) }
 }
