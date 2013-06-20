@@ -1,20 +1,23 @@
 package de.sciss.reacttest
 
-import scala.react.Domain
-
-object Test extends Domain with App {
+object Test extends scala.react.Domain with App {
   val engine    = new Engine
   val scheduler = new ManualScheduler
 
-  val v1, v2    = Var(0)
-  lazy val f    = Strict { v1() + v2() }
+  val v2   = Var(0)
+  val v1   = Lazy { v2() + 10 }
+  val f    = Lazy { v1() + v2() }
 
   start()
+
+  schedule {
+    new Observing {
+      observe(f) { p =>
+        println(s"Observed: $p")
+      }
+    }
+    v2() = 5
+  }
+
   runTurn()
-
-  schedule { f; println(f.now) }
-
-  runTurn()
-
-  // println(f.now)
 }
