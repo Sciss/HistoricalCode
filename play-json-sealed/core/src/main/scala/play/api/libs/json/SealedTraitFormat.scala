@@ -43,7 +43,7 @@ object SealedTraitFormat {
     val aTpeW   = c.weakTypeOf[A]
     val aClazz  = aTpeW.typeSymbol.asClass
 
-    if (!aClazz.isSealed) { // fall back to Json.format
+    if (!aClazz.isTrait) { // fall back to Json.format
       if (DEBUG) log(s"Type $aTpeW is not sealed")
       return JsMacroImpl.formatImpl[A](c)
     }

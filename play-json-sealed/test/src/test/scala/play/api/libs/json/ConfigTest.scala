@@ -1,0 +1,60 @@
+package play.api.libs.json
+
+import java.io.File
+import scala.annotation.switch
+import collection.immutable.{IndexedSeq => Vec}
+import language.implicitConversions
+
+object Analysis {
+  object Function {
+    case object Power     extends Function { final val id = 0 }
+    case object MagSum    extends Function { final val id = 1 }
+    case object Complex   extends Function { final val id = 2 }
+    case object RComplex  extends Function { final val id = 3 }
+    case object Phase     extends Function { final val id = 4 }
+    case object WPhase    extends Function { final val id = 5 }
+    case object MKL       extends Function { final val id = 6 }
+
+    val seq: Vec[Function] = Vector(Power, MagSum, Complex, RComplex, Phase, WPhase, MKL)
+
+    def apply(id: Int): Function = (id: @switch) match {
+      case Power    .id => Power
+      case MagSum   .id => MagSum
+      case Complex  .id => Complex
+      case RComplex .id => RComplex
+      case Phase    .id => Phase
+      case WPhase   .id => WPhase
+      case MKL      .id => MKL
+    }
+  }
+  sealed trait Function {
+    def id: Int
+    def productPrefix: String
+    def name: String = productPrefix.toLowerCase
+  }
+
+  sealed trait ConfigLike
+
+  trait ConfigBuilder extends ConfigLike {
+    def build: Config
+  }
+
+  object Config {
+    def default: Config = ???
+    // def apply() = new ConfigBuilder
+
+    implicit def build(b: ConfigBuilder): Config = b.build
+  }
+  final case class Config(input: File, thresh: Float, function: Function, fftSize: Int, fftOverlap: Int,
+                          decay: Float, noiseFloor: Float, minGap: Int, median: Int, inputGain: Float)
+    extends ConfigLike
+}
+
+object ConfigTest {
+  import Formats.{File, IndexedSeq}
+  import Analysis._
+  implicit val fmtFun : Format[Function]                  = SealedTraitFormat[Function]
+  implicit val fmtCfg : Format[Config]                    = SealedTraitFormat[Config]
+  // implicit val fmtProd: Format[Vec[Long]]                 = implicitly[Format[Vec[Long]]]
+  implicit val fmtCfgs: Format[Vec[(Config, Vec[Long])]]  = implicitly[Format[Vec[(Config, Vec[Long])]]]
+}
