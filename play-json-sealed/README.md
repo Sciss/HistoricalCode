@@ -23,7 +23,7 @@ The following resolvers must also be added:
 
 ## example
 
-Examples are provided by way of test sources (`sbt test`). Basically you get a format via `SealedTraitFormat[A]`. If that trait requires formats for other traits, you need to put their respective formats implicitly in scope, first. There are also a few useful formats in `Formats`, such as `File` and `IndexedSeq`.
+Examples are provided by way of test sources (`sbt test`). Basically you get a format via `SealedTraitFormat[A]`. If that trait requires formats for other traits, you need to put their respective formats implicitly in scope, first. There are also a few useful formats in `Formats`, such as `FileFormat` and `Tuple2Format`.
 
 ## limitations and issues
 

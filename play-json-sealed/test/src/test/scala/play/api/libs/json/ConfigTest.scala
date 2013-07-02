@@ -48,13 +48,19 @@ object Analysis {
   final case class Config(input: File, thresh: Float, function: Function, fftSize: Int, fftOverlap: Int,
                           decay: Float, noiseFloor: Float, minGap: Int, median: Int, inputGain: Float)
     extends ConfigLike
+
+  type Product = Vec[Long]
+
+  type ConfigAndProduct = (Config, Option[Product])
 }
 
 object ConfigTest {
-  import Formats.{File, IndexedSeq}
+  import Formats.{FileFormat, Tuple2Format}
   import Analysis._
   implicit val fmtFun : Format[Function]                  = SealedTraitFormat[Function]
   implicit val fmtCfg : Format[Config]                    = SealedTraitFormat[Config]
-  // implicit val fmtProd: Format[Vec[Long]]                 = implicitly[Format[Vec[Long]]]
-  implicit val fmtCfgs: Format[Vec[(Config, Vec[Long])]]  = implicitly[Format[Vec[(Config, Vec[Long])]]]
+  // val fmtProd: Format[Product]                   = implicitly[Format[Product]]
+  // implicit val fmtCfgs: Format[Vec[(Config, Vec[Long])]]  = IndexedSeq[(Config, Vec[Long])]
+
+  implicitly[Format[Vec[ConfigAndProduct]]]
 }
