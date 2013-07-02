@@ -67,7 +67,11 @@ object SealedTraitFormat {
     val cases   = subsAll.map { sub =>
       val subC      = sub.asClass
       val isObject  = subC.isModuleClass
-      val subIdent  = Ident(if (isObject) subC.companionSymbol.asModule else subC)
+      val subIdent  = Ident(if (isObject) {
+        val companion = subC.companionSymbol
+        require(companion.isModule, s"Sub type $subC of $aTpeW does not have a companion object")
+        companion.asModule
+      } else subC)
       val patWrite  = Bind(newTermName("x"), Typed(Ident("_"), subIdent))
       val subName0  = if (PACKAGE) sub.fullName else sub.name.toString
       val subName   = Literal(Constant(subName0))
