@@ -23,7 +23,7 @@ digraph G {
 	Processor [label="\"processor\" % \"0.2.0\"", shape=Box];
 	SbtAppbundle [label="\"sbt-appbundle\" % \"1.0.1\"", shape=Box, color=blue];
 	ScalaOSC [label="\"scalaosc\" % \"1.1.1\"", shape=box];
-	ScalaAudioFileS [label="\"scalaaudiofile\" % \"1Ser.4.0\"", shape=box];
+	ScalaAudioFile [label="\"scalaaudiofile\" % \"1.4.0\"", shape=box];
 	ScalaCollider [label="\"scalacollider\" % \"1.8.0\"", shape=Box];
 	ScalaColliderSwing [label="\"scalacolliderswing\" % \"1.8.0\"", shape=Box];
 	ScalaColliderUGens [label="\"scalacolliderugens\" % \"1.6.0\"", shape=Box];
@@ -33,13 +33,14 @@ digraph G {
 	Serial [label="\"serial\" % \"1.0.1\"", shape=Box];
 	SonogramOverview [label="\"sonogramoverview\" % \"1.6.2\"", shape=Box];
 	SoundProcesses [label="\"soundprocesses\" % \"1.8.0\"", shape=Box];
-   Span [label="\"span\" % \"1.2.0\"", shape=box];
+    Span [label="\"span\" % \"1.2.0\"", shape=box];
 	Strugatzki [label="\"strugatzki\" % \"2.0.0\"", shape=Box];
 	SwingPlus [label="\"swingplus\" % \"0.0.1\"", shape=Box];
+	TreeTable [label="\"treetable-scala\" % \"1.3.0\"", shape=Box];
 	
 	SysSon [label="\"sysson\" % \"0.1.0-SNAPSHOT\"", shape=Box, style=dotted];
 
-   Desktop -> Model;	
+	Desktop -> Model;	
 	FileCache -> Serial;
 	FScapeJobs -> ScalaOSC;
 	FScapeJobs -> ScalaAudioFile;
@@ -55,13 +56,13 @@ digraph G {
 	LucreConfluent -> LucreEvent;
 	LucreData -> LucreSTM;
 	LucreEvent -> LucreSTM;
-   LucreEvent -> LucreData;
-   LucreSTM -> Serial;
-   LucreSTM_BDB -> LucreSTM;
-   Mellite -> Desktop;
-   Mellite -> FileUtil;
-   Mellite -> FScapeJobs;
-   Mellite -> JTreeTable;
+	LucreEvent -> LucreData;
+	LucreSTM -> Serial;
+	LucreSTM_BDB -> LucreSTM;
+	Mellite -> Desktop;
+	Mellite -> FileUtil;
+	Mellite -> FScapeJobs;
+	Mellite -> JTreeTable;
 	Mellite -> LucreSTM_BDB;
 	Mellite -> ScalaColliderSwing;
 	Mellite -> SonogramOverview;
@@ -71,8 +72,8 @@ digraph G {
 	Pointillism -> PDFlitz;
 	Pointillism -> ScalaMIDI;
 	Processor -> Model;
-   ScalaAudioFile -> Serial;
-   ScalaCollider -> Processor;
+	ScalaAudioFile -> Serial;
+	ScalaCollider -> Processor;
 	ScalaCollider -> ScalaAudioFile;
 	ScalaCollider -> ScalaColliderUGens;
 	ScalaCollider -> ScalaOSC;
@@ -98,5 +99,15 @@ digraph G {
 	Strugatzki -> Processor;
 	Strugatzki -> ScalaCollider;
 	Strugatzki -> Span;
+	
+	SysSon -> Desktop;
+	SysSon -> FileCache;
+	SysSon -> FileUtil;
+	SysSon -> IntensityPalette;
+	SysSon -> ScalaCollider;
+	SysSon -> ScalaColliderSwing;
+	SysSon -> ScalaColliderUGens;
+	SysSon -> ScalaOSC;
+	SysSon -> SwingPlus;
 }
 
