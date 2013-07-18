@@ -16,7 +16,7 @@ digraph G {
 	LucreSTM [label="\"lucrestm\" % \"2.0.0\"", shape=Box];
 	LucreSTM_BDB [label="\"lucrestm-bdb\" % \"2.0.0\"", shape=Box];
 	Mellite [label="\"mellite\" % \"0.2.0\"", shape=Box];
-	Model [label="\"model\" % \"0.3.0\"", shape=Box];
+	Model [label="\"model\" % \"0.3.1\"", shape=Box];
 	PDFlitz [label="\"pdflitz\" % \"1.0.0\"", shape=Box];
 	PrefuseCore [label="\"prefuse-core\" % \"0.21\"", shape=Box, color=green];
 	Pointillism [label="\"pointillism\" % \"0.2.0-SNAPSHOT\"", shape=Box, style=dotted];
@@ -40,6 +40,10 @@ digraph G {
 	
 	SysSon [label="\"sysson\" % \"0.1.0-SNAPSHOT\"", shape=Box, style=dotted];
 
+	AudioWidgets -> Desktop;
+	AudioWidgets -> Model;
+	AudioWidgets -> Span;
+	AudioWidgets -> SwingPlus;
 	Desktop -> Model;	
 	FileCache -> Serial;
 	FScapeJobs -> ScalaOSC;
