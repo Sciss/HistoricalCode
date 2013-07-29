@@ -2,7 +2,7 @@
  *  package.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -85,7 +85,7 @@ package object illism {
       val mean = sum / size
       var vari = num.zero
       it.foreach { e =>
-        val d = (e - mean)
+        val d = e - mean
         vari += d * d
       }
 
@@ -138,11 +138,11 @@ package object illism {
       val b     = IIdxSeq.newBuilder[OffsetNote]
       val wait  = mutable.Map.empty[(Int, Int), (Double, midi.NoteOn)]
       t.events.foreach {
-        case midi.Event(tick, on @ midi.NoteOn(ch, pitch, _)) if (channel == -1 || channel == ch) =>
+        case midi.Event(tick, on @ midi.NoteOn(ch, pitch, _)) if channel == -1 || channel == ch =>
           val startTime = tick / r.value
           wait += (ch, pitch) -> (startTime, on)
 
-        case midi.Event(tick, off @ midi.NoteOff(ch, pitch, _)) if (channel == -1 || channel == ch) =>
+        case midi.Event(tick, off @ midi.NoteOff(ch, pitch, _)) if channel == -1 || channel == ch =>
           val stopTime  = tick / r.value
           wait.remove(ch -> pitch).foreach { case (startTime, on) =>
             b += OffsetNote(offset = startTime, /* channel = ch, */ pitch = pitch.asPitch, duration = stopTime - startTime,

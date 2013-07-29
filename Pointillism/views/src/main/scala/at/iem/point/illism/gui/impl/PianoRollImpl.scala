@@ -2,7 +2,7 @@
  *  PianoRollImpl.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -32,9 +32,8 @@ import collection.immutable.{IndexedSeq => IIdxSeq}
 
 object PianoRollImpl {
   class JComponent extends javax.swing.JComponent with PianoRollImpl{
-    override def paintComponent(g: Graphics) {
+    override def paintComponent(g: Graphics): Unit =
       paint(g.asInstanceOf[Graphics2D], 0, 0, getWidth, getHeight)
-    }
 
     override def getPreferredSize: Dimension = {
       if (isPreferredSizeSet) return super.getPreferredSize
@@ -82,7 +81,7 @@ object PianoRollImpl {
   recalcKeySize()
 
   final def notes = _notes
-  def notes_=(value: IIdxSeq[OffsetNote]) {
+  def notes_=(value: IIdxSeq[OffsetNote]): Unit = {
     _notes = value
     // _notesTree    = RangedSeq[OffsetNote, Double](value: _*)
     if (_autoRange && !value.isEmpty) {
@@ -96,7 +95,7 @@ object PianoRollImpl {
   }
 
   final def chords = _chords
-  def chords_=(value: IIdxSeq[Chord]) {
+  def chords_=(value: IIdxSeq[Chord]): Unit = {
     _chords = value
     if (_autoRange && !value.isEmpty) {
       val floor   = math.floor(_chords.map(_.minOffset).min)
@@ -107,7 +106,7 @@ object PianoRollImpl {
   }
 
   final def pitchRange = _pitchRange
-  def pitchRange_=(value: (Int, Int)) {
+  def pitchRange_=(value: (Int, Int)): Unit = {
     if (_pitchRange != value) {
       _pitchRange = value
       repaint()
@@ -115,7 +114,7 @@ object PianoRollImpl {
   }
 
   final def timeRange = _timeRange
-  def timeRange_=(value: (Double, Double)) {
+  def timeRange_=(value: (Double, Double)): Unit = {
     _autoRange = false
     if (_timeRange != value) {
       _timeRange = value
@@ -124,21 +123,20 @@ object PianoRollImpl {
   }
 
   final def decoration = _decoration
-  def decoration_=(value: Map[OffsetNote, NoteDecoration]) {
+  def decoration_=(value: Map[OffsetNote, NoteDecoration]): Unit = {
     _decoration = value
     if (_notes.nonEmpty) repaint()
   }
 
   final def keyWidth = _keyWidth
-  def keyWidth_=(value: Int) {
+  def keyWidth_=(value: Int): Unit =
     if (_keyWidth != value) {
       _keyWidth = value
       repaint()
     }
-  }
 
   final def keyHeight = _keyHeight
-  def keyHeight_=(value: Int) {
+  def keyHeight_=(value: Int): Unit = {
     val even = value & ~1
     if (_keyHeight != even) {
       _keyHeight = even
@@ -147,19 +145,19 @@ object PianoRollImpl {
     }
   }
 
-  private def recalcKeySize() {
+  private def recalcKeySize(): Unit = {
     _keySize1 = _keyHeight + (_keyHeight >> 1)
     _keySize2 = _keyHeight << 1
   }
 
-  def paint(g: Graphics2D, x: Int, y: Int, w: Int, h: Int) {
+  def paint(g: Graphics2D, x: Int, y: Int, w: Int, h: Int): Unit = {
     val kw = math.min(keyWidth, w)
     if (kw > 0) paintKeyboard(g, x, y, kw, h)
     val rw = w - kw
     if (rw > 0) paintRoll(g, x + kw, y, rw, h)
   }
 
-  def paintKeyboard(g: Graphics2D, x: Int, y: Int, w: Int, h: Int) {
+  def paintKeyboard(g: Graphics2D, x: Int, y: Int, w: Int, h: Int): Unit = {
     val clipOrig = g.getClip
     try {
       g.clipRect(x, y, w, h)
@@ -201,7 +199,7 @@ object PianoRollImpl {
     }
   }
 
-  def paintRoll(g: Graphics2D, x: Int, y: Int, w: Int, h: Int) {
+  def paintRoll(g: Graphics2D, x: Int, y: Int, w: Int, h: Int): Unit = {
     val clipOrig = g.getClip
     try {
       g.clipRect(x, y, w, h)

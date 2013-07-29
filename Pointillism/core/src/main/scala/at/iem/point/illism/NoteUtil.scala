@@ -2,7 +2,7 @@
  *  NoteUtil.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -31,9 +31,9 @@ import collection.immutable.{IndexedSeq => IIdxSeq}
 import annotation.tailrec
 
 object NoteUtil {
-//  def findMonophones(in: IIdxSeq[OffsetNote], overlapTolerance: Double = 0.1): IIdxSeq[IIdxSeq[OffsetNote]] = {
-//    ???
-//  }
+  //  def findMonophones(in: IIdxSeq[OffsetNote], overlapTolerance: Double = 0.1): IIdxSeq[IIdxSeq[OffsetNote]] = {
+  //    ???
+  //  }
 
   def toTrack(notes: IIdxSeq[OffsetNote], channel: Int = 0)(implicit tickRate: TickRate): Track = {
     val events = notes.flatMap(_.toMIDI(channel))
@@ -90,15 +90,15 @@ object NoteUtil {
     var chords  = Vector.empty[Chord]
     val pairs   = stabs.sliding(2, 1)
 
-//println(s"First ten raw     notes ${notes.take(10).mkString(", ")}")
-//println(s"First ten cleaned notes ${notes.take(10).mkString(", ")}")
-//println(s"First ten stabs         ${stabs.take(10).mkString(", ")}")
+    //println(s"First ten raw     notes ${notes.take(10).mkString(", ")}")
+    //println(s"First ten cleaned notes ${notes.take(10).mkString(", ")}")
+    //println(s"First ten stabs         ${stabs.take(10).mkString(", ")}")
 
     // initially put all notes into the sequential bin, then
     // as chords are detected remove them from this set
     var seqSet  = Set(notes:_ *)
 
-//var i = 0
+    //var i = 0
 
     pairs.foreach {
       case IIdxSeq(start, stop) =>

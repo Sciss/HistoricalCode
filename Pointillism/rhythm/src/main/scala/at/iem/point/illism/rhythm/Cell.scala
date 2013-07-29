@@ -2,7 +2,7 @@
  *  Cell.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -28,7 +28,6 @@ package at.iem.point.illism.rhythm
 import spire.math._
 import collection.immutable.{IndexedSeq => IIdxSeq}
 import scala.annotation.tailrec
-import spire.syntax._
 
 object Cell {
   private val durationMap = Map(

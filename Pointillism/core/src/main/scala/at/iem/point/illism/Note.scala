@@ -2,7 +2,7 @@
  *  Note.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -30,47 +30,38 @@ import midi.TickRate
 import collection.immutable.{IndexedSeq => IIdxSeq}
 
 sealed trait NoteLike {
-//  /**
-//   * MIDI channel (0 to 15)
-//   */
-//  def channel: Int
+  //  /**
+  //   * MIDI channel (0 to 15)
+  //   */
+  //  def channel: Int
 
-  /**
-   * MIDI pitch number
-   */
+  /** MIDI pitch number */
   def pitch: Pitch
 
-  /**
-   * Duration __in seconds__
-   */
+  /** Duration __in seconds__ */
   def duration: Double
 
-  /**
-   * MIDI attack velocity
-   */
+  /** MIDI attack velocity */
   def velocity: Int
 
-//  /**
-//   * MIDI release velocity (typically zero)
-//   */
-//  def release: Int
+  //  /**
+  //   * MIDI release velocity (typically zero)
+  //   */
+  //  def release: Int
 
-  /**
-   * Returns the duration rounded to milliseconds, as a String.
-   */
+  /** Returns the duration rounded to milliseconds, as a String. */
   final def durationString: String = s"${duration.roundSecondsToMillis}s"
 
   final def noteOn(channel: Int):  midi.NoteOn   = midi.NoteOn (channel, pitch.midi, velocity)
   final def noteOff(channel: Int): midi.NoteOff  = midi.NoteOff(channel, pitch.midi, 0)
 }
 
-/**
- * A logical grouping of a note on and note off.
- *
- * @param pitch     the MIDI key number (pitch)
- * @param duration  the duration __in seconds__
- * @param velocity    the attack velocity
- */
+/** A logical grouping of a note on and note off.
+  *
+  * @param pitch     the MIDI key number (pitch)
+  * @param duration  the duration __in seconds__
+  * @param velocity    the attack velocity
+  */
 final case class Note(/* channel: Int, */ pitch: Pitch, duration: Double, velocity: Int /*, release: Int = 0 */)
   extends NoteLike {
 
