@@ -28,7 +28,7 @@ package gui
 
 import java.awt.{Color, Graphics2D}
 import javax.swing.JComponent
-import collection.immutable.{IndexedSeq => IIdxSeq}
+import collection.immutable.{IndexedSeq => Vec}
 import impl.{PianoRollImpl => Impl}
 
 object PianoRoll {
@@ -42,8 +42,8 @@ object PianoRoll {
 trait PianoRoll {
   var pitchRange: (Int, Int)
   var timeRange: (Double, Double)
-  var notes : IIdxSeq[OffsetNote]
-  var chords: IIdxSeq[Chord]
+  var notes : Vec[OffsetNote]
+  var chords: Vec[Chord]
   var decoration: Map[OffsetNote, PianoRoll.NoteDecoration]
   var keyWidth: Int
   /** The height of each normalized key in pixels. This will be rounded to an even number! */

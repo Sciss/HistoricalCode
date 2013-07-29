@@ -28,7 +28,7 @@ package gui
 package impl
 
 import java.awt.{Dimension, Graphics, RenderingHints, Color, Graphics2D}
-import collection.immutable.{IndexedSeq => IIdxSeq}
+import collection.immutable.{IndexedSeq => Vec}
 
 object PianoRollImpl {
   class JComponent extends javax.swing.JComponent with PianoRollImpl{
@@ -66,9 +66,9 @@ object PianoRollImpl {
 
   protected def repaint(): Unit
 
-  private var _notes      = IIdxSeq.empty[OffsetNote]
+  private var _notes      = Vec.empty[OffsetNote]
   // private var _notesTree  = RangedSeq.empty[OffsetNote, Double]
-  private var _chords     = IIdxSeq.empty[Chord]
+  private var _chords     = Vec.empty[Chord]
   private var _decoration = Map.empty[OffsetNote, NoteDecoration]
   private var _pitchRange = defaultPitchRange
   private var _timeRange  = defaultTimeRange
@@ -81,7 +81,7 @@ object PianoRollImpl {
   recalcKeySize()
 
   final def notes = _notes
-  def notes_=(value: IIdxSeq[OffsetNote]): Unit = {
+  def notes_=(value: Vec[OffsetNote]): Unit = {
     _notes = value
     // _notesTree    = RangedSeq[OffsetNote, Double](value: _*)
     if (_autoRange && !value.isEmpty) {
@@ -95,7 +95,7 @@ object PianoRollImpl {
   }
 
   final def chords = _chords
-  def chords_=(value: IIdxSeq[Chord]): Unit = {
+  def chords_=(value: Vec[Chord]): Unit = {
     _chords = value
     if (_autoRange && !value.isEmpty) {
       val floor   = math.floor(_chords.map(_.minOffset).min)

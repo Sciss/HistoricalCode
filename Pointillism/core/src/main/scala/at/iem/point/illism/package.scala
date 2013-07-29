@@ -31,7 +31,7 @@ import java.math.RoundingMode
 import collection.breakOut
 import collection.mutable
 import collection.generic.CanBuildFrom
-import collection.immutable.{IndexedSeq => IIdxSeq}
+import collection.immutable.{IndexedSeq => Vec}
 import de.sciss.midi
 import midi.TickRate
 import language.higherKinds
@@ -59,12 +59,12 @@ package object illism {
   }
 
   implicit final class IllismIterable[A](val it: Iterable[A]) extends AnyVal {
-    def intervals(implicit ev: A <:< Pitch): IIdxSeq[DirectedInterval] =
+    def intervals(implicit ev: A <:< Pitch): Vec[DirectedInterval] =
       it.sliding(2,1).map({ case Seq(low, high) => high interval low }).toIndexedSeq
 
     def play()(implicit ev: A <:< ConvertibleToMIDI) {
       implicit val rate = TickRate.tempo(120, 1024)
-      val events0: IIdxSeq[midi.Event] = it.flatMap(_.toMIDI)(breakOut)
+      val events0: Vec[midi.Event] = it.flatMap(_.toMIDI)(breakOut)
       val min     = events0.minBy(_.tick).tick
       val events  = events0.map(e => e.copy(tick = e.tick - min))
       val track   = midi.Track(events)
@@ -127,15 +127,15 @@ package object illism {
   }
 
   implicit final class IllismSequence(val sq: midi.Sequence) extends AnyVal {
-    def notes: IIdxSeq[OffsetNote] = notes(-1)
-    def notes(channel: Int): IIdxSeq[OffsetNote] = sq.tracks.flatMap(_.notes(channel)).sortBy(_.offset)
+    def notes: Vec[OffsetNote] = notes(-1)
+    def notes(channel: Int): Vec[OffsetNote] = sq.tracks.flatMap(_.notes(channel)).sortBy(_.offset)
   }
 
   implicit final class IllismTrack(val t: midi.Track) extends AnyVal {
-    def notes: IIdxSeq[OffsetNote] = notes(-1)
-    def notes(channel: Int): IIdxSeq[OffsetNote] = {
+    def notes: Vec[OffsetNote] = notes(-1)
+    def notes(channel: Int): Vec[OffsetNote] = {
       val r     = t.rate
-      val b     = IIdxSeq.newBuilder[OffsetNote]
+      val b     = Vec.newBuilder[OffsetNote]
       val wait  = mutable.Map.empty[(Int, Int), (Double, midi.NoteOn)]
       t.events.foreach {
         case midi.Event(tick, on @ midi.NoteOn(ch, pitch, _)) if channel == -1 || channel == ch =>

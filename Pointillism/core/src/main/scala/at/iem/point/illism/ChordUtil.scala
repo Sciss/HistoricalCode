@@ -26,15 +26,14 @@
 package at.iem.point.illism
 
 import annotation.tailrec
-// import de.sciss.fingertree.{RangedSeq, FingerTree}
-import collection.immutable.{IndexedSeq => IIdxSeq}
+import collection.immutable.{IndexedSeq => Vec}
 
 object ChordUtil {
   /** Tries to find the chords by clustering a given sequence of notes. */
-  def findChords(notes: IIdxSeq[OffsetNote], minPoly: Int = 2, offsetTolerance: Double = 0.1,
-                 stopTolerance: Double = 10.0): IIdxSeq[Chord] = {
-    val b = IIdxSeq.newBuilder[Chord]
-    @tailrec def loop(ns: IIdxSeq[OffsetNote]) {
+  def findChords(notes: Vec[OffsetNote], minPoly: Int = 2, offsetTolerance: Double = 0.1,
+                 stopTolerance: Double = 10.0): Vec[Chord] = {
+    val b = Vec.newBuilder[Chord]
+    @tailrec def loop(ns: Vec[OffsetNote]) {
       if (ns.isEmpty) return
       val h = ns.head
       // takes as many notes that satisfy the offset tolerance. because notes are sorted by
@@ -60,7 +59,7 @@ object ChordUtil {
   /** Tries to find harmonic constellations which are vertical structures of a minimum
     * number of voices and duration
     */
-  def findHarmonicFields(notes: IIdxSeq[OffsetNote], minPoly: Int = 2, minDuration: Double = 0.1): IIdxSeq[Chord] = {
+  def findHarmonicFields(notes: Vec[OffsetNote], minPoly: Int = 2, minDuration: Double = 0.1): Vec[Chord] = {
     if (notes.isEmpty) return Vector.empty
 
     /*
@@ -78,13 +77,15 @@ object ChordUtil {
     val res   = Vector.newBuilder[Chord]
     val pairs = stabs.sliding(2, 1)
     pairs.foreach {
-      case IIdxSeq(start, stop) =>
+      case Vec(start, stop) if stop - start >= minDuration =>
         val segm = tFlt.filter(n => n.offset <= start && n.stop >= stop).map { n =>
           n.replaceStart(start).replaceStop(stop)
         }
         if (segm.size >= minPoly) {
           res += Chord(segm.sortBy(_.pitch))
         }
+
+      case _ =>
     }
 
     res.result()

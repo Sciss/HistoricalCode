@@ -2,10 +2,10 @@ package at.iem.point.illism
 
 import de.sciss.midi
 import midi.TickRate
-import collection.immutable.{IndexedSeq => IIdxSeq}
+import collection.immutable.{IndexedSeq => Vec}
 
 object ConvertibleToMIDI {
-  def play(events: IIdxSeq[midi.Event])(implicit rate: TickRate) {
+  def play(events: Vec[midi.Event])(implicit rate: TickRate) {
     val track   = midi.Track(events.toIndexedSeq)
     val seq     = midi.Sequence(Vector(track))
     val player  = midi.Sequencer.open()

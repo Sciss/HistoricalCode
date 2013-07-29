@@ -27,7 +27,7 @@ package at.iem.point.illism
 
 import annotation.tailrec
 import collection.breakOut
-import collection.immutable.{IndexedSeq => IIdxSeq}
+import collection.immutable.{IndexedSeq => Vec}
 import de.sciss.midi
 import midi.TickRate
 
@@ -35,7 +35,7 @@ import midi.TickRate
  * A chord made of a sequence of notes. Notes must be in ascending order with respect to their
  * pitches.
  */
-final case class Chord(notes: IIdxSeq[OffsetNote]) extends ConvertibleToMIDI with ConvertibleToNotes {
+final case class Chord(notes: Vec[OffsetNote]) extends ConvertibleToMIDI with ConvertibleToNotes {
   require(notes.isSortedBy(_.pitch))
 
   def minOffset: Double = notes.minBy(_.offset).offset
@@ -66,7 +66,7 @@ final case class Chord(notes: IIdxSeq[OffsetNote]) extends ConvertibleToMIDI wit
    *
    * @return  the pitches in ascending order
    */
-  def pitches: IIdxSeq[Pitch] = notes.map(_.pitch)
+  def pitches: Vec[Pitch] = notes.map(_.pitch)
 
   /**
    * Returns the framing interval which is the interval between lowest and highest pitch in the chord.
@@ -76,13 +76,13 @@ final case class Chord(notes: IIdxSeq[OffsetNote]) extends ConvertibleToMIDI wit
   /**
    * Returns a sequence of subsequent intervals
    */
-  def layeredIntervals: IIdxSeq[UndirectedInterval] = pitches.intervals.map(_.undirected)
+  def layeredIntervals: Vec[UndirectedInterval] = pitches.intervals.map(_.undirected)
 
   /**
    * Returns a sequence of all intervals between all pairs of pitches
    */
-  def allIntervals: IIdxSeq[Interval] = {
-    val b = IIdxSeq.newBuilder[Interval]
+  def allIntervals: Vec[Interval] = {
+    val b = Vec.newBuilder[Interval]
     @tailrec def loop(sq: List[Pitch]) {
       sq match {
         case head :: tail =>

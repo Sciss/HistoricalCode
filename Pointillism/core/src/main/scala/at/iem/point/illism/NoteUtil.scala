@@ -27,15 +27,15 @@ package at.iem.point.illism
 
 import de.sciss.midi
 import midi.{Track, TickRate}
-import collection.immutable.{IndexedSeq => IIdxSeq}
+import collection.immutable.{IndexedSeq => Vec}
 import annotation.tailrec
 
 object NoteUtil {
-  //  def findMonophones(in: IIdxSeq[OffsetNote], overlapTolerance: Double = 0.1): IIdxSeq[IIdxSeq[OffsetNote]] = {
+  //  def findMonophones(in: Vec[OffsetNote], overlapTolerance: Double = 0.1): Vec[Vec[OffsetNote]] = {
   //    ???
   //  }
 
-  def toTrack(notes: IIdxSeq[OffsetNote], channel: Int = 0)(implicit tickRate: TickRate): Track = {
+  def toTrack(notes: Vec[OffsetNote], channel: Int = 0)(implicit tickRate: TickRate): Track = {
     val events = notes.flatMap(_.toMIDI(channel))
     Track(events)
   }
@@ -44,7 +44,7 @@ object NoteUtil {
     * and adjusting the others to match note beginnings and endings within this
     * minimum duration window.
     */
-  def clean(notes: IIdxSeq[OffsetNote], minDuration: Double = 0.1): IIdxSeq[OffsetNote] = {
+  def clean(notes: Vec[OffsetNote], minDuration: Double = 0.1): Vec[OffsetNote] = {
     if (notes.isEmpty) return Vector.empty
 
     val tAll = notes.filter(_.duration >= minDuration)
@@ -73,12 +73,12 @@ object NoteUtil {
     tFlt
   }
 
-  def stabbings(notes: IIdxSeq[OffsetNote]): IIdxSeq[Double] = {
+  def stabbings(notes: Vec[OffsetNote]): Vec[Double] = {
     notes.flatMap(n => n.offset :: n.stop :: Nil).toSet.toIndexedSeq.sorted
   }
 
-  def splitMelodicHarmonic(notes: IIdxSeq[OffsetNote], minChordDuration: Double = 0.1, minSeq: Int = 2):
-    (IIdxSeq[((Double, Double), Vector[OffsetNote])], IIdxSeq[((Double, Double), Vector[Chord])]) = {
+  def splitMelodicHarmonic(notes: Vec[OffsetNote], minChordDuration: Double = 0.1, minSeq: Int = 2):
+    (Vec[((Double, Double), Vector[OffsetNote])], Vec[((Double, Double), Vector[Chord])]) = {
 
     var resSeq      = Vector.empty[((Double, Double), Vector[OffsetNote])]
     var resChords   = Vector.empty[((Double, Double), Vector[Chord])]
@@ -101,7 +101,7 @@ object NoteUtil {
     //var i = 0
 
     pairs.foreach {
-      case IIdxSeq(start, stop) =>
+      case Vec(start, stop) =>
         // first condition: given a stabbing span, a note must begin no later than the span start
         // plus the tolerence, and it must end no earlier than the span stop minus the tolerance.
         val par0 = notes.filter { n =>

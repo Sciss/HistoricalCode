@@ -26,7 +26,7 @@
 package at.iem.point.illism.rhythm
 
 import spire.math._
-import collection.immutable.{IndexedSeq => IIdxSeq}
+import collection.immutable.{IndexedSeq => Vec}
 import scala.annotation.tailrec
 
 object Cell {
@@ -35,7 +35,7 @@ object Cell {
     12 -> "8.", 16 -> "4", 24 -> "4.", 32 -> "2", 48 -> "2.", 64 -> "1", 96 -> "1."
   )
 
-  private def lilyDurations(dur: Int): IIdxSeq[String] = {
+  private def lilyDurations(dur: Int): Vec[String] = {
     if (dur > 96) {
       return durationMap(96) +: lilyDurations(dur - 96)
     }
@@ -51,7 +51,7 @@ object Cell {
     }
  	}
 }
-final case class Cell(id: Int, elements: IIdxSeq[NoteOrRest], dur: Rational) {
+final case class Cell(id: Int, elements: Vec[NoteOrRest], dur: Rational) {
   override def toString = s"Cell#$id($prettyElements}, dur = $dur)"
 
   /** Number of elements in the cell */
@@ -96,7 +96,7 @@ final case class Cell(id: Int, elements: IIdxSeq[NoteOrRest], dur: Rational) {
     loop(1)
   }
 
-  private[Cell] def adjusted: IIdxSeq[NoteOrRest] = {
+  private[Cell] def adjusted: Vec[NoteOrRest] = {
     val f = factor
     elements.map(_ * f)
   }

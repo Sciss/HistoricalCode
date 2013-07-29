@@ -25,12 +25,12 @@
 
 package at.iem.point.illism.rhythm
 
-import scala.collection.immutable.{IndexedSeq => IIdxSeq}
+import scala.collection.immutable.{IndexedSeq => Vec}
 import spire.math._
 
 // reference: http://vladimir_ladma.sweb.cz/english/music/articles/links/mrhythm.htm
 object Ladma {
-  private def prepare(cell: Cell): (IIdxSeq[Rational], BigInt) = {
+  private def prepare(cell: Cell): (Vec[Rational], BigInt) = {
     // we first incorporate the total duration into the cell's elements
     // (e.g [1, 1, 1], 1/4 becomes [1/12, 1/12, 1/12], 1
     val dursN   = cell.normalized.elements.map(_.dur)

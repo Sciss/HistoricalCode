@@ -27,7 +27,7 @@ package at.iem.point.illism
 
 import de.sciss.midi
 import midi.TickRate
-import collection.immutable.{IndexedSeq => IIdxSeq}
+import collection.immutable.{IndexedSeq => Vec}
 
 sealed trait NoteLike {
   //  /**
@@ -104,5 +104,5 @@ final case class OffsetNote(offset: Double, /* channel: Int, */ pitch: Pitch, du
     midi.Event(startTick, noteOn(channel)) :: midi.Event(stopTick, noteOff(channel)) :: Nil
   }
 
-  def toNotes = IIdxSeq(this)
+  def toNotes = Vec(this)
 }
