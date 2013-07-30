@@ -54,7 +54,15 @@ object Pitch {
 final class Pitch(val midi: Int) extends AnyVal {
   override def toString = Pitch.toString(midi)
 
-  def interval(that: Pitch): DirectedInterval = (this, that) // new DirectedInterval(math.abs(this.midi - that.midi))
+  def to(that: Pitch): DirectedInterval = (this, that) // new DirectedInterval(math.abs(this.midi - that.midi))
+
+  def +(interval: Interval): Pitch = {
+    val steps = interval match {
+      case d: DirectedInterval    => d.semitones * d.direction
+      case u: UndirectedInterval  => u.semitones
+    }
+    new Pitch(midi + steps)
+  }
 
   def map(fun: Int => Int): Pitch = new Pitch(fun(midi))
 

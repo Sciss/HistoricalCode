@@ -29,7 +29,7 @@ import annotation.switch
 import language.implicitConversions
 
 object Interval {
-  implicit val ordering = Ordering.by[Interval, Int](_.semitones)
+  // implicit val ordering = Ordering.by[Interval, Int](_.semitones)
 
   implicit def fromPitchTuple(tup: (Pitch, Pitch)): DirectedInterval = new DirectedInterval(tup._2.midi - tup._1.midi)
 
@@ -52,6 +52,9 @@ sealed trait Interval extends Any {
     new IntervalClass(j)
   }
 //  def map(fun: Int => Int): this.type
+}
+object UndirectedInterval {
+  implicit val ordering = Ordering.by[UndirectedInterval, Int](_.semitones)
 }
 final class UndirectedInterval(val semitones: Int) extends AnyVal with Interval {
   def modOctave: Interval = if (semitones < 12) this else new UndirectedInterval(semitones % 12)

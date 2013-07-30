@@ -60,7 +60,7 @@ package object illism {
 
   implicit final class IllismIterable[A](val it: Iterable[A]) extends AnyVal {
     def intervals(implicit ev: A <:< Pitch): Vec[DirectedInterval] =
-      it.sliding(2,1).map({ case Seq(low, high) => high interval low }).toIndexedSeq
+      it.sliding(2,1).map({ case Seq(low, high) => high to low }).toIndexedSeq
 
     def play()(implicit ev: A <:< ConvertibleToMIDI) {
       implicit val rate = TickRate.tempo(120, 1024)
