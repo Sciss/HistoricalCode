@@ -26,18 +26,18 @@
 package at.iem.point.illism
 package chart
 
-import de.sciss.midi
 import scalax.chart.XYChart
 import org.jfree.chart.title.TextTitle
 import java.awt.{Color, Font}
 import org.jfree.chart.axis.{NumberTickUnit, NumberAxis}
+import collection.immutable.{IndexedSeq => Vec}
 import scalax.chart.Charting._
 
 object HarmonicFields {
-  def contingencyChart(seq: midi.Sequence, allIntervals: Boolean = false,
+  def contingencyChart(notes: Vec[OffsetNote], allIntervals: Boolean = false,
               intervalClasses: Boolean = false, chordSize: Int = -1, title: String = "Title"): ContingencyChartPanel = {
-    val n   = seq.notes
-    val nf0 = ChordUtil.findHarmonicFields(n)
+    // val n   = seq.notes
+    val nf0 = ChordUtil.findHarmonicFields(notes)
     val nf  = if (chordSize < 0) nf0 else nf0.filter(_.size == chordSize)
 
     //    var max = 0.0
@@ -61,10 +61,10 @@ object HarmonicFields {
     panel
   }
 
-  def barChart(seq: midi.Sequence, weighted: Boolean = false, allIntervals: Boolean = false,
+  def barChart(notes: Vec[OffsetNote], weighted: Boolean = false, allIntervals: Boolean = false,
             intervalClasses: Boolean = false, chordSize: Int = -1, title: String = "Title"): XYChart = {
-    val n   = seq.notes
-    val nf0 = ChordUtil.findHarmonicFields(n)
+    // val n   = seq.notes
+    val nf0 = ChordUtil.findHarmonicFields(notes)
     val nf  = if (chordSize < 0) nf0 else nf0.filter(_.size == chordSize)
 
     val iv  = nf.flatMap { ch =>
