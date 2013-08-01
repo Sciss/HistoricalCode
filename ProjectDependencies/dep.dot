@@ -1,5 +1,5 @@
 digraph G {
-	AudioWidgets [label="\"audiowidgets\" % \"1.2.0\"", shape=box];
+	AudioWidgets [label="\"audiowidgets\" % \"1.3.0\"", shape=box];
 	Desktop [label="\"desktop\" % \"0.3.2\"", shape=Box];
 	FileCache [label="\"filecache\" % \"0.2.0\"", shape=Box];
 	FileUtil [label="\"fileutil\" % \"1.0.0\"", shape=Box];
@@ -15,7 +15,7 @@ digraph G {
 	LucreEvent [label="\"lucreevent\" % \"2.3.0\"", shape=Box];
 	LucreSTM [label="\"lucrestm\" % \"2.0.0\"", shape=Box];
 	LucreSTM_BDB [label="\"lucrestm-bdb\" % \"2.0.0\"", shape=Box];
-	Mellite [label="\"mellite\" % \"0.2.0\"", shape=Box];
+	Mellite [label="\"mellite\" % \"0.3.0-SNAPSHOT\"", shape=Box, style=dotted];
 	Model [label="\"model\" % \"0.3.1\"", shape=Box];
 	PDFlitz [label="\"pdflitz\" % \"1.0.0\"", shape=Box];
 	PrefuseCore [label="\"prefuse-core\" % \"0.21\"", shape=Box, color=green];
@@ -24,17 +24,17 @@ digraph G {
 	SbtAppbundle [label="\"sbt-appbundle\" % \"1.0.1\"", shape=Box, color=blue];
 	ScalaOSC [label="\"scalaosc\" % \"1.1.1\"", shape=box];
 	ScalaAudioFile [label="\"scalaaudiofile\" % \"1.4.0\"", shape=box];
-	ScalaCollider [label="\"scalacollider\" % \"1.8.0\"", shape=Box];
-	ScalaColliderSwing [label="\"scalacolliderswing\" % \"1.8.0\"", shape=Box];
-	ScalaColliderUGens [label="\"scalacolliderugens\" % \"1.6.0\"", shape=Box];
+	ScalaCollider [label="\"scalacollider\" % \"1.9.0\"", shape=Box];
+	ScalaColliderSwing [label="\"scalacolliderswing\" % \"1.9.0\"", shape=Box];
+	ScalaColliderUGens [label="\"scalacolliderugens\" % \"1.6.2\"", shape=Box];
 	ScalaInterpreterPane [label="\scalainterpreterpane\" % \"1.4.0\"", shape=Box];
 	ScalaMIDI [label="\"scalamidi\" % \"0.1.0\"", shape=Box];
 	ScissDSP [label="\"scissdsp\" % \"1.2.0\"", shape=Box];
 	Serial [label="\"serial\" % \"1.0.1\"", shape=Box];
 	SonogramOverview [label="\"sonogramoverview\" % \"1.6.2\"", shape=Box];
-	SoundProcesses [label="\"soundprocesses\" % \"1.8.0\"", shape=Box];
+	SoundProcesses [label="\"soundprocesses\" % \"1.9.0-SNAPSHOT\"", shape=Box style=dotted];
     Span [label="\"span\" % \"1.2.0\"", shape=box];
-	Strugatzki [label="\"strugatzki\" % \"2.0.0\"", shape=Box];
+	Strugatzki [label="\"strugatzki\" % \"2.1.0\"", shape=Box];
 	SwingPlus [label="\"swingplus\" % \"0.0.1\"", shape=Box];
 	TreeTable [label="\"treetable-scala\" % \"1.3.0\"", shape=Box];
 	
