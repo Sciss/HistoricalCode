@@ -36,7 +36,7 @@ digraph G {
     Span [label="\"span\" % \"1.2.0\"", shape=box];
 	Strugatzki [label="\"strugatzki\" % \"2.1.0\"", shape=Box];
 	SwingPlus [label="\"swingplus\" % \"0.0.1\"", shape=Box];
-	TreeTable [label="\"treetable-scala\" % \"1.3.0\"", shape=Box];
+	TreeTable [label="\"treetable-scala\" % \"1.3.1\"", shape=Box];
 	
 	SysSon [label="\"sysson\" % \"0.1.0-SNAPSHOT\"", shape=Box, style=dotted];
 
