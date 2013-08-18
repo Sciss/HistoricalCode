@@ -10,9 +10,9 @@ digraph G {
 	JSyntaxPane [label="\"jsyntaxpane\" % \"1.0.0\"", shape=Box, color=green];
 	JTreeTable [label="\"jtreetable\" % \"1.2.1\"", shape=Box, color=green];
 	Kontur [label="\"kontur\" % \"1.2.0-SNAPSHOT\"", shape=Box, style=dotted, color=red];
-	LucreConfluent [label="\"lucreconfluent\" % \"2.4.0\"", shape=Box];
-	LucreData [label="\"lucredata\" % \"2.1.0\"", shape=Box];
-	LucreEvent [label="\"lucreevent\" % \"2.3.0\"", shape=Box];
+	LucreConfluent [label="\"lucreconfluent\" % \"2.5.0-SNAPSHOT\"", shape=Box, style=dotted];
+	LucreData [label="\"lucredata\" % \"2.2.0-SNAPSHOT\"", shape=Box, style=dotted];
+	LucreEvent [label="\"lucreevent\" % \"2.4.0-SNAPSHOT\"", shape=Box, style=dotted];
 	LucreSTM [label="\"lucrestm\" % \"2.0.0\"", shape=Box];
 	LucreSTM_BDB [label="\"lucrestm-bdb\" % \"2.0.0\"", shape=Box];
 	Mellite [label="\"mellite\" % \"0.3.0-SNAPSHOT\"", shape=Box, style=dotted];
