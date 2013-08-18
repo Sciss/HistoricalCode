@@ -61,6 +61,7 @@ digraph G {
 	LucreData -> LucreSTM;
 	LucreEvent -> LucreSTM;
 	LucreEvent -> LucreData;
+	LucreEvent -> Model;
 	LucreSTM -> Serial;
 	LucreSTM_BDB -> LucreSTM;
 	Mellite -> Desktop;
