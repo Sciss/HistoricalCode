@@ -10,11 +10,11 @@ digraph G {
 	JSyntaxPane [label="\"jsyntaxpane\" % \"1.0.0\"", shape=Box, color=green];
 	Kontur [label="\"kontur\" % \"1.2.0-SNAPSHOT\"", shape=Box, style=dotted, color=red];
 	LucreConfluent [label="\"lucreconfluent\" % \"2.5.0\"", shape=Box];
-	LucreData [label="\"lucredata\" % \"2.2.1\"", shape=Box];
+	LucreData [label="\"lucredata\" % \"2.2.0\"", shape=Box];
 	LucreEvent [label="\"lucreevent\" % \"2.4.0\"", shape=Box];
 	LucreSTM [label="\"lucrestm\" % \"2.0.0\"", shape=Box];
 	LucreSTM_BDB [label="\"lucrestm-bdb\" % \"2.0.0\"", shape=Box];
-	Mellite [label="\"mellite\" % \"0.4.0\"", shape=Box];
+	Mellite [label="\"mellite\" % \"0.3.0\"", shape=Box];
 	Model [label="\"model\" % \"0.3.1\"", shape=Box];
 	PDFlitz [label="\"pdflitz\" % \"1.0.0\"", shape=Box];
 	PrefuseCore [label="\"prefuse-core\" % \"0.21\"", shape=Box, color=green];
@@ -31,7 +31,7 @@ digraph G {
 	ScissDSP [label="\"scissdsp\" % \"1.2.0\"", shape=Box];
 	Serial [label="\"serial\" % \"1.0.1\"", shape=Box];
 	SonogramOverview [label="\"sonogramoverview\" % \"1.6.2\"", shape=Box];
-	SoundProcesses [label="\"soundprocesses\" % \"1.9.1\"", shape=Box];
+	SoundProcesses [label="\"soundprocesses\" % \"1.9.0\"", shape=Box];
     Span [label="\"span\" % \"1.2.0\"", shape=box];
 	Strugatzki [label="\"strugatzki\" % \"2.1.0\"", shape=Box];
 	SwingPlus [label="\"swingplus\" % \"0.0.1\"", shape=Box];
