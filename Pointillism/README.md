@@ -21,7 +21,7 @@ The current version `v` is `"0.2.+"`
 
 ## building
 
-Pointillism currently builds against Scala 2.10, using sbt 0.12.
+Pointillism currently builds against Scala 2.10, using sbt 0.13.
 
 ## overview
 
