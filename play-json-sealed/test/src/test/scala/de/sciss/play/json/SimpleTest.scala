@@ -1,7 +1,8 @@
-package play.api.libs.json
+package de.sciss.play.json
 
 import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.FlatSpec
+import play.api.libs.json.Json
 
 sealed trait Foo
 case class Bar(i: Int   ) extends Foo
@@ -12,7 +13,7 @@ object SimpleTest extends FlatSpec with ShouldMatchers {
   def print = false
 
   "A sealed trait" should "find an automatic serializer" in {
-    implicit val fooWrites = SealedTraitFormat[Foo]
+    implicit val fooWrites = AutoFormat[Foo]
 
     val obj1: Foo = Bar(33)
     val out1 = Json.toJson(obj1)

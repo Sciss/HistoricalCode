@@ -1,5 +1,5 @@
 /*
- * SealedTraitFormat.scala
+ * AutoFormat.scala
  * (play-json-sealed)
  *
  * Copyright (c) 2013 Hanns Holger Rutz. All rights reserved.
@@ -23,12 +23,14 @@
  * contact@sciss.de
  */
 
-package play.api.libs.json
+package de.sciss.play.json
 
 import scala.reflect.macros.Context
 import language.experimental.macros
+import play.api.libs.json.{JsError, Writes, JsValue, JsResult, JsMacroImpl, Format, JsSuccess, JsString, JsObject}
+import collection.immutable.{IndexedSeq => Vec}
 
-object SealedTraitFormat {
+object AutoFormat {
   private val DEBUG   = false
   private val PACKAGE = false
 
@@ -43,10 +45,28 @@ object SealedTraitFormat {
     val aTpeW   = c.weakTypeOf[A]
     val aClazz  = aTpeW.typeSymbol.asClass
 
-    if (!aClazz.isTrait) { // fall back to Json.format
+    // directly support Vec
+    if (aTpeW <:< typeOf[Vec[Any]]) {
+      // cf. stackoverflow nr. 12842729
+      val ta    = aTpeW.asInstanceOf[TypeRefApi].args.head
+      val tree  = q"_root_.de.sciss.play.json.Formats.VecFormat[$ta]"
+      return c.Expr[Format[A]](tree)
+    }
+
+    // directly support Vec
+    if (aTpeW <:< typeOf[(Any, Any)]) {
+      val ta :: tb :: Nil = aTpeW.asInstanceOf[TypeRefApi].args // XXX TODO: doesn't work with type aliases, e.g. type X = (Y, Z)
+      val tree = q"_root_.de.sciss.play.json.Formats.Tuple2Format[$ta, $tb]"
+      return c.Expr[Format[A]](tree)
+    }
+
+    // fall back to Json.format
+    if (!aClazz.isTrait) {
       if (DEBUG) log(s"Type $aTpeW is not sealed")
       return JsMacroImpl.formatImpl[A](c)
     }
+
+    def id(s: String) = Ident(newTermName(s))
 
     val aIdent  = Ident(aClazz)
 
@@ -72,33 +92,34 @@ object SealedTraitFormat {
         require(companion.isModule, s"Sub type $subC of $aTpeW does not have a companion object")
         companion.asModule
       } else subC)
-      val patWrite  = Bind(newTermName("x"), Typed(Ident("_"), subIdent))
+      val patWrite  = Bind(newTermName("x"), Typed(id("_"), subIdent))
       val subName0  = if (PACKAGE) sub.fullName else sub.name.toString
       val subName   = Literal(Constant(subName0))
       val patRead   = subName
       val (bodyWrite, bodyRead) = if (isObject) {
         val jsSuccessTree = Ident(typeOf[JsSuccess.type].typeSymbol.asClass.companionSymbol.asModule) // frickin' hell
-        Apply(Ident("writeObject"), subName :: Nil) ->
+        Apply(id("writeObject"), subName :: Nil) ->
         Apply(TypeApply(jsSuccessTree, aIdent :: Nil), subIdent :: Nil) // JsSuccess[A](MyCaseObject)
 
       } else {
         // val jsonTree  = Ident(typeOf[Json.type].typeSymbol.asClass)
         // val subFmt    = TypeApply(Select(jsonTree, "format"), subIdent :: Nil)
-        val jsonTree  = Ident(typeOf[SealedTraitFormat.type].typeSymbol.asClass)
-        val subFmt    = TypeApply(Select(jsonTree, "apply"), subIdent :: Nil)
-        Apply(TypeApply(Ident("writeClass"), subIdent:: Nil), subName :: Ident("x") :: subFmt :: Nil) ->
-        Apply(Select(subFmt, "reads"), Ident("data") :: Nil)
+        val jsonTree  = Ident(typeOf[AutoFormat.type].typeSymbol.asClass)
+        val subFmt    = TypeApply(Select(jsonTree, newTermName("apply")), subIdent :: Nil)
+        Apply(TypeApply(id("writeClass"), subIdent:: Nil), subName :: id("x") :: subFmt :: Nil) ->
+        Apply(Select(subFmt, newTermName("reads")), id("data") :: Nil)
       }
-      CaseDef(patWrite, bodyWrite) -> (isObject, CaseDef(patRead, bodyRead))
+      CaseDef(pat = patWrite, guard = EmptyTree, body = bodyWrite) ->
+        (isObject, CaseDef(pat = patRead, guard = EmptyTree, body = bodyRead))
     }
     val (casesWrite, casesRead) = cases.unzip
-    val matchWrite      = Match(Ident("value"), casesWrite)
+    val matchWrite      = Match(id("value"), casesWrite)
     val matchWriteExpr  = c.Expr[JsValue](matchWrite)
     val casesReadC      = casesRead collect { case (false, tree) => tree }
-    val matchReadC      = Match(Ident("name"), casesReadC) // XXX TODO add catch all
+    val matchReadC      = Match(id("name"), casesReadC) // XXX TODO add catch all
     val matchReadExprC  = c.Expr[JsResult[A]](matchReadC)
     val casesReadO      = casesRead collect { case (true, tree) => tree }
-    val matchReadO      = Match(Ident("name"), casesReadO) // XXX TODO add catch all
+    val matchReadO      = Match(id("name"), casesReadO) // XXX TODO add catch all
     val matchReadExprO  = c.Expr[JsResult[A]](matchReadO)
     val r               = reify {
       new Format[A] {

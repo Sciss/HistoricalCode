@@ -10,7 +10,12 @@ object Build extends sbt.Build {
 
   lazy val core = Project(
     id        = "play-json-sealed",
-    base      = file("core")
+    base      = file("core"),
+    settings  = Project.defaultSettings ++ Seq(
+      // needs paradise for quasi-quotes
+      resolvers += Resolver.sonatypeRepo("snapshots"),
+      addCompilerPlugin("org.scala-lang.plugins" % "macro-paradise" % "2.0.0-SNAPSHOT" cross CrossVersion.full)
+    )
   )
 
   lazy val test = Project(

@@ -1,22 +1,22 @@
-name in ThisBuild := "play-json-sealed"
+name         in ThisBuild := "play-json-sealed"
 
-version in ThisBuild := "0.0.1-SNAPSHOT"
+version      in ThisBuild := "0.1.0"
 
 organization in ThisBuild := "de.sciss"
 
-scalaVersion in ThisBuild := "2.10.2"
+scalaVersion in ThisBuild := "2.10.3"
 
-description in ThisBuild := "Automatic sealed traits JSON format for play-json-alone"
+description  in ThisBuild := "Automatic formats for case classes based on Play-JSON"
 
-homepage in ThisBuild <<= name { n => Some(url("https://github.com/Sciss/" + n)) }
+homepage     in ThisBuild <<= name { n => Some(url("https://github.com/Sciss/" + n)) }
 
-licenses in ThisBuild := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
+licenses     in ThisBuild := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
 
-resolvers in ThisBuild += "Mandubian repository snapshots" at "https://github.com/mandubian/mandubian-mvn/raw/master/snapshots/"
+resolvers    in ThisBuild += "Typesafe Releases" at "https://repo.typesafe.com/typesafe/releases/"
 
 libraryDependencies in ThisBuild ++= Seq(
-  "play" %% "play-json" % "2.2-SNAPSHOT",
-  "org.scalatest" %% "scalatest" % "1.9.1" % "test"
+  "com.typesafe.play" %% "play-json" % "2.2.0",
+  "org.scalatest"     %% "scalatest" % "1.9.1" % "test"
 )
 
 retrieveManaged in ThisBuild := true
@@ -27,19 +27,18 @@ scalacOptions in ThisBuild ++= Seq("-deprecation", "-unchecked", "-feature")
 
 publishMavenStyle in ThisBuild := true
 
-publishTo in ThisBuild <<= version { v =>
-  Some(if (v endsWith "-SNAPSHOT")
+publishTo in ThisBuild :=
+  Some(if (version.value endsWith "-SNAPSHOT")
     "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
   else
     "Sonatype Releases"  at "https://oss.sonatype.org/service/local/staging/deploy/maven2"
   )
-}
 
 publishArtifact in Test := false
 
 pomIncludeRepository in ThisBuild := { _ => false }
 
-pomExtra in ThisBuild <<= name { n =>
+pomExtra in ThisBuild := { val n = name.value
 <scm>
   <url>git@github.com:Sciss/{n}.git</url>
   <connection>scm:git:git@github.com:Sciss/{n}.git</connection>
@@ -52,3 +51,4 @@ pomExtra in ThisBuild <<= name { n =>
   </developer>
 </developers>
 }
+

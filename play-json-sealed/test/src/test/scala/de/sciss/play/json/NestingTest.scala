@@ -1,4 +1,6 @@
-package play.api.libs.json
+package de.sciss.play.json
+
+import play.api.libs.json.Json
 
 /** Note: what still doesn't work, it putting `A` _into_ the object `NestingTest`. */
 object NestingTest {
