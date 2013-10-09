@@ -1,4 +1,6 @@
-name         in ThisBuild := "play-json-sealed"
+lazy val projectName = "play-json-sealed"
+
+name         in ThisBuild := projectName
 
 version      in ThisBuild := "0.1.0"
 
@@ -8,7 +10,7 @@ scalaVersion in ThisBuild := "2.10.3"
 
 description  in ThisBuild := "Automatic formats for case classes based on Play-JSON"
 
-homepage     in ThisBuild <<= name { n => Some(url("https://github.com/Sciss/" + n)) }
+homepage     in ThisBuild := Some(url("https://github.com/Sciss/" + projectName))
 
 licenses     in ThisBuild := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
 
@@ -38,7 +40,7 @@ publishArtifact in Test := false
 
 pomIncludeRepository in ThisBuild := { _ => false }
 
-pomExtra in ThisBuild := { val n = name.value
+pomExtra in ThisBuild := { val n = projectName
 <scm>
   <url>git@github.com:Sciss/{n}.git</url>
   <connection>scm:git:git@github.com:Sciss/{n}.git</connection>
