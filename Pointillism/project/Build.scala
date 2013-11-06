@@ -5,7 +5,8 @@ object Build extends sbt.Build {
   def baseName      = "pointillism"
   def midiVersion   = "0.1.+"
   // def fingerVersion = "1.5.+"
-  def chartVersion  = "latest.integration"
+  def chartVersion  = "0.3.0"
+  def spireVersion  = "0.6.1"
 
   lazy val root: Project = Project(
     id            = baseName,
@@ -35,7 +36,7 @@ object Build extends sbt.Build {
     dependencies  = Seq(core),
     settings      = Project.defaultSettings /* ++ buildInfoSettings */ ++ Seq(
       libraryDependencies ++= Seq(
-        "org.spire-math" %% "spire" % "0.4.0"   // e.g. Rational numbers
+        "org.spire-math" %% "spire" % spireVersion   // e.g. Rational numbers
       )
     )
   )
