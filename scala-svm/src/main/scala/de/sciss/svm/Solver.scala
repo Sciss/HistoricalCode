@@ -104,8 +104,8 @@ class Solver(problem: Problem,
   def calculateRho: Double = {
     var ub        = Double.MaxValue
     var lb        = Double.MinValue
-    var sum_free  = 0.0
-    var nr_free   = 0
+    var sumFree   = 0.0
+    var numFree   = 0
     for (i <- 0 until activeSize) {
       val yG = y(i) * G(i)
       if (isUpperBound(i)) {
@@ -113,13 +113,13 @@ class Solver(problem: Problem,
       } else if (isLowerBound(i)) {
         if (y(i) == +1) ub = ub min yG else lb = lb max yG
       } else {
-        nr_free += 1
-        sum_free += yG
+        numFree += 1
+        sumFree += yG
       }
     }
 
-    if (nr_free > 0) {
-      sum_free / nr_free
+    if (numFree > 0) {
+      sumFree / numFree
     } else {
       (ub + lb) / 2
     }

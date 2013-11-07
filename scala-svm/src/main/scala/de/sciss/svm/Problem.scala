@@ -18,7 +18,7 @@ case class Node(index: Int, value: Double) {
   * @param x  the feature vector
   * @param y  the label
   */
-case class Instance(x: List[Node], y: Double) {
+case class Instance(x: List[Node], y: Int) {
   override def toString = "(" + y + "|" + x.mkString(", ") + ")"
 }
 
@@ -30,7 +30,7 @@ class Problem(val instances: Array[Instance]) {
   /** The feature vectors of all instances. */
   lazy val xs: Array[List[Node]]  = instances.map(_.x)
   /** The labels of all instances. */
-  lazy val ys: Array[Double]      = instances.map(_.y)
+  lazy val ys: Array[Int]         = instances.map(_.y)
 
   /** Queries the feature vector of a given instance
     *
@@ -41,9 +41,9 @@ class Problem(val instances: Array[Instance]) {
     *
     * @param idx  index of the instance. Must be `>= 0` and `< size`
     */
-  def y(idx: Int): Double = instances(idx).y
+  def y(idx: Int): Int = instances(idx).y
 
-  def groupClasses: Map[Double, Problem] = instances.groupBy(_.y).mapValues(Problem.apply)
+  def groupClasses: Map[Int, Problem] = instances.groupBy(_.y).mapValues(Problem.apply)
 
   override def toString = instances.mkString("\n")
 }

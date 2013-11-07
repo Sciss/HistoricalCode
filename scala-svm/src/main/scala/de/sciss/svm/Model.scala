@@ -25,6 +25,9 @@ class SVMParameter(
   val kernel: Kernel,
   val nu    : Double = 0.5,
   val eps   : Double = 0.001,
+  val C     : Double = 0,                       // for C_SVC, EPSILON_SVR and NU_SVR
+  val weights: Map[Int, Double] = Map.empty,    // for C_SVC
+  val probability: Boolean = false,
   var gamma : Double = 0.0) {
 
   override def toString = Array(
@@ -41,8 +44,8 @@ class EpsilonSVRSVMParamter(
   kernel: Kernel,
   nu    : Double,
   eps   : Double,
-  val C : Double,
-  val p : Double) extends SVMParameter(kernel, nu, eps)
+  C     : Double,
+  val p : Double) extends SVMParameter(kernel, nu, eps, C = C)
 
 // aka
 case class SupportVector(
