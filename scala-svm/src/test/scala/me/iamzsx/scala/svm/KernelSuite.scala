@@ -15,20 +15,20 @@ import AssertUtil._
 class KernelTypeSuite extends FunSuite {
 
   test("dot") {
-    val x = List(new SVMNode(1, 0.4), new SVMNode(2, 0.5))
-    val y = List(new SVMNode(1, 0.9), new SVMNode(3, 0.4))
+    val x = List(SVMNode(1, 0.4), SVMNode(2, 0.5))
+    val y = List(SVMNode(1, 0.9), SVMNode(3, 0.4))
     svmAssertEquals(0.36, dot(x, y))
   }
 
   test("dot with normal") {
-    val x = List(new SVMNode(1, 0.4), new SVMNode(2, 0.5))
-    val y = List(new SVMNode(1, 0.9), new SVMNode(2, 0.4))
+    val x = List(SVMNode(1, 0.4), SVMNode(2, 0.5))
+    val y = List(SVMNode(1, 0.9), SVMNode(2, 0.4))
     svmAssertEquals(0.56, dot(x, y))
   }
 
   test("dot with empty") {
-    val x = List(new SVMNode(1, 0.4), new SVMNode(2, 0.5))
-    val y = List(new SVMNode(4, 0.9), new SVMNode(3, 0.4))
+    val x = List(SVMNode(1, 0.4), SVMNode(2, 0.5))
+    val y = List(SVMNode(4, 0.9), SVMNode(3, 0.4))
     svmAssertEquals(0, dot(x, y))
   }
 
@@ -64,8 +64,8 @@ class PolynomialKernelSuite extends FunSuite {
   }
 
   test("apply") {
-    val x = List(new SVMNode(1, 0.4), new SVMNode(2, 0.5))
-    val y = List(new SVMNode(1, 0.9), new SVMNode(3, 0.4))
+    val x = List(SVMNode(1, 0.4), SVMNode(2, 0.5))
+    val y = List(SVMNode(1, 0.9), SVMNode(3, 0.4))
 
     svmAssertEquals(pow(1.0 * 0.36 + 2.0, 3), new PolynomialKernel(1.0, 2.0, 3).apply(x, y))
   }
@@ -80,8 +80,8 @@ class RBFKernelSuite extends FunSuite {
   }
 
   test("apply") {
-    val x = List(new SVMNode(1, 0.4), new SVMNode(2, 0.5))
-    val y = List(new SVMNode(1, 0.9), new SVMNode(3, 0.4))
+    val x = List(SVMNode(1, 0.4), SVMNode(2, 0.5))
+    val y = List(SVMNode(1, 0.9), SVMNode(3, 0.4))
 
     svmAssertEquals(exp(-2.0 * 0.66), new RBFKernel(2.0).apply(x, y))
   }
@@ -97,8 +97,8 @@ class SigmoidKernelSuite extends FunSuite {
   }
 
   test("apply") {
-    val x = List(new SVMNode(1, 0.4), new SVMNode(2, 0.5))
-    val y = List(new SVMNode(1, 0.9), new SVMNode(3, 0.4))
+    val x = List(SVMNode(1, 0.4), SVMNode(2, 0.5))
+    val y = List(SVMNode(1, 0.9), SVMNode(3, 0.4))
 
     svmAssertEquals(tanh(1.0 * 0.36 + 2.0), new SigmoidKernel(1.0, 2.0).apply(x, y))
   }

@@ -13,7 +13,7 @@ class SVMTrainerSuite extends FunSuite {
     val param   = new SVMParameter(new LinearKernel)
 
     val source  = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46")
-    val problem = SVMProblem.get(param, source)
+    val problem = SVMProblem.read(param, source)
 
     /* val solution = */ Solver.solveOneClass(problem, param)
     val model = SVM("one_class").trainer.train(param, problem)
@@ -28,8 +28,9 @@ class SVMTrainerSuite extends FunSuite {
   test("2 train case") {
     val param     = new SVMParameter(new LinearKernel)
 
-    val source    = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46\n+1\t1:2.0\t2:22.08\t3:11.46")
-    val problem   = SVMProblem.get(param, source)
+    val source    = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46\n" +
+                                      "+1\t1:2.0\t2:22.08\t3:11.46")
+    val problem   = SVMProblem.read(param, source)
 
     val solution  = Solver.solveOneClass(problem, param)
     svmAssertEquals(309.929000, solution.obj)

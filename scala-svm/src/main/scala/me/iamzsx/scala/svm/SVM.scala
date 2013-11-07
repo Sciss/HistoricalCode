@@ -1,7 +1,6 @@
 package me.iamzsx.scala.svm
 
 import scala.math.abs
-import scala.collection.mutable.ArrayBuffer
 
 class DecisionFunction(val alpha: Array[Double], val rho: Double)
 
@@ -48,7 +47,7 @@ class OneClassOrRegressionTrainer extends SVMTrainer {
 
     val decisionFunction = trainOne(param, problem, 0, 0)
 
-    val suportVectors = ArrayBuffer[SupportVector]()
+    val suportVectors = Array.newBuilder[SupportVector]
     for (i <- 0 until problem.size if abs(decisionFunction.alpha(i)) > 0) {
       suportVectors += new SupportVector(problem.x(i), decisionFunction.alpha(i), i + 1)
     }
@@ -56,7 +55,7 @@ class OneClassOrRegressionTrainer extends SVMTrainer {
     new SVMModel(
       nr_class,
       param,
-      Array(suportVectors.toArray),
+      Array(suportVectors.result()),
       Array(decisionFunction.rho))
   }
 

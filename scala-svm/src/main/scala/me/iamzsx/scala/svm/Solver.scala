@@ -38,7 +38,7 @@ class Solver(problem: SVMProblem,
              Q      : QMatrix,
              p      : Array[Double],
              y      : Array[Int],
-             alpha_ : Array[Double],
+             alpha  : Array[Double],
              Cp     : Double,
              Cn     : Double) {
 
@@ -53,14 +53,14 @@ class Solver(problem: SVMProblem,
 
   private val len: Int = problem.size
 
-  private val alpha = alpha_.clone()
+  private val _alpha = alpha.clone()  // defensive copy. that's why we should use Vector eventually
 
   var activeSize = 1
 
   private def getAlphaStatus(i: Int) = {
-    if (alpha(i) >= getC(i)) UPPER_BOUND
-    else if (alpha(i) <= 0) LOWER_BOUND
-    else FREE
+    if      (_alpha(i) >= getC(i)) UPPER_BOUND
+    else if (_alpha(i) <= 0      ) LOWER_BOUND
+    else                           FREE
   }
 
   private def getC(i: Int): Double = if (y(i) > 0) Cp else Cn
@@ -81,7 +81,7 @@ class Solver(problem: SVMProblem,
       upperBoundP = Cp,
       upperBoundN = Cn,
       r           = 0,
-      alpha       = alpha)
+      alpha       = _alpha)
   }
 
   def init(): Unit = {
@@ -89,7 +89,7 @@ class Solver(problem: SVMProblem,
       i <- 0 until len if !isLowerBound(i)
     ) {
       for (j <- 0 until len) {
-        G(j) += alpha(i) * Q(i, j)
+        G(j) += _alpha(i) * Q(i, j)
       }
       if (isUpperBound(i)) {
         for (j <- 0 until len) {
@@ -128,7 +128,7 @@ class Solver(problem: SVMProblem,
   def calculateObjectiveValue: Double =
     {
       for (i <- 0 until len)
-        yield alpha(i) * (G(i) + p(i))
+        yield _alpha(i) * (G(i) + p(i))
     }.sum / 2
 
   def optimize(): Unit = {
@@ -165,22 +165,22 @@ class Solver(problem: SVMProblem,
         quadCoef = TAU
       }
       // val delta = -y(i) * G(i) + y(j) * G(j)
-      val oldAi = alpha(i)
-      val oldAj = alpha(j)
-      alpha(i) = alpha(i) + (-G(i) + y(i) * y(j) * G(j)) / quadCoef
-      alpha(j) = alpha(j) - (-y(i) * y(j) * G(i) + G(j)) / quadCoef
+      val oldAi = _alpha(i)
+      val oldAj = _alpha(j)
+      _alpha(i) = _alpha(i) + (-G(i) + y(i) * y(j) * G(j)) / quadCoef
+      _alpha(j) = _alpha(j) - (-y(i) * y(j) * G(i) + G(j)) / quadCoef
 
       val sum = y(i) * oldAi + y(j) * oldAj
 
-      if (alpha(i) > getC(i)) alpha(i) = getC(i)
-      if (alpha(i) < 0) alpha(i) = 0
-      alpha(j) = y(j) * (sum - y(i) * alpha(i))
+      if (_alpha(i) > getC(i)) _alpha(i) = getC(i)
+      if (_alpha(i) < 0) _alpha(i) = 0
+      _alpha(j) = y(j) * (sum - y(i) * _alpha(i))
 
-      if (alpha(j) > getC(j)) alpha(j) = getC(j)
-      if (alpha(j) < 0) alpha(j) = 0
-      alpha(i) = y(i) * (sum - y(i) * alpha(j))
-      val deltaAi = alpha(i) - oldAi
-      val deltaAj = alpha(j) - oldAj
+      if (_alpha(j) > getC(j)) _alpha(j) = getC(j)
+      if (_alpha(j) < 0) _alpha(j) = 0
+      _alpha(i) = y(i) * (sum - y(i) * _alpha(j))
+      val deltaAi = _alpha(i) - oldAi
+      val deltaAj = _alpha(j) - oldAj
 
       for (t <- 1 until activeSize) {
         G(t) = G(t) + Q(t, i) * deltaAi + Q(t, j) * deltaAj
@@ -264,14 +264,14 @@ class Solver(problem: SVMProblem,
           i <- activeSize until len
           j <- 0 until activeSize if isFree(j)
         } {
-          G(i) += alpha(j) * Q(i, j)
+          G(i) += _alpha(j) * Q(i, j)
         }
       } else {
         for {
           i <- 0 until activeSize if isFree(i)
           j <- activeSize until len
         } {
-          G(j) += alpha(i) * Q(i, j)
+          G(j) += _alpha(i) * Q(i, j)
         }
       }
     }
@@ -298,7 +298,7 @@ object Solver {
       Q       = new OneClassQMatrix(problem, param),
       p       = zeros,
       y       = ones,
-      alpha_  = alpha,
+      alpha  = alpha,
       Cp      = 1.0,
       Cn      = 1.0)
 
@@ -322,7 +322,7 @@ object Solver {
       Q         = new OneClassQMatrix(problem, param), // TODO
       p         = linearTerm,
       y         = y,
-      alpha_    = alpha2,
+      alpha    = alpha2,
       Cp        = param.C,
       Cn        = param.C)
 
@@ -350,7 +350,7 @@ object Solver {
       Q       = new OneClassQMatrix(problem, param), // TODO
       p       = linearTerm,
       y       = y,
-      alpha_  = alpha2,
+      alpha  = alpha2,
       Cp      = param.C,
       Cn      = param.C)
 
