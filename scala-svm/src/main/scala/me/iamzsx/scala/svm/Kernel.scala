@@ -39,6 +39,7 @@ import KernelType._
 /** @see http://en.wikipedia.org/wiki/Support_vector_machine */
 trait Kernel {
   def kernelType: KernelType
+  /** Calculates the kernel product from a given matrix of features. */
   def apply(x: List[SVMNode], y: List[SVMNode]): Double
 }
 
@@ -51,7 +52,7 @@ class LinearKernel extends Kernel {
 
   override def kernelType = LINEAR
 
-  override def apply(x: List[SVMNode], y: List[SVMNode]) = dot(x, y)
+  override def apply(x: List[SVMNode], y: List[SVMNode]): Double = dot(x, y)
 
   override def toString = "kernel_type " + kernelType.toString
 }
@@ -61,7 +62,7 @@ class PolynomialKernel(val gamma: Double, val coef0: Double = 0, val degree: Int
 
   override def kernelType = POLY
 
-  override def apply(x: List[SVMNode], y: List[SVMNode]) = powi(gamma * dot(x, y) + coef0, degree)
+  override def apply(x: List[SVMNode], y: List[SVMNode]): Double = powi(gamma * dot(x, y) + coef0, degree)
 
   override def toString = Array(
     "kernel_type " + kernelType.toString,
@@ -108,7 +109,7 @@ class SigmoidKernel(val gamma: Double, val coef0: Double = 0) extends Kernel {
 
   override def kernelType = SIGMOID
 
-  override def apply(x: List[SVMNode], y: List[SVMNode]) = math.tanh(gamma * dot(x, y) + coef0)
+  override def apply(x: List[SVMNode], y: List[SVMNode]): Double = math.tanh(gamma * dot(x, y) + coef0)
 
   override def toString = Array(
     "kernel_type " + kernelType.toString,
@@ -120,9 +121,9 @@ class PrecomputedKernel extends Kernel {
 
   override def kernelType = PRECOMPUTED
 
-  override def apply(x: List[SVMNode], y: List[SVMNode]) = {
+  override def apply(x: List[SVMNode], y: List[SVMNode]): Double = {
     // TODO
-    0
+    ???
   }
 
   override def toString = "kernel_type " + kernelType.toString

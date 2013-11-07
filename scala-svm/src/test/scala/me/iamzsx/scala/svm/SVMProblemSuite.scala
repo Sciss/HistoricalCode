@@ -25,7 +25,7 @@ class SVMProblemSuite extends FunSuite with BeforeAndAfter {
     val problem = SVMProblem.get(param, source)
 
     assertEquals   (1, problem.size)
-    svmAssertEquals(y, problem.ys)
+    svmAssertEquals(y, problem.ys .map(_.toDouble))
     svmAssertEquals(x, problem.xs)
     assertEquals(param.gamma, 1.0 / 3, DELTA)
   }
@@ -39,7 +39,7 @@ class SVMProblemSuite extends FunSuite with BeforeAndAfter {
     val problem = SVMProblem.get(param, source)
 
     assertEquals   (2, problem.size)
-    svmAssertEquals(y, problem.ys)
+    svmAssertEquals(y, problem.ys .map(_.toDouble))
     svmAssertEquals(x, problem.xs)
     assertEquals(param.gamma, 1.0 / 3, DELTA)
   }

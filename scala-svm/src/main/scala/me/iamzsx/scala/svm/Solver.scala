@@ -336,8 +336,8 @@ object Solver {
 
     val alpha2 = Array.fill(2 * problem.size)(0.0)
     val linearTerm = Array.tabulate(2 * problem.size) {
-      case i if i < problem.size  => -problem.y(i)
-      case i                      =>  problem.y(i - problem.size)
+      case i if i < problem.size  => -problem.y(i)                .toDouble
+      case i                      =>  problem.y(i - problem.size) .toDouble
     }
     val y = Array.tabulate(2 * problem.size) {
       case i if i < problem.size  =>  1
