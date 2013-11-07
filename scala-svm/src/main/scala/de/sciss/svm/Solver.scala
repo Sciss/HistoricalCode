@@ -16,9 +16,9 @@ abstract class QMatrix {
 }
 
 class OneClassQMatrix(val problem: Problem, val param: SVMParameter) extends QMatrix {
-  val x: Array[List[Node]] = problem.xs.clone()
+  val x: Array[List[Node]] = problem.xs.toArray // .clone()
   val qd  = Array.tabulate(problem.size)(i => param.kernel(x(i), x(i)))
-  val y   = problem.ys.clone()
+  val y   = problem.ys.toArray // clone()
 
   def swapIndex(i: Int, j: Int): Unit = {
     swap(x , i, j)
@@ -36,9 +36,9 @@ class OneClassQMatrix(val problem: Problem, val param: SVMParameter) extends QMa
 class Solver(problem: Problem,
              param  : SVMParameter,
              Q      : QMatrix,
-             p      : Array[Double],
-             y      : Array[Int],
-             alpha  : Array[Double],
+             p      : Vec[Double],
+             y      : Vec[Int],
+             alpha  : Vec[Double],
              Cp     : Double,
              Cn     : Double) {
 
@@ -53,7 +53,7 @@ class Solver(problem: Problem,
 
   private val len: Int = problem.size
 
-  private val _alpha = alpha.clone()  // defensive copy. that's why we should use Vector eventually
+  private val _alpha: Array[Double] = alpha.toArray
 
   var activeSize = 1
 
@@ -81,7 +81,7 @@ class Solver(problem: Problem,
       upperBoundP = Cp,
       upperBoundN = Cn,
       r           = 0,
-      alpha       = _alpha)
+      alpha       = _alpha.toIndexedSeq)
   }
 
   def init(): Unit = {
@@ -144,7 +144,7 @@ class Solver(problem: Problem,
         println(".")
       }
 
-      // TODO 
+      // TODO
       val (i, j) = selectWorkingSet()
       if (!isValidWorkingSet(i, j)) {
         reconstructGradient()
@@ -190,7 +190,7 @@ class Solver(problem: Problem,
 
   def isValidWorkingSet(i: Int, j: Int) = j != -1
 
-  val G     = p.clone()
+  private val G: Array[Double] = p.toArray // clone()
   val GBar  = new Array[Double](len) // Array.fill(len)(0.0)
 
   def selectWorkingSet(): (Int, Int) = {
@@ -283,14 +283,14 @@ object Solver {
   def solveOneClass(problem: Problem, param: SVMParameter): Solution = {
     val n = (param.nu * problem.size).toInt
 
-    val alpha = Array.tabulate(problem.size) {
+    val alpha = Vec.tabulate(problem.size) {
       case i if i < n                       => 1.0
       case i if i == n && i < problem.size  => param.nu * problem.size - n
       case _                                => 0.0
     }
 
-    val zeros = Array.fill(problem.size)(0.0)
-    val ones  = Array.fill(problem.size)(1)
+    val zeros = Vec.fill(problem.size)(0.0)
+    val ones  = Vec.fill(problem.size)(1)
 
     val solver = new Solver(
       problem = problem,
@@ -306,12 +306,12 @@ object Solver {
   }
 
   def solveEpsilonSVR(problem: Problem, param: EpsilonSVRSVMParamter): Solution = {
-    val alpha2     = Array.fill    (2 * problem.size)(0.0)
-    val linearTerm = Array.tabulate(2 * problem.size) {
+    val alpha2     = Vec.fill    (2 * problem.size)(0.0)
+    val linearTerm = Vec.tabulate(2 * problem.size) {
       case i if i < problem.size  => param.p - problem.y(i)
       case i                      => param.p + problem.y(i - problem.size)
     }
-    val y = Array.tabulate(2 * problem.size) {
+    val y = Vec.tabulate(2 * problem.size) {
       case i if i < problem.size  =>  1
       case _                      => -1
     }
@@ -334,12 +334,12 @@ object Solver {
   def solveNuSVR(problem: Problem, param: EpsilonSVRSVMParamter): Solution = {
     // var sum = param.C * param.nu * problem.size / 2
 
-    val alpha2     = Array.fill    (2 * problem.size)(0.0)
-    val linearTerm = Array.tabulate(2 * problem.size) {
+    val alpha2     = Vec.fill    (2 * problem.size)(0.0)
+    val linearTerm = Vec.tabulate(2 * problem.size) {
       case i if i < problem.size  => -problem.y(i)                .toDouble
       case i                      =>  problem.y(i - problem.size) .toDouble
     }
-    val y = Array.tabulate(2 * problem.size) {
+    val y = Vec.tabulate(2 * problem.size) {
       case i if i < problem.size  =>  1
       case _                      => -1
     }
@@ -372,4 +372,4 @@ case class Solution(
   upperBoundP : Double,
   upperBoundN : Double,
   r           : Double,
-  alpha       : Array[Double])
+  alpha       : Vec[Double])

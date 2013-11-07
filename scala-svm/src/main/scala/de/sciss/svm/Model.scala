@@ -51,7 +51,7 @@ abstract class Model(
   val numClasses      : Int,
   val param         : SVMParameter,
   val supportVectors: Vec[Vec[SupportVector]],
-  val rho           : Array[Double]) {
+  val rho           : Vec[Double]) {
 
   require(supportVectors.size == rho.size)
 
@@ -72,7 +72,7 @@ abstract class Model(
 class BaseModel(
     param         : SVMParameter,
     supportVectors: Vec[Vec[SupportVector]],
-    rho           : Array[Double])
+    rho           : Vec[Double])
   extends Model(2, param, supportVectors, rho) {
 
   override def predictValues(x: List[Node]): Double =

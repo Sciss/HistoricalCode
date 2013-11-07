@@ -25,10 +25,6 @@ private[train] trait ClassificationTrainer extends Trainer {
     if(numClasses == 1)
       info("WARNING: training data in only one class. See README for details.\n")
 
-    val x = new Array[List[Node]](l)
-    //    for (i <- 0 until l)
-    //      x(i) = problem.x(perm(i))
-
     // calculate weighted C
 
     val weightedC = Array.tabulate[Double](numClasses) { ci =>
@@ -41,7 +37,8 @@ private[train] trait ClassificationTrainer extends Trainer {
     // val f = new Array[DecisionFunction](numClasses * (numClasses - 1) / 2)
 
     // class -> index
-    var nonZero = Map.empty[Int, Set[Int]] withDefaultValue Set.empty
+
+    // var nonZero = Map.empty[Int, Set[Int]] withDefaultValue Set.empty
 
     require(!param.probability, "Not yet implemented: probability")
     //    double *probA=NULL,*probB=NULL;
@@ -65,6 +62,12 @@ private[train] trait ClassificationTrainer extends Trainer {
 
       case _ => Vec.empty
     } .toIndexedSeq
+
+    val nonZero = f.map { fi =>
+      fi.map { fij =>
+        fij.alpha.exists(_ > 0)
+      }
+    }
 
     //    val f = (0 until numClasses).map { i =>
     //      val gi  = groups(i)
@@ -144,12 +147,9 @@ private[train] trait ClassificationTrainer extends Trainer {
     //      }
     //    }
 
-    val modelSV = (0 until numClasses).map { i =>
-      val nz  = nonZero(i)
-      val gi  = groups(i)
-      val ci  = gi.size
-      (0 until ci).collect {
-        case j if nz(j) => SupportVector(gi.x(j), 0.0, j)  // ??? correct
+    val modelSV = (groups zip nonZero).zipWithIndex.map { case ((gi, nzi), i) =>
+      (gi.xs zip nzi).zipWithIndex.collect {
+        case ((x, true), j) => SupportVector(x, 0.0, j)  // TODO: correct?
       }
     }
 
@@ -193,7 +193,7 @@ private[train] trait ClassificationTrainer extends Trainer {
       }
     }
 
-    val rho: Array[Double] = ??? // f.map(_.rho)(breakOut)
+    val rho: Vec[Double] = f.flatMap(_.map(_.rho))
 
     new Model(numClasses = numClasses, param = param, supportVectors = modelSV, rho = rho) {
       def predictValues(x: List[Node]): Double = ???

@@ -29,7 +29,7 @@ trait Trainer {
 
     println("nSV = " + nSV + ", nBSV = " + nBSV)
 
-    new DecisionFunction(solution.alpha, solution.rho)
+    DecisionFunction(solution.alpha, solution.rho)
   }
 }
 

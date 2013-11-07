@@ -3,6 +3,7 @@ package de.sciss.svm
 import java.io.IOException
 
 import scala.io.Source
+import collection.breakOut
 
 /** Element of a feature vector.
   *
@@ -23,14 +24,14 @@ case class Instance(x: List[Node], y: Int) {
 }
 
 /** An `Problem` is wrapping a collection of data instances. */
-class Problem(val instances: Array[Instance]) {
-  require(instances.length > 0, s"Instances cannot be empty")
+case class Problem(instances: Vec[Instance]) {
+  require(instances.nonEmpty, s"Instances cannot be empty")
 
-  val size: Int = instances.length
+  val size: Int = instances.size
   /** The feature vectors of all instances. */
-  lazy val xs: Array[List[Node]]  = instances.map(_.x)
+  lazy val xs: Vec[List[Node]]  = instances.map(_.x)
   /** The labels of all instances. */
-  lazy val ys: Array[Int]         = instances.map(_.y)
+  lazy val ys: Vec[Int]         = instances.map(_.y)
 
   /** Queries the feature vector of a given instance
     *
@@ -49,8 +50,6 @@ class Problem(val instances: Array[Instance]) {
 }
 
 object Problem {
-  def apply(instances: Array[Instance]): Problem = new Problem(instances)
-
   /** Decodes a text description of input data.
     * 
     * The input data must be formatted as follows: Each entry or instance occupies one line,
@@ -69,7 +68,7 @@ object Problem {
     * @return         the problem consisting of the given configuration and decoded input data
     */
   def read(param: SVMParameter, source: Source): Problem = {
-    val instances = Array.newBuilder[Instance]
+    val instances = Vec.newBuilder[Instance]
     var maxIndex = 0
     for (line <- source.getLines().map(_.trim)) {
       val columns = line.split('\t')
@@ -82,7 +81,7 @@ object Problem {
       val y  = y0.toInt // allows `+1` which causes problem with straight `.toInt`
       if (y != y0) throw new IOException(s"Labels must be integer numbers ($y0)")
       var featureMaxIndex = 0
-      val x = features.map { feature =>
+      val x: List[Node] = features.map { feature =>
         val splits = feature.split(':')
         if (splits.size != 2) {
           throw new IOException(s"Invalid input, feature component must be `index:value`: $feature in line " + line)
@@ -95,7 +94,8 @@ object Problem {
         }
         val value = splits(1).toDouble
         Node(index, value)
-      } .toList
+      } (breakOut)
+
       instances += Instance(x, y)
       maxIndex = maxIndex max featureMaxIndex
     }

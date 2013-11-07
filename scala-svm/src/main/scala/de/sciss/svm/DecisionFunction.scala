@@ -1,3 +1,5 @@
 package de.sciss.svm
 
-class DecisionFunction(val alpha: Array[Double], val rho: Double)
+case class DecisionFunction(alpha: Vec[Double], rho: Double) {
+  def nonZero: Boolean = alpha.exists(_ > 0)
+}

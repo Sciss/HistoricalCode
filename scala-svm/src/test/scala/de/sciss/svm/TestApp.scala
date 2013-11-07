@@ -91,7 +91,7 @@ object TestApp extends SimpleSwingApplication {
     val gamma     = 1.0 / numInstances
     val kernel    = new RBFKernel(gamma)
     val param     = new SVMParameter(kernel)
-    val instances: Array[Instance] = model.zipWithIndex.map { case (c, idx) =>
+    val instances: Vec[Instance] = model.zipWithIndex.map { case (c, idx) =>
       Instance(c.asFeature, if (categ(idx)) 1 else 0)
     } (breakOut)
 

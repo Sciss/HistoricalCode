@@ -17,7 +17,7 @@ private[train] trait OneClassOrRegressionTrainer extends Trainer {
       // numClasses,
       param,
       Vec(supportVectors.result()),
-      Array(decisionFunction.rho))
+      Vec(decisionFunction.rho))
   }
 
   def solver: FormulationSolver = new OneClassSolver
