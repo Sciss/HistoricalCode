@@ -11,3 +11,7 @@ This library is a Scala port of [libSVM](http://www.csie.ntu.edu.tw/~cjlin/libsv
 ## Requirements
 
 Builds with sbt 0.13 for Scala 2.10.
+
+## Notes
+
+This is incomplete. Only `OneClassTrainer` is implemented and there is a restriction on `numClasses = 2` (?)

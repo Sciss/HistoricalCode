@@ -43,7 +43,7 @@ trait SVMTrainer {
 class OneClassOrRegressionTrainer extends SVMTrainer {
 
   def train(param: SVMParameter, problem: SVMProblem): SVMModel = {
-    val nr_class = 2
+    val numClasses = 2
 
     val decisionFunction = trainOne(param, problem, 0, 0)
 
@@ -52,9 +52,9 @@ class OneClassOrRegressionTrainer extends SVMTrainer {
       suportVectors += new SupportVector(problem.x(i), decisionFunction.alpha(i), i + 1)
     }
 
-    assert(nr_class == 2)
+    assert(numClasses == 2)
     new BaseModel /* SVMModel */(
-      // nr_class,
+      // numClasses,
       param,
       Array(suportVectors.result()),
       Array(decisionFunction.rho))
@@ -109,12 +109,10 @@ object NuSVRSVM extends SVM {
   val trainer = new NuSVRTrainer
 }
 
-
-
 //class MultipleClassSVM extends SVM {
 //
 //  def train(param: SVMParameter): SVMModel = {
-//    val nr_class = 1;
+//    val numClasses = 1;
 //    null
 //  }
 //}

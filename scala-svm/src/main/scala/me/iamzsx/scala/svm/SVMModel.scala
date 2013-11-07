@@ -50,7 +50,7 @@ case class SupportVector(
   index       : Int)
 
 abstract class SVMModel(
-  val nr_class      : Int,
+  val numClasses      : Int,
   val param         : SVMParameter,
   val supportVectors: Array[Array[SupportVector]],
   val rho           : Array[Double]) {
@@ -61,7 +61,7 @@ abstract class SVMModel(
 
   def predict(instance: Instance): Double = predict(instance.x)
 
-  def predictValues(x: List[SVMNode]): Double = 0.0
+  def predictValues(x: List[SVMNode]): Double // = 0.0
 
   def save(file: String) = ()
 
@@ -95,7 +95,7 @@ class BaseModel(
 //          case "degree" => ""
 //          case "gamma" => ""
 //          case "coef0" => ""
-//          case "nr_class" => ""
+//          case "numClasses" => ""
 //          case "total_sv" => ""
 //          case "rho" => ""
 //          case "label" => ""

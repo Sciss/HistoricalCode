@@ -17,7 +17,7 @@ class SVMTrainerSuite extends FunSuite {
 
     /* val solution = */ Solver.solveOneClass(problem, param)
     val model = SVM("one_class").trainer.train(param, problem)
-    assertEquals(2, model.nr_class)
+    assertEquals(2, model.numClasses)
     svmAssertEquals(309.929000, model.rho(0))
     svmAssertEquals(
       Array(
