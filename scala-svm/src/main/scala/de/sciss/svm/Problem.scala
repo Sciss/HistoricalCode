@@ -1,4 +1,4 @@
-package me.iamzsx.scala.svm
+package de.sciss.svm
 
 import java.io.IOException
 
@@ -9,7 +9,7 @@ import scala.io.Source
   * @param index  feature index or category
   * @param value  feature value
   */
-case class SVMNode(index: Int, value: Double) {
+case class Node(index: Int, value: Double) {
   override def toString = index + ":" + value
 }
 
@@ -18,17 +18,17 @@ case class SVMNode(index: Int, value: Double) {
   * @param x  the feature vector
   * @param y  the label
   */
-case class Instance(x: List[SVMNode],y: Int /* Double */) {
+case class Instance(x: List[Node],y: Int /* Double */) {
   override def toString = "(" + y + "|" + x.mkString(", ") + ")"
 }
 
-/** An `SVMProblem` is wrapping a collection of data instances. */
-class SVMProblem(val instances: Array[Instance]) {
+/** An `Problem` is wrapping a collection of data instances. */
+class Problem(val instances: Array[Instance]) {
   require(instances.length > 0, s"Instances cannot be empty")
 
   val size: Int = instances.length
   /** The feature vectors of all instances. */
-  lazy val xs: Array[List[SVMNode]] = instances.map(_.x)
+  lazy val xs: Array[List[Node]] = instances.map(_.x)
   /** The labels of all instances. */
   lazy val ys: Array[Int]           = instances.map(_.y)
 
@@ -36,20 +36,20 @@ class SVMProblem(val instances: Array[Instance]) {
     *
     * @param idx  index of the instance. Must be `>= 0` and `< size`
     */
-  def x(idx: Int): List[SVMNode] = instances(idx).x
+  def x(idx: Int): List[Node] = instances(idx).x
   /** Queries the label of a given instance
     *
     * @param idx  index of the instance. Must be `>= 0` and `< size`
     */
   def y(idx: Int): Int = instances(idx).y
 
-  def groupClasses: Map[Int, SVMProblem] = instances.groupBy(_.y).mapValues(SVMProblem.apply)
+  def groupClasses: Map[Int, Problem] = instances.groupBy(_.y).mapValues(Problem.apply)
 
   override def toString = instances.mkString("\n")
 }
 
-object SVMProblem {
-  def apply(instances: Array[Instance]): SVMProblem = new SVMProblem(instances)
+object Problem {
+  def apply(instances: Array[Instance]): Problem = new Problem(instances)
 
   /** Decodes a text description of input data.
     * 
@@ -68,7 +68,7 @@ object SVMProblem {
     * @param source   input data, formatted as described above
     * @return         the problem consisting of the given configuration and decoded input data
     */
-  def read(param: SVMParameter, source: Source): SVMProblem = {
+  def read(param: SVMParameter, source: Source): Problem = {
     val instances = Array.newBuilder[Instance]
     var maxIndex = 0
     for (line <- source.getLines().map(_.trim)) {
@@ -94,7 +94,7 @@ object SVMProblem {
           featureMaxIndex = index
         }
         val value = splits(1).toDouble
-        SVMNode(index, value)
+        Node(index, value)
       } .toList
       instances += Instance(x, y)
       maxIndex = maxIndex max featureMaxIndex
@@ -102,6 +102,6 @@ object SVMProblem {
     if (param.gamma == 0 && maxIndex > 0) {
       param.gamma = 1.0 / maxIndex
     }
-    new SVMProblem(instances.result())
+    new Problem(instances.result())
   }
 }

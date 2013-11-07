@@ -1,4 +1,4 @@
-package me.iamzsx.scala.svm
+package de.sciss.svm
 
 object KernelType extends Enumeration {
   type KernelType = Value
@@ -8,7 +8,7 @@ object KernelType extends Enumeration {
   val SIGMOID     = Value("sigmoid")
   val PRECOMPUTED = Value
 
-  def dot(x: List[SVMNode], y: List[SVMNode]): Double = {
+  def dot(x: List[Node], y: List[Node]): Double = {
     if (x == Nil || y == Nil) 0
     else {
       if (x.head.index == y.head.index) {
@@ -40,7 +40,7 @@ import KernelType._
 trait Kernel {
   def kernelType: KernelType
   /** Calculates the kernel product from a given matrix of features. */
-  def apply(x: List[SVMNode], y: List[SVMNode]): Double
+  def apply(x: List[Node], y: List[Node]): Double
 }
 
 //object Kernel {
@@ -52,7 +52,7 @@ class LinearKernel extends Kernel {
 
   override def kernelType = LINEAR
 
-  override def apply(x: List[SVMNode], y: List[SVMNode]): Double = dot(x, y)
+  override def apply(x: List[Node], y: List[Node]): Double = dot(x, y)
 
   override def toString = "kernel_type " + kernelType.toString
 }
@@ -62,7 +62,7 @@ class PolynomialKernel(val gamma: Double, val coef0: Double = 0, val degree: Int
 
   override def kernelType = POLY
 
-  override def apply(x: List[SVMNode], y: List[SVMNode]): Double = powi(gamma * dot(x, y) + coef0, degree)
+  override def apply(x: List[Node], y: List[Node]): Double = powi(gamma * dot(x, y) + coef0, degree)
 
   override def toString = Array(
     "kernel_type " + kernelType.toString,
@@ -79,8 +79,8 @@ class RBFKernel(val gamma: Double) extends Kernel {
 
   override def kernelType = RBF
 
-  override def apply(x: List[SVMNode], y: List[SVMNode]): Double = {
-    def rbf(x: List[SVMNode], y: List[SVMNode], sum: Double): Double = {
+  override def apply(x: List[Node], y: List[Node]): Double = {
+    def rbf(x: List[Node], y: List[Node], sum: Double): Double = {
       if (x == Nil && y == Nil) math.exp(-gamma * sum)
       else if (x == Nil)
         rbf(Nil, y.tail, sum + y.head.value * y.head.value)
@@ -109,7 +109,7 @@ class SigmoidKernel(val gamma: Double, val coef0: Double = 0) extends Kernel {
 
   override def kernelType = SIGMOID
 
-  override def apply(x: List[SVMNode], y: List[SVMNode]): Double = math.tanh(gamma * dot(x, y) + coef0)
+  override def apply(x: List[Node], y: List[Node]): Double = math.tanh(gamma * dot(x, y) + coef0)
 
   override def toString = Array(
     "kernel_type " + kernelType.toString,
@@ -121,7 +121,7 @@ class PrecomputedKernel extends Kernel {
 
   override def kernelType = PRECOMPUTED
 
-  override def apply(x: List[SVMNode], y: List[SVMNode]): Double = {
+  override def apply(x: List[Node], y: List[Node]): Double = {
     // TODO
     ???
   }

@@ -1,4 +1,4 @@
-package me.iamzsx.scala.svm
+package de.sciss.svm
 
 object AssertUtil {
 
@@ -13,7 +13,7 @@ object AssertUtil {
     org.junit.Assert.assertEquals(excepted.index, actual.index)
   }
 
-  implicit def svmAssertEquals(excepted: SVMNode, actual: SVMNode): Unit = {
+  implicit def svmAssertEquals(excepted: Node, actual: Node): Unit = {
     org.junit.Assert.assertEquals(excepted.value, actual.value, DELTA)
     org.junit.Assert.assertEquals(excepted.index, actual.index)
   }
@@ -28,7 +28,7 @@ object AssertUtil {
     (excepted zip actual) map (z => svmAssertEquals(z._1, z._2))
   }
 
-  implicit def svmAssertSeqSVMNodeEquals(excepted: List[SVMNode], actual: List[SVMNode]): Unit = {
+  implicit def svmAssertSeqSVMNodeEquals(excepted: List[Node], actual: List[Node]): Unit = {
     org.junit.Assert.assertEquals(excepted.size, actual.size)
     (excepted zip actual) map (z => svmAssertEquals(z._1, z._2))
   }

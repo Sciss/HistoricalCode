@@ -1,4 +1,4 @@
-package me.iamzsx.scala.svm
+package de.sciss.svm
 
 trait Gamma {
   def gamma: Double
@@ -45,11 +45,11 @@ class EpsilonSVRSVMParamter(
   val p : Double) extends SVMParameter(kernel, nu, eps)
 
 case class SupportVector(
-  vector      : List[SVMNode],
+  vector      : List[Node],
   coefficient : Double,
   index       : Int)
 
-abstract class SVMModel(
+abstract class Model(
   val numClasses      : Int,
   val param         : SVMParameter,
   val supportVectors: Array[Array[SupportVector]],
@@ -57,11 +57,11 @@ abstract class SVMModel(
 
   require(supportVectors.size == rho.size)
 
-  def predict(x: List[SVMNode]): Double = predictValues(x)
+  def predict(x: List[Node]): Double = predictValues(x)
 
   def predict(instance: Instance): Double = predict(instance.x)
 
-  def predictValues(x: List[SVMNode]): Double // = 0.0
+  def predictValues(x: List[Node]): Double // = 0.0
 
   def save(file: String) = ()
 
@@ -75,9 +75,9 @@ class BaseModel(
     param         : SVMParameter,
     supportVectors: Array[Array[SupportVector]],
     rho           : Array[Double])
-  extends SVMModel(2, param, supportVectors, rho) {
+  extends Model(2, param, supportVectors, rho) {
 
-  override def predictValues(x: List[SVMNode]): Double =
+  override def predictValues(x: List[Node]): Double =
     supportVectors(0).map(supportVector => param.kernel(x, supportVector.vector)).sum - rho(0)
 }
 

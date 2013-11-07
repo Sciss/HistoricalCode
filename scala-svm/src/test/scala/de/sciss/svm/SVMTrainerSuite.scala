@@ -1,4 +1,4 @@
-package me.iamzsx.scala.svm
+package de.sciss.svm
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.junit.Assert._
@@ -13,10 +13,10 @@ class SVMTrainerSuite extends FunSuite {
     val param   = new SVMParameter(new LinearKernel)
 
     val source  = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46")
-    val problem = SVMProblem.read(param, source)
+    val problem = Problem.read(param, source)
 
     /* val solution = */ Solver.solveOneClass(problem, param)
-    val model = SVM("one_class").trainer.train(param, problem)
+    val model = SVM.OneClass.trainer.train(param, problem)
     assertEquals(2, model.numClasses)
     svmAssertEquals(309.929000, model.rho(0))
     svmAssertEquals(
@@ -30,7 +30,7 @@ class SVMTrainerSuite extends FunSuite {
 
     val source    = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46\n" +
                                       "+1\t1:2.0\t2:22.08\t3:11.46")
-    val problem   = SVMProblem.read(param, source)
+    val problem   = Problem.read(param, source)
 
     val solution  = Solver.solveOneClass(problem, param)
     svmAssertEquals(309.929000, solution.obj)

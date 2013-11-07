@@ -1,4 +1,4 @@
-package me.iamzsx.scala.svm
+package de.sciss.svm
 
 /** 1. SVC: support vector classification (two-class and multi-class).
   * 2. SVR: support vector regression.
@@ -15,8 +15,8 @@ abstract class QMatrix {
   }
 }
 
-class OneClassQMatrix(val problem: SVMProblem, val param: SVMParameter) extends QMatrix {
-  val x: Array[List[SVMNode]] = problem.xs.clone()
+class OneClassQMatrix(val problem: Problem, val param: SVMParameter) extends QMatrix {
+  val x: Array[List[Node]] = problem.xs.clone()
   val qd  = Array.tabulate(problem.size)(i => param.kernel(x(i), x(i)))
   val y   = problem.ys.clone()
 
@@ -33,7 +33,7 @@ class OneClassQMatrix(val problem: SVMProblem, val param: SVMParameter) extends 
       param.kernel(x(i), x(j))
 }
 
-class Solver(problem: SVMProblem,
+class Solver(problem: Problem,
              param  : SVMParameter,
              Q      : QMatrix,
              p      : Array[Double],
@@ -280,7 +280,7 @@ class Solver(problem: SVMProblem,
 
 object Solver {
 
-  def solveOneClass(problem: SVMProblem, param: SVMParameter): Solution = {
+  def solveOneClass(problem: Problem, param: SVMParameter): Solution = {
     val n = (param.nu * problem.size).toInt
 
     val alpha = Array.tabulate(problem.size) {
@@ -305,7 +305,7 @@ object Solver {
     solver.solve()
   }
 
-  def solveEpsilonSVR(problem: SVMProblem, param: EpsilonSVRSVMParamter): Solution = {
+  def solveEpsilonSVR(problem: Problem, param: EpsilonSVRSVMParamter): Solution = {
     val alpha2     = Array.fill    (2 * problem.size)(0.0)
     val linearTerm = Array.tabulate(2 * problem.size) {
       case i if i < problem.size  => param.p - problem.y(i)
@@ -331,7 +331,7 @@ object Solver {
     // TODO
   }
 
-  def solveNuSVR(problem: SVMProblem, param: EpsilonSVRSVMParamter): Solution = {
+  def solveNuSVR(problem: Problem, param: EpsilonSVRSVMParamter): Solution = {
     // var sum = param.C * param.nu * problem.size / 2
 
     val alpha2     = Array.fill    (2 * problem.size)(0.0)
@@ -359,11 +359,11 @@ object Solver {
 }
 
 trait FormulationSolver {
-  def solve(problem: SVMProblem, param: SVMParameter): Solution
+  def solve(problem: Problem, param: SVMParameter): Solution
 }
 
 class OneClassSolver extends FormulationSolver {
-  def solve(problem: SVMProblem, param: SVMParameter) = Solver.solveOneClass(problem, param)
+  def solve(problem: Problem, param: SVMParameter) = Solver.solveOneClass(problem, param)
 }
 
 case class Solution(

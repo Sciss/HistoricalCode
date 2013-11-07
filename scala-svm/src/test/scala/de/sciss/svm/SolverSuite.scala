@@ -1,4 +1,4 @@
-package me.iamzsx.scala.svm
+package de.sciss.svm
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import scala.io.Source
@@ -12,7 +12,7 @@ class SolverSuite extends FunSuite {
     val param     = new SVMParameter(new LinearKernel)
 
     val source    = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46")
-    val problem   = SVMProblem.read(param, source)
+    val problem   = Problem.read(param, source)
 
     val solution  = Solver.solveOneClass(problem, param)
     svmAssertEquals( 77.482250, solution.obj)
@@ -28,7 +28,7 @@ class SolverSuite extends FunSuite {
 
     val source    = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46\n" +
                                       "+1\t1:2.0\t2:22.08\t3:11.46")
-    val problem   = SVMProblem.read(param, source)
+    val problem   = Problem.read(param, source)
 
     val solution  = Solver.solveOneClass(problem, param)
     svmAssertEquals(309.929000, solution.obj)

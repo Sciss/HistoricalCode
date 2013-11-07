@@ -1,9 +1,8 @@
-package me.iamzsx.scala.svm
+package de.sciss.svm
 
 import java.awt.{Color => JColor}
 import scala.swing.{Button, Orientation, BoxPanel, Color, GridPanel, CheckBox, Swing, Graphics2D, MainFrame, Frame, Component, SimpleSwingApplication}
 import Swing._
-import scala.collection.immutable.{IndexedSeq => Vec}
 import scala.collection.breakOut
 import scala.swing.event.ButtonClicked
 
@@ -35,8 +34,8 @@ object TestApp extends SimpleSwingApplication {
     def brightness: Double = hsb(1)
     def saturation: Double = hsb(2)
 
-    def asFeature: List[SVMNode] =
-      hsb.zipWithIndex.map { case (v, idx) => SVMNode(idx + 1, v) } (breakOut)
+    def asFeature: List[Node] =
+      hsb.zipWithIndex.map { case (v, idx) => Node(idx + 1, v) } (breakOut)
   }
 
   //  implicit class RichColorCompanion(val c: Color.type) extends AnyVal {
@@ -96,8 +95,8 @@ object TestApp extends SimpleSwingApplication {
       Instance(c.asFeature, if (categ(idx)) 1 else 0)
     } (breakOut)
 
-    val problem   = new SVMProblem(instances)
-    val m         = OneClassSVM.trainer.train(param, problem)
+    val problem   = new Problem(instances)
+    val m         = SVM.OneClass.trainer.train(param, problem)
     instances.zipWithIndex.foreach { case (ins, idx) =>
       val ir = m.predict(ins)
       println(s"Index $idx, selected ${ins.y} prediction $ir")

@@ -1,4 +1,4 @@
-name            := "scala-svm"
+name            := "ScalaSVM"
 
 version         := "0.1.0-SNAPSHOT"
 
@@ -8,7 +8,7 @@ description     := "A Scala implementation of SVM"
 
 homepage        := Some(url("https://github.com/Sciss/" + name.value))
 
-licenses        := Seq("MIT" -> url("http://opensource.org/licenses/MIT"))
+licenses        := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
 
 scalaVersion    := "2.10.3"
 
@@ -22,4 +22,4 @@ libraryDependencies ++= Seq(
   "junit"          %  "junit"       % "4.10"             % "test"
 )
 
-initialCommands in console := """import me.iamzsx.scala.svm._"""
+initialCommands in console := """import de.sciss.svm._"""
