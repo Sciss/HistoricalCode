@@ -12,10 +12,10 @@ import org.scalatest.{BeforeAndAfter, FunSuite}
 class SVMProblemSuite extends FunSuite with BeforeAndAfter {
   val DELTA = 10E-6
 
-  var param: SVMParameter = _
+  var param: Parameters = _
 
   before {
-    param = new SVMParameter(new LinearKernel, 0, 0)
+    param = new Parameters(LinearKernel, 0, 0)
   }
 
   test("get") {

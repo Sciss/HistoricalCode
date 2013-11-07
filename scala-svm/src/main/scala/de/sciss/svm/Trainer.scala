@@ -3,11 +3,11 @@ package de.sciss.svm
 import scala.math.abs
 
 trait Trainer {
-  def train(param: SVMParameter, problem: Problem): Model
+  def train(param: Parameters, problem: Problem): Model
 
   protected[this] def solver: FormulationSolver
 
-  def trainOne(param: SVMParameter, problem: Problem, Cp: Double, Cn: Double): DecisionFunction = {
+  def trainOne(param: Parameters, problem: Problem, Cp: Double, Cn: Double): DecisionFunction = {
     val solution = solver.solve(problem, param)
 
     println("obj = " + solution.obj + ", rho = " + solution.rho)
@@ -34,7 +34,7 @@ trait Trainer {
 }
 
 ///** <pre>
-//  * val param = new SVMParameter(new LinearKernel)
+//  * val param = new Parameters(new LinearKernel)
 //  * val svm = SVM("one_class")
 //  * val problem = SVMProblem.get(param, ...)
 //  * val model = svm.trainer.train(param, problem)
@@ -53,8 +53,8 @@ trait Trainer {
 //  //    case _ => throw new IllegalArgumentException("Invalid SVM type: " + name)
 //  //  }
 //
-//  def oneClass(kernel: Kernel, nu: Double, eps: Double): (Type, SVMParameter) =
-//    (Type.OneClass, new SVMParameter(kernel))
+//  def oneClass(kernel: Kernel, nu: Double, eps: Double): (Type, Parameters) =
+//    (Type.OneClass, new Parameters(kernel))
 //}
 
 // val C_SVC = Value("c_svc")
@@ -76,7 +76,7 @@ trait Trainer {
 
 //class MultipleClassSVM extends SVM {
 //
-//  def train(param: SVMParameter): SVMModel = {
+//  def train(param: Parameters): SVMModel = {
 //    val numClasses = 1;
 //    null
 //  }

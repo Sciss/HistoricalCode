@@ -2,7 +2,9 @@ package de.sciss.svm
 package train
 
 private[train] trait OneClassOrRegressionTrainer extends Trainer {
-  def train(param: SVMParameter, problem: Problem): Model = {
+  protected def tpe: Type
+
+  def train(param: Parameters, problem: Problem): Model = {
     val numClasses = 2
 
     val decisionFunction = trainOne(param, problem, 0, 0)
@@ -15,6 +17,7 @@ private[train] trait OneClassOrRegressionTrainer extends Trainer {
     assert(numClasses == 2)
     new BaseModel /* SVMModel */(
       // numClasses,
+      tpe,
       param,
       Vec(supportVectors.result()),
       Vec(decisionFunction.rho))

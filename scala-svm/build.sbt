@@ -17,6 +17,7 @@ retrieveManaged := true
 scalacOptions ++= Seq("-deprecation", "-unchecked", "-feature")
 
 libraryDependencies ++= Seq(
+  "de.sciss"       %% "fileutil"    % "1.1.+",
   "org.scala-lang" %  "scala-swing" % scalaVersion.value % "test",
   "org.scalatest"  %% "scalatest"   % "1.9.1"            % "test",
   "junit"          %  "junit"       % "4.10"             % "test"

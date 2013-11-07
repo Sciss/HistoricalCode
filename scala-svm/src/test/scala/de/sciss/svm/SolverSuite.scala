@@ -9,7 +9,7 @@ import org.scalatest.FunSuite
 class SolverSuite extends FunSuite {
 
   test("1 train case") {
-    val param     = new SVMParameter(new LinearKernel)
+    val param     = new Parameters(LinearKernel)
 
     val source    = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46")
     val problem   = Problem.read(param, source)
@@ -24,7 +24,7 @@ class SolverSuite extends FunSuite {
   }
 
   test("2 train case") {
-    val param     = new SVMParameter(new LinearKernel)
+    val param     = new Parameters(LinearKernel)
 
     val source    = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46\n" +
                                       "+1\t1:2.0\t2:22.08\t3:11.46")

@@ -15,7 +15,7 @@ abstract class QMatrix {
   }
 }
 
-class OneClassQMatrix(val problem: Problem, val param: SVMParameter) extends QMatrix {
+class OneClassQMatrix(val problem: Problem, val param: Parameters) extends QMatrix {
   val x: Array[List[Node]] = problem.xs.toArray // .clone()
   val qd  = Array.tabulate(problem.size)(i => param.kernel(x(i), x(i)))
   val y   = problem.ys.toArray // clone()
@@ -34,7 +34,7 @@ class OneClassQMatrix(val problem: Problem, val param: SVMParameter) extends QMa
 }
 
 class Solver(problem: Problem,
-             param  : SVMParameter,
+             param  : Parameters,
              Q      : QMatrix,
              p      : Vec[Double],
              y      : Vec[Int],
@@ -280,7 +280,7 @@ class Solver(problem: Problem,
 
 object Solver {
 
-  def solveOneClass(problem: Problem, param: SVMParameter): Solution = {
+  def solveOneClass(problem: Problem, param: Parameters): Solution = {
     val n = (param.nu * problem.size).toInt
 
     val alpha = Vec.tabulate(problem.size) {
@@ -359,11 +359,11 @@ object Solver {
 }
 
 trait FormulationSolver {
-  def solve(problem: Problem, param: SVMParameter): Solution
+  def solve(problem: Problem, param: Parameters): Solution
 }
 
 class OneClassSolver extends FormulationSolver {
-  def solve(problem: Problem, param: SVMParameter) = Solver.solveOneClass(problem, param)
+  def solve(problem: Problem, param: Parameters) = Solver.solveOneClass(problem, param)
 }
 
 case class Solution(

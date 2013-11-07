@@ -46,7 +46,7 @@ class LinearKernelSuite extends FunSuite {
   val DELTA = 10E-6
 
   test("toString") {
-    assertEquals("kernel_type linear", new LinearKernel().toString)
+    assertEquals("kernel_type linear", LinearKernel.toString)
   }
 
 }
@@ -57,7 +57,7 @@ class PolynomialKernelSuite extends FunSuite {
   val DELTA = 10E-6
 
   test("toString") {
-    assertEquals("kernel_type poly\n" +
+    assertEquals("kernel_type polynomial\n" +
       "degree 3\n" +
       "gamma 1.0\n" +
       "coef0 2.0", new PolynomialKernel(1.0, 2.0, 3).toString)

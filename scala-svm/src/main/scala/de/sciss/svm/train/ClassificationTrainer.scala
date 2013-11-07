@@ -4,13 +4,13 @@ package train
 import collection.breakOut
 
 private[train] trait ClassificationTrainer extends Trainer {
+  protected def tpe: Type
+
   case class Grouped(numClasses: Int, label: Array[Int], start: Array[Int], count: Array[Int])
 
   def info(what: => String): Unit = println(what)
 
-  def train(param: SVMParameter, problem: Problem): Model = {
-    val l = problem.size
-
+  def train(param: Parameters, problem: Problem): Model = {
     // group training data of the same class
     val map     = problem.groupClasses // groupClasses(problem)
     val keys    = map.keys.toIndexedSeq.sorted
@@ -33,12 +33,7 @@ private[train] trait ClassificationTrainer extends Trainer {
 
     // train k*(k-1)/2 models
 
-    // val nonzero = new Array[Boolean](l)
-    // val f = new Array[DecisionFunction](numClasses * (numClasses - 1) / 2)
-
     // class -> index
-
-    // var nonZero = Map.empty[Int, Set[Int]] withDefaultValue Set.empty
 
     require(!param.probability, "Not yet implemented: probability")
     //    double *probA=NULL,*probB=NULL;
@@ -50,7 +45,6 @@ private[train] trait ClassificationTrainer extends Trainer {
 
     val f = (groups zip weightedC).tails.map {
       case (gi, wi) +: gij =>
-        val ci  = gi.size
         val si  = gi.instances.map(_.copy(y = 1))
         gij.map { case (gj, wj) =>
           val sj  = gj.instances.map(_.copy(y = -1))
@@ -69,47 +63,9 @@ private[train] trait ClassificationTrainer extends Trainer {
       }
     }
 
-    //    val f = (0 until numClasses).map { i =>
-    //      val gi  = groups(i)
-    //      val ci  = gi.size
-    //      val si  = gi.instances.map(_.copy(y = 1))
-    //
-    //      (i+1 until numClasses).map { j =>
-    //        if(param.probability) {
-    //          sys.error("Not yet implemented: probability") // svm_binary_svc_probability(&sub_prob,param,weighted_C[i],weighted_C[j],probA[p],probB[p]);
-    //        }
-    //
-    //        val gj  = groups(j)
-    //        val sij = si ++ gj.instances.map(_.copy(y = -1))
-    //        val sp  = new Problem(sij)
-    //
-    //        val res = trainOne(param, sp, weightedC(i),weightedC(j))
-    //        for (k <- 0 until ci) {
-    //          val nzi = nonZero(i)
-    //          if(!nzi(k) && math.abs(res.alpha(k)) > 0)
-    //            nonZero += i -> (nzi + k)
-    //        }
-    //        for (k <- 0 until gj.size) {
-    //          val nzj = nonZero(j)
-    //          if(!nzj(k) && math.abs(res.alpha(ci+k)) > 0)
-    //            nonZero += j -> (nzj + k)
-    //        }
-    //        res
-    //      }
-    //    }
-
     // build output
 
     // model->numClasses = numClasses
-
-    //    case class SupportVector(
-    //      vector      : List[Node],
-    //      coefficient : Double,
-    //      index       : Int)
-
-    //    model->label = Malloc(int,numClasses);
-    //    for(i=0;i<numClasses;i++)
-    //      model->label[i] = label[i];
 
     //    if(param->probability)
     //    {
@@ -132,20 +88,6 @@ private[train] trait ClassificationTrainer extends Trainer {
     val totalSV   = nzCount.sum
 
     info(s"Total nSV = $totalSV")
-
-    //    // model->l = total_sv;
-    //    // model->SV = Malloc(svm_node *,total_sv);
-    //    val modelSV = new Array[SupportVector](totalSV)
-    //    // model->sv_indices = Malloc(int,total_sv);
-    //    // val modelSVIndices = new Array[Int](total_sv)
-    //    var p = 0
-    //    for (i <- 0 until l) {
-    //      if (nonzero(i)) {
-    //        modelSV(p) = x(i)
-    //        // modelSVIndices(p) = perm(i) + 1
-    //        p += 1
-    //      }
-    //    }
 
     val modelSV = (groups zip nonZero).zipWithIndex.map { case ((gi, nzi), i) =>
       (gi.xs zip nzi).zipWithIndex.collect {
@@ -195,7 +137,7 @@ private[train] trait ClassificationTrainer extends Trainer {
 
     val rho: Vec[Double] = f.flatMap(_.map(_.rho))
 
-    new Model(numClasses = numClasses, param = param, supportVectors = modelSV, rho = rho) {
+    new Model(tpe = tpe, numClasses = numClasses, param = param, supportVectors = modelSV, rho = rho) {
       def predictValues(x: List[Node]): Double = ???
     }
   }

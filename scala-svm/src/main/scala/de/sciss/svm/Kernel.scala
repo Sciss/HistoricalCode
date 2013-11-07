@@ -35,12 +35,22 @@ object KernelType extends Enumeration {
 }
 
 import KernelType._
+import java.io.PrintStream
 
 /** @see http://en.wikipedia.org/wiki/Support_vector_machine */
-trait Kernel {
-  def kernelType: KernelType
+sealed trait Kernel {
+  // def tpe: KernelType
   /** Calculates the kernel product from a given matrix of features. */
   def apply(x: List[Node], y: List[Node]): Double
+
+  def id: String
+
+  def write(ps: PrintStream): Unit = {
+    ps.println(s"kernel_type $id")
+    writeData(ps)
+  }
+
+  protected def writeData(ps: PrintStream): Unit
 }
 
 //object Kernel {
@@ -48,36 +58,49 @@ trait Kernel {
 //}
 
 /** @see http://en.wikipedia.org/wiki/Support_vector_machine */
-class LinearKernel extends Kernel {
+case object LinearKernel extends Kernel {
 
-  override def kernelType = LINEAR
+  // override def tpe  = LINEAR
+  final val id      = "linear"
 
   override def apply(x: List[Node], y: List[Node]): Double = dot(x, y)
 
-  override def toString = "kernel_type " + kernelType.toString
+  override def toString = "kernel_type " + id // tpe.toString
+
+  protected def writeData(ps: PrintStream) = ()
 }
 
-class PolynomialKernel(val gamma: Double, val coef0: Double = 0, val degree: Int = 3) extends Kernel {
+object PolynomialKernel {
+  final val id = "polynomial"
+}
+case class PolynomialKernel(gamma: Double, coef0: Double = 0, degree: Int = 3) extends Kernel {
   require(degree >= 0) // Why degree == 0 is valid?
 
-  override def kernelType = POLY
+  // override def tpe = POLY
+  def id = PolynomialKernel.id
 
   override def apply(x: List[Node], y: List[Node]): Double = powi(gamma * dot(x, y) + coef0, degree)
 
   override def toString = Array(
-    "kernel_type " + kernelType.toString,
+    "kernel_type " + id, // tpe.toString,
     "degree " + degree,
     "gamma " + gamma,
     "coef0 " + coef0).mkString("\n")
+
+  protected def writeData(ps: PrintStream) = ()
 }
 
+object RBFKernel {
+  final val id = "rbf"
+}
 /** @see http://en.wikipedia.org/wiki/Support_vector_machine#Nonlinear_classification
   * @see http://en.wikipedia.org/RBF_kernel
   */
-class RBFKernel(val gamma: Double) extends Kernel {
+case class RBFKernel(gamma: Double) extends Kernel {
   require(gamma >= 0) // Why gamma == 0 is valid?
 
-  override def kernelType = RBF
+  // override def tpe = RBF
+  def id = RBFKernel.id
 
   override def apply(x: List[Node], y: List[Node]): Double = {
     def rbf(x: List[Node], y: List[Node], sum: Double): Double = {
@@ -99,32 +122,43 @@ class RBFKernel(val gamma: Double) extends Kernel {
   }
 
   override def toString = Array(
-    "kernel_type " + kernelType.toString,
+    "kernel_type " + id, // tpe.toString,
     "gamma " + gamma).mkString("\n")
+
+  protected def writeData(ps: PrintStream) = ()
 }
 
+object SigmoidKernel {
+  final val id = "sigmoid"
+}
 /** @see http://en.wikipedia.org/wiki/Support_vector_machine#Nonlinear_classification */
-class SigmoidKernel(val gamma: Double, val coef0: Double = 0) extends Kernel {
+case class SigmoidKernel(gamma: Double, coef0: Double = 0) extends Kernel {
   require(gamma >= 0) // Why gamma == 0 is valid?
 
-  override def kernelType = SIGMOID
+  // override def tpe = SIGMOID
+  def id = SigmoidKernel.id
 
   override def apply(x: List[Node], y: List[Node]): Double = math.tanh(gamma * dot(x, y) + coef0)
 
   override def toString = Array(
-    "kernel_type " + kernelType.toString,
+    "kernel_type " + id, // tpe.toString,
     "gamma " + gamma,
     "coef0 " + coef0).mkString("\n")
+
+  protected def writeData(ps: PrintStream) = ()
 }
 
-class PrecomputedKernel extends Kernel {
+case object PrecomputedKernel extends Kernel {
 
-  override def kernelType = PRECOMPUTED
+  // override def tpe = PRECOMPUTED
+  final val id = "precomputed"
 
   override def apply(x: List[Node], y: List[Node]): Double = {
     // TODO
     ???
   }
 
-  override def toString = "kernel_type " + kernelType.toString
+  override def toString = "kernel_type " + id // tpe.toString
+
+  protected def writeData(ps: PrintStream) = ()
 }

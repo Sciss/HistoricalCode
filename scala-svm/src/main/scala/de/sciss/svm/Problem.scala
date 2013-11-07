@@ -67,7 +67,7 @@ object Problem {
     * @param source   input data, formatted as described above
     * @return         the problem consisting of the given configuration and decoded input data
     */
-  def read(param: SVMParameter, source: Source): Problem = {
+  def read(param: Parameters, source: Source): Problem = {
     val instances = Vec.newBuilder[Instance]
     var maxIndex = 0
     for (line <- source.getLines().map(_.trim)) {
