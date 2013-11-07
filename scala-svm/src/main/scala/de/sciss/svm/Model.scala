@@ -47,12 +47,6 @@ class EpsilonSVRSVMParamter(
   C     : Double,
   val p : Double) extends SVMParameter(kernel, nu, eps, C = C)
 
-// aka
-case class SupportVector(
-  vector      : List[Node],
-  coefficient : Double,
-  index       : Int)
-
 abstract class Model(
   val numClasses      : Int,
   val param         : SVMParameter,
