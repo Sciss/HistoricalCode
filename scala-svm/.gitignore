@@ -1,7 +1,7 @@
-.gradle
-build
-bin
-.classpath
-.project
-.settings
-.cache
+target/
+lib_managed/
+src_managed/
+project/boot/
+.idea/
+.idea_modules/
+dependency-graph.sbt
