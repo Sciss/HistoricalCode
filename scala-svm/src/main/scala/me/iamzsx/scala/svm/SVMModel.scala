@@ -49,7 +49,7 @@ case class SupportVector(
   coefficient : Double,
   index       : Int)
 
-class SVMModel(
+abstract class SVMModel(
   val nr_class      : Int,
   val param         : SVMParameter,
   val supportVectors: Array[Array[SupportVector]],

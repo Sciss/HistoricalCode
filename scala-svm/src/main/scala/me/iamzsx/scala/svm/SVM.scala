@@ -52,8 +52,9 @@ class OneClassOrRegressionTrainer extends SVMTrainer {
       suportVectors += new SupportVector(problem.x(i), decisionFunction.alpha(i), i + 1)
     }
 
-    new SVMModel(
-      nr_class,
+    assert(nr_class == 2)
+    new BaseModel /* SVMModel */(
+      // nr_class,
       param,
       Array(suportVectors.result()),
       Array(decisionFunction.rho))

@@ -306,7 +306,7 @@ object Solver {
   }
 
   def solveEpsilonSVR(problem: SVMProblem, param: EpsilonSVRSVMParamter): Solution = {
-    val alpha2 = Array.fill(2 * problem.size)(0.0)
+    val alpha2     = Array.fill    (2 * problem.size)(0.0)
     val linearTerm = Array.tabulate(2 * problem.size) {
       case i if i < problem.size  => param.p - problem.y(i)
       case i                      => param.p + problem.y(i - problem.size)
@@ -334,7 +334,7 @@ object Solver {
   def solveNuSVR(problem: SVMProblem, param: EpsilonSVRSVMParamter): Solution = {
     // var sum = param.C * param.nu * problem.size / 2
 
-    val alpha2 = Array.fill(2 * problem.size)(0.0)
+    val alpha2     = Array.fill    (2 * problem.size)(0.0)
     val linearTerm = Array.tabulate(2 * problem.size) {
       case i if i < problem.size  => -problem.y(i)                .toDouble
       case i                      =>  problem.y(i - problem.size) .toDouble
@@ -350,7 +350,7 @@ object Solver {
       Q       = new OneClassQMatrix(problem, param), // TODO
       p       = linearTerm,
       y       = y,
-      alpha  = alpha2,
+      alpha   = alpha2,
       Cp      = param.C,
       Cn      = param.C)
 
