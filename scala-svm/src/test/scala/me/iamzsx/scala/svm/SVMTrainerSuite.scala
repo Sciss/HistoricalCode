@@ -1,11 +1,8 @@
 package me.iamzsx.scala.svm
-import scala.math._
 import org.scalatest._
-import org.scalatest.matchers._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.junit.Assert._
-import KernelType._
 import scala.io.Source
 import AssertUtil._
 
@@ -18,7 +15,7 @@ class SVMTrainerSuite extends FunSuite {
     val source = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46")
     val problem = SVMProblem.get(param, source)
 
-    val solution = Solver.solveOneClass(problem, param)
+    /* val solution = */ Solver.solveOneClass(problem, param)
     val model = SVM("one_class").trainer.train(param, problem)
     assertEquals(2, model.nr_class)
     svmAssertEquals(309.929000, model.rho(0))

@@ -1,11 +1,7 @@
 package me.iamzsx.scala.svm
-import scala.math._
 import org.scalatest._
-import org.scalatest.matchers._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.junit.Assert._
-import KernelType._
 import scala.io.Source
 import AssertUtil._
 

@@ -1,9 +1,8 @@
 package me.iamzsx.scala.svm
 
-import scala.math._
+import scala.math.{exp, tanh, pow}
 
 import org.scalatest._
-import org.scalatest.matchers._
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -68,7 +67,7 @@ class PolynomialKernelSuite extends FunSuite {
     val x = List(new SVMNode(1, 0.4), new SVMNode(2, 0.5))
     val y = List(new SVMNode(1, 0.9), new SVMNode(3, 0.4))
 
-    svmAssertEquals(pow(1.0 * 0.36 + 2.0, 3), new PolynomialKernel(1.0, 2.0, 3)(x, y))
+    svmAssertEquals(pow(1.0 * 0.36 + 2.0, 3), new PolynomialKernel(1.0, 2.0, 3).apply(x, y))
   }
 }
 
@@ -84,7 +83,7 @@ class RBFKernelSuite extends FunSuite {
     val x = List(new SVMNode(1, 0.4), new SVMNode(2, 0.5))
     val y = List(new SVMNode(1, 0.9), new SVMNode(3, 0.4))
 
-    svmAssertEquals(exp(-2.0 * 0.66), new RBFKernel(2.0)(x, y))
+    svmAssertEquals(exp(-2.0 * 0.66), new RBFKernel(2.0).apply(x, y))
   }
 }
 
@@ -101,6 +100,6 @@ class SigmoidKernelSuite extends FunSuite {
     val x = List(new SVMNode(1, 0.4), new SVMNode(2, 0.5))
     val y = List(new SVMNode(1, 0.9), new SVMNode(3, 0.4))
 
-    svmAssertEquals(tanh(1.0 * 0.36 + 2.0), new SigmoidKernel(1.0, 2.0)(x, y))
+    svmAssertEquals(tanh(1.0 * 0.36 + 2.0), new SigmoidKernel(1.0, 2.0).apply(x, y))
   }
 }

@@ -1,63 +1,59 @@
 package me.iamzsx.scala.svm
 
-/**
- * 1. SVC: support vector classication (two-class and multi-class).
- * 2. SVR: support vector regression.
- * 3. One-class SVM.
- */
+/** 1. SVC: support vector classification (two-class and multi-class).
+  * 2. SVR: support vector regression.
+  * 3. One-class SVM.
+  */
 abstract class QMatrix {
-  def swapIndex(i: Int, j: Int)
-  def apply(i: Int, j: Int): Double
+  def swapIndex(i: Int, j: Int): Unit
+  def apply    (i: Int, j: Int): Double
 
-  protected def swap[T](array: scala.collection.mutable.Seq[T], i: Int, j: Int) {
-    val temp = array(i);
-    array(i) = array(j);
-    array(j) = temp;
+  protected def swap[T](array: scala.collection.mutable.Seq[T], i: Int, j: Int): Unit = {
+    val temp = array(i)
+    array(i) = array(j)
+    array(j) = temp
   }
 }
 
 class OneClassQMatrix(val problem: SVMProblem, val param: SVMParameter) extends QMatrix {
-  val x: Array[List[SVMNode]] = problem.xs.clone
-  val qd = Array.tabulate(problem.size)(i => param.kernel(x(i), x(i)))
-  val y = problem.ys.clone
+  val x: Array[List[SVMNode]] = problem.xs.clone()
+  val qd  = Array.tabulate(problem.size)(i => param.kernel(x(i), x(i)))
+  val y   = problem.ys.clone()
 
-  def swapIndex(i: Int, j: Int) {
-    swap(x, i, j)
-    swap(y, i, j)
+  def swapIndex(i: Int, j: Int): Unit = {
+    swap(x , i, j)
+    swap(y , i, j)
     swap(qd, i, j)
   }
 
-  override def apply(i: Int, j: Int) = {
-    if (i == j) {
+  override def apply(i: Int, j: Int): Double =
+    if (i == j)
       qd(i)
-    } else {
+    else
       param.kernel(x(i), x(j))
-    }
-  }
 }
 
-class Solver(
-  problem: SVMProblem,
-  param: SVMParameter,
-  Q: QMatrix,
-  p: Array[Double],
-  y: Array[Int],
-  alpha_ : Array[Double],
-  Cp: Double,
-  Cn: Double) {
+class Solver(problem: SVMProblem,
+             param  : SVMParameter,
+             Q      : QMatrix,
+             p      : Array[Double],
+             y      : Array[Int],
+             alpha_ : Array[Double],
+             Cp     : Double,
+             Cn     : Double) {
 
   private val epsilon = param.eps
   // private val shrinking = param.shrinking
 
   val LOWER_BOUND = 2
   val UPPER_BOUND = 1
-  val FREE = 3
+  val FREE        = 3
 
-  val TAU = 1e-12
+  val TAU         = 1e-12
 
   private val len: Int = problem.size
 
-  private val alpha = alpha_.clone
+  private val alpha = alpha_.clone()
 
   var activeSize = 1
 
@@ -67,29 +63,28 @@ class Solver(
     else FREE
   }
 
-  private def getC(i: Int) = if (y(i) > 0) Cp else Cn
+  private def getC(i: Int): Double = if (y(i) > 0) Cp else Cn
 
   private def isUpperBound(i: Int) = getAlphaStatus(i) == UPPER_BOUND
   private def isLowerBound(i: Int) = getAlphaStatus(i) == LOWER_BOUND
-  private def isFree(i: Int) = getAlphaStatus(i) == FREE
+  private def isFree      (i: Int) = getAlphaStatus(i) == FREE
 
-  var counter = 1;
+  var counter = 1
 
-  def solve: Solution = {
-    init
-
-    optimize
+  def solve(): Solution = {
+    init()
+    optimize()
 
     new Solution(
-      calculateObjectiveValue,
-      calculateRho,
-      Cp,
-      Cn,
-      0,
-      alpha)
+      obj         = calculateObjectiveValue,
+      rho         = calculateRho,
+      upperBoundP = Cp,
+      upperBoundN = Cn,
+      r           = 0,
+      alpha       = alpha)
   }
 
-  def init {
+  def init(): Unit = {
     for (
       i <- 0 until len if !isLowerBound(i)
     ) {
@@ -104,15 +99,13 @@ class Solver(
     }
   }
 
-  def doShrinking {
+  def doShrinking() = ()
 
-  }
-
-  def calculateRho = {
-    var ub = Double.MaxValue
-    var lb = Double.MinValue
-    var sum_free = 0.0
-    var nr_free = 0
+  def calculateRho: Double = {
+    var ub        = Double.MaxValue
+    var lb        = Double.MinValue
+    var sum_free  = 0.0
+    var nr_free   = 0
     for (i <- 0 until activeSize) {
       val yG = y(i) * G(i)
       if (isUpperBound(i)) {
@@ -132,18 +125,16 @@ class Solver(
     }
   }
 
-  def calculateObjectiveValue = {
+  def calculateObjectiveValue: Double =
     {
       for (i <- 0 until len)
         yield alpha(i) * (G(i) + p(i))
     }.sum / 2
-  }
 
-  def optimize {
-    var iter = 0
-    val maxIter = getMaxIteration
+  def optimize(): Unit = {
+    val maxIter = maxIteration
+
     for (iter <- 0 until maxIter) {
-
       counter = counter - 1
       if (counter == 0) {
         counter = len min 1000
@@ -154,18 +145,18 @@ class Solver(
       }
 
       // TODO 
-      val (i, j) = selectWorkingSet
+      val (i, j) = selectWorkingSet()
       if (!isValidWorkingSet(i, j)) {
-        reconstructGradient
+        reconstructGradient()
 
         activeSize = len
         // TODO
 
-        val (i, j) = selectWorkingSet
+        val (i, j) = selectWorkingSet()
         if (!isValidWorkingSet(i, j)) {
           return
         } else {
-          counter = 1;
+          counter = 1
         }
       }
 
@@ -173,7 +164,7 @@ class Solver(
       if (quadCoef <= 0) {
         quadCoef = TAU
       }
-      val delta = -y(i) * G(i) + y(j) * G(j)
+      // val delta = -y(i) * G(i) + y(j) * G(j)
       val oldAi = alpha(i)
       val oldAj = alpha(j)
       alpha(i) = alpha(i) + (-G(i) + y(i) * y(j) * G(j)) / quadCoef
@@ -197,14 +188,12 @@ class Solver(
     }
   }
 
-  def isValidWorkingSet(i: Int, j: Int) = {
-    j != -1
-  }
+  def isValidWorkingSet(i: Int, j: Int) = j != -1
 
-  val G = p.clone
-  val GBar = Array.fill(len)(0.0)
+  val G     = p.clone()
+  val GBar  = new Array[Double](len) // Array.fill(len)(0.0)
 
-  def selectWorkingSet = {
+  def selectWorkingSet(): (Int, Int) = {
     var maxG = Double.MinValue
     var i = -1
 
@@ -222,13 +211,13 @@ class Solver(
       }
     }
 
-    var j = -1
-    var minObj = Double.MaxValue
-    var minG = Double.MaxValue
+    var j       = -1
+    var minObj  = Double.MaxValue
+    var minG    = Double.MaxValue
 
     for (t <- 0 until len) {
       if ((y(i) == +1 && !isLowerBound(t)) ||
-        (y(i) == -1 && !isUpperBound(t))) {
+          (y(i) == -1 && !isUpperBound(t))) {
         val gradDiff = maxG + y(t) * G(t)
         if (-y(t) * G(t) <= minG) {
           minG = -y(t) * G(t)
@@ -251,20 +240,20 @@ class Solver(
     if (maxG - minG < epsilon) (-1, -1) else (i, j)
   }
 
-  private def getMaxIteration() = {
+  private def maxIteration: Int = {
     val iter = if (len > Int.MaxValue / 100)
       Int.MaxValue // overflow
     else len * 100
     iter max 10000000 // We run at least 10000000 times
   }
 
-  private def reconstructGradient {
+  private def reconstructGradient(): Unit = {
     if (activeSize != len) {
       for (j <- activeSize until len) {
         G(j) = GBar(j) + p(j)
       }
 
-      val nr_free = (0 until activeSize).count(isFree(_))
+      val nr_free = (0 until activeSize).count(isFree)
       if (2 * nr_free < activeSize) {
         // TODO
         println("WARNING: using -h 0 may be faster")
@@ -287,7 +276,6 @@ class Solver(
       }
     }
   }
-
 }
 
 object Solver {
@@ -295,78 +283,78 @@ object Solver {
   def solveOneClass(problem: SVMProblem, param: SVMParameter): Solution = {
     val n = (param.nu * problem.size).toInt
 
-    val alpha = Array.tabulate(problem.size)(_ match {
-      case i if i < n => 1.0
-      case i if i == n && i < problem.size => param.nu * problem.size - n;
-      case _ => 0.0
-    })
+    val alpha = Array.tabulate(problem.size) {
+      case i if i < n                       => 1.0
+      case i if i == n && i < problem.size  => param.nu * problem.size - n
+      case _                                => 0.0
+    }
 
     val zeros = Array.fill(problem.size)(0.0)
-    val ones = Array.fill(problem.size)(1)
+    val ones  = Array.fill(problem.size)(1)
 
     val solver = new Solver(
-      problem,
-      param,
-      new OneClassQMatrix(problem, param),
-      zeros,
-      ones,
-      alpha,
-      1.0,
-      1.0);
+      problem = problem,
+      param   = param,
+      Q       = new OneClassQMatrix(problem, param),
+      p       = zeros,
+      y       = ones,
+      alpha_  = alpha,
+      Cp      = 1.0,
+      Cn      = 1.0)
 
-    solver.solve
+    solver.solve()
   }
 
   def solveEpsilonSVR(problem: SVMProblem, param: EpsilonSVRSVMParamter): Solution = {
     val alpha2 = Array.fill(2 * problem.size)(0.0)
-    val linearTerm = Array.tabulate(2 * problem.size)(_ match {
-      case i if i < problem.size => param.p - problem.y(i)
-      case i => param.p + problem.y(i - problem.size)
-    })
-    val y = Array.tabulate(2 * problem.size)(_ match {
-      case i if i < problem.size => 1
-      case _ => -1
-    })
+    val linearTerm = Array.tabulate(2 * problem.size) {
+      case i if i < problem.size  => param.p - problem.y(i)
+      case i                      => param.p + problem.y(i - problem.size)
+    }
+    val y = Array.tabulate(2 * problem.size) {
+      case i if i < problem.size  =>  1
+      case _                      => -1
+    }
 
     val solver = new Solver(
-      problem,
-      param,
-      new OneClassQMatrix(problem, param), // TODO
-      linearTerm,
-      y,
-      alpha2,
-      param.C,
-      param.C);
+      problem   = problem,
+      param     = param,
+      Q         = new OneClassQMatrix(problem, param), // TODO
+      p         = linearTerm,
+      y         = y,
+      alpha_    = alpha2,
+      Cp        = param.C,
+      Cn        = param.C)
 
-    solver.solve
+    solver.solve()
 
     // TODO
   }
 
   def solveNuSVR(problem: SVMProblem, param: EpsilonSVRSVMParamter): Solution = {
-    var sum = param.C * param.nu * problem.size / 2;
+    // var sum = param.C * param.nu * problem.size / 2
 
     val alpha2 = Array.fill(2 * problem.size)(0.0)
-    val linearTerm = Array.tabulate(2 * problem.size)(_ match {
-      case i if i < problem.size => -problem.y(i)
-      case i => problem.y(i - problem.size)
-    })
-    val y = Array.tabulate(2 * problem.size)(_ match {
-      case i if i < problem.size => 1
-      case _ => -1
-    })
+    val linearTerm = Array.tabulate(2 * problem.size) {
+      case i if i < problem.size  => -problem.y(i)
+      case i                      =>  problem.y(i - problem.size)
+    }
+    val y = Array.tabulate(2 * problem.size) {
+      case i if i < problem.size  =>  1
+      case _                      => -1
+    }
 
     val solver = new Solver(
-      problem,
-      param,
-      new OneClassQMatrix(problem, param), // TODO
-      linearTerm,
-      y,
-      alpha2,
-      param.C,
-      param.C);
+      problem = problem,
+      param   = param,
+      Q       = new OneClassQMatrix(problem, param), // TODO
+      p       = linearTerm,
+      y       = y,
+      alpha_  = alpha2,
+      Cp      = param.C,
+      Cn      = param.C)
 
-    solver.solve
+    solver.solve()
   }
 }
 
@@ -379,11 +367,9 @@ class OneClassSolver extends FormulationSolver {
 }
 
 case class Solution(
-  val obj: Double,
-  val rho: Double,
-  val upperBoundP: Double,
-  val upperBoundN: Double,
-  val r: Double,
-  val alpha: Array[Double]) {
-}
-
+  obj         : Double,
+  rho         : Double,
+  upperBoundP : Double,
+  upperBoundN : Double,
+  r           : Double,
+  alpha       : Array[Double])

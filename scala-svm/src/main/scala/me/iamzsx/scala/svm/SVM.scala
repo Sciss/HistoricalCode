@@ -1,6 +1,6 @@
 package me.iamzsx.scala.svm
 
-import scala.math._
+import scala.math.abs
 import scala.collection.mutable.ArrayBuffer
 
 class DecisionFunction(val alpha: Array[Double], val rho: Double)
@@ -18,7 +18,7 @@ trait SVMTrainer {
   def train_one(param: SVMParameter, problem: SVMProblem, Cp: Double, Cn: Double): DecisionFunction = {
     val solution = solver.solve(problem, param)
 
-    println("obj = " + solution.obj + ", rho = " + solution.rho);
+    println("obj = " + solution.obj + ", rho = " + solution.rho)
 
     val nSV = solution.alpha.count(abs(_) > 0)
 
@@ -87,32 +87,31 @@ class NuSVRTrainer extends RegressionTrainer
 object SVM {
 
   def apply(name: String): SVM = name match {
-    case OneClassSVM.name => OneClassSVM
+    case OneClassSVM  .name => OneClassSVM
     case EpsilonSVRSVM.name => EpsilonSVRSVM
-    case NuSVRSVM.name => NuSVRSVM
+    case NuSVRSVM     .name => NuSVRSVM
     // TODO
-    case _ => throw new IllegalArgumentException("Invalid SVM type:" + name)
+    case _ => throw new IllegalArgumentException("Invalid SVM type: " + name)
   }
 
-  def oneClass(kernel: Kernel, nu: Double, eps: Double): (SVM, SVMParameter) = {
+  def oneClass(kernel: Kernel, nu: Double, eps: Double): (SVM, SVMParameter) =
     (SVM("one_class"), new SVMParameter(kernel))
-  }
 }
 
 // val C_SVC = Value("c_svc")
 // val NU_SVC = Value("nu_svc")
 object OneClassSVM extends SVM {
-  val name = "one_class"
+  val name    = "one_class"
   val trainer = new OneClassTrainer
 }
 
 object EpsilonSVRSVM extends SVM {
-  val name = "epsilon_svr"
+  val name    = "epsilon_svr"
   val trainer = new EpsilonSVRTrainer
 }
 
 object NuSVRSVM extends SVM {
-  val name = "nu_svr"
+  val name    = "nu_svr"
   val trainer = new NuSVRTrainer
 }
 

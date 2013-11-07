@@ -1,8 +1,6 @@
 package me.iamzsx.scala.svm
 
-import scala.math._
 import org.scalatest._
-import org.scalatest.matchers._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.junit.Assert._
@@ -49,9 +47,9 @@ class SVMProblemSuite extends FunSuite with BeforeAndAfter {
   test("get with param.gamma 0.1") {
     param.gamma = 0.1
     val source = Source.fromString("-1\t1:1.000000\t2:22.080000\t3:11.460000")
-    val x = Array(List(new SVMNode(1, 1.0), new SVMNode(2, 22.08), new SVMNode(3, 11.46)))
-    val y = Array(-1.0)
-    val problem = SVMProblem.get(param, source)
+    /* val x = */ Array(List(new SVMNode(1, 1.0), new SVMNode(2, 22.08), new SVMNode(3, 11.46)))
+    /* val y = */ Array(-1.0)
+    /* val problem = */ SVMProblem.get(param, source)
     assertEquals(param.gamma, 0.1, DELTA)
   }
 
