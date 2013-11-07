@@ -2,7 +2,7 @@ name            := "scala-svm"
 
 version         := "0.1.0-SNAPSHOT"
 
-organization    := "me.iamzsx"
+organization    := "de.sciss"
 
 description     := "A Scala implementation of SVM"
 

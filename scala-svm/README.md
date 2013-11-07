@@ -1,12 +1,12 @@
 # ScalaSVM: A Scala implementation of Support Vector Machines
 
-## Fork
+## Statement
 
-This is a fork from https://github.com/zsxwing/scala-svm originally (C)opyright by Shixiong Zhu and released under an [MIT style license](https://raw.github.com/zsxwing/scala-svm/master/LICENSE). All changes (C)opyright 2013 by Hanns Holger Rutz and release under that same license.
+This library provides Support Vector Machines for the Scala programming language.
 
-This fork builds with sbt.
+This project started as a [Scala port](https://github.com/zsxwing/scala-svm) of [libSVM](http://www.csie.ntu.edu.tw/~cjlin/libsvm) by Shixiong Zhu and was released under an [MIT style license](https://raw.github.com/zsxwing/scala-svm/master/LICENSE).
 
-This library is a Scala port of [libSVM](http://www.csie.ntu.edu.tw/~cjlin/libsvm).
+This new version is release under the [GNU Lesser General Public License]() and comes with absolutely no warranties. All changes and extensions from the original version are (C)opyright 2013 by Hanns Holger Rutz. To contact the author, send an email to `contact at sciss.de`
 
 ## Requirements
 
