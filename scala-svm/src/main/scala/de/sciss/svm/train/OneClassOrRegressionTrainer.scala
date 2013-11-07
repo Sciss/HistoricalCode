@@ -7,16 +7,16 @@ private[train] trait OneClassOrRegressionTrainer extends Trainer {
 
     val decisionFunction = trainOne(param, problem, 0, 0)
 
-    val suportVectors = Array.newBuilder[SupportVector]
+    val supportVectors = Array.newBuilder[SupportVector]
     for (i <- 0 until problem.size if math.abs(decisionFunction.alpha(i)) > 0) {
-      suportVectors += new SupportVector(problem.x(i), decisionFunction.alpha(i), i + 1)
+      supportVectors += new SupportVector(problem.x(i), decisionFunction.alpha(i), i + 1)
     }
 
     assert(numClasses == 2)
     new BaseModel /* SVMModel */(
       // numClasses,
       param,
-      Array(suportVectors.result()),
+      Array(supportVectors.result()),
       Array(decisionFunction.rho))
   }
 

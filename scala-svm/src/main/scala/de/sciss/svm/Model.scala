@@ -44,6 +44,7 @@ class EpsilonSVRSVMParamter(
   val C : Double,
   val p : Double) extends SVMParameter(kernel, nu, eps)
 
+// aka
 case class SupportVector(
   vector      : List[Node],
   coefficient : Double,

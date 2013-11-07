@@ -2,8 +2,6 @@ package de.sciss.svm
 
 import scala.math.abs
 
-class DecisionFunction(val alpha: Array[Double], val rho: Double)
-
 trait Trainer {
   def train(param: SVMParameter, problem: Problem): Model
 
