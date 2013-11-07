@@ -1,17 +1,17 @@
 package me.iamzsx.scala.svm
-import org.scalatest._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import scala.io.Source
 import AssertUtil._
+import org.scalatest.FunSuite
 
 @RunWith(classOf[JUnitRunner])
 class SolverSuite extends FunSuite {
 
   test("1 train case") {
-    val param = new SVMParameter(new LinearKernel)
+    val param   = new SVMParameter(new LinearKernel)
 
-    val source = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46")
+    val source  = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46")
     val problem = SVMProblem.get(param, source)
 
     val solution = Solver.solveOneClass(problem, param)

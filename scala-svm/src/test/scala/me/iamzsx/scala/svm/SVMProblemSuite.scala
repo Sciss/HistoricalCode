@@ -1,30 +1,30 @@
 package me.iamzsx.scala.svm
 
-import org.scalatest._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.junit.Assert._
 import scala.io.Source
 import java.io.IOException
 import AssertUtil._
+import org.scalatest.{BeforeAndAfter, FunSuite}
 
 @RunWith(classOf[JUnitRunner])
 class SVMProblemSuite extends FunSuite with BeforeAndAfter {
   val DELTA = 10E-6
 
-  var param: SVMParameter = null
+  var param: SVMParameter = _
 
   before {
     param = new SVMParameter(new LinearKernel, 0, 0)
   }
 
   test("get") {
-    val source = Source.fromString("-1\t1:1.000000\t2:22.080000\t3:11.460000")
-    val x = Array(List(new SVMNode(1, 1.0), new SVMNode(2, 22.08), new SVMNode(3, 11.46)))
-    val y = Array(-1.0)
+    val source  = Source.fromString("-1\t1:1.000000\t2:22.080000\t3:11.460000")
+    val x       = Array(List(new SVMNode(1, 1.0), new SVMNode(2, 22.08), new SVMNode(3, 11.46)))
+    val y       = Array(-1.0)
     val problem = SVMProblem.get(param, source)
 
-    assertEquals(1, problem.size)
+    assertEquals   (1, problem.size)
     svmAssertEquals(y, problem.ys)
     svmAssertEquals(x, problem.xs)
     assertEquals(param.gamma, 1.0 / 3, DELTA)
@@ -38,7 +38,7 @@ class SVMProblemSuite extends FunSuite with BeforeAndAfter {
     val y = Array(-1.0, 1.0)
     val problem = SVMProblem.get(param, source)
 
-    assertEquals(2, problem.size)
+    assertEquals   (2, problem.size)
     svmAssertEquals(y, problem.ys)
     svmAssertEquals(x, problem.xs)
     assertEquals(param.gamma, 1.0 / 3, DELTA)

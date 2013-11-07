@@ -13,9 +13,9 @@ trait Coef0 {
 }
 
 class PolyParameter(
-  val gamma: Double,
+  val gamma : Double,
   val degree: Double,
-  val coef0: Double) extends Gamma with Degree with Coef0
+  val coef0 : Double) extends Gamma with Degree with Coef0
 
 class SigmoidParameter(
   val gamma: Double,
@@ -31,7 +31,7 @@ class SVMParameter(
     kernel.toString).mkString("\n")
 }
 
-class SVMTrainParameter
+// class SVMTrainParameter
 
 object SVMParameter {
   def poly(gamma: Double, degree: Double, coef0: Double) = new PolyParameter(gamma, degree, coef0)
@@ -63,7 +63,7 @@ class SVMModel(
 
   def predictValues(x: List[SVMNode]): Double = 0.0
 
-  def save(file: String): Unit = ()
+  def save(file: String) = ()
 
   override def toString = Array(
     param.toString,
@@ -81,44 +81,42 @@ class BaseModel(
     supportVectors(0).map(supportVector => param.kernel(x, supportVector.vector)).sum - rho(0)
 }
 
-class CSVCModel
+//class CSVCModel
+//
+//class NUSVCModel
 
-class NUSVCModel
+//object SVMModel {
+//    def load(file: String): SVMModel = {
+//      for (line <- Source.fromFile(file).getLines()) {
+//        val splits = line.split(" ")
+//        splits(0) match {
+//          case "svm_type" => ""
+//          case "kernel_type" => ""
+//          case "degree" => ""
+//          case "gamma" => ""
+//          case "coef0" => ""
+//          case "nr_class" => ""
+//          case "total_sv" => ""
+//          case "rho" => ""
+//          case "label" => ""
+//          case "probA" => ""
+//          case "probB" => ""
+//          case "nr_sv" => ""
+//          case "SV" => ""
+//        }
+//      }
+//      null
+//    }
+//
+//    def save(file: String): Unit = {
+//      val output = new PrintWriter(new FileWriter(file))
+//      output.close()
+//      //val output = Resource.fromFile(file)(Codec.UTF8)
+//    }
+//}
 
-object SVMModel {
-  //  def load(file: String): SVMModel = {
-  //    for (line <- Source.fromFile(file).getLines()) {
-  //      val splits = line.split(" ")
-  //      splits(0) match {
-  //        case "svm_type" => ""
-  //        case "kernel_type" => ""
-  //        case "degree" => ""
-  //        case "gamma" => ""
-  //        case "coef0" => ""
-  //        case "nr_class" => ""
-  //        case "total_sv" => ""
-  //        case "rho" => ""
-  //        case "label" => ""
-  //        case "probA" => ""
-  //        case "probB" => ""
-  //        case "nr_sv" => ""
-  //        case "SV" => ""
-  //      }
-  //    }
-  //    null
-  //  }
-
-  //  def save(file: String): Unit = {
-  //    val output = new PrintWriter(new FileWriter(file))
-  //    output.close()
-  //    //val output = Resource.fromFile(file)(Codec.UTF8)
-  //  }
-}
-
-class SolutionInfo {
-  val upper_bound_p : Double = 0
-  val upper_bound_n : Double = 0
-  val rho           : Double = 0
-}
-
-
+//class SolutionInfo {
+//  val upper_bound_p : Double = 0
+//  val upper_bound_n : Double = 0
+//  val rho           : Double = 0
+//}

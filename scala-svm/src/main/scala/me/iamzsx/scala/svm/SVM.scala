@@ -15,7 +15,7 @@ trait SVMTrainer {
 
   protected[this] def solver: FormulationSolver
 
-  def train_one(param: SVMParameter, problem: SVMProblem, Cp: Double, Cn: Double): DecisionFunction = {
+  def trainOne(param: SVMParameter, problem: SVMProblem, Cp: Double, Cn: Double): DecisionFunction = {
     val solution = solver.solve(problem, param)
 
     println("obj = " + solution.obj + ", rho = " + solution.rho)
@@ -46,7 +46,7 @@ class OneClassOrRegressionTrainer extends SVMTrainer {
   def train(param: SVMParameter, problem: SVMProblem): SVMModel = {
     val nr_class = 2
 
-    val decisionFunction = train_one(param, problem, 0, 0)
+    val decisionFunction = trainOne(param, problem, 0, 0)
 
     val suportVectors = ArrayBuffer[SupportVector]()
     for (i <- 0 until problem.size if abs(decisionFunction.alpha(i)) > 0) {
@@ -63,27 +63,21 @@ class OneClassOrRegressionTrainer extends SVMTrainer {
   def solver: FormulationSolver = new OneClassSolver
 }
 
-class OneClassTrainer extends OneClassOrRegressionTrainer {
-
-}
-
+class OneClassTrainer   extends OneClassOrRegressionTrainer
 class RegressionTrainer extends OneClassOrRegressionTrainer
-
 class EpsilonSVRTrainer extends RegressionTrainer
+class NuSVRTrainer      extends RegressionTrainer
 
-class NuSVRTrainer extends RegressionTrainer
-
-/**
- * <pre>
- * val param = new SVMParameter(new LinearKernel)
- * val svm = SVM("one_class")
- * val problem = SVMProblem.get(param, ...)
- * val model = svm.trainer.train(param, problem)
- * val y = model.predict(...)
- * </pre>
- *
- * @author szhu
- */
+/** <pre>
+  * val param = new SVMParameter(new LinearKernel)
+  * val svm = SVM("one_class")
+  * val problem = SVMProblem.get(param, ...)
+  * val model = svm.trainer.train(param, problem)
+  * val y = model.predict(...)
+  * </pre>
+  *
+  * @author szhu
+  */
 object SVM {
 
   def apply(name: String): SVM = name match {
