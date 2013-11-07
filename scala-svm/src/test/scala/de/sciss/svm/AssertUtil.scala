@@ -37,4 +37,9 @@ object AssertUtil {
     org.junit.Assert.assertEquals(excepted.size, actual.size)
     (excepted zip actual) map (z => svmAssertEquals(z._1, z._2))
   }
+
+  implicit def svmAssertSeqSupportVecEquals(excepted: Vec[SupportVector], actual: Vec[SupportVector]): Unit = {
+    org.junit.Assert.assertEquals(excepted.size, actual.size)
+    (excepted zip actual) map (z => svmAssertEquals(z._1, z._2))
+  }
 }

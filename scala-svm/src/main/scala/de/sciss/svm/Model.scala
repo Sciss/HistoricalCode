@@ -50,7 +50,7 @@ class EpsilonSVRSVMParamter(
 abstract class Model(
   val numClasses      : Int,
   val param         : SVMParameter,
-  val supportVectors: Array[Array[SupportVector]],
+  val supportVectors: Vec[Vec[SupportVector]],
   val rho           : Array[Double]) {
 
   require(supportVectors.size == rho.size)
@@ -71,7 +71,7 @@ abstract class Model(
 
 class BaseModel(
     param         : SVMParameter,
-    supportVectors: Array[Array[SupportVector]],
+    supportVectors: Vec[Vec[SupportVector]],
     rho           : Array[Double])
   extends Model(2, param, supportVectors, rho) {
 

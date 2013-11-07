@@ -20,8 +20,8 @@ class SVMTrainerSuite extends FunSuite {
     assertEquals(2, model.numClasses)
     svmAssertEquals(309.929000, model.rho(0))
     svmAssertEquals(
-      Array(
-        Array(
+      Vec(
+        Vec(
           new SupportVector(problem.x(0), 0.5, 1))), model.supportVectors)
   }
 
