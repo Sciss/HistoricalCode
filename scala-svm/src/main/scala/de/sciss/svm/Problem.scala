@@ -71,7 +71,7 @@ object Problem {
     val instances = Vec.newBuilder[Instance]
     var maxIndex = 0
     for (line <- source.getLines().map(_.trim)) {
-      val columns = line.split('\t')
+      val columns = line.split("\\s")  // use whitespace
       if (columns.size <= 1) {
         // Do we need to support no feature?
         throw new IOException("Invalid input: Feature vector empty in line " + line)

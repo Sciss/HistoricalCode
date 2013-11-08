@@ -25,7 +25,7 @@ object SVM {
       final val name  = "C-SVC"
       final val id    = "c_svc"
 
-      def trainer: Trainer = ???
+      def trainer: Trainer = train.CSVCTrainer
     }
     case object Nu extends Classification {
       final val name  = "Nu-SVC" // "\u03BD-SVC"
