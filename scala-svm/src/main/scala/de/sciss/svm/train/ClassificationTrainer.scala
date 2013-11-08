@@ -8,8 +8,6 @@ private[train] trait ClassificationTrainer extends Trainer {
 
   case class Grouped(numClasses: Int, label: Array[Int], start: Array[Int], count: Array[Int])
 
-  def info(what: => String): Unit = println(what)
-
   def train(param: Parameters, problem: Problem): Model = {
     // group training data of the same class
     val map     = problem.groupClasses // groupClasses(problem)

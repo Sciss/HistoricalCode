@@ -1,5 +1,8 @@
 package de.sciss.svm
 
+import de.sciss.svm.train.OneClassTrainer
+import de.sciss.svm.solve.OneClassSolver
+
 /** 1. SVC: support vector classification (two-class and multi-class).
   * 2. SVR: support vector regression.
   * 3. One-class SVM.
@@ -279,32 +282,8 @@ class Solver(problem: Problem,
 }
 
 object Solver {
-//  def solveOneClass(problem: Problem, param: Parameters): Solution = {
-//    val l     = problem.size
-//    val nd    = param.nu * l
-//    val n     = nd.toInt
-//
-//    val alpha = Vec.tabulate(l) {
-//      case i if i < n           => 1.0
-//      case i if i == n && i < l => nd - n
-//      case _                    => 0.0
-//    }
-//
-//    val zeros = Vec.fill(l)(0.0)
-//    val ones  = Vec.fill(l)(1)
-//
-//    val solver = new Solver(
-//      problem = problem,
-//      param   = param,
-//      Q       = new OneClassQMatrix(problem, param),
-//      p       = zeros,
-//      y       = ones,
-//      alpha  = alpha,
-//      Cp      = 1.0,
-//      Cn      = 1.0)
-//
-//    solver.solve()
-//  }
+  def solveOneClass(problem: Problem, param: Parameters): Solution =
+    OneClassSolver.solve(problem, param, 0.0, 0.0)
 
   def solveEpsilonSVR(problem: Problem, param: EpsilonSVRSVMParamter): Solution = {
     val l           = problem.size
@@ -364,7 +343,7 @@ object Solver {
 }
 
 trait FormulationSolver {
-  def solve(problem: Problem, param: Parameters): Solution
+  def solve(problem: Problem, param: Parameters, Cp: Double, Cn: Double): Solution
 }
 
 //class OneClassSolver extends FormulationSolver {

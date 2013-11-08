@@ -5,12 +5,12 @@ import scala.math.abs
 trait Trainer {
   def train(param: Parameters, problem: Problem): Model
 
-  protected[this] def solver: FormulationSolver
+  protected def solver: FormulationSolver
 
   def trainOne(param: Parameters, problem: Problem, Cp: Double, Cn: Double): DecisionFunction = {
-    val solution = solver.solve(problem, param)
+    val solution = solver.solve(problem, param, Cp = Cp, Cn = Cn)
 
-    println("obj = " + solution.obj + ", rho = " + solution.rho)
+    println(s"obj = ${solution.obj}, rho = ${solution.rho}")
 
     val nSV = solution.alpha.count(abs(_) > 0)
 
