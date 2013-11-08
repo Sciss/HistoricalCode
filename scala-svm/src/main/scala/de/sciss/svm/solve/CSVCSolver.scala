@@ -30,7 +30,7 @@ private[svm] object CSVCSolver extends FormulationSolver {
     //   	s.Solve(l, SVC_Q(*prob,*param,y), minus_ones, y,
     //   		alpha, Cp, Cn, param->eps, si, param->shrinking);
 
-    if (Cp == Cn) info(s"nu = ${sumAlpha / (Cp * len)}\n")
+    if (Cp == Cn) logInfo(s"nu = ${sumAlpha / (Cp * len)}\n")
 
     val alphaNew = (solution.alpha zip y).map { case (ai, yi) => ai * yi }
     solution.copy(alpha = alphaNew)

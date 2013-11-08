@@ -4,5 +4,9 @@ package object svm {
   val Vec       = collection.immutable.IndexedSeq
   type Vec[+A]  = collection.immutable.IndexedSeq[A]
 
-  def info(what: => String): Unit = print(what) // TODO: use proper logging
+  final val Inf = Double.PositiveInfinity
+
+   // TODO: use proper logging
+  def logInfo(what: => String): Unit = Console.out.print(what)
+  def logWarn(what: => String): Unit = Console.err.print(s"\nWARNING: $what")
 }

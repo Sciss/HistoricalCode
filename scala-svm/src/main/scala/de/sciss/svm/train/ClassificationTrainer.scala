@@ -21,7 +21,7 @@ private[train] trait ClassificationTrainer extends Trainer {
 
     val numClasses = classes.size
     if(numClasses == 1)
-      info("WARNING: training data in only one class. See README for details.\n")
+      logInfo("WARNING: training data in only one class. See README for details.\n")
 
     // calculate weighted C
 
@@ -91,7 +91,7 @@ private[train] trait ClassificationTrainer extends Trainer {
     // val modelNSV  = nzCount.clone()
     val totalSV   = nzCount.sum
 
-    info(s"Total nSV = $totalSV\n")
+    logInfo(s"Total nSV = $totalSV\n")
 
     val modelSV = (groups zip nonZero).zipWithIndex.map { case ((gi, nzi), i) =>
       (gi.xs zip nzi).zipWithIndex.collect {
