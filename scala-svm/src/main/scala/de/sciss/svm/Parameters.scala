@@ -51,7 +51,7 @@ class Parameters(
   val kernel      : Kernel,
   val nu          : Double = 0.5,
   val eps         : Double = 0.001,
-  val C           : Double = 0,                     // for C_SVC, EPSILON_SVR and NU_SVR
+  val C           : Double = 1,                     // for C_SVC, EPSILON_SVR and NU_SVR
   val weights     : Map[Int, Double] = Map.empty,   // for C_SVC
   val shrinking   : Boolean = true,                 // use the shrinking heuristics
   val probability : Boolean = false,

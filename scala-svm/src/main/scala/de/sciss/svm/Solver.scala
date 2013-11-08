@@ -3,6 +3,7 @@ package de.sciss.svm
 import de.sciss.svm.solve.OneClassSolver
 import math.{min, max}
 import collection.breakOut
+import scala.annotation.elidable
 
 object Solver {
   final val LowerBound = 0
@@ -233,6 +234,8 @@ class Solver(problem: Problem,
     }
   }
 
+  @elidable(elidable.INFO) private def debug(what: => String): Unit = println(s"[DEBUG] $what")
+
   private def calculateObjectiveValue(): Double =
     (0 until len).iterator.map(i => _alpha(i) * (grad(i) + _p(i))).sum / 2
 
@@ -241,6 +244,8 @@ class Solver(problem: Problem,
     var iter    = 0
 
     while (iter < maxIter) {
+      // debug(s"iter $iter")
+
       counter -= 1
       if (counter == 0) {
         counter = min(len, 1000)
@@ -403,6 +408,8 @@ class Solver(problem: Problem,
       }
     }
 
+    debug(s"selectWorkingSet; activeSize = $activeSize; maxGrad $maxGrad; mxi $mxi")
+
     var minObj      = Inf
     var maxGrad2    = -Inf
     var mni         = -1
@@ -430,6 +437,8 @@ class Solver(problem: Problem,
         }
       }
     }
+
+    // debug(s"selectWorkingSet; maxGrad2 $maxGrad2; mni $mni")
 
     if (maxGrad + maxGrad2 < eps) None else Some(mxi, mni)
   }
