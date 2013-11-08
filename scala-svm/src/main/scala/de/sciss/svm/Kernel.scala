@@ -53,19 +53,11 @@ sealed trait Kernel {
   protected def writeData(ps: PrintStream): Unit
 }
 
-//object Kernel {
-//
-//}
-
 /** @see http://en.wikipedia.org/wiki/Support_vector_machine */
 case object LinearKernel extends Kernel {
-
-  // override def tpe  = LINEAR
-  final val id      = "linear"
+  final val id = "linear"
 
   override def apply(x: List[Node], y: List[Node]): Double = dot(x, y)
-
-  override def toString = "kernel_type " + id // tpe.toString
 
   protected def writeData(ps: PrintStream) = ()
 }
@@ -76,18 +68,15 @@ object PolynomialKernel {
 case class PolynomialKernel(gamma: Double, coef0: Double = 0, degree: Int = 3) extends Kernel {
   require(degree >= 0) // Why degree == 0 is valid?
 
-  // override def tpe = POLY
   def id = PolynomialKernel.id
 
   override def apply(x: List[Node], y: List[Node]): Double = powi(gamma * dot(x, y) + coef0, degree)
 
-  override def toString = Array(
-    "kernel_type " + id, // tpe.toString,
-    "degree " + degree,
-    "gamma " + gamma,
-    "coef0 " + coef0).mkString("\n")
-
-  protected def writeData(ps: PrintStream) = ()
+  protected def writeData(ps: PrintStream): Unit = {
+    ps.println(s"degree $degree")
+    ps.println(s"gamma $gamma")
+    ps.println(s"coef0 $coef0")
+  }
 }
 
 object RBFKernel {
@@ -99,7 +88,6 @@ object RBFKernel {
 case class RBFKernel(gamma: Double) extends Kernel {
   require(gamma >= 0) // Why gamma == 0 is valid?
 
-  // override def tpe = RBF
   def id = RBFKernel.id
 
   override def apply(x: List[Node], y: List[Node]): Double = {
@@ -121,11 +109,7 @@ case class RBFKernel(gamma: Double) extends Kernel {
     rbf(x, y, 0)
   }
 
-  override def toString = Array(
-    "kernel_type " + id, // tpe.toString,
-    "gamma " + gamma).mkString("\n")
-
-  protected def writeData(ps: PrintStream) = ()
+  protected def writeData(ps: PrintStream) = ps.println(s"gamma $gamma")
 }
 
 object SigmoidKernel {
@@ -135,30 +119,23 @@ object SigmoidKernel {
 case class SigmoidKernel(gamma: Double, coef0: Double = 0) extends Kernel {
   require(gamma >= 0) // Why gamma == 0 is valid?
 
-  // override def tpe = SIGMOID
   def id = SigmoidKernel.id
 
   override def apply(x: List[Node], y: List[Node]): Double = math.tanh(gamma * dot(x, y) + coef0)
 
-  override def toString = Array(
-    "kernel_type " + id, // tpe.toString,
-    "gamma " + gamma,
-    "coef0 " + coef0).mkString("\n")
-
-  protected def writeData(ps: PrintStream) = ()
+  protected def writeData(ps: PrintStream): Unit = {
+    ps.println(s"gamma $gamma")
+    ps.println(s"coef0 $coef0")
+  }
 }
 
 case object PrecomputedKernel extends Kernel {
-
-  // override def tpe = PRECOMPUTED
   final val id = "precomputed"
 
   override def apply(x: List[Node], y: List[Node]): Double = {
     // TODO
     ???
   }
-
-  override def toString = "kernel_type " + id // tpe.toString
 
   protected def writeData(ps: PrintStream) = ()
 }

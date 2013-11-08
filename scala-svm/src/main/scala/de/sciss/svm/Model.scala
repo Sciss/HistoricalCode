@@ -4,12 +4,16 @@ import java.io.{PrintStream, File}
 
 abstract class Model(
   val tpe           : Type,
-  val numClasses    : Int,
+  val classes       : Vec[Int], // labels
   val param         : Parameters,
   val supportVectors: Vec[Vec[SupportVector]],
   val rho           : Vec[Double]) {
 
   require(supportVectors.size == rho.size)
+
+  lazy val numVectors: Int = supportVectors.iterator.map(_.size).sum
+
+  def numClasses = classes.size
 
   def predict(x: List[Node]): Double = predictValues(x)
 
@@ -26,85 +30,82 @@ abstract class Model(
     }
   }
 
+  /** Writes a string representation of the model data to a stream.
+    *
+    * The entries are separated by new lines. The preamble contains pairs of
+    * keys and values which are separated by a space character. E.g.
+    * `svm_type c_svc` or `gamma 0.25`. The line `SV` concludes the preamble
+    * after which the support vectors are printed line by line.
+    *
+    * @param ps  the output stream to which the string is appended
+    */
   def write(ps: PrintStream): Unit = {
     ps.println(s"svm_type ${tpe.id}")
     param.write(ps)
-//
-//    fprintf(fp,"kernel_type %s\n", kernel_type_table[param.kern//e//l_type]);
-//
-//    if(param.kernel.tpe == Kernel//Type.POLY)
-//      fp.println(s"degree ${param.d//e//gree}\n")
-//
-//    if(param.kernel_type == POLY || param.kernel_type == RBF || param.kernel_type =//= SIGMOID)
-//      fprintf(fp,"gamma %g\n", par//a//m.gamma);
-//
-//    if(param.kernel_type == POLY || param.kernel_type =//= SIGMOID)
-//      fprintf(fp,"coef0 %g\n", par//a//m.coef0);
-//
-//    int nr_class = model-//>nr_class;
-//    int l =// model->l;
-//    fprintf(fp, "nr_class %d\n", //nr_class);
-//    fprintf(fp, "total_sv// //%d\n",//l);
-//
-//    {
-//      fprintf(f//p, "rho");
-//      for(int i=0;i<nr_class*(nr_class//-1)/2;i++)
-//        fprintf(fp," %g",model//->rho[i]);
-//      fprintf(//fp, "\//n//");
-//    }
-//
-//    if(mod//el->la//bel)
-//    {
-//      fprintf(fp,// "label");
-//      for(int i=0;i<nr_//class;i++)
-//        fprintf(fp," %d",model->//label[i]);
-//      fprintf(//fp, "\//n//");
-//    }
-//
-//    if(model->probA) // regression has //probA //only
-//    {
-//      fprintf(fp,// "probA");
-//      for(int i=0;i<nr_class*(nr_class//-1)/2;i++)
-//        fprintf(fp," %g",model->//probA[i]);
-//      fprintf(//fp, "\//n");
-//    }
-//    if(mod//el->pr//obB)
-//    {
-//      fprintf(fp,// "probB");
-//      for(int i=0;i<nr_class*(nr_class//-1)/2;i++)
-//        fprintf(fp," %g",model->//probB[i]);
-//      fprintf(//fp, "\//n//");
-//    }
-//
-//    if(m//odel->//nSV)
-//    {
-//      fprintf(fp,// "nr_sv");
-//      for(int i=0;i<nr_//class;i++)
-//        fprintf(fp," %d",model//->nSV[i]);
-//      fprintf(//fp, "\//n//");
-//    }
-//
-//    fprintf(fp//, "SV\n");
-//    const double * const *sv_coef = model//->sv_coef;
-//    const svm_node * const *SV = //m//odel->SV;
-//
-//    for(int i=//0;i<l;//i++)
-//    {
-//      for(int j=0;j<nr_cl//ass-1;j++)
-//        fprintf(fp, "%.16g ",sv_co//e//f[j][i]);
-//
-//      const svm_node *//p// = SV[i];
-//
-//      if(param.kernel_type == PR//ECOMPUTED)
-//        fprintf(fp,"0:%d ",(int)(p//->value));
-////      else
-//        while(p->in//dex != -1)//
-//        {
-//          fprintf(fp,"%d:%.8g ",p->index,//p->value);
-//    //      p++;//
-//        }
-//      fprintf(//fp, "\n");
-//    }
+
+    ps.println(s"nr_class $numClasses")
+    ps.println(s"total_sv $numVectors")
+
+    ps.print("rho")
+    rho.foreach(x => ps.print(s" $x"))  // %g in the C code
+    ps.println()
+
+    // if (classes.nonEmpty) {
+      ps.print("label")
+      classes.foreach(lb => ps.print(s" $lb"))
+      ps.println()
+    // }
+
+    //   	if(model->probA) // regression has probA only
+    //   	{
+    //   		fprintf(fp, "probA");
+    //   		for(int i=0;i<nr_class*(nr_class-1)/2;i++)
+    //   			fprintf(fp," %g",model->probA[i]);
+    //   		fprintf(fp, "\n");
+    //   	}
+    //   	if(model->probB)
+    //   	{
+    //   		fprintf(fp, "probB");
+    //   		for(int i=0;i<nr_class*(nr_class-1)/2;i++)
+    //   			fprintf(fp," %g",model->probB[i]);
+    //   		fprintf(fp, "\n");
+    //   	}
+
+    // if (supportVectors.nonEmpty) {
+      ps.print("nr_sv")
+      supportVectors.foreach(sv => ps.print(s" ${sv.size}"))
+      ps.println()
+   	// }
+
+    ps.println("SV")
+    for (i <- 0 until numVectors) {
+      supportVectors.foreach { sv =>
+        ps.print(f"${sv(i).coefficient}%.16f")
+      }
+      // ???
+      ps.println()
+    }
+
+    //   	const double * const *sv_coef = model->sv_coef;
+    //   	const svm_node * const *SV = model->SV;
+    //
+    //   	for(int i=0;i<l;i++)
+    //   	{
+    //   		for(int j=0;j<nr_class-1;j++)
+    //   			fprintf(fp, "%.16g ",sv_coef[j][i]);
+    //
+    //   		const svm_node *p = SV[i];
+    //
+    //   		if(param.kernel_type == PRECOMPUTED)
+    //   			fprintf(fp,"0:%d ",(int)(p->value));
+    //   		else
+    //   			while(p->index != -1)
+    //   			{
+    //   				fprintf(fp,"%d:%.8g ",p->index,p->value);
+    //   				p++;
+    //   			}
+    //   		fprintf(fp, "\n");
+    //   	}
   }
 
   override def toString = Array(
@@ -118,7 +119,7 @@ class BaseModel(
     param         : Parameters,
     supportVectors: Vec[Vec[SupportVector]],
     rho           : Vec[Double])
-  extends Model(tpe = tpe, numClasses = 2, param = param, supportVectors = supportVectors, rho = rho) {
+  extends Model(tpe = tpe, classes = Vec(0, 1), param = param, supportVectors = supportVectors, rho = rho) {
 
   override def predictValues(x: List[Node]): Double =
     supportVectors(0).map(supportVector => param.kernel(x, supportVector.vector)).sum - rho(0)

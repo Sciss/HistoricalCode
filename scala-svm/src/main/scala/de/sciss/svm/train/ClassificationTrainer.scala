@@ -13,22 +13,22 @@ private[train] trait ClassificationTrainer extends Trainer {
   def train(param: Parameters, problem: Problem): Model = {
     // group training data of the same class
     val map     = problem.groupClasses // groupClasses(problem)
-    val keys    = map.keys.toIndexedSeq.sorted
-    val groups  = keys.map(map)
+    val classes = map.keys.toIndexedSeq.sorted
+    val groups  = classes.map(map)
 
     // TODO:
     // Labels are ordered by their first occurrence in the training set.
     // However, for two-class sets with -1/+1 labels and -1 appears first,
     // we swap labels to ensure that internally the binary SVM has positive data corresponding to the +1 instances.
 
-    val numClasses = keys.size
+    val numClasses = classes.size
     if(numClasses == 1)
       info("WARNING: training data in only one class. See README for details.\n")
 
     // calculate weighted C
 
     val weightedC = Array.tabulate[Double](numClasses) { ci =>
-      param.C * param.weights.getOrElse[Double](keys(ci), 1.0)
+      param.C * param.weights.getOrElse[Double](classes(ci), 1.0)
     }
 
     // train k*(k-1)/2 models
@@ -137,7 +137,7 @@ private[train] trait ClassificationTrainer extends Trainer {
 
     val rho: Vec[Double] = f.flatMap(_.map(_.rho))
 
-    new Model(tpe = tpe, numClasses = numClasses, param = param, supportVectors = modelSV, rho = rho) {
+    new Model(tpe = tpe, classes = classes, param = param, supportVectors = modelSV, rho = rho) {
       def predictValues(x: List[Node]): Double = ???
     }
   }

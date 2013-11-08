@@ -4,7 +4,7 @@ object Main extends App {
   private val argsv = args.toIndexedSeq
   argsv match {
     case "train" +: rest =>
-      CommandTrain(argsv)
+      CommandTrain(rest)
 
     case other +: _ =>
       println(s"Illegal command '$other'!\n")
