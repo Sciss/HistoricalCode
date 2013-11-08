@@ -279,41 +279,44 @@ class Solver(problem: Problem,
 }
 
 object Solver {
-
-  def solveOneClass(problem: Problem, param: Parameters): Solution = {
-    val n = (param.nu * problem.size).toInt
-
-    val alpha = Vec.tabulate(problem.size) {
-      case i if i < n                       => 1.0
-      case i if i == n && i < problem.size  => param.nu * problem.size - n
-      case _                                => 0.0
-    }
-
-    val zeros = Vec.fill(problem.size)(0.0)
-    val ones  = Vec.fill(problem.size)(1)
-
-    val solver = new Solver(
-      problem = problem,
-      param   = param,
-      Q       = new OneClassQMatrix(problem, param),
-      p       = zeros,
-      y       = ones,
-      alpha  = alpha,
-      Cp      = 1.0,
-      Cn      = 1.0)
-
-    solver.solve()
-  }
+//  def solveOneClass(problem: Problem, param: Parameters): Solution = {
+//    val l     = problem.size
+//    val nd    = param.nu * l
+//    val n     = nd.toInt
+//
+//    val alpha = Vec.tabulate(l) {
+//      case i if i < n           => 1.0
+//      case i if i == n && i < l => nd - n
+//      case _                    => 0.0
+//    }
+//
+//    val zeros = Vec.fill(l)(0.0)
+//    val ones  = Vec.fill(l)(1)
+//
+//    val solver = new Solver(
+//      problem = problem,
+//      param   = param,
+//      Q       = new OneClassQMatrix(problem, param),
+//      p       = zeros,
+//      y       = ones,
+//      alpha  = alpha,
+//      Cp      = 1.0,
+//      Cn      = 1.0)
+//
+//    solver.solve()
+//  }
 
   def solveEpsilonSVR(problem: Problem, param: EpsilonSVRSVMParamter): Solution = {
-    val alpha2     = Vec.fill    (2 * problem.size)(0.0)
-    val linearTerm = Vec.tabulate(2 * problem.size) {
-      case i if i < problem.size  => param.p - problem.y(i)
-      case i                      => param.p + problem.y(i - problem.size)
+    val l           = problem.size
+    val l2          = l * 2
+    val alpha2      = Vec.fill    (l2)(0.0)
+    val linearTerm  = Vec.tabulate(l2) {
+      case i if i < l => param.p - problem.y(i)
+      case i          => param.p + problem.y(i - l)
     }
-    val y = Vec.tabulate(2 * problem.size) {
-      case i if i < problem.size  =>  1
-      case _                      => -1
+    val y = Vec.tabulate(l2) {
+      case i if i < l =>  1
+      case _          => -1
     }
 
     val solver = new Solver(
@@ -333,15 +336,17 @@ object Solver {
 
   def solveNuSVR(problem: Problem, param: EpsilonSVRSVMParamter): Solution = {
     // var sum = param.C * param.nu * problem.size / 2
+    val l           = problem.size
+    val l2          = l * 2
 
-    val alpha2     = Vec.fill    (2 * problem.size)(0.0)
-    val linearTerm = Vec.tabulate(2 * problem.size) {
-      case i if i < problem.size  => -problem.y(i)                .toDouble
-      case i                      =>  problem.y(i - problem.size) .toDouble
+    val alpha2      = Vec.fill    (l2)(0.0)
+    val linearTerm  = Vec.tabulate(l2) {
+      case i if i < l => -problem.y(i)     .toDouble
+      case i          =>  problem.y(i - l) .toDouble
     }
-    val y = Vec.tabulate(2 * problem.size) {
-      case i if i < problem.size  =>  1
-      case _                      => -1
+    val y = Vec.tabulate(l2) {
+      case i if i < l =>  1
+      case _          => -1
     }
 
     val solver = new Solver(
@@ -362,9 +367,9 @@ trait FormulationSolver {
   def solve(problem: Problem, param: Parameters): Solution
 }
 
-class OneClassSolver extends FormulationSolver {
-  def solve(problem: Problem, param: Parameters) = Solver.solveOneClass(problem, param)
-}
+//class OneClassSolver extends FormulationSolver {
+//  def solve(problem: Problem, param: Parameters) =  Solver.solveOneClass(problem, param)
+//}
 
 case class Solution(
   obj         : Double,
