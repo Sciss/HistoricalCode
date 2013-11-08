@@ -3,18 +3,18 @@ package solve
 
 private[svm] object OneClassSolver extends FormulationSolver {
   def solve(problem: Problem, param: Parameters, Cp: Double, Cn: Double): Solution = {
-    val l     = problem.size
-    val nd    = param.nu * l
+    val len   = problem.size
+    val nd    = param.nu * len
     val n     = nd.toInt
 
-    val alpha = Vec.tabulate(l) {
-      case i if i < n           => 1.0
-      case i if i == n && i < l => nd - n
-      case _                    => 0.0
+    val alpha = Vec.tabulate(len) {
+      case i if i < n             => 1.0
+      case i if i == n && i < len => nd - n
+      case _                      => 0.0
     }
 
-    val zeros = Vec.fill(l)(0.0)
-    val ones  = Vec.fill(l)(1)
+    val zeros = Vec.fill(len)(0.0)
+    val ones  = Vec.fill(len)(1)
 
     //    s.Solve(l, ONE_CLASS_Q(*prob,*param), zeros, ones,
     //   		alpha, 1.0, 1.0, param->eps, si, param->shrinking);

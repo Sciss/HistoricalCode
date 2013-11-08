@@ -26,7 +26,7 @@ private[train] trait ClassificationTrainer extends Trainer {
     // calculate weighted C
 
     val weightedC = Array.tabulate[Double](numClasses) { ci =>
-      param.C * param.weights.getOrElse[Double](classes(ci), 1.0)
+      param.C * param.weights.getOrElse(classes(ci), 1.0)
     }
 
     // train k*(k-1)/2 models
@@ -41,7 +41,7 @@ private[train] trait ClassificationTrainer extends Trainer {
     //      probB=Malloc(double,numClasses*(numClasses-1)/2);
     //    }
 
-    val f = (groups zip weightedC).tails.map {
+    val f = (groups zip weightedC).tails.take(numClasses - 1).map {
       case (gi, wi) +: gij =>
         val si  = gi.instances.map(_.copy(y = 1))
         gij.map { case (gj, wj) =>
@@ -52,8 +52,14 @@ private[train] trait ClassificationTrainer extends Trainer {
           trainOne(param, sp, wi, wj)
         }
 
-      case _ => Vec.empty
+      // case _ => Vec.empty
     } .toIndexedSeq
+
+    println("f:")
+    f.foreach(println)
+
+    // DDD
+    println(s"numClasses $numClasses; f.size ${f.size}; f(0).size ${f(0).size}; f total ${f.map(_.size).sum}")
 
     val nonZero = f.map { fi =>
       fi.map { fij =>
@@ -85,7 +91,7 @@ private[train] trait ClassificationTrainer extends Trainer {
     // val modelNSV  = nzCount.clone()
     val totalSV   = nzCount.sum
 
-    info(s"Total nSV = $totalSV")
+    info(s"Total nSV = $totalSV\n")
 
     val modelSV = (groups zip nonZero).zipWithIndex.map { case ((gi, nzi), i) =>
       (gi.xs zip nzi).zipWithIndex.collect {

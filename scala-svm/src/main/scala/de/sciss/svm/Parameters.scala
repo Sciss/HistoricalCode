@@ -48,13 +48,14 @@ class SigmoidParameter(
   val coef0: Double) extends Gamma with Coef0
 
 class Parameters(
-  val kernel: Kernel,
-  val nu    : Double = 0.5,
-  val eps   : Double = 0.001,
-  val C     : Double = 0,                       // for C_SVC, EPSILON_SVR and NU_SVR
-  val weights: Map[Int, Double] = Map.empty,    // for C_SVC
-  val probability: Boolean = false,
-  var gamma : Double = 0.0) {
+  val kernel      : Kernel,
+  val nu          : Double = 0.5,
+  val eps         : Double = 0.001,
+  val C           : Double = 0,                     // for C_SVC, EPSILON_SVR and NU_SVR
+  val weights     : Map[Int, Double] = Map.empty,   // for C_SVC
+  val shrinking   : Boolean = true,                 // use the shrinking heuristics
+  val probability : Boolean = false,
+  var gamma       : Double = 0.0) {
 
   override def toString = Array(
     kernel.toString).mkString("\n")
@@ -66,13 +67,14 @@ class Parameters(
 
 // class SVMTrainParameter
 
-object SVMParameter {
+object Parameters {
   def poly(gamma: Double, degree: Double, coef0: Double) = new PolyParameter(gamma, degree, coef0)
 }
 
 class EpsilonSVRSVMParamter(
-  kernel: Kernel,
-  nu    : Double,
-  eps   : Double,
-  C     : Double,
-  val p : Double) extends Parameters(kernel, nu, eps, C = C)
+    kernel: Kernel,
+    nu    : Double,
+    eps   : Double,
+    C     : Double,
+    val p : Double)
+  extends Parameters(kernel, nu, eps, C = C)
