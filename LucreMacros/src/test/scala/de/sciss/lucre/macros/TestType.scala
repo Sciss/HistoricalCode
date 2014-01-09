@@ -1,6 +1,6 @@
 package de.sciss.lucre.macros
 
-import scala.concurrent.stm.{InTxn, Ref}
+//import scala.concurrent.stm.{InTxn, Ref}
 
 object TestType {
 
@@ -27,16 +27,16 @@ object TestType {
 
   // @txn class Bar(@txn val read: Int, @txn var readWrite: Int)
 
-  @txn class Foo(bar: Int, baz: Float) {
-    // def reset(): Unit = readWrite = 42
-  }
+//  @txn class Foo(bar: Int, baz: Float) {
+//    // def reset(): Unit = readWrite = 42
+//  }
 
-  @txn class FooR(bar0: Int) {
-    private val _bar = Ref(bar0)
-
-    def bar(implicit tx: InTxn): Int = _bar()
-    def bar_=(value: Int)(implicit tx: InTxn): Unit = _bar() = value
-  }
+//  @txn class FooR(bar0: Int) {
+//    private val _bar = Ref(bar0)
+//
+//    def bar(implicit tx: InTxn): Int = _bar()
+//    def bar_=(value: Int)(implicit tx: InTxn): Unit = _bar() = value
+//  }
 
   /*
 
@@ -68,4 +68,7 @@ object TestType {
   }
 
    */
+
+  object Foo
+  @mkCompanion class Foo
 }

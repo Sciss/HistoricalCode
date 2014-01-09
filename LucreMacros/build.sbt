@@ -4,12 +4,12 @@ organization    := "de.sciss"
 
 version         := "0.1.0-SNAPSHOT"
 
-scalaVersion    := "2.10.3"
+scalaVersion    := "2.11.0-M7"
 
 retrieveManaged := true
 
 libraryDependencies ++= Seq(
-  "de.sciss"        %% "lucrestm-core" % "2.0.+",
+  // "de.sciss"        %% "lucrestm-core" % "2.0.+",
   "org.scala-lang"   % "scala-reflect" % scalaVersion.value
 )
 
