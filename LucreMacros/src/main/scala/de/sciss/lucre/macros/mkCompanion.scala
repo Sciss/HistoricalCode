@@ -7,12 +7,13 @@ import language.experimental.macros
 trait Foo[A]
 
 class mkCompanion extends StaticAnnotation {
-  def macroTransform(annottees: Any*) = macro mkCompanionMacro.impl1
+  def macroTransform(annottees: Any*) = macro mkCompanionMacro.impl
 }
 object mkCompanionMacro {
   def impl1(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
     val inputs = annottees.map(_.tree).toList
+    println(s"---- RAW ----\n${showRaw(inputs.head)}")
     val (validAnnottees, _) = inputs partition {
       case x: ClassDef => true
       case _ => false
@@ -20,9 +21,11 @@ object mkCompanionMacro {
     for (v <- validAnnottees ) {
       val tpe = v.tpe // <- tpe is null as the annotated type is not yet type checked!
       val tpe2 = if (tpe == null) {
-          val blk = c.typeCheck(Block(Literal(Constant()), v))
-          println(s"Yo mama, we got $blk")
-          blk.tpe // <- fails with a compiler error (assertion failure)
+          println(s"---- Input ----\n${showRaw(v)}")
+          val blk = c.typeCheck(Block(v))
+          val Block((cd1 @ ClassDef(_, _, _, _)) :: Nil, _) = blk
+          println(s"---- Output ----\n${showRaw(blk)}")
+          cd1.tpe // <- fails with a compiler error (assertion failure)
         }
         else
           tpe
@@ -37,7 +40,7 @@ object mkCompanionMacro {
     val inputs : List[Tree] = annottees.map(_.tree)(collection.breakOut)
     val outputs: List[Tree] = inputs match {
       case (cd @ ClassDef(_, cName, _, _)) :: tail =>
-        val cTpe = cd.tpe
+        // val cTpe = cd.tpe
         val mod0: ModuleDef = tail match {
           case (md @ ModuleDef(_, mName, mTemp)) :: Nil if cName.decoded == mName.decoded => md
 
@@ -67,11 +70,17 @@ object mkCompanionMacro {
         //        val fooDef = DefDef(mods = NoMods, name = TermName("hasFoo"), tparams = Nil, vparamss = Nil,
         //          tpt = TypeTree(typeOf[Int]), rhs = Literal(Constant(33)))
 
+        val cTpe = if (cd.tpe != null) cd.tpe else {
+          val Block(cd1 :: Nil, _) = c.typeCheck(Block(cd))
+          cd1.tpe
+        }
+
         val fooName = TermName("hasFoo")
         // val cTpe    = annottees.head.tree.tpe // staticType // .actualType // yes?
         println(s"cTpe '$cTpe'")
-        val fooTpt  = TypeTree(cTpe)
-        val fooDef  = q"implicit def $fooName: $fooTpt = ???"
+
+        // val fooTpt  = TypeTree(cTpe)
+        val fooDef  = q"implicit def $fooName: Foo[$cTpe] = ???"
         val mTempBody1 = fooDef :: mTempBody0
         val mTemp1 = Template(mTempParents, mTempSelf, mTempBody1)
         val mod1 = ModuleDef(mod0.mods, mod0.name, mTemp1)
