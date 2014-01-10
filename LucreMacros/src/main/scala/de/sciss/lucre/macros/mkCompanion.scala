@@ -70,14 +70,17 @@ object mkCompanionMacro {
         //        val fooDef = DefDef(mods = NoMods, name = TermName("hasFoo"), tparams = Nil, vparamss = Nil,
         //          tpt = TypeTree(typeOf[Int]), rhs = Literal(Constant(33)))
 
-        val cTpe = if (cd.tpe != null) cd.tpe else {
-          val Block(cd1 :: Nil, _) = c.typeCheck(Block(cd))
-          cd1.tpe
-        }
+        //        val cTpe = if (cd.tpe != null) cd.tpe else {
+        //          val Block(cd1 :: Nil, _) = c.typeCheck(Block(cd))
+        //          cd1.tpe
+        //        }
+
+        // cf. http://stackoverflow.com/questions/21044957/type-of-a-macro-annottee
+        val cTpe = Ident(TypeName(cd.name.decoded))
 
         val fooName = TermName("hasFoo")
         // val cTpe    = annottees.head.tree.tpe // staticType // .actualType // yes?
-        println(s"cTpe '$cTpe'")
+        // println(s"cTpe '$cTpe'")
 
         // val fooTpt  = TypeTree(cTpe)
         val fooDef  = q"implicit def $fooName: Foo[$cTpe] = ???"
