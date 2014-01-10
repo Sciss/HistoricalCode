@@ -1,12 +1,14 @@
 package de.sciss.lucre.macros
 
 object TestType extends App {
-  object Foo
-  @mkCompanion class Foo
+//  object Bar
+//  @mkCompanion class Bar
 
-  @mkCompanion class Bar
+  @mkCompanion class Baz
 
-  assert(Foo.hasFoo == 33)
-  assert(Bar.hasFoo == 33)
-  println("Passed.")
+  // implicitly[Foo[Bar]]
+  implicitly[Foo[Baz]]
+  println("Done.")
+
+  // @mkCompanion class Bar
 }
