@@ -8,6 +8,8 @@ scalaVersion    := "2.11.0-M7"
 
 retrieveManaged := true
 
+scalacOptions  ++= Seq("-unchecked", "-deprecation", "-feature")
+
 libraryDependencies ++= Seq(
   // "de.sciss"        %% "lucrestm-core" % "2.0.+",
   "org.scala-lang"   % "scala-reflect" % scalaVersion.value
