@@ -19,8 +19,11 @@ object mkCompanionMacro {
     }
     for (v <- validAnnottees ) {
       val tpe = v.tpe // <- tpe is null as the annotated type is not yet type checked!
-      val tpe2 = if (tpe == null)
-          c.typeCheck(v).tpe // <- fails with a compiler error (assertion failure)
+      val tpe2 = if (tpe == null) {
+          val blk = c.typeCheck(Block(Literal(Constant()), v))
+          println(s"Yo mama, we got $blk")
+          blk.tpe // <- fails with a compiler error (assertion failure)
+        }
         else
           tpe
       println(s"type = '$tpe2'")
