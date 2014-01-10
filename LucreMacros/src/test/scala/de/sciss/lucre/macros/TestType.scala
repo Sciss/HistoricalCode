@@ -70,5 +70,5 @@ object TestType {
    */
 
   object Foo
-  @mkCompanion final class Foo
+  @mkCompanion class Foo
 }
