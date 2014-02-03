@@ -2,7 +2,7 @@ package de.sciss.svm
 
 object AssertUtil {
 
-  val DELTA = 10E-6
+  val DELTA = 10e-6
 
   implicit def svmAssertEquals(excepted: Double, actual: Double): Unit =
     org.junit.Assert.assertEquals(excepted, actual, DELTA)

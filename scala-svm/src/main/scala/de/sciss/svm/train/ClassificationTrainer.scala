@@ -1,14 +1,12 @@
 package de.sciss.svm
 package train
 
-import collection.breakOut
-
 private[train] trait ClassificationTrainer extends Trainer {
   protected def tpe: Type
 
   case class Grouped(numClasses: Int, label: Array[Int], start: Array[Int], count: Array[Int])
 
-  def train(param: Parameters, problem: Problem): Model = {
+  def train(param: Parameters, problem: Problem): ClassificationModel = {
     // group training data of the same class
     val map     = problem.groupClasses // groupClasses(problem)
     val classes = map.keys.toIndexedSeq.sorted
@@ -93,7 +91,7 @@ private[train] trait ClassificationTrainer extends Trainer {
 
     logInfo(s"Total nSV = $totalSV\n")
 
-    val modelSV = (groups zip nonZero).zipWithIndex.map { case ((gi, nzi), i) =>
+    val modelSV: Vec[Vec[SupportVector]] = (groups zip nonZero).zipWithIndex.map { case ((gi, nzi), i) =>
       (gi.xs zip nzi).zipWithIndex.collect {
         case ((x, true), j) => SupportVector(x, 0.0, j)  // TODO: correct?
       }
@@ -141,8 +139,9 @@ private[train] trait ClassificationTrainer extends Trainer {
 
     val rho: Vec[Double] = f.flatMap(_.map(_.rho))
 
-    new Model(tpe = tpe, classes = classes, param = param, supportVectors = modelSV, rho = rho) {
-      def predictValues(x: List[Node]): Double = ???
-    }
+    mkModel(classes = classes, param = param, supportVectors = modelSV, rho = rho)
   }
+
+  protected def mkModel(classes: Vec[Int], param: Parameters, supportVectors: Vec[Vec[SupportVector]],
+                        rho: Vec[Double]): ClassificationModel
 }

@@ -17,7 +17,7 @@ object SVM {
     final val name  = "one-class SVM"
     final val id    = "one_class"
 
-    def trainer: Trainer = train.OneClassTrainer
+    def trainer: train.OneClassTrainer.type = train.OneClassTrainer
   }
 
   object Classification {
