@@ -8,7 +8,7 @@ description     := "A Scala implementation of SVM"
 
 homepage        := Some(url("https://github.com/Sciss/" + name.value))
 
-licenses        := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
+licenses        := Seq("LGPL v3+" -> url("http://www.gnu.org/licenses/lgpl-3.0.txt"))
 
 scalaVersion    := "2.10.3"
 

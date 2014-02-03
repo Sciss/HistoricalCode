@@ -1,3 +1,16 @@
+/*
+ *  Solver.scala
+ *  (ScalaSVM)
+ *
+ *  Copyright (c) 2013-2014 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2014 Shixiong Zhu.
+ *
+ *	This software is published under the GNU Lesser General Public License v3+
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
+
 package de.sciss.svm
 
 import de.sciss.svm.solve.OneClassSolver
@@ -10,12 +23,12 @@ object Solver {
   final val UpperBound = 1
   final val Free       = 2
 
-  final val Tau         = 1e-12
+  final val Tau        = 1e-12
 
   def solveOneClass(problem: Problem, param: Parameters): Solution =
-    OneClassSolver.solve(problem, param, 0.0, 0.0)
+    OneClassSolver.solve(problem, param, 1.0, 1.0)
 
-  def solveEpsilonSVR(problem: Problem, param: EpsilonSVRSVMParamter): Solution = {
+  def solveEpsilonSVR(problem: Problem, param: EpsilonSVRSVMParameter): Solution = {
     val len         = problem.size
     val len2        = len * 2
     val alpha2      = Vec.fill    (len2)(0.0)
@@ -43,7 +56,7 @@ object Solver {
     // TODO
   }
 
-  def solveNuSVR(problem: Problem, param: EpsilonSVRSVMParamter): Solution = {
+  def solveNuSVR(problem: Problem, param: EpsilonSVRSVMParameter): Solution = {
     // var sum = param.C * param.nu * problem.size / 2
     val len         = problem.size
     val len2        = len * 2
@@ -386,7 +399,7 @@ class Solver(problem: Problem,
     // return i,j such that
     // i: maximizes -y_i * grad(f)_i, i in I_up(\alpha)
     // j: minimizes the decrease of obj value
-    //    (if quadratic coefficeint <= 0, replace it with tau)
+    //    (if quadratic coefficient <= 0, replace it with tau)
     //    -y_j*grad(f)_j < -y_i*grad(f)_i, j in I_low(\alpha)
 
     var maxGrad     = -Inf

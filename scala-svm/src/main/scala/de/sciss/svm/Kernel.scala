@@ -1,4 +1,20 @@
+/*
+ *  Kernel.scala
+ *  (ScalaSVM)
+ *
+ *  Copyright (c) 2013-2014 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2014 Shixiong Zhu.
+ *
+ *	This software is published under the GNU Lesser General Public License v3+
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
+
 package de.sciss.svm
+
+import java.io.PrintStream
+import java.io.ByteArrayOutputStream
 
 object KernelType extends Enumeration {
   type KernelType = Value
@@ -20,7 +36,7 @@ object KernelType extends Enumeration {
     }
   }
 
-  def powi(base: Double, times: Int) = {
+  def powInt(base: Double, times: Int) = {
     require(times >= 0, s"Parameter times $times must be >= 0")
     var tmp = base
     var ret = 1.0
@@ -35,9 +51,6 @@ object KernelType extends Enumeration {
 }
 
 import KernelType._
-import java.io.PrintStream
-import java.io.StringWriter
-import java.io.ByteArrayOutputStream
 
 sealed trait Kernel {
   // def tpe: KernelType
@@ -78,7 +91,7 @@ case class PolynomialKernel(gamma: Double, coef0: Double = 0, degree: Int = 3) e
 
   def id = PolynomialKernel.id
 
-  override def apply(x: List[Node], y: List[Node]): Double = powi(gamma * dot(x, y) + coef0, degree)
+  override def apply(x: List[Node], y: List[Node]): Double = powInt(gamma * dot(x, y) + coef0, degree)
 
   protected def writeData(ps: PrintStream): Unit = {
     ps.println(s"degree $degree")

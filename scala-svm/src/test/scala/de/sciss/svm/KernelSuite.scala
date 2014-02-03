@@ -31,10 +31,10 @@ class KernelTypeSuite extends FunSuite {
   }
 
   test("powi") {
-    svmAssertEquals(16, powi(2.0, 4))
-    svmAssertEquals(1, powi(2.0, 0))
-    svmAssertEquals(1.21, powi(1.1, 2))
-    svmAssertEquals(1.23 * 1.23 * 1.23 * 1.23 * 1.23, powi(1.23, 5))
+    svmAssertEquals(16, powInt(2.0, 4))
+    svmAssertEquals(1, powInt(2.0, 0))
+    svmAssertEquals(1.21, powInt(1.1, 2))
+    svmAssertEquals(1.23 * 1.23 * 1.23 * 1.23 * 1.23, powInt(1.23, 5))
   }
 }
 

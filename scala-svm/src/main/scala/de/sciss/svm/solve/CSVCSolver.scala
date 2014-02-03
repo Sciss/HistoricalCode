@@ -1,7 +1,20 @@
+/*
+ *  CSVCSolver.scala
+ *  (ScalaSVM)
+ *
+ *  Copyright (c) 2013-2014 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2014 Shixiong Zhu.
+ *
+ *	This software is published under the GNU Lesser General Public License v3+
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
+
 package de.sciss.svm
 package solve
 
-private[svm] object CSVCSolver extends FormulationSolver {
+object CSVCSolver extends FormulationSolver {
   //  const svm_problem *prob, const svm_parameter* param,
   // 	double *alpha, Solver::SolutionInfo* si, double Cp, double Cn)
   def solve(problem: Problem, param: Parameters, Cp: Double, Cn: Double): Solution = {

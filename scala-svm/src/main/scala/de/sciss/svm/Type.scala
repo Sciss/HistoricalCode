@@ -1,6 +1,17 @@
-package de.sciss.svm
+/*
+ *  Type.scala
+ *  (ScalaSVM)
+ *
+ *  Copyright (c) 2013-2014 Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2014 Shixiong Zhu.
+ *
+ *	This software is published under the GNU Lesser General Public License v3+
+ *
+ *	For further information, please contact Hanns Holger Rutz at
+ *	contact@sciss.de
+ */
 
-import scala.annotation.switch
+package de.sciss.svm
 
 object SVM {
   def apply(id: String): Type = id /* : @switch */ match {

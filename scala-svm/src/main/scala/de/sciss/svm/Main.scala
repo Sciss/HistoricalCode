@@ -1,8 +1,8 @@
 package de.sciss.svm
 
 object Main extends App {
-  private val argsv = args.toIndexedSeq
-  argsv match {
+  private val argsVec = args.toIndexedSeq
+  argsVec match {
     case "train" +: rest =>
       CommandTrain(rest)
 
