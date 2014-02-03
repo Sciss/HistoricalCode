@@ -1,12 +1,15 @@
 package de.sciss.svm
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+
 import scala.io.Source
 import AssertUtil._
 import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
-class SolverSuite extends FunSuite {
+/*
+  to run only this suite:
+
+  test-only de.sciss.svm.SolverSuite
+ */
+class SolverSuite extends FunSuite {    // XXX FAILS
 
   test("1 train case") {
     val param     = new Parameters(LinearKernel)

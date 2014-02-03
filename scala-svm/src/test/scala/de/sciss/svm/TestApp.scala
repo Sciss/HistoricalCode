@@ -96,7 +96,7 @@ object TestApp extends SimpleSwingApplication {
     } (breakOut)
 
     val problem   = new Problem(instances)
-    val m         = SVM.OneClass.trainer.train(param, problem)
+    val m         = SVM.OneClass.trainer.train(problem, param)
     instances.zipWithIndex.foreach { case (ins, idx) =>
       val ir = m.predict(ins)
       println(s"Index $idx, selected ${ins.y} prediction $ir")

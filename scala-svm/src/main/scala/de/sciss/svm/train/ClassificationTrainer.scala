@@ -4,9 +4,9 @@ package train
 private[train] trait ClassificationTrainer extends Trainer {
   protected def tpe: Type
 
-  case class Grouped(numClasses: Int, label: Array[Int], start: Array[Int], count: Array[Int])
+  // case class Grouped(numClasses: Int, label: Array[Int], start: Array[Int], count: Array[Int])
 
-  def train(param: Parameters, problem: Problem): ClassificationModel = {
+  def train(problem: Problem, param: Parameters): model.ClassificationModel = {
     // group training data of the same class
     val map     = problem.groupClasses // groupClasses(problem)
     val classes = map.keys.toIndexedSeq.sorted
@@ -47,11 +47,11 @@ private[train] trait ClassificationTrainer extends Trainer {
           val sij = si ++ sj
           val sp  = new Problem(sij)
 
-          trainOne(param, sp, wi, wj)
+          trainOne(sp, param, wi, wj)
         }
 
       // case _ => Vec.empty
-    } .toIndexedSeq
+    } .toIndexedSeq // XXX TODO: use collection.breakOut
 
     println("f:")
     f.foreach(println)
@@ -93,7 +93,7 @@ private[train] trait ClassificationTrainer extends Trainer {
 
     val modelSV: Vec[Vec[SupportVector]] = (groups zip nonZero).zipWithIndex.map { case ((gi, nzi), i) =>
       (gi.xs zip nzi).zipWithIndex.collect {
-        case ((x, true), j) => SupportVector(x, 0.0, j)  // TODO: correct?
+        case ((x, true), j) => SupportVector(x, j)  // TODO: correct?
       }
     }
 
@@ -139,9 +139,17 @@ private[train] trait ClassificationTrainer extends Trainer {
 
     val rho: Vec[Double] = f.flatMap(_.map(_.rho))
 
-    mkModel(classes = classes, param = param, supportVectors = modelSV, rho = rho)
+    val coefficients = ??? // Coefficients(modelSV.map(_.map(_ => 0.0)))  // XXX TODO correct?
+    val probA = ???
+    val probB = ???
+    mkModel(classes = classes, param = param, supportVectors = modelSV,
+      coefficients = coefficients, rho = rho, probA = probA, probB = probB)
   }
 
-  protected def mkModel(classes: Vec[Int], param: Parameters, supportVectors: Vec[Vec[SupportVector]],
-                        rho: Vec[Double]): ClassificationModel
+  protected def mkModel(classes: Vec[Int],
+                        param: Parameters,
+                        supportVectors: Vec[Vec[SupportVector]],
+                        coefficients: Coefficients,
+                        rho: Vec[Double],
+                        probA: Vec[Double], probB: Vec[Double]): model.ClassificationModel
 }

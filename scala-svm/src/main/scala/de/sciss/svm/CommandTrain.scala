@@ -35,7 +35,7 @@ object CommandTrain {
     val problem = Problem.read(param, io.Source.fromFile(inputFile, "UTF-8"))
     val param1  = new Parameters(new RBFKernel(param.gamma), nu = 0.5, eps = 1.0e-3, gamma = param.gamma)
     val tpe     = SVM.Classification.C
-    val model   = tpe.trainer.train(param1, problem)
+    val model   = tpe.trainer.train(problem, param1)
     model.save(outputFile)
   }
 }

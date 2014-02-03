@@ -1,16 +1,18 @@
 package de.sciss.svm
 
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
 import org.junit.Assert._
 import scala.io.Source
 import java.io.IOException
 import AssertUtil._
 import org.scalatest.{BeforeAndAfter, FunSuite}
 
-@RunWith(classOf[JUnitRunner])
-class SVMProblemSuite extends FunSuite with BeforeAndAfter {
-  val DELTA = 10E-6
+/*
+  to run only this suite:
+
+  test-only de.sciss.svm.ProblemSuite
+ */
+class ProblemSuite extends FunSuite with BeforeAndAfter {
+  val DELTA = 10e-6
 
   var param: Parameters = _
 

@@ -8,7 +8,19 @@ private[svm] object CSVCTrainer extends ClassificationTrainer {
 
   def solver: FormulationSolver = CSVCSolver
 
-  protected def mkModel(classes: Vec[Int], param: Parameters, supportVectors: Vec[Vec[SupportVector]],
-                        rho: Vec[Double]): ClassificationModel =
-    new CSVCModel(param = param, supportVectors = supportVectors, rho = rho, label = classes /* XXX right? */)
+  protected def mkModel(classes: Vec[Int],
+                        param: Parameters,
+                        supportVectors: Vec[Vec[SupportVector]],
+                        coefficients: Coefficients,
+                        probA: Vec[Double],
+                        probB: Vec[Double],
+                        rho: Vec[Double]): model.ClassificationModel =
+    new model.CSVCModel(
+      param           = param,
+      supportVectors  = supportVectors,
+      coefficients    = coefficients,
+      rho             = rho,
+      probA           = probA,
+      probB           = probB,
+      label           = classes /* XXX right? */)
 }

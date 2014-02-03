@@ -1,13 +1,16 @@
 package de.sciss.svm
-import org.junit.runner.RunWith
-import org.scalatest.junit.JUnitRunner
+
 import org.junit.Assert._
 import scala.io.Source
 import AssertUtil._
 import org.scalatest.FunSuite
 
-@RunWith(classOf[JUnitRunner])
-class TrainerSuite extends FunSuite {
+/*
+  to run only this suite:
+
+  test-only de.sciss.svm.TrainerSuite
+ */
+class TrainerSuite extends FunSuite {   // XXX FAILS
 
   test("1 train case") {
     val param   = new Parameters(LinearKernel)
@@ -15,10 +18,11 @@ class TrainerSuite extends FunSuite {
     val source  = Source.fromString("-1\t1:1.0\t2:22.08\t3:11.46")
     val problem = Problem.read(param, source)
 
-    /* val solution = */ Solver.solveOneClass(problem, param)
-    val model = SVM.OneClass.trainer.train(param, problem)
-    svmAssertEquals(309.929000, model.rho(0))
-    svmAssertEquals(Vec(new SupportVector(problem.x(0), 0.5, 1)), model.supportVector)
+    val sol       = Solver.solveOneClass      (problem, param)
+    val model     = SVM.OneClass.trainer.train(problem, param)
+    svmAssertEquals(309.929000, model.rho)
+    svmAssertEquals(Vec(new SupportVector(problem.x(0), 1)), model.supportVector)
+    svmAssertEquals(Vec(0.5), model.coefficientVector)
   }
 
   test("2 train case") {

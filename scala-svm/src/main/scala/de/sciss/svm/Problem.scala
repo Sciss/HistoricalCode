@@ -4,23 +4,47 @@ import java.io.IOException
 
 import scala.io.Source
 import collection.breakOut
+import scala.util.control.NonFatal
 
+object Node {
+  private val RegEx = """(.+):(.+)""".r
+
+  def fromString(s: String): Node = try s match {
+    case RegEx(index, value) => Node(index.toInt, value.toDouble)
+  } catch {
+    case NonFatal(e) => throw new IOException(s"Invalid input: $s", e)
+  }
+}
 /** Element of a feature vector.
   *
   * @param index  feature index or category
   * @param value  feature value
   */
 case class Node(index: Int, value: Double) {
-  override def toString = index + ":" + value
+  override def toString = s"$index:$value"
 }
 
+object Instance {
+  def fromString(s: String, delimiter: String = " "): Instance = try {
+    val tokens = s.trim().split(delimiter)
+    val vector = tokens.tail map Node.fromString
+    // Integer.parseInt("+1") throws NumberFormatException before JDK7
+    val coefficient = tokens.head match {
+      case token if token.startsWith("+") => token.tail.toInt
+      case token => token.toInt
+    }
+    Instance(vector.toList, coefficient)
+  } catch {
+    case NonFatal(e) => throw new IOException(s"Invalid input: $s", e)
+  }
+}
 /** A data sample or instance.
   *
   * @param x  the feature vector
   * @param y  the label
   */
 case class Instance(x: List[Node], y: Int) {
-  override def toString = "(" + y + "|" + x.mkString(", ") + ")"
+  override def toString = x.mkString(y + " ", " ", "")
 }
 
 /** An `Problem` is wrapping a collection of data instances. */

@@ -36,8 +36,9 @@ object KernelType extends Enumeration {
 
 import KernelType._
 import java.io.PrintStream
+import java.io.StringWriter
+import java.io.ByteArrayOutputStream
 
-/** @see http://en.wikipedia.org/wiki/Support_vector_machine */
 sealed trait Kernel {
   // def tpe: KernelType
   /** Calculates the kernel product from a given matrix of features. */
@@ -50,10 +51,17 @@ sealed trait Kernel {
     writeData(ps)
   }
 
+  def writeString: String = {
+    val baos  = new ByteArrayOutputStream
+    val ps    = new PrintStream(baos)
+    write(ps)
+    ps.flush()
+    baos.toString("UTF-8")
+  }
+
   protected def writeData(ps: PrintStream): Unit
 }
 
-/** @see http://en.wikipedia.org/wiki/Support_vector_machine */
 case object LinearKernel extends Kernel {
   final val id = "linear"
 
