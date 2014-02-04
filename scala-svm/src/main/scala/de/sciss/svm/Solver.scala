@@ -289,6 +289,8 @@ class Solver(problem: Problem,
     while (iter < maxIter) {
       debug(s"iter $iter")
 
+      if (DEBUG && iter > 6000) sys.exit(1)
+
       counter -= 1
       if (counter == 0) {
         counter = min(len, 1000)
