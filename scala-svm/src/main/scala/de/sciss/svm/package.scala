@@ -31,4 +31,13 @@ package object svm {
   // TODO: use proper logging
   def logInfo(what: => String): Unit = Console.out.print(what)
   def logWarn(what: => String): Unit = Console.err.print(s"\nWARNING: $what")
+
+  // cf. https://stackoverflow.com/questions/21557195/c-fprintf-g-correspondence-in-scala-java
+  def ¬(x: Double) = {
+    val obj = x.toFloat.asInstanceOf[AnyRef]
+    val s0  = String.format("%.6g", obj)
+    val i0  = s0.lastIndexOf('e')
+    val i   = if (i0 < 0) s0.length else i0
+    s0.substring(0, i).replaceFirst("\\.?0+($)", "$1") + s0.substring(i)
+  }
 }

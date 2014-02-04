@@ -26,6 +26,8 @@ private[train] trait ClassificationTrainer extends Trainer {
     val groups0     = problem.groupClasses
     val numClasses  = groups0.size
 
+    if (DEBUG) println("Aqui1.")
+
     // Labels are ordered by their first occurrence in the training set.
     // However, for two-class sets with -1/+1 labels and -1 appears first,
     // we swap labels to ensure that internally the binary SVM has positive data corresponding to the +1 instances.
@@ -45,9 +47,9 @@ private[train] trait ClassificationTrainer extends Trainer {
       param.C * param.weights.getOrElse(classes(ci), 1.0)
     }
 
-    if (DEBUG) {
-      println(s"classes = ${classes.mkString(",")}; weightedC = ${weightedC.mkString(",")}")
-    }
+//    if (DEBUG) {
+//      println(s"classes = ${classes.mkString(",")}; weightedC = ${weightedC.mkString(",")}")
+//    }
 
     // train k*(k-1)/2 models
 
@@ -61,10 +63,10 @@ private[train] trait ClassificationTrainer extends Trainer {
     //      probB=Malloc(double,numClasses*(numClasses-1)/2);
     //    }
 
-    if (DEBUG) {
-      val f0 = (groups zip weightedC).tails
-      println(s"zipped size = ${f0.size}")
-    }
+//    if (DEBUG) {
+//      val f0 = (groups zip weightedC).tails
+//      println(s"zipped size = ${f0.size}")
+//    }
 
     // pairwise permutations of classified problems
     val f = (groups zip weightedC).tails.take(numClasses - 1).map {
@@ -74,12 +76,12 @@ private[train] trait ClassificationTrainer extends Trainer {
           val sj  = gj.instances.map(_.copy(y = -1))
           val sij = si ++ sj
 
-          if (DEBUG) {
-            println("---permutation---")
-            sij.zipWithIndex.foreach { case (sub, i) =>
-              println(s"[$i] ${sub.y} " + sub.x.map(n => s"${n.index}:${n.value}").mkString(" "))
-            }
-          }
+//          if (DEBUG) {
+//            println("---permutation---")
+//            sij.zipWithIndex.foreach { case (sub, i) =>
+//              println(s"[$i] ${sub.y} " + sub.x.map(n => s"${n.index}:${n.value}").mkString(" "))
+//            }
+//          }
 
           val sp  = new Problem(sij)
 
@@ -93,7 +95,7 @@ private[train] trait ClassificationTrainer extends Trainer {
     f.foreach(println)
 
     // DDD
-    println(s"numClasses $numClasses; f.size ${f.size}; f(0).size ${f(0).size}; f total ${f.map(_.size).sum}")
+//    println(s"numClasses $numClasses; f.size ${f.size}; f(0).size ${f(0).size}; f total ${f.map(_.size).sum}")
 
     val nonZero = f.map { fi =>
       fi.map { fij =>

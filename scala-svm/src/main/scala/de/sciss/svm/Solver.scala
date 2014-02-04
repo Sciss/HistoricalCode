@@ -126,23 +126,23 @@ class Solver(problem: Problem,
   def solve(): Solution = {
     init()
 
-    if (DEBUG) {
-      println("-------- Solver.solver() --------")
-      println(s"problem.size ${problem.size}")
-      println(problem)
-      println(param)
-      println(Q)
-      println(p.mkString("p = ", ",", ""))
-      println(_y.mkString("y = ", ",", ""))
-      println(_alpha.mkString("alpha = ", ",", ""))
-      println(s"Cp $Cp, Cn $Cn")
-    }
+//    if (DEBUG) {
+//      println("-------- Solver.solver() --------")
+//      println(s"problem.size ${problem.size}")
+//      println(problem)
+//      println(param)
+//      println(Q)
+//      println(p.mkString("p = ", ",", ""))
+//      println(_y.mkString("y = ", ",", ""))
+//      println(_alpha.mkString("alpha = ", ",", ""))
+//      println(s"Cp $Cp, Cn $Cn")
+//    }
 
     val iter      = optimize()
 
     if (DEBUG) {
       println("optimize(). new gradient:")
-      println(s"[499] ${grad(499)}; [1999] ${grad(1999)}")
+      println(s"[499] ${¬(grad(499))}; [1999] ${¬(grad(1999))}")
     }
 
     val solution  = new Solution(
@@ -174,7 +174,7 @@ class Solver(problem: Problem,
 
     if (DEBUG) {
       println("init(). new gradient:")
-      println(s"[499] ${grad(499)}; [1999] ${grad(1999)}")
+      println(s"[499] ${¬(grad(499))}; [1999] ${¬(grad(1999))}")
     }
   }
 
@@ -327,7 +327,7 @@ class Solver(problem: Problem,
         _alpha(i) += delta
         _alpha(j) += delta
 
-        if (DEBUG) println(s"diff $diff, C_i $ci, C_j $cj")
+        if (DEBUG) println(s"diff ${¬(diff)}, C_i ${¬(ci)}, C_j ${¬(cj)}")
 
         if (diff > 0) {
           if (_alpha(j) < 0) {
@@ -364,7 +364,7 @@ class Solver(problem: Problem,
         _alpha(i) -= delta
         _alpha(j) += delta
 
-        if (DEBUG) println(s"sum  $sum, C_i $ci, C_j $cj")
+        if (DEBUG) println(s"sum  ${¬(sum)}, C_i ${¬(ci)}, C_j ${¬(cj)}")
 
         if (sum > ci) {
           if (_alpha(i) > ci) {
@@ -394,7 +394,7 @@ class Solver(problem: Problem,
       val deltaAi = _alpha(i) - oldAi
       val deltaAj = _alpha(j) - oldAj
 
-      if (DEBUG) println(s"delta_alpha_i $deltaAi, delta_alpha_j $deltaAj")
+      if (DEBUG) println(s"delta_alpha_i ${¬(deltaAi)}, delta_alpha_j ${¬(deltaAj)}")
 
       for (k <- 1 until activeSize) {
         grad(k) += Q(i, k) * deltaAi + Q(j, k) * deltaAj
@@ -441,7 +441,7 @@ class Solver(problem: Problem,
   // the return value's `_2` is `-1` if already optimal
   private def selectWorkingSet(): Option[(Int, Int)] = {
     debug("\n----select_working_set(). gradient:")
-    debug(s"[499] ${grad(499)}; [1999] ${grad(1999)}; y[1999] = ${_y(1999)}; alpha ${alphaStatus(1999)}")
+    debug(s"[499] ${¬(grad(499))}; [1999] ${¬(grad(1999))}; y[1999] = ${_y(1999)}; alpha ${alphaStatus(1999)}")
 
     // return i,j such that
     // i: maximizes -y_i * grad(f)_i, i in I_up(\alpha)
@@ -472,7 +472,7 @@ class Solver(problem: Problem,
       }
     }
 
-    debug(s"selectWorkingSet; activeSize = $activeSize; maxGrad $maxGrad; mxi $mxi")
+    debug(s"selectWorkingSet; activeSize = $activeSize; maxGrad ${¬(maxGrad)}; mxi $mxi")
     // if (DEBUG) sys.exit(0)
 
     var minObj      = Inf
@@ -494,7 +494,7 @@ class Solver(problem: Problem,
         val gradDiff  = maxGrad + gjs
         if (gjs > maxGrad2) {
           maxGrad2 = gjs
-          if (DEBUG) println(s"j $j, maxGrad2 $maxGrad2, isPos $isPos")
+          if (DEBUG) println(s"j $j, maxGrad2 ${¬(maxGrad2)}, isPos $isPos")
         }
 
         if (gradDiff > 0) {
@@ -513,7 +513,7 @@ class Solver(problem: Problem,
 
     val res = if (maxGrad + maxGrad2 < eps) None else Some(mxi, mni)
 
-    debug(s"selectWorkingSet; maxGrad2 $maxGrad2; mni $mni; res = $res")
+    debug(s"selectWorkingSet; maxGrad2 ${¬(maxGrad2)}; mni $mni; res = ${if (res.isDefined) "1" else "0"}")
 
     res
   }
