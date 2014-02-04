@@ -15,10 +15,12 @@ package de.sciss
 
 package object svm {
   // ---- types ----
-  val Vec       = collection.immutable.IndexedSeq
-  type Vec[+A]  = collection.immutable.IndexedSeq[A]
+  val Vec         = collection.immutable.IndexedSeq
+  type Vec[+A]    = collection.immutable.IndexedSeq[A]
 
-  final val Inf = Double.PositiveInfinity
+  final val Inf   = Double.PositiveInfinity
+
+  type Label      = Int
 
   type Classifier             = (Int, Int)
   type CoefficientVector      = Vec[Double]

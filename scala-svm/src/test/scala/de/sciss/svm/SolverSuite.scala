@@ -18,6 +18,7 @@ class SolverSuite extends FunSuite {    // XXX FAILS
     val problem   = Problem.read(param, source)
 
     val solution  = Solver.solveOneClass(problem, param)
+    println(solution)
     svmAssertEquals( 77.482250, solution.obj)
     svmAssertEquals(309.929000, solution.rho)
     svmAssertEquals(Array(0.5), solution.alpha)

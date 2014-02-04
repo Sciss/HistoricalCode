@@ -15,12 +15,16 @@ package de.sciss.svm
 package solve
 
 object CSVCSolver extends FormulationSolver {
+  private val DEBUG = true
+
   //  const svm_problem *prob, const svm_parameter* param,
   // 	double *alpha, Solver::SolutionInfo* si, double Cp, double Cn)
   def solve(problem: Problem, param: Parameters, Cp: Double, Cn: Double): Solution = {
     val len       = problem.size
     val minusOnes = Vec.fill(len)(-1.0) // new Array[Double](l)
     val alpha     = Vec.fill(len)( 0.0)
+
+    // if (DEBUG) for (i <- 0 until len) println(s"prob[$i].y = ${problem.y(i)}")
 
     val y         = Vec.tabulate(len) {
       case i if problem.y(i) > 0  =>  1

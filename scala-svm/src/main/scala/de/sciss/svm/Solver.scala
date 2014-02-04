@@ -125,7 +125,25 @@ class Solver(problem: Problem,
   //  		   SolutionInfo* si, int shrinking)
   def solve(): Solution = {
     init()
+
+    if (DEBUG) {
+      println("-------- Solver.solver() --------")
+      println(s"problem.size ${problem.size}")
+      println(problem)
+      println(param)
+      println(Q)
+      println(p.mkString("p = ", ",", ""))
+      println(_y.mkString("y = ", ",", ""))
+      println(_alpha.mkString("alpha = ", ",", ""))
+      println(s"Cp $Cp, Cn $Cn")
+    }
+
     val iter      = optimize()
+
+    if (DEBUG) {
+      println("optimize(). new gradient:")
+      println(s"[499] ${grad(499)}; [1999] ${grad(1999)}")
+    }
 
     val solution  = new Solution(
       obj         = calculateObjectiveValue(),
@@ -152,6 +170,11 @@ class Solver(problem: Problem,
           gradBar(j) += getC(i) * Q(i, j)
         }
       }
+    }
+
+    if (DEBUG) {
+      println("init(). new gradient:")
+      println(s"[499] ${grad(499)}; [1999] ${grad(1999)}")
     }
   }
 
@@ -213,6 +236,7 @@ class Solver(problem: Problem,
 
   private def swapIndex(i: Int, j: Int): Unit = {
     import QMatrix.swap
+    if (DEBUG) println(s"Solver::swap_index($i, $j)")
     Q.swapIndex      (i, j)
     swap(_y         , i, j)
     swap(grad       , i, j)
@@ -247,7 +271,8 @@ class Solver(problem: Problem,
     }
   }
 
-  @elidable(elidable.INFO) private def debug(what: => String): Unit = println(s"[DEBUG] $what")
+  private val DEBUG = true
+  @elidable(elidable.INFO) private def debug(what: => String): Unit = if (DEBUG) println(s"[DEBUG] $what")
 
   private def calculateObjectiveValue(): Double =
     (0 until len).iterator.map(i => _alpha(i) * (grad(i) + _p(i))).sum / 2
@@ -257,13 +282,13 @@ class Solver(problem: Problem,
     var iter    = 0
 
     while (iter < maxIter) {
-      // debug(s"iter $iter")
+      debug(s"iter $iter")
 
       counter -= 1
       if (counter == 0) {
         counter = min(len, 1000)
         if (shrinking) doShrinking()
-        println(".")
+        logInfo(".")
       }
 
       val (i, j) = selectWorkingSet().getOrElse {
@@ -286,8 +311,9 @@ class Solver(problem: Problem,
       val oldAj = _alpha(j)
 
       if (_y(i) != _y(j)) {
+        if (DEBUG) println("y[i]!=y[j]")
         val quadCoef = {
-          val tmp = Q(i, i) + Q(j, j) + 2 * _y(i) * _y(j) * Q(i, j)
+          val tmp = Q(i, i) + Q(j, j) + 2 * /* _y(i) * _y(j) * */ Q(i, j)
           if (tmp <= 0) Tau else tmp
         }
 
@@ -295,6 +321,8 @@ class Solver(problem: Problem,
         val diff   = oldAi - oldAj
         _alpha(i) += delta
         _alpha(j) += delta
+
+        if (DEBUG) println(s"diff $diff, C_i $ci, C_j $cj")
 
         if (diff > 0) {
           if (_alpha(j) < 0) {
@@ -320,8 +348,9 @@ class Solver(problem: Problem,
         }
 
       } else {  // _y(i) == _y(j)
+        if (DEBUG) println("y[i]==y[j]")
         val quadCoef = {
-          val tmp = Q(i, i) + Q(j, j) - 2 * _y(i) * _y(j) * Q(i, j)
+          val tmp = Q(i, i) + Q(j, j) - 2 * /* _y(i) * _y(j) * */ Q(i, j)
           if (tmp <= 0) Tau else tmp
         }
 
@@ -329,6 +358,8 @@ class Solver(problem: Problem,
         val sum    = oldAi + oldAj
         _alpha(i) -= delta
         _alpha(j) += delta
+
+        if (DEBUG) println(s"sum  $sum, C_i $ci, C_j $cj")
 
         if (sum > ci) {
           if (_alpha(i) > ci) {
@@ -358,6 +389,8 @@ class Solver(problem: Problem,
       val deltaAi = _alpha(i) - oldAi
       val deltaAj = _alpha(j) - oldAj
 
+      if (DEBUG) println(s"delta_alpha_i $deltaAi, delta_alpha_j $deltaAj")
+
       for (k <- 1 until activeSize) {
         grad(k) += Q(i, k) * deltaAi + Q(j, k) * deltaAj
       }
@@ -365,8 +398,10 @@ class Solver(problem: Problem,
   		// update alpha_status and G_bar
 			val ui = isUpperBound(i)
       val uj = isUpperBound(j)
-			updateAlphaStatus(i)
-      updateAlphaStatus(j)
+      alphaStatus(i) = updateAlphaStatus(i)
+      alphaStatus(j) = updateAlphaStatus(j)
+
+      if (DEBUG) println(s"old i '$ui' new i '${isUpperBound(i)}' old j '$uj' new j '${isUpperBound(j)}'")
 
 			if (ui != isUpperBound(i)) {
         val cis = if (ui) -ci else ci
@@ -396,6 +431,9 @@ class Solver(problem: Problem,
 
   // the return value's `_2` is `-1` if already optimal
   private def selectWorkingSet(): Option[(Int, Int)] = {
+    debug("\n----select_working_set(). gradient:")
+    debug(s"[499] ${grad(499)}; [1999] ${grad(1999)}; y[1999] = ${_y(1999)}; alpha ${alphaStatus(1999)}")
+
     // return i,j such that
     // i: maximizes -y_i * grad(f)_i, i in I_up(\alpha)
     // j: minimizes the decrease of obj value
@@ -407,21 +445,26 @@ class Solver(problem: Problem,
 
     for (i <- 0 until activeSize) {
       if (_y(i) == 1) {
-        val gim = -grad(i)
-        if (!isUpperBound(i) && gim >= maxGrad) {
-          mxi     = i
-          maxGrad = gim
+        if (!isUpperBound(i)) {
+          val gim = -grad(i)
+          if (gim >= maxGrad) {
+            mxi     = i
+            maxGrad = gim
+          }
         }
       } else {
-        val gi = grad(i)
-        if (!isLowerBound(i) && gi >= maxGrad) {
-          mxi     = i
-          maxGrad = gi
+        if (!isLowerBound(i)) {
+          val gi = grad(i)
+          if (gi >= maxGrad) {
+            mxi     = i
+            maxGrad = gi
+          }
         }
       }
     }
 
     debug(s"selectWorkingSet; activeSize = $activeSize; maxGrad $maxGrad; mxi $mxi")
+    // if (DEBUG) sys.exit(0)
 
     var minObj      = Inf
     var maxGrad2    = -Inf
@@ -429,13 +472,21 @@ class Solver(problem: Problem,
 
     for (j <- 0 until activeSize) {
       val isPos = _y(j) == 1
+
+//      if (j == 1999) {
+//        println("halt")
+//      }
+
       if ((isPos && !isLowerBound(j)) ||
          (!isPos && !isUpperBound(j))) {
 
         val gj        = grad(j)
         val gjs       = if (isPos) gj else -gj
         val gradDiff  = maxGrad + gjs
-        if (gjs >= maxGrad2) maxGrad2 = gjs
+        if (gjs > maxGrad2) {
+          maxGrad2 = gjs
+          if (DEBUG) println(s"j $j, maxGrad2 $maxGrad2, isPos $isPos")
+        }
 
         if (gradDiff > 0) {
           val yf          = if (isPos) -2.0 else 2.0
@@ -451,9 +502,11 @@ class Solver(problem: Problem,
       }
     }
 
-    // debug(s"selectWorkingSet; maxGrad2 $maxGrad2; mni $mni")
+    val res = if (maxGrad + maxGrad2 < eps) None else Some(mxi, mni)
 
-    if (maxGrad + maxGrad2 < eps) None else Some(mxi, mni)
+    debug(s"selectWorkingSet; maxGrad2 $maxGrad2; mni $mni; res = $res")
+
+    res
   }
 
   private def maxIteration: Int = {
@@ -464,6 +517,8 @@ class Solver(problem: Problem,
   }
 
   private def reconstructGradient(): Unit = {
+    if (DEBUG) println(s"reconstruct_gradient${if (activeSize == len) " (false)" else ""}")
+
     if (activeSize == len) return
 
     for (j <- activeSize until len) {

@@ -17,20 +17,25 @@ package train
 private[train] trait ClassificationTrainer extends Trainer {
   protected def tpe: Type
 
+  private def DEBUG: Boolean = true   // AbstractMethodError if we make this a `val`!
+
   // case class Grouped(numClasses: Int, label: Array[Int], start: Array[Int], count: Array[Int])
 
   def train(problem: Problem, param: Parameters): model.ClassificationModel = {
     // group training data of the same class
-    val map     = problem.groupClasses // groupClasses(problem)
-    val classes = map.keys.toIndexedSeq.sorted
-    val groups  = classes.map(map)
+    val groups0     = problem.groupClasses
+    val numClasses  = groups0.size
 
-    // TODO:
     // Labels are ordered by their first occurrence in the training set.
     // However, for two-class sets with -1/+1 labels and -1 appears first,
     // we swap labels to ensure that internally the binary SVM has positive data corresponding to the +1 instances.
+    val groups = if (numClasses == 2 && groups0(0).y(0) == -1 && groups0(1).y(0) == 1) {
+      groups0.reverse
+    } else {
+      groups0
+    }
+    val classes = groups.map(_.y(0))
 
-    val numClasses = classes.size
     if(numClasses == 1)
       logInfo("WARNING: training data in only one class. See README for details.\n")
 
@@ -38,6 +43,10 @@ private[train] trait ClassificationTrainer extends Trainer {
 
     val weightedC = Array.tabulate[Double](numClasses) { ci =>
       param.C * param.weights.getOrElse(classes(ci), 1.0)
+    }
+
+    if (DEBUG) {
+      println(s"classes = ${classes.mkString(",")}; weightedC = ${weightedC.mkString(",")}")
     }
 
     // train k*(k-1)/2 models
@@ -52,12 +61,26 @@ private[train] trait ClassificationTrainer extends Trainer {
     //      probB=Malloc(double,numClasses*(numClasses-1)/2);
     //    }
 
+    if (DEBUG) {
+      val f0 = (groups zip weightedC).tails
+      println(s"zipped size = ${f0.size}")
+    }
+
+    // pairwise permutations of classified problems
     val f = (groups zip weightedC).tails.take(numClasses - 1).map {
       case (gi, wi) +: gij =>
-        val si  = gi.instances.map(_.copy(y = 1))
+        val si    = gi.instances.map(_.copy(y = +1))
         gij.map { case (gj, wj) =>
           val sj  = gj.instances.map(_.copy(y = -1))
           val sij = si ++ sj
+
+          if (DEBUG) {
+            println("---permutation---")
+            sij.zipWithIndex.foreach { case (sub, i) =>
+              println(s"[$i] ${sub.y} " + sub.x.map(n => s"${n.index}:${n.value}").mkString(" "))
+            }
+          }
+
           val sp  = new Problem(sij)
 
           trainOne(sp, param, wi, wj)
@@ -152,9 +175,9 @@ private[train] trait ClassificationTrainer extends Trainer {
 
     val rho: Vec[Double] = f.flatMap(_.map(_.rho))
 
-    val coefficients = ??? // Coefficients(modelSV.map(_.map(_ => 0.0)))  // XXX TODO correct?
-    val probA = ???
-    val probB = ???
+    val coefficients = Coefficients(Vec.empty) // Coefficients(modelSV.map(_.map(_ => 0.0)))  // XXX TODO correct?
+    val probA = Vec.empty // XXX TODO correct?
+    val probB = Vec.empty // XXX TODO correct?
     mkModel(classes = classes, param = param, supportVectors = modelSV,
       coefficients = coefficients, rho = rho, probA = probA, probB = probB)
   }

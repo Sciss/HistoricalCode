@@ -18,10 +18,12 @@ import java.io.IOException
 import scala.io.Source
 import collection.breakOut
 import scala.util.control.NonFatal
+import scala.collection.mutable
 
 object Node {
   private val RegEx = """(.+):(.+)""".r
 
+  // XXX TODO: Problem.read has alternative code
   def fromString(s: String): Node = try s match {
     case RegEx(index, value) => Node(index.toInt, value.toDouble)
   } catch {
@@ -38,6 +40,7 @@ case class Node(index: Int, value: Double) {
 }
 
 object Instance {
+  // XXX TODO: Problem.read has alternative code
   def fromString(s: String, delimiter: String = " "): Instance = try {
     val tokens = s.trim().split(delimiter)
     val vector = tokens.tail map Node.fromString
@@ -56,7 +59,7 @@ object Instance {
   * @param x  the feature vector
   * @param y  the label
   */
-case class Instance(x: List[Node], y: Int) {
+case class Instance(x: List[Node], y: Label) {
   override def toString = x.mkString(y + " ", " ", "")
 }
 
@@ -68,7 +71,7 @@ case class Problem(instances: Vec[Instance]) {
   /** The feature vectors of all instances. */
   lazy val xs: Vec[List[Node]]  = instances.map(_.x)
   /** The labels of all instances. */
-  lazy val ys: Vec[Int]         = instances.map(_.y)
+  lazy val ys: Vec[Label]       = instances.map(_.y)
 
   /** Queries the feature vector of a given instance
     *
@@ -79,9 +82,36 @@ case class Problem(instances: Vec[Instance]) {
     *
     * @param idx  index of the instance. Must be `>= 0` and `< size`
     */
-  def y(idx: Int): Int = instances(idx).y
+  def y(idx: Int): Label = instances(idx).y
 
-  def groupClasses: Map[Int, Problem] = instances.groupBy(_.y).mapValues(Problem.apply)
+  /** Groups the instances by their labels. This preserves the order of
+    * in which the labels first appear.
+    */
+  def groupClasses: Vec[Problem] = {
+    // the problem with creating a Map is we loose the order of the label appearances,
+    // making comparison with libsvm difficult
+    //    instances.groupBy(_.y).mapValues(Problem.apply)
+
+    // therefore, we do something similar to groupBy, while maintaining
+    // the appearance order of new labels.
+
+    val mb  = mutable.Map.empty[Label, mutable.Builder[Instance, Vec[Instance]]]
+    var cb  = Vec.newBuilder[Label]
+    for (elem <- instances) {
+      val key   = elem.y
+      val ib    = mb.getOrElseUpdate(key, {
+        cb += key
+        Vec.newBuilder[Instance]
+      })
+      ib += elem
+    }
+    val map     = mb.result()
+    val classes = cb.result()
+
+    classes.map { key =>
+      /* key -> */ Problem(map(key).result())
+    }
+  }
 
   override def toString = instances.mkString("\n")
 }
