@@ -205,17 +205,19 @@ class Solver(problem: Problem,
     }
 
     def beShrunk(j: Int): Boolean =
-    	if(isUpperBound(j)) {
+    	if (isUpperBound(j)) {
     		if (_y(j) == 1)
     			-grad(j) > gradMax1
     		else
     			-grad(j) > gradMax2
-    	} else if(isLowerBound(j)) {
+    	} else if (isLowerBound(j)) {
     		if (_y(j) == 1)
     			grad(j) > gradMax2
     		else
           grad(j) > gradMax1
     	} else false
+
+    if (DEBUG) println(s"doShrinking. G[0] ${grad(0)}, alphaStatus(0) ${alphaStatus(0)}")
 
     var i = 0
     while (i < activeSize) {  // WARNING: activeSize is mutated in the loop
@@ -226,12 +228,15 @@ class Solver(problem: Problem,
           if (!beShrunk(activeSize)) {
             swapIndex(i, activeSize)
             continue = false
+          } else {
+            activeSize -= 1
           }
-          activeSize -= 1
         }
       }
       i += 1
     }
+
+    // if (DEBUG) sys.exit(1)
   }
 
   private def swapIndex(i: Int, j: Int): Unit = {
@@ -401,7 +406,11 @@ class Solver(problem: Problem,
       alphaStatus(i) = updateAlphaStatus(i)
       alphaStatus(j) = updateAlphaStatus(j)
 
-      if (DEBUG) println(s"old i '$ui' new i '${isUpperBound(i)}' old j '$uj' new j '${isUpperBound(j)}'")
+      if (DEBUG) {
+        if (i == 0 || j == 0) println("##### changing alpha_status[0]")
+      }
+
+      if (DEBUG) println(s"old i '${if (ui) "1" else "0"}' new i '${alphaStatus(i)}' old j '${if (uj) "1" else "0"}' new j '${alphaStatus(j)}'")
 
 			if (ui != isUpperBound(i)) {
         val cis = if (ui) -ci else ci
