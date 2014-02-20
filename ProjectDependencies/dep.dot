@@ -1,19 +1,19 @@
 digraph G {
 	AudioWidgets [label="\"audiowidgets\" % \"1.4.0\"", shape=box];
-	Desktop [label="\"desktop\" % \"0.4.0\"", shape=box];
+	Desktop [label="\"desktop\" % \"0.4.1\"", shape=box];
 	FileCache [label="\"filecache\" % \"0.3.0\"", shape=box];
 	FileUtil [label="\"fileutil\" % \"1.1.0\"", shape=box];
 	FingerTree [label="\"fingertree\" % \"1.5.0\"", shape=box];
 	FScapeJobs [label="\"fscapejobs\" % \"1.4.0\"", shape=box];
 	GUIFlitz [label="\"guiflitz\" % \"0.3.0\"", shape=box, style];
 	IntensityPalette [label="\"intensitypalette\" % \"1.0.0\"", shape=box, color=green];
-	Kontur [label="\"kontur\" % \"1.2.0\"", shape=box];
+	Kontur [label="\"kontur\" % \"1.2.1\"", shape=box];
 	LucreConfluent [label="\"lucreconfluent\" % \"2.6.0\"", shape=box];
 	LucreData [label="\"lucredata\" % \"2.2.1\"", shape=box];
 	LucreEvent [label="\"lucreevent\" % \"2.5.0\"", shape=box];
 	LucreSTM [label="\"lucrestm\" % \"2.0.1\"", shape=box];
 	LucreSTM_BDB [label="\"lucrestm-bdb\" % \"2.0.1\"", shape=box];
-	Mellite [label="\"mellite\" % \"0.6.0\"", shape=box];
+	Mellite [label="\"mellite\" % \"0.6.1\"", shape=box];
 	Model [label="\"model\" % \"0.3.1\"", shape=box];
 	Numbers [label="\"numbers\" % \"0.1.0\"", shape=box];
 	PDFlitz [label="\"pdflitz\" % \"1.0.0\"", shape=box];
