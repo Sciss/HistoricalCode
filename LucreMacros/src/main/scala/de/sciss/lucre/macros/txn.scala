@@ -1,15 +1,15 @@
 package de.sciss.lucre.macros
 
-import scala.reflect.macros.Context
+import scala.reflect.macros.whitebox
 import scala.language.experimental.macros
 import scala.annotation.StaticAnnotation
 
 class txn extends StaticAnnotation {
-  def macroTransform(annottees: Any*) = macro txnMacro.impl
+  def macroTransform(annottees: Any*): Any = macro txnMacro.impl
 }
 
 object txnMacro {
-  def impl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
+  def impl(c: whitebox.Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
     val inputs = annottees.map(_.tree).toList
 
@@ -17,6 +17,10 @@ object txnMacro {
       c.error(c.enclosingPosition, "This annotation can only be used on a class definition")
 
     val expandees: List[Tree] = inputs match {
+      //      case q"$mods trait $tpname[..$targs] extends ..$parents { $self => ..$stats }" =>
+      //        println("Yo crazy mama")
+      //        ...
+
       case cd @ ClassDef(mods, name, tparams, tmp @ Template(parents, self, body)) :: Nil =>
         // println(s"Class name: '$name'")
         // println(s"Parents: $parents")
@@ -25,9 +29,15 @@ object txnMacro {
         println(s"$body")
         body.foreach(t => println(t.getClass))
 
-        val newDefs = body map {
-          case v @ ValDef(vMods, vName, tpt, rhs) if vMods.hasFlag(Flag.LOCAL) =>
-            println(s"ValDef(vMods = $vMods (flags = ${vMods.flags}), vName = $vName, tpt = $tpt")
+        val newDefs = body.map {
+          // case tree @ q"$vMods val $vName: $tpt = $rhs" =>
+          //  tree
+
+          case v @ ValDef(vMods, vName, tpt, rhs) /* if vMods.hasFlag(Flag.LOCAL) */ =>
+            val isVar       = vMods.hasFlag(Flag.MUTABLE)
+            // val isAbstract  = vMods.hasFlag(Flag.ABSTRACT)
+
+            println(s"${if (isVar) "var" else "val"} - vMods = $vMods, flags = ${vMods.flags}), vName = $vName, tpt = $tpt")
             //            if (vMods.hasFlag(Flag.ABSTRACT    )) println(" - abstract")
             //            if (vMods.hasFlag(Flag.DEFAULTINIT )) println(" - defaultinit")
             //            if (vMods.hasFlag(Flag.DEFAULTPARAM)) println(" - defaultparam")
@@ -42,11 +52,25 @@ object txnMacro {
             //            if (vMods.hasFlag(Flag.PROTECTED   )) println(" - protected")
             //            if (vMods.hasFlag(Flag.TRAIT       )) println(" - trait")
             // println(s"Constructor param: $vName")
-            v
-          case other => other
+
+            if (!rhs.isEmpty) c.abort(v.pos, "@txn members must be abstract")
+
+            val tpt1 = tq"S#Var[$tpt]"
+            ValDef(vMods, vName, tpt1, rhs)
+
+          case other =>
+            c.abort(other.pos, s"@txn trait body may only contain abstract val and var members (${other.getClass}")
         }
 
-        inputs
+        val implClass = q"""
+          object ${name.toTermName} {
+            sealed trait Impl[S <: Sys[S], ..$tparams] { ..$newDefs }
+
+            def apply[S <: Sys[S], ..$tparams](): Impl[S, ..${tparams.map(_.name)}] = ???
+          }
+          """
+
+        implClass :: inputs
 
       case _ =>
         reportInvalidAnnotationTarget()

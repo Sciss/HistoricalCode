@@ -4,9 +4,9 @@ organization    := "de.sciss"
 
 version         := "0.1.0-SNAPSHOT"
 
-scalaVersion    := "2.11.0-M7"
+scalaVersion    := "2.11.0-RC1"
 
-retrieveManaged := true
+// retrieveManaged := true
 
 scalacOptions  ++= Seq("-unchecked", "-deprecation", "-feature")
 
@@ -15,6 +15,6 @@ libraryDependencies ++= Seq(
   "org.scala-lang"   % "scala-reflect" % scalaVersion.value
 )
 
-resolvers += Resolver.sonatypeRepo("snapshots")
+// resolvers += Resolver.sonatypeRepo("snapshots")
 
-addCompilerPlugin("org.scala-lang.plugins" % "macro-paradise" % "2.0.0-SNAPSHOT" cross CrossVersion.full)
+addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0-M3" cross CrossVersion.full)
