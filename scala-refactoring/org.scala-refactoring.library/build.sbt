@@ -1,20 +1,29 @@
-name := "org.scala-refactoring.library"
+// name               := "org.scala-refactoring.library"
 
-version := "0.6.2-SNAPSHOT"
+name               := "ScalaRefactoring"   // in order to better understand we publish a different version
 
-scalaVersion := "2.10.1"
+// version            := "0.6.2-SNAPSHOT"
 
-moduleName := name.value
+version            := "0.1.0" // in order to better understand we publish a different version
 
-organization := "org.scala-refactoring"
+scalaVersion       := "2.11.0"
 
-crossScalaVersions := Seq("2.10.1", "2.11.0-RC3")
+// moduleName         := name.value
 
-publishMavenStyle := true
+// ensure the Java classes use 1.6 compatible file format, even when compiling on JDK 7 or higher
+javacOptions in (Compile, compile) ++= Seq("-source", "1.6", "-target", "1.6")
 
-publishTo <<= version { (v: String) =>
+// organization       := "org.scala-refactoring"
+
+organization       := "de.sciss" // in order to publish to our sonatype account
+
+crossScalaVersions := Seq("2.11.0", "2.10.4")
+
+publishMavenStyle  := true
+
+publishTo := {
   val nexus = "https://oss.sonatype.org/"
-  if (v.trim.endsWith("SNAPSHOT"))
+  if (version.value.trim.endsWith("SNAPSHOT"))
     Some("snapshots" at nexus + "content/repositories/snapshots")
   else
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
@@ -45,13 +54,10 @@ pomExtra := (
     </developer>
   </developers>)
 
-credentials += Credentials(Path.userHome / ".m2" / "credentials")
+// credentials += Credentials(Path.userHome / ".m2" / "credentials")
 
-libraryDependencies += { 
-  val binVersion  = scalaBinaryVersion.value
-  val compVersion = if (binVersion == "2.10") "2.10.4-RC3" else binVersion
-  "org.scala-lang" % "scala-compiler" % compVersion
-}
+libraryDependencies +=
+  "org.scala-lang" % "scala-compiler" % scalaVersion.value
 
 libraryDependencies += "com.novocode" % "junit-interface" % "0.10" % "test"
 
