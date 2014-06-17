@@ -2,21 +2,9 @@
  *  PianoRollImpl.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
- *  This software is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License
- *  as published by the Free Software Foundation; either
- *  version 3, june 2007 of the License, or (at your option) any later version.
- *
- *  This software is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- *  General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public
- *  License (gpl.txt) along with this software; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  This software is published under the GNU Lesser General Public License v2.1+
  *
  *
  *  For further information, please contact Hanns Holger Rutz at
@@ -37,7 +25,8 @@ object PianoRollImpl {
 
     override def getPreferredSize: Dimension = {
       if (isPreferredSizeSet) return super.getPreferredSize
-      val pw = keyWidth + ((timeRange._2 - timeRange._1) * 24).toInt
+      val kw = if (showKeyboard) keyWidth else 0
+      val pw = kw + ((timeRange._2 - timeRange._1) * 24).toInt
       new Dimension(pw, preferredHeight)
     }
   }
@@ -66,25 +55,27 @@ object PianoRollImpl {
 
   protected def repaint(): Unit
 
-  private var _notes      = Vec.empty[OffsetNote]
+  private var _notes        = Vec.empty[OffsetNote]
   // private var _notesTree  = RangedSeq.empty[OffsetNote, Double]
-  private var _chords     = Vec.empty[Chord]
-  private var _decoration = Map.empty[OffsetNote, NoteDecoration]
-  private var _pitchRange = defaultPitchRange
-  private var _timeRange  = defaultTimeRange
-  private var _keyWidth   = defaultKeyWidth
-  private var _keyHeight  = defaultKeyHeight
-  private var _keySize1   = 0
-  private var _keySize2   = 0
-  private var _autoRange  = true
+  private var _chords       = Vec.empty[Chord]
+  private var _decoration   = Map.empty[OffsetNote, NoteDecoration]
+  private var _pitchRange   = defaultPitchRange
+  private var _timeRange    = defaultTimeRange
+  private var _keyWidth     = defaultKeyWidth
+  private var _keyHeight    = defaultKeyHeight
+  private var _keySize1     = 0
+  private var _keySize2     = 0
+  private var _autoRange    = true
+  private var _showLines    = true
+  private var _showKeyboard = true
 
   recalcKeySize()
 
   final def notes = _notes
-  def notes_=(value: Vec[OffsetNote]): Unit = {
+  final def notes_=(value: Vec[OffsetNote]): Unit = {
     _notes = value
     // _notesTree    = RangedSeq[OffsetNote, Double](value: _*)
-    if (_autoRange && !value.isEmpty) {
+    if (_autoRange && value.nonEmpty) {
       // val floor   = math.floor(_notesTree.head.offset)
       // val ceil    = math.ceil(_notesTree.filterOverlaps((_notesTree.last.offset, Double.PositiveInfinity)).map(_.stop).max)
       val floor   = math.floor(_notes.map(_.offset).min)
@@ -97,7 +88,7 @@ object PianoRollImpl {
   final def chords = _chords
   def chords_=(value: Vec[Chord]): Unit = {
     _chords = value
-    if (_autoRange && !value.isEmpty) {
+    if (_autoRange && value.nonEmpty) {
       val floor   = math.floor(_chords.map(_.minOffset).min)
       val ceil    = math.ceil (_chords.map(_.maxStop  ).max)
       _timeRange  = (floor, ceil)
@@ -132,7 +123,7 @@ object PianoRollImpl {
   def keyWidth_=(value: Int): Unit =
     if (_keyWidth != value) {
       _keyWidth = value
-      repaint()
+      if (_showKeyboard) repaint()
     }
 
   final def keyHeight = _keyHeight
@@ -141,9 +132,23 @@ object PianoRollImpl {
     if (_keyHeight != even) {
       _keyHeight = even
       recalcKeySize()
-      repaint()
+      if (_showKeyboard) repaint()
     }
   }
+
+  final def showLines = _showLines
+  def showLines_=(value: Boolean): Unit =
+    if (_showLines != value) {
+      _showLines = value
+      repaint()
+    }
+
+  final def showKeyboard = _showKeyboard
+  def showKeyboard_=(value: Boolean): Unit =
+    if (_showKeyboard != value) {
+      _showKeyboard = value
+      repaint()
+    }
 
   private def recalcKeySize(): Unit = {
     _keySize1 = _keyHeight + (_keyHeight >> 1)
@@ -151,7 +156,7 @@ object PianoRollImpl {
   }
 
   def paint(g: Graphics2D, x: Int, y: Int, w: Int, h: Int): Unit = {
-    val kw = math.min(keyWidth, w)
+    val kw = if (_showKeyboard) math.min(keyWidth, w) else 0
     if (kw > 0) paintKeyboard(g, x, y, kw, h)
     val rw = w - kw
     if (rw > 0) paintRoll(g, x + kw, y, rw, h)
@@ -203,25 +208,29 @@ object PianoRollImpl {
     val clipOrig = g.getClip
     try {
       g.clipRect(x, y, w, h)
-      g.setColor(colrGridLines)
-      g.fillRect(x, y, w, h)
+      if (_showLines) {
+        g.setColor(colrGridLines)
+        g.fillRect(x, y, w, h)
+      }
       var y0 = y + h - _keyHeight // + 1
-      val (pstart, pstop) = _pitchRange
-      val toff    = -_timeRange._1
-      val tscale  = w / (_timeRange._2 - _timeRange._1)
+      val (pStart, pStop) = _pitchRange
+      val tOff    = -_timeRange._1
+      val tScale  = w / (_timeRange._2 - _timeRange._1)
 
-      var i = pstart
-      while (i < pstop) {
-        g.setColor(if (isBlack(i)) colrGridBlack else colrGridWhite)
-        g.fillRect(x, y0, w, _keyHeight - 1)
-        y0 -= _keyHeight
-        i += 1
+      if (_showLines) {
+        var i = pStart
+        while (i < pStop) {
+          g.setColor(if (isBlack(i)) colrGridBlack else colrGridWhite)
+          g.fillRect(x, y0, w, _keyHeight - 1)
+          y0 -= _keyHeight
+          i += 1
+        }
       }
 
-      def paintNote(n: OffsetNote, colrDefault: Color) {
-        val xn = ((n.offset + toff) * tscale + x).toInt
-        val wn = math.max(1, ((n.stop   + toff) * tscale + x).toInt - xn)
-        val yn = y0 - (n.pitch.midi - pstart) * _keyHeight
+      def paintNote(n: OffsetNote, colrDefault: Color): Unit = {
+        val xn = ((n.offset + tOff) * tScale + x).toInt
+        val wn = math.max(1, ((n.stop   + tOff) * tScale + x).toInt - xn)
+        val yn = y0 - (n.pitch.midi - pStart) * _keyHeight
         g.setColor(_decoration.get(n).flatMap(_.color).getOrElse(colrDefault))
         g.fillRect(xn, yn, wn, _keyHeight - 1)
       }
@@ -234,9 +243,9 @@ object PianoRollImpl {
         val minPch  = cn.head.pitch.midi
         val maxPch  = cn.last.pitch.midi
 
-        val xn = ((c.minOffset + toff) * tscale + x).toInt
-        val wn = math.max(1, ((c.maxStop + toff) * tscale + x).toInt - xn)
-        val yn = y0 - (maxPch - pstart) * _keyHeight
+        val xn = ((c.minOffset + tOff) * tScale + x).toInt
+        val wn = math.max(1, ((c.maxStop + tOff) * tScale + x).toInt - xn)
+        val yn = y0 - (maxPch - pStart) * _keyHeight
         g.setColor(colrChordOutline)
         g.drawRect(xn - 2, yn - 2, wn + 3, (_keyHeight * (maxPch - minPch + 1)) + 2)
       }

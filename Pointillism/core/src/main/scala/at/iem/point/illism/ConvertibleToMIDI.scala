@@ -5,7 +5,7 @@ import midi.TickRate
 import collection.immutable.{IndexedSeq => Vec}
 
 object ConvertibleToMIDI {
-  def play(events: Vec[midi.Event])(implicit rate: TickRate) {
+  def play(events: Vec[midi.Event])(implicit rate: TickRate): Unit = {
     val track   = midi.Track(events.toIndexedSeq)
     val seq     = midi.Sequence(Vector(track))
     val player  = midi.Sequencer.open()
@@ -17,7 +17,7 @@ trait ConvertibleToMIDI {
 
   def toMIDI(channel: Int)(implicit tickRate: TickRate): List[midi.Event]
 
-  def play() {
+  def play(): Unit = {
     implicit val rate = TickRate.tempo(120, 1024)
     val events  = toMIDI
     ConvertibleToMIDI.play(events.toIndexedSeq)

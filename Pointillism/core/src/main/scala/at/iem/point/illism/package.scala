@@ -2,21 +2,9 @@
  *  package.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
- *  This software is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License
- *  as published by the Free Software Foundation; either
- *  version 3, june 2007 of the License, or (at your option) any later version.
- *
- *  This software is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- *  General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public
- *  License (gpl.txt) along with this software; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *  This software is published under the GNU Lesser General Public License v2.1+
  *
  *
  *  For further information, please contact Hanns Holger Rutz at
@@ -62,7 +50,7 @@ package object illism {
     def intervals(implicit ev: A <:< Pitch): Vec[DirectedInterval] =
       it.sliding(2,1).map({ case Seq(low, high) => high to low }).toIndexedSeq
 
-    def play()(implicit ev: A <:< ConvertibleToMIDI) {
+    def play()(implicit ev: A <:< ConvertibleToMIDI): Unit = {
       implicit val rate = TickRate.tempo(120, 1024)
       val events0: Vec[midi.Event] = it.flatMap(_.toMIDI)(breakOut)
       val min     = events0.minBy(_.tick).tick
@@ -108,13 +96,10 @@ package object illism {
     }
   }
 
-  def defer(thunk: => Unit) {
-    if (EventQueue.isDispatchThread) thunk else EventQueue.invokeLater(new Runnable { def run() { thunk }})
-  }
+  def defer(thunk: => Unit): Unit =
+    if (EventQueue.isDispatchThread) thunk else EventQueue.invokeLater(new Runnable { def run(): Unit = thunk })
 
-  def stopSequencer() {
-    midi.Sequencer.open().stop()
-  }
+  def stopSequencer(): Unit = midi.Sequencer.open().stop()
 
   private lazy val dfRound3 = {
     val res = new DecimalFormat("#.###")

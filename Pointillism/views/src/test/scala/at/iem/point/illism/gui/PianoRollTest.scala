@@ -3,14 +3,18 @@ package gui
 
 import java.awt.{Color, EventQueue}
 import javax.swing.{WindowConstants, JFrame}
-import collection.breakOut
 
 object PianoRollTest extends App with Runnable {
   EventQueue.invokeLater(this)
 
-  def run() {
+  def run(): Unit = {
     val f = new JFrame("Piano Roll")
     val comp = PianoRoll.j()
+    comp.showLines    = false
+    comp.showKeyboard = false
+    //    val sq = de.sciss.midi.Sequence.read("/home/hhrutz/IEM/POINT/composers/mattias_skoeld/blind/Study_#134C.mid")
+    //    val n = sq.notes
+
     val n = Vector.tabulate(30) { i =>
       val off = i * 2
       val dur = math.random * 1.75 + 0.25

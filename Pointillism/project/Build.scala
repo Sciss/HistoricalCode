@@ -3,10 +3,10 @@ import Keys._
 
 object Build extends sbt.Build {
   def baseName      = "pointillism"
-  def midiVersion   = "0.1.+"
+  def midiVersion   = "0.2.0"
   // def fingerVersion = "1.5.+"
-  def chartVersion  = "0.3.0"
-  def spireVersion  = "0.6.1"
+  def chartVersion  = "0.4.2"
+  def spireVersion  = "0.7.5"
 
   lazy val root: Project = Project(
     id            = baseName,
