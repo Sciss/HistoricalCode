@@ -1,7 +1,6 @@
 package de.sciss.play.json
 
-import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.FlatSpec
+import org.scalatest.{Matchers, FlatSpec}
 import play.api.libs.json.Json
 
 sealed trait Foo
@@ -9,7 +8,7 @@ case class Bar(i: Int   ) extends Foo
 case class Baz(j: String) extends Foo
 case object Gaga          extends Foo
 
-object SimpleTest extends FlatSpec with ShouldMatchers {
+object SimpleTest extends FlatSpec with Matchers {
   def print = false
 
   "A sealed trait" should "find an automatic serializer" in {

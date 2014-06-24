@@ -8,17 +8,17 @@ It is released under the [GNU Lesser General Public License](https://raw.github.
 
 ## requirements / installation
 
-This project currently compiles against Scala 2.10 using sbt 0.13.
+This project currently compiles against Scala 2.11 and 2.10 using sbt 0.13.
 
 To use the library in your project:
 
     "de.sciss" %% "play-json-sealed" % v
 
-The current version `v` is `"0.1.+"`
+The current version `v` is `"0.2.0"`
 
 The following resolver must be added to find the `play-json` dependency:
 
-    "Typesafe Releases" at "https://repo.typesafe.com/typesafe/releases/"
+    "Typesafe Releases" at "https://repo.typesafe.com/typesafe/maven-releases/"
 
 ## example
 

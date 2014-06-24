@@ -13,8 +13,8 @@ object Build extends sbt.Build {
     base      = file("core"),
     settings  = Project.defaultSettings ++ Seq(
       // needs paradise for quasi-quotes
-      resolvers += Resolver.sonatypeRepo("snapshots"),
-      addCompilerPlugin("org.scala-lang.plugins" % "macro-paradise" % "2.0.0-SNAPSHOT" cross CrossVersion.full)
+      resolvers += Resolver.sonatypeRepo("releases"),
+      addCompilerPlugin("org.scalamacros" % "paradise" % "2.0.0" cross CrossVersion.full)
     )
   )
 
