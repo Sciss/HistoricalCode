@@ -29,7 +29,7 @@ object ConvertKonturToMellite {
 
       opt[Int]('t', "track-scale") .action { case (v, c) =>
         c.copy(trackFactor = v) } .validate { v =>
-        if (v > 0) success else failure("Value <max> must be >0")
+        if (v > 0) success else failure("Value <track-scale> must be >0")
       } .text("track index integer scale factor (default: 4)")
 
       opt[Unit]('v', "verbose") .action { (_, c) =>
