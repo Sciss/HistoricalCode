@@ -20,17 +20,20 @@ object ConvertKonturToMellite {
   final val attrTrackHeight = "track-height"
 
   case class Config(in: File = file(""), out: File = file(""), trackFactor: Int = 4, skipErrors: Boolean = false,
-                    verbose: Boolean = false)
+                    /* existingArtifacts: Boolean = false, */ verbose: Boolean = false)
 
   def main(args: Array[String]): Unit = {
     val parser = new scopt.OptionParser[Config]("ConvertKonturToMellite") {
       opt[Unit]('e', "skip-errors") .action { (_, c) =>
         c.copy(skipErrors = true) } .text("skip errors such as missing audio files")
 
-      opt[Int]('t', "track-scale") .action { case (v, c) =>
+      opt[Int]('t', "track-scale") .action { (v, c) =>
         c.copy(trackFactor = v) } .validate { v =>
         if (v > 0) success else failure("Value <track-scale> must be >0")
       } .text("track index integer scale factor (default: 4)")
+
+      //      opt[Unit]('a', "existing-artifacts") .action { (_, c) =>
+      //        c.copy(existingArtifacts = true) } .text("try to reuse existing artifacts")
 
       opt[Unit]('v', "verbose") .action { (_, c) =>
         c.copy(verbose = true) } .text("verbose is a flag")
@@ -108,12 +111,12 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
       }
       t.toOption.map(afe -> _)
     }
-    val baseDirs  = collectBaseDirs(afs.map(_._1))
+    val baseDirs = collectBaseDirs(afs.map(_._1))
 
     cursor.step { implicit tx =>
       val folder = out.root()
 
-      val locs = baseDirs.map(d => ArtifactLocation.Modifiable(d))
+      val locs = baseDirs.map(ArtifactLocation(_))
       locs.foreach { loc =>
         val obj       = Obj(ArtifactLocation.Elem(loc))
         obj.attr.name = loc.directory.name
@@ -149,15 +152,18 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
     val tl    = Timeline[S]
     val ratio = Timeline.SampleRate / in.rate
 
+    def audioToTL(in: Long): Long = (in * ratio + 0.5).toLong
+
     in.tracks.toList.zipWithIndex.foreach {
       case (at: AudioTrack, trkIdxIn) =>
         at.trail.getAll().foreach { ar =>
           // name, span, audioFile, offset, gain, muted, fadeIn, fadeOut
           def mkAudioRegion(af: Grapheme.Expr.Audio[S]): Unit = {
-            val start = (ar.span.start * ratio + 0.5).toLong
-            val stop  = (ar.span.stop  * ratio + 0.5).toLong
-            val span  = Span(start, stop)
-            val (_, proc) = ProcActions.insertAudioRegion(tl, time = span, grapheme = af, gOffset = ar.offset, bus = None)
+            val start     = audioToTL(ar.span.start)
+            val stop      = audioToTL(ar.span.stop )
+            val gOffset   = audioToTL(ar.offset    )
+            val span      = Span(start, stop)
+            val (_, proc) = ProcActions.insertAudioRegion(tl, time = span, grapheme = af, gOffset = gOffset, bus = None)
             proc.attr.name = ar.name
             if (ar.muted) {
               ProcActions.toggleMute(proc)
@@ -168,7 +174,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
 
             def mkFade(fadeOpt: Option[KFadeSpec], key: String): Unit = fadeOpt.foreach {
               case fsIn: KFadeSpec if fsIn.numFrames > 0L =>
-                val numFrames = (fsIn.numFrames * ratio + 0.5).toLong
+                val numFrames = audioToTL(fsIn.numFrames)
                 val fsOut     = FadeSpec(numFrames, fsIn.shape, fsIn.floor)
                 val fsObj     = Obj(FadeSpec.Elem(FadeSpec.Expr.newVar(FadeSpec.Expr.newConst[S](fsOut))))
                 proc.attr.put(key, fsObj)
