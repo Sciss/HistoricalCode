@@ -8,7 +8,7 @@ import de.sciss.mellite.{Code, ProcActions, Workspace}
 import de.sciss.span.Span
 import de.sciss.synth
 import de.sciss.synth.io.{AudioFileSpec, AudioFile}
-import de.sciss.synth.proc.{FolderElem, Folder, SynthGraphs, Proc, IntElem, ObjKeys, FadeSpec, Timeline, AudioGraphemeElem, Grapheme, Obj, ArtifactLocation, graph}
+import de.sciss.synth.proc.{DoubleElem, FolderElem, Folder, SynthGraphs, Proc, IntElem, ObjKeys, FadeSpec, Timeline, AudioGraphemeElem, Grapheme, Obj, ArtifactLocation, graph}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.lucre.expr.{Long => LongEx, Double => DoubleEx, Int => IntEx}
 import de.sciss.lucre.bitemp.{SpanLike => SpanLikeEx}
@@ -205,7 +205,8 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
       val m    = Mix.tabulate(md.numInputChannels) { chIn =>
         val inc = in \ chIn
         val sig0: GE = Vector.tabulate(md.numOutputChannels) { chOut =>
-          val ampc = md.matrix(row = chIn, col = chOut)
+          // val ampc = md.matrix(row = chIn, col = chOut)
+          val ampc = attribute(s"m${chIn+1}>${chOut+1}").kr(0)
           inc * ampc
         }
         sig0
@@ -214,32 +215,38 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
       Out.ar(bus, m)
     }
 
-    val sourceM = md.matrix.toSeq.map(row => row.mkString("Vector(", ",", ")")).mkString("Vector(", ",", ")")
+    // val sourceM = md.matrix.toSeq.map(row => row.mkString("Vector(", ",", ")")).mkString("Vector(", ",", ")")
     val source =
-      raw"""val md   = $sourceM
-         |val gain = attribute("gain").kr(1)
-         |val mute = attribute("mute").kr(0)
-         |val amp  = gain * (1 - mute)
-         |val in   = scan.In("in") * amp
-         |val m    = Mix.tabulate(${md.numInputChannels}) { chIn =>
-         |  val inc = in \ chIn
-         |  val sig0: GE = Vector.tabulate(${md.numOutputChannels}) { chOut =>
-         |    val ampc = md(chIn)(chOut)
-         |    inc * ampc
-         |  }
-         |  sig0
-         |}
-         |val bus = attribute("bus").kr(0)
-         |Out.ar(bus, m)
-         |""".stripMargin
+      raw"""|val gain = attribute("gain").kr(1)
+            |val mute = attribute("mute").kr(0)
+            |val amp  = gain * (1 - mute)
+            |val in   = scan.In("in") * amp
+            |val m    = Mix.tabulate(${md.numInputChannels}) { chIn =>
+            |  val inc = in \ chIn
+            |  val sig0: GE = Vector.tabulate(${md.numOutputChannels}) { chOut =>
+            |    val ampc = attribute(s"m$${chIn+1}>$${chOut+1}").kr(0)
+            |    inc * ampc
+            |  }
+            |  sig0
+            |}
+            |val bus = attribute("bus").kr(0)
+            |Out.ar(bus, m)
+            |""".stripMargin
 
     val p       = Proc[S]
     p.graph()   = SynthGraphs.newVar(SynthGraphs.newConst[S](g))
     p.scans.add("in")
     val obj     = Obj(Proc.Elem(p))
     val code    = Obj(Code.Elem(Code.Expr.newVar(Code.Expr.newConst[S](Code.SynthGraph(source)))))
-    obj.attr.put(Proc.Obj.attrSource, code)
-    obj.attr.name = md.name
+    val attr    = obj.attr
+    attr.put(Proc.Obj.attrSource, code)
+    attr.name = md.name
+    (0 until md.numInputChannels).foreach { chIn =>
+      (0 until md.numOutputChannels).foreach { chOut =>
+        val v = md.matrix(row = chIn, col = chOut)
+        attr.put(s"m${chIn+1}>${chOut+1}", Obj(DoubleElem(DoubleEx.newVar(DoubleEx.newConst[S](v)))))
+      }
+    }
     obj
   }
 
@@ -308,6 +315,12 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
 
           val afOpt = afMap.get(ar.audioFile)
           afOpt.foreach(mkAudioRegion)
+
+          if (ar.audioFile.sampleRate != in.rate) {
+            val txt1 = s"Warning: audio file '${ar.audioFile.name}' has a sample-rate of ${ar.audioFile.sampleRate}Hz"
+            val txt2 = s" but was played back at ${in.rate}Hz in Kontur!"
+            Console.err.println(s"$txt1$txt2")
+          }
         }
 
       case _ =>
