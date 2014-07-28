@@ -1,15 +1,17 @@
 package de.sciss.convert
 
 import de.sciss.file._
-import de.sciss.kontur.session.{Timeline => KTimeline, AudioFileElement, AudioTrack, Session, FadeSpec => KFadeSpec}
+import de.sciss.kontur.session.{Timeline => KTimeline, FadeSpec => KFadeSpec, Diffusion, MatrixDiffusion, AudioFileElement, AudioTrack, Session}
 import de.sciss.lucre.event.Sys
 import de.sciss.lucre.stm
-import de.sciss.mellite.{ProcActions, Workspace}
+import de.sciss.mellite.{Code, ProcActions, Workspace}
 import de.sciss.span.Span
+import de.sciss.synth
 import de.sciss.synth.io.{AudioFileSpec, AudioFile}
-import de.sciss.synth.proc.{IntElem, ObjKeys, FadeSpec, Timeline, AudioGraphemeElem, Grapheme, Obj, ArtifactLocation}
+import de.sciss.synth.proc.{FolderElem, Folder, SynthGraphs, Proc, IntElem, ObjKeys, FadeSpec, Timeline, AudioGraphemeElem, Grapheme, Obj, ArtifactLocation, graph}
 import de.sciss.synth.proc.Implicits._
 import de.sciss.lucre.expr.{Long => LongEx, Double => DoubleEx, Int => IntEx}
+import de.sciss.lucre.bitemp.{SpanLike => SpanLikeEx}
 
 import scala.annotation.tailrec
 import scala.collection.breakOut
@@ -20,7 +22,7 @@ object ConvertKonturToMellite {
   final val attrTrackHeight = "track-height"
 
   case class Config(in: File = file(""), out: File = file(""), trackFactor: Int = 4, skipErrors: Boolean = false,
-                    /* existingArtifacts: Boolean = false, */ verbose: Boolean = false)
+                    create: Boolean = false, noDiffusions: Boolean = false, verbose: Boolean = false)
 
   def main(args: Array[String]): Unit = {
     val parser = new scopt.OptionParser[Config]("ConvertKonturToMellite") {
@@ -31,6 +33,12 @@ object ConvertKonturToMellite {
         c.copy(trackFactor = v) } .validate { v =>
         if (v > 0) success else failure("Value <track-scale> must be >0")
       } .text("track index integer scale factor (default: 4)")
+
+      opt[Unit]('c', "create") .action { (_, c) =>
+        c.copy(create = true) } .text("create a new workspace")
+
+      opt[Unit]('d', "no-diffusions") .action { (_, c) =>
+        c.copy(noDiffusions = true) } .text("do not create output routing processes")
 
       //      opt[Unit]('a', "existing-artifacts") .action { (_, c) =>
       //        c.copy(existingArtifacts = true) } .text("try to reuse existing artifacts")
@@ -62,7 +70,12 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
     log(s"Open Kontur session '${in.name}'")
     val kDoc  = Session.newFrom(in)
     log(s"Open Mellite session '${out.name}'")
-    val mDoc  = Workspace.read(out)
+    val mDoc  = if (create) {
+      require (!out.exists(), s"Cannot overwrite existing workspace '$out'")
+      Workspace.Confluent.empty(out)
+    } else {
+      Workspace.read(out)
+    }
     mDoc match {
       case eph: Workspace.Ephemeral => performSys(kDoc, eph)(eph.cursor)
       case con: Workspace.Confluent => performSys(kDoc, con)(con.cursors.cursor)
@@ -113,14 +126,37 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
     }
     val baseDirs = collectBaseDirs(afs.map(_._1))
 
+    //    if (noDiffusions) Nil else in.diffusions.toList.flatMap { d =>
+    //      val mOpt = d match {
+    //        case md: MatrixDiffusion =>
+    //          val m = md.matrix
+    //          Some(m)
+    //        case _ => None
+    //      }
+    //
+    //    }
+
     cursor.step { implicit tx =>
       val folder = out.root()
+
+      def mkFolder(name: String): Folder[S] = {
+        val res = Folder[S]
+        val obj = Obj(FolderElem(res))
+        obj.attr.name = name
+        folder.addLast(obj)
+        res
+      }
+
+      lazy val locsFolder       = mkFolder("locations")
+      lazy val audioFilesFolder = mkFolder("audio-files")
+      lazy val diffsFolder      = mkFolder("routing")
+      lazy val timelinesFolder  = mkFolder("timelines")
 
       val locs = baseDirs.map(ArtifactLocation(_))
       locs.foreach { loc =>
         val obj       = Obj(ArtifactLocation.Elem(loc))
         obj.attr.name = loc.directory.name
-        folder.addLast(obj)
+        locsFolder.addLast(obj)
         log(s"Add artifact location '${loc.directory}'")
       }
 
@@ -135,27 +171,99 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
         val obj     = Obj(AudioGraphemeElem(gr))
         obj.attr.name = afe.path.base
         log(s"Add audio file '${afe.path.name}'")
-        folder.addLast(obj)
+        audioFilesFolder.addLast(obj)
         afe -> gr
+      } (breakOut)
+
+      val dMap: Map[Diffusion, Proc.Obj[S]] = if (noDiffusions) Map.empty else in.diffusions.toList.flatMap {
+        case md: MatrixDiffusion =>
+          val obj = mkDiff(md)
+          log(s"Add diffusion '${md.name}'")
+          diffsFolder.addLast(obj)
+          Some((md: Diffusion) -> obj)
+        case _ => None
       } (breakOut)
 
       in.timelines.foreach { tlIn =>
         log(s"Translating timeline '${tlIn.name}'...")
-        val tlOut = performTL(tlIn, afMap)
-        folder.addLast(tlOut)
+        val tlOut = performTL(tlIn, afMap, dMap)
+        timelinesFolder.addLast(tlOut)
       }
     }
   }
 
-  private def performTL[S <: Sys[S]](in: KTimeline, afMap: Map[AudioFileElement, Grapheme.Expr.Audio[S]])
+  private def mkDiff[S <: Sys[S]](md: MatrixDiffusion)(implicit tx: S#Tx): Proc.Obj[S] = {
+    import synth._
+    import ugen._
+
+    val g = SynthGraph {
+      import graph._
+      val gain = attribute("gain").kr(1)
+      val mute = attribute("mute").kr(0)
+      val amp  = gain * (1 - mute)
+      val in   = scan.In("in") * amp
+      val m    = Mix.tabulate(md.numInputChannels) { chIn =>
+        val inc = in \ chIn
+        val sig0: GE = Vector.tabulate(md.numOutputChannels) { chOut =>
+          val ampc = md.matrix(row = chIn, col = chOut)
+          inc * ampc
+        }
+        sig0
+      }
+      val bus = attribute("bus").kr(0)
+      Out.ar(bus, m)
+    }
+
+    val sourceM = md.matrix.toSeq.map(row => row.mkString("Vector(", ",", ")")).mkString("Vector(", ",", ")")
+    val source =
+      raw"""val md   = $sourceM
+         |val gain = attribute("gain").kr(1)
+         |val mute = attribute("mute").kr(0)
+         |val amp  = gain * (1 - mute)
+         |val in   = scan.In("in") * amp
+         |val m    = Mix.tabulate(${md.numInputChannels}) { chIn =>
+         |  val inc = in \ chIn
+         |  val sig0: GE = Vector.tabulate(${md.numOutputChannels}) { chOut =>
+         |    val ampc = md(chIn)(chOut)
+         |    inc * ampc
+         |  }
+         |  sig0
+         |}
+         |val bus = attribute("bus").kr(0)
+         |Out.ar(bus, m)
+         |""".stripMargin
+
+    val p       = Proc[S]
+    p.graph()   = SynthGraphs.newVar(SynthGraphs.newConst[S](g))
+    p.scans.add("in")
+    val obj     = Obj(Proc.Elem(p))
+    val code    = Obj(Code.Elem(Code.Expr.newVar(Code.Expr.newConst[S](Code.SynthGraph(source)))))
+    obj.attr.put(Proc.Obj.attrSource, code)
+    obj.attr.name = md.name
+    obj
+  }
+
+  private def performTL[S <: Sys[S]](in: KTimeline, afMap: Map[AudioFileElement, Grapheme.Expr.Audio[S]],
+                                     dMap: Map[Diffusion, Proc.Obj[S]])
                                     (implicit tx: S#Tx): Timeline.Obj[S] = {
     val tl    = Timeline[S]
     val ratio = Timeline.SampleRate / in.rate
 
     def audioToTL(in: Long): Long = (in * ratio + 0.5).toLong
 
+    var diffAdded = Set.empty[Proc.Obj[S]]
+
     in.tracks.toList.zipWithIndex.foreach {
       case (at: AudioTrack, trkIdxIn) =>
+        val dOpt = at.diffusion.flatMap(dMap.get)
+        dOpt.foreach { d =>
+          if (!diffAdded.contains(d)) {
+            diffAdded += d
+            log(s"Include diffusion '${d.attr.name}'")
+            tl.add(SpanLikeEx.newConst(Span.All), d)
+          }
+        }
+
         at.trail.getAll().foreach { ar =>
           // name, span, audioFile, offset, gain, muted, fadeIn, fadeOut
           def mkAudioRegion(af: Grapheme.Expr.Audio[S]): Unit = {
@@ -189,6 +297,13 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
             val trkHOut = trackFactor
             proc.attr.put(attrTrackIndex , Obj(IntElem(IntEx.newVar(IntEx.newConst(trkIdxOut)))))
             proc.attr.put(attrTrackHeight, Obj(IntElem(IntEx.newVar(IntEx.newConst(trkHOut  )))))
+
+            dOpt.foreach { d =>
+              val scanIn  = d   .elem.peer.scans.get("in" ).get
+              val scanOut = proc.elem.peer.scans.add("out")
+              scanOut addSink   scanIn
+              scanIn  addSource scanOut
+            }
           }
 
           val afOpt = afMap.get(ar.audioFile)
