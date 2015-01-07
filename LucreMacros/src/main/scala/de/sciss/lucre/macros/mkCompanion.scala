@@ -7,10 +7,10 @@ import language.experimental.macros
 trait Foo[A]
 
 class mkCompanion extends StaticAnnotation {
-  def macroTransform(annottees: Any*) = macro mkCompanionMacro.impl
+  def macroTransform(annottees: Any*): Any = macro mkCompanionMacro.impl
 }
 object mkCompanionMacro {
-  def impl1(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
+  def impl1(c: blackbox.Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
     import c.universe._
     val inputs = annottees.map(_.tree).toList
     println(s"---- RAW ----\n${showRaw(inputs.head)}")
@@ -22,7 +22,7 @@ object mkCompanionMacro {
       val tpe = v.tpe // <- tpe is null as the annotated type is not yet type checked!
       val tpe2 = if (tpe == null) {
           println(s"---- Input ----\n${showRaw(v)}")
-          val blk = c.typeCheck(Block(v))
+          val blk = c.typecheck(q"{..$v}")
           val Block((cd1 @ ClassDef(_, _, _, _)) :: Nil, _) = blk
           println(s"---- Output ----\n${showRaw(blk)}")
           cd1.tpe // <- fails with a compiler error (assertion failure)
@@ -31,10 +31,10 @@ object mkCompanionMacro {
           tpe
       println(s"type = '$tpe2'")
     }
-    c.Expr[Any](Literal(Constant()))
+    c.Expr[Any](Literal(Constant(())))
   }
 
-  def impl(c: Context)(annottees: c.Expr[Any]*): c.Expr[Any] = {
+  def impl(c: blackbox.Context)(annottees: c.Expr[Any]*): c.Expr[List[c.Tree]] = {
     import c.universe._
 
     val inputs : List[Tree] = annottees.map(_.tree)(collection.breakOut)
@@ -42,7 +42,7 @@ object mkCompanionMacro {
       case (cd @ ClassDef(_, cName, _, _)) :: tail =>
         // val cTpe = cd.tpe
         val mod0: ModuleDef = tail match {
-          case (md @ ModuleDef(_, mName, mTemp)) :: Nil if cName.decoded == mName.decoded => md
+          case (md @ ModuleDef(_, mName, mTemp)) :: Nil if cName.decodedName == mName.decodedName => md
 
           case Nil =>
             val cMod = cd.mods
@@ -53,13 +53,13 @@ object mkCompanionMacro {
             val mMod = Modifiers(mModF, cMod.privateWithin, Nil)
 
             // XXX TODO: isn't there a shortcut for creating the constructor? ast.Trees apparently has stuff for it
-            val mkSuperSelect = Select(Super(This(tpnme.EMPTY), tpnme.EMPTY), nme.CONSTRUCTOR)
+            val mkSuperSelect = Select(Super(This(typeNames.EMPTY), typeNames.EMPTY), termNames.CONSTRUCTOR)
             val superCall     = Apply(mkSuperSelect, Nil)
-            val constr        = DefDef(NoMods, nme.CONSTRUCTOR, Nil, List(Nil), TypeTree(),
-              Block(List(superCall), Literal(Constant())))
+            val constr        = DefDef(NoMods, termNames.CONSTRUCTOR, Nil, List(Nil), TypeTree(),
+              Block(List(superCall), Literal(Constant(()))))
 
             val mTemp = Template(parents = List(TypeTree(typeOf[AnyRef])), self = noSelfType, body = constr :: Nil)
-            val mName = TermName(cName.decoded) // or encoded?
+            val mName = TermName(cName.decodedName.toString) // or encoded?
 
             ModuleDef(mMod, mName, mTemp)
 
@@ -76,7 +76,7 @@ object mkCompanionMacro {
         //        }
 
         // cf. http://stackoverflow.com/questions/21044957/type-of-a-macro-annottee
-        val cTpe = Ident(TypeName(cd.name.decoded))
+        val cTpe = Ident(TypeName(cd.name.decodedName.toString))
 
         val fooName = TermName("hasFoo")
         // val cTpe    = annottees.head.tree.tpe // staticType // .actualType // yes?
@@ -93,6 +93,6 @@ object mkCompanionMacro {
       case _ => c.abort(c.enclosingPosition, "Must annotate a class or trait")
     }
 
-    c.Expr[Any](Block(outputs, Literal(Constant(()))))
+    c.Expr(Block(outputs, Literal(Constant(()))))
   }
 }

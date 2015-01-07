@@ -55,7 +55,14 @@ object txnMacro {
 
             if (!rhs.isEmpty) c.abort(v.pos, "@txn members must be abstract")
 
-            val tpt1 = tq"S#Var[$tpt]"
+            val tpt0 = tpt match {
+              // case tq"Option[$x]" => println(s"Option of: '$x'"); tpt
+              case _ =>
+                // val tt = tpt.asInstanceOf[TypeTree]
+                tpt
+            }
+
+            val tpt1 = tq"S#Var[$tpt0]"
             ValDef(vMods, vName, tpt1, rhs)
 
           case other =>
@@ -64,9 +71,9 @@ object txnMacro {
 
         val implClass = q"""
           object ${name.toTermName} {
-            sealed trait Impl[S <: Sys[S], ..$tparams] { ..$newDefs }
+            sealed trait Txn[S <: Sys[S], ..$tparams] { ..$newDefs }
 
-            def apply[S <: Sys[S], ..$tparams](): Impl[S, ..${tparams.map(_.name)}] = ???
+            def apply[S <: Sys[S], ..$tparams]()(implicit tx: S#Tx): Txn[S, ..${tparams.map(_.name)}] = ???
           }
           """
 
