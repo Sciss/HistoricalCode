@@ -1,0 +1,9 @@
+OhrwaldPlayer.playPiece( "Ko" );
+OhrwaldPlayer.playPiece( "Lipp" );
+OhrwaldPlayer.playPiece( "Erdmann" );
+OhrwaldPlayer.playPiece( "Vorwerk" );
+OhrwaldPlayer.playPiece( "Rutz" );
+OhrwaldPlayer.playPiece( "Helm" );
+OhrwaldPlayer.playPiece( "Leventhal" );
+OhrwaldPlayer.playPiece( "Meyerkoenig" );
+OhrwaldPlayer.playPiece( "Lindig" );
