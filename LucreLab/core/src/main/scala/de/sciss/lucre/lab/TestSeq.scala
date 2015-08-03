@@ -1,4 +1,4 @@
-package de.sciss.lucrelab
+package de.sciss.lucre.lab
 
 trait MutableSeqOps[-A] {
   def insert(idx: Int, elem: A): Unit

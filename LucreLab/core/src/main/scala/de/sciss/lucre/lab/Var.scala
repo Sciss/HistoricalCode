@@ -1,4 +1,4 @@
-package de.sciss.lucrelab
+package de.sciss.lucre.lab
 
 trait Source[-Tx, +A] {
   def apply()(implicit tx: Tx): A

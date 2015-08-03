@@ -1,4 +1,4 @@
-package de.sciss.lucrelab
+package de.sciss.lucre.lab
 
 import scala.collection.generic.CanBuildFrom
 
