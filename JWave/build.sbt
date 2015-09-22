@@ -19,7 +19,7 @@ scalaVersion      := "2.11.7"
 
 // ---- publishing ----
 
-version           := "1.0.0"
+version           := "1.0.2"
 organization      := "de.sciss"   // requirement to publish from my Sonatype account
 
 publishMavenStyle := true

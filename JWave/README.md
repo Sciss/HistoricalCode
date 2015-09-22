@@ -2,10 +2,13 @@
 
 __Note:__ This fork takes the [original source code](https://github.com/cscheiblich/JWave) by Christian Scheiblich
 and adds an sbt build file, so that I can publish an artifact on Maven Central.
-For technical reasons, the artifact group is 'de.sciss', but the class
-structure remains the same. The artifact is
+For technical reasons, the artifact group is 'de.sciss'. The package structure
+was changed from `math.jwave` to `jwave`, because it collides with `scala.math`
+and is not a proper top-level domain anyway.
 
-    "de.sciss" % "jwave" % "1.0.0"
+The artifact is
+
+    "de.sciss" % "jwave" % "1.0.2"
 
 Below is the original README:
 
