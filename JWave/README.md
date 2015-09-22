@@ -1,4 +1,14 @@
 # JWave
+
+__Note:__ This fork takes the [original source code](https://github.com/cscheiblich/JWave) by Christian Scheiblich
+and adds an sbt build file, so that I can publish an artifact on Maven Central.
+For technical reasons, the artifact group is 'de.sciss', but the class
+structure remains the same. The artifact is
+
+    "de.sciss" % "jwave" % "1.0.0"
+
+Below is the original README:
+
 ## What is it and what it is not?!
 Java implementation of a discrete fourier transform (DFT) algorithm, a fast
 wavelet transform (FWT) algorithm, and a wavelet packet transform (WPT)
