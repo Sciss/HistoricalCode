@@ -80,12 +80,9 @@ public class SpaceFull extends Space {
    * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 16.05.2015 15:57:35
-   * @param i
-   *          from 0 to noOfRows-1
-   * @param j
-   *          from 0 to noOfCols-1
-   * @param k
-   *          from 0 to noOfLvls-1
+   * @param noOfRows
+   * @param noOfCols
+   * @param noOfLvls
    */
   public SpaceFull( int noOfRows, int noOfCols, int noOfLvls ) {
     super( noOfRows, noOfCols, noOfLvls );

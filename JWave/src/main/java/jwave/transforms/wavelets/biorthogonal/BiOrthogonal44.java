@@ -25,7 +25,7 @@ package jwave.transforms.wavelets.biorthogonal;
 
 /**
  * BiOrthogonal Wavelet of type 4.4 - Four vanishing moments in wavelet function
- * and four vanishing moments in scaling function - 44 muhahaha! ~8>
+ * and four vanishing moments in scaling function - 44 muhahaha! ~8&gt;
  * 
  * @author Christian Scheiblich (cscheiblich@gmail.com)
  * @date 16.02.2014 17:36:17

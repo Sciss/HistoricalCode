@@ -55,7 +55,6 @@ public class CompressorMagnitude extends Compressor {
    * @date 20.02.2014 23:56:09
    * @param threshold
    *          has to be positive value starting at 0 - 0 means no compression.
-   * @throws JWaveException
    */
   public CompressorMagnitude( double threshold ) {
 

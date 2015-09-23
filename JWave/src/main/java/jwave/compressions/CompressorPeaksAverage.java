@@ -39,7 +39,7 @@ public class CompressorPeaksAverage extends Compressor {
   protected double _peakMaximum;
 
   /**
-   * Compression by average of peak min & max.
+   * Compression by average of peak min and max.
    * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 14.05.2015 17:57:19
@@ -53,12 +53,11 @@ public class CompressorPeaksAverage extends Compressor {
   } // CompressorPeaksAverage
 
   /**
-   * Compression by average of peak min & max.
+   * Compression by average of peak min and max.
    * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 14.05.2015 17:57:19
    * @param threshold
-   * @throws JWaveException
    */
   public CompressorPeaksAverage( double threshold ) {
 

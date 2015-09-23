@@ -117,7 +117,7 @@ public abstract class WaveletTransform extends BasicTransform {
    * array of dimension (length) 2^p | p€N; N = 2, 4, 8, 16, 32, 64, 128, ..,
    * and so on. However, the algorithm stores all levels in a matrix that has in
    * first dimension the range of 0, .., p and in second dimension the
-   * coefficients (energy & details) of a certain level. From any level a full
+   * coefficients (energy and details) of a certain level. From any level a full
    * reconstruction can be performed. The first dimension is keeping the time
    * series, due to being the Hilbert space of level 0. All following dimensions
    * are keeping the next higher Hilbert spaces, so the next step in wavelet
@@ -150,7 +150,7 @@ public abstract class WaveletTransform extends BasicTransform {
    * one kind of wavelet transform algorithm for a given array of dimension
    * (length) 2^p | p€N; N = 2, 4, 8, 16, 32, 64, 128, .., and so on. However,
    * the algorithm uses on of level in a matrix that has in first dimension the
-   * range of 0, .., p and in second dimension the coefficients (energy &
+   * range of 0, .., p and in second dimension the coefficients (energy and
    * details) the level. From any level a full a reconstruction can be
    * performed; so from the selected by "level". Anyway, the first dimension is
    * keeping the time series, due to being the Hilbert space of level 0. All
@@ -168,7 +168,7 @@ public abstract class WaveletTransform extends BasicTransform {
    * @throws JWaveException
    *           if something does not match upon the criteria of input
    * @return a 1-D time domain signal
-   * @see jwave.transforms.BasicTransform#recompose(double[])
+   * @see jwave.transforms.BasicTransform#recompose(double[][])
    */
   public double[ ] recompose( double[ ][ ] matDeComp, int level )
       throws JWaveException {

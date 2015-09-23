@@ -120,7 +120,7 @@ public abstract class BasicTransform {
    * @date 22.03.2015 11:33:11
    * @param arrTime
    * @param level
-   *          the level of Hilbert space; energy & detail coefficients
+   *          the level of Hilbert space; energy and detail coefficients
    * @return array keeping Hilbert space of requested level
    * @throws JWaveException
    *           if given array is not of type 2^p | p € N or given level does not
@@ -142,7 +142,7 @@ public abstract class BasicTransform {
    * @date 22.03.2015 11:34:27
    * @param arrFreq
    * @param level
-   *          the level of Hilbert space; energy & detail coefficients
+   *          the level of Hilbert space; energy and detail coefficients
    * @return array keeping Hilbert space of requested level
    * @throws JWaveException
    *           if given array is not of type 2^p | p € N or given level does not
@@ -161,9 +161,7 @@ public abstract class BasicTransform {
    * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 17.08.2014 10:07:19
-   * @param matDeComp
-   *          2-D Hilbert spaces: [ 0 .. p ][ 0 .. N ] where p is the exponent
-   *          of N=2^p
+   * @param arrTime
    * @return a 1-D time domain signal
    * @throws JWaveException
    */
@@ -291,7 +289,7 @@ public abstract class BasicTransform {
    * @date 16.02.2014 14:42:57
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    *         (cscheiblich@gmail.com)
-   * @param arrFreq
+   * @param arrHilb
    *          coefficients of 1-D frequency or Hilbert domain
    * @return coefficients of 1-D time domain
    * @throws JWaveException

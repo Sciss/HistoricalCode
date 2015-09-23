@@ -8,7 +8,7 @@ licenses          := Seq("MIT License" -> url("https://github.com/cscheiblich/JW
 
 lazy val commonJava  = Seq("-source", "1.7")
 javacOptions        := commonJava ++ Seq("-target", "1.7", "-g")
-javacOptions in doc := commonJava
+javacOptions in doc := commonJava ++ Seq("-tag", "date:Xaoptcmf:date", "-tag", "contact:Xaoptcmf:contact")
 
 libraryDependencies += "junit" % "junit" % "4.12" % "test"
 
@@ -19,7 +19,7 @@ scalaVersion      := "2.11.7"
 
 // ---- publishing ----
 
-version           := "1.0.2"
+version           := "1.0.3"
 organization      := "de.sciss"   // requirement to publish from my Sonatype account
 
 publishMavenStyle := true

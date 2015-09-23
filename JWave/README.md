@@ -8,7 +8,7 @@ and is not a proper top-level domain anyway.
 
 The artifact is
 
-    "de.sciss" % "jwave" % "1.0.2"
+    "de.sciss" % "jwave" % "1.0.3"
 
 Below is the original README:
 

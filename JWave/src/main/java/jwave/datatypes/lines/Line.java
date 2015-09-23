@@ -91,7 +91,7 @@ public abstract class Line extends Super {
 
   /**
    * Create a Line object by an off set and the number of rows. Set the off set
-   * of row starting for this line; e.g. _offSetRow + _noOfRows =>
+   * of row starting for this line; e.g. _offSetRow + _noOfRows =&gt;
    * next_offSetRow of next_lineObject!
    * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
@@ -139,11 +139,11 @@ public abstract class Line extends Super {
 
   /**
    * Set the off set of row starting for this line; e.g. _offSetRow + _noOfRows
-   * => next_offSetRow of next_lineObject!
+   * =&gt; next_offSetRow of next_lineObject!
    * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 18.05.2015 17:51:02
-   * @param offSetRows
+   * @param offSetRow
    *          the global off set of this Line object in a SuperLine object
    */
   protected void setOffSetRow( int offSetRow ) { // set to protected due to miss usage
@@ -181,7 +181,7 @@ public abstract class Line extends Super {
    * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 16.05.2015 15:10:04
-   * @param pos
+   * @param i
    *          from 0 to noOfRows-1 as range of input
    * @return the stored double value
    * @throws JWaveException

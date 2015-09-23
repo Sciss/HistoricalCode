@@ -32,7 +32,7 @@ import jwave.exceptions.*;
 public class MathToolKit {
 
   /**
-   * Some how useless ~8>
+   * Some how useless ~8&gt;
    * 
    * @author Christian Scheiblich (cscheiblich@gmail.com) date Feb 11, 2013
    *         1:42:37 PM
@@ -204,7 +204,7 @@ public class MathToolKit {
    * @author sashi
    * @date 19.04.2011 15:43:16
    * @param f
-   * @return p of 2^p <= f < 2^(p+1)
+   * @return p of 2^p &lt;= f &lt; 2^(p+1)
    */
   public static int getExponent( double f ) {
 

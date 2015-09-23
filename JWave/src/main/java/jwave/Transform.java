@@ -224,7 +224,7 @@ public final class Transform {
    * 
    * @date 10.02.2010 10:59:32
    * @author Christian Scheiblich (cscheiblich@gmail.com)
-   * @param matrixFreq
+   * @param matrixHilb
    *          coefficients of 2-D frequency or Hilbert domain; internal
    *          M(i),N(j)
    * @return coefficients of 2-D time domain
@@ -270,7 +270,7 @@ public final class Transform {
    * 
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 22.03.2015 14:42:12
-   * @param matrixFreq
+   * @param matrixHilb
    *          coefficients of 2-D frequency or Hilbert domain; internal
    *          M(i),N(j)
    * @param levelM
@@ -296,7 +296,7 @@ public final class Transform {
    * 
    * @date 10.07.2010 18:15:22
    * @author Christian Scheiblich (cscheiblich@gmail.com)
-   * @param matrixTime
+   * @param spaceTime
    *          coefficients of 2-D time domain; internal M(i),N(j),O(k)
    * @return coefficients of 2-D frequency or Hilbert domain
    */
@@ -316,7 +316,7 @@ public final class Transform {
    * 
    * @date 10.07.2010 18:15:33
    * @author Christian Scheiblich (cscheiblich@gmail.com)
-   * @param matrixFreq
+   * @param spaceHilb
    *          coefficients of 2-D frequency or Hilbert domain; internal
    *          M(i),N(j),O(k)
    * @return coefficients of 2-D time domain
@@ -487,7 +487,6 @@ public final class Transform {
    * @author Christian Scheiblich (cscheiblich@gmail.com)
    * @date 14.03.2015 18:58:50
    * @return object of type Wavelet
-   * @throws JWaveFailure
    *           if Wavelet object is not available
    */
   public final Wavelet getWavelet( ) {
