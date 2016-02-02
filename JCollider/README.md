@@ -1,12 +1,16 @@
 # JCollider
 
+[![Flattr this](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=sciss&url=https%3A%2F%2Fgithub.com%2FSciss%2FJCollider&title=JCollider&language=Scala&tags=github&category=software)
+[![Build Status](https://travis-ci.org/Sciss/JCollider.svg?branch=master)](https://travis-ci.org/Sciss/JCollider)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/jcollider/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/jcollider)
+
 __Note:__ This project is not being actively developed any longer. See [ScalaCollider](https://github.com/Sciss/ScalaCollider) for an actively maintained SuperCollider client for the Scala programming language instead.
 
 ## Statement
 
 JCollider is a Java library to build clients for the SuperCollider server architecture. While staying rather compact, it provides a lot of the functionality found in the SuperCollider Language (sclang) application. JCollider uses the same concept of mirroring the server (scsynth) objects on the client side as sclang, and its API is fairly similar to classes found in sclang. Some additional GUI helper classes are provided.
 
-JCollider is (C)opyright 2004-2015 by Hanns Holger Rutz. All rights reserved. JCollider is released under the GNU Lesser General Public License v2.1+. The software comes with absolutely no warranties.
+JCollider is (C)opyright 2004&ndash;2016 by Hanns Holger Rutz. All rights reserved. JCollider is released under the GNU Lesser General Public License v2.1+. The software comes with absolutely no warranties.
 
 To contact the author, send an email to `contact at sciss.de`. For project status, API and current version, visit [the GitHub page](https://github.com/Sciss/JCollider).
 
@@ -33,6 +37,10 @@ To use JCollider in your project, you can link to the following Maven artifact:
     GroupId: de.sciss
     ArtifactId: jcollider
     Version: 1.0.0
+
+## contributing
+
+Please see the file [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## documentation
 

@@ -1,6 +1,6 @@
 name             := "JCollider"
 
-version          := "1.0.0"
+version          := "1.0.1-SNAPSHOT"
 
 organization     := "de.sciss"
 
@@ -10,7 +10,7 @@ homepage         := Some(url("https://github.com/Sciss/" + name.value))
 
 licenses         := Seq("LGPL v2.1+" -> url("http://www.gnu.org/licenses/lgpl-2.1.txt"))
 
-scalaVersion     := "2.11.5"
+scalaVersion     := "2.11.7"
 
 crossPaths       := false      // this is just a Java only project
 
