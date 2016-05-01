@@ -15,7 +15,8 @@ object MainFrame {
         val frames = if (args.length > 3) Integer.parseInt(args(3)) else 1024
         val outFile = if (args.length > 4) Option(new File(args(4))) else Option.empty
 
-        val frame = new MainFrame("ScalaPT", width, height, inFile, frames, outFile)
+        val scene = SceneIO.load(inFile)
+        /* val frame = */ new MainFrame("ScalaPT", width, height, inFile, frames, outFile, scene = scene)
     }
 }
 
@@ -26,6 +27,7 @@ class MainFrame(
    val inFile : String,
    val frames : Int,
    val outFile : Option[File],
+   val scene: Scene,
    var closing : Boolean = false
 ) extends Frame(frameTitle) {
 
@@ -35,7 +37,7 @@ class MainFrame(
     System.out.println("Frames: " + frames)
     outFile.foreach(name => System.out.println("Outfile: " + name))
 
-    val scene = SceneIO.load(inFile)
+    // val scene = SceneIO.load(inFile)
 
     pack()
 
