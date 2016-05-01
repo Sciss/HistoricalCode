@@ -10,7 +10,7 @@ case class Diffuse(colour : RGB, emColour : RGB, emis : Boolean = false) extends
 
     override def radiance(
         rdr : Renderer,
-        ray : Ray, depth: Integer,
+        ray : Ray, depth: Int,
         p : Point3,
         n : Vector3,
         nl : Vector3
@@ -40,7 +40,7 @@ case class Refractive(colour : RGB, emColour : RGB) extends Material {
 
     override def radiance(
         rdr : Renderer,
-        ray : Ray, depth: Integer,
+        ray : Ray, depth: Int,
         p : Point3,
         n : Vector3,
         nl : Vector3
@@ -85,7 +85,7 @@ case class Refractive(colour : RGB, emColour : RGB) extends Material {
 case class Reflective(colour : RGB, emColour : RGB) extends Material {
     override def radiance(
         rdr : Renderer,
-        ray : Ray, depth: Integer,
+        ray : Ray, depth: Int,
         p : Point3,
         n : Vector3,
         nl : Vector3

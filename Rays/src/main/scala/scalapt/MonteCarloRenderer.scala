@@ -29,14 +29,14 @@ object ConcurrentUtils {
   * Monte-Carlo path tracing renderer.
   */
 class MonteCarloRenderer(
-    val width : Integer,
-    val height : Integer,
+    val width : Int,
+    val height : Int,
     val scene : Scene
 ) extends Renderer {
 
     override def radiance(
         ray : Ray,
-        depth : Integer
+        depth : Int
     ) : RNG.Type[RGB] = {
         scene.intersect(ray) match {
             case None => State.pure(RGB.black)

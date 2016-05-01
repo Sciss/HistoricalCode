@@ -97,7 +97,7 @@ trait Material {
     def radiance(
         rdr : Renderer,
         ray : Ray,
-        depth : Integer,
+        depth : Int,
         p : Point3,
         n : Vector3,
         nl : Vector3
@@ -165,8 +165,8 @@ object Renderer {
 }
 
 trait Renderer {
-    val width : Integer
-    val height : Integer
+    val width : Int
+    val height : Int
     val scene : Scene
 
     private val cx = Vector3(width * scene.camera.fov / height, 0.0, 0.0)
@@ -202,6 +202,6 @@ trait Renderer {
 
     def radiance(
         ray : Ray,
-        depth : Integer
+        depth : Int
     ) : RNG.Type[RGB]
 }

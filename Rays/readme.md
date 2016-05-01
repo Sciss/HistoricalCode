@@ -1,6 +1,10 @@
 ScalaPT
 ============
 
+Fork: Image output from package de.sciss (C)opyright 2016 Hanns Holger Rutz and licensed under
+[Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License](https://creativecommons.org/licenses/by-nc-nd/3.0/)
+(CC BY-NC-ND 3.0).
+
 # Introduction
 
 ![Screenshot](https://github.com/jon-hanson/ScalaPT/blob/master/examples/cornell2.png)
