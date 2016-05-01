@@ -4,7 +4,6 @@ import java.awt._
 import java.awt.event.{MouseAdapter, MouseEvent, WindowAdapter, WindowEvent}
 import java.awt.image.BufferedImage
 import java.io.File
-import java.time.LocalDateTime
 import javax.imageio.ImageIO
 
 object MainFrame {
@@ -85,7 +84,7 @@ class MainFrame(
         }
     }
 
-    System.out.println(LocalDateTime.now() + " : Done")
+    System.out.println(new java.util.Date() + " : Done")
 
     outFile.foreach(file => {
         val name = file.getName
@@ -103,7 +102,7 @@ class MainFrame(
     })
 
     def render(i : Int) = {
-        System.out.println(LocalDateTime.now() + " : Frame " + i)
+        System.out.println(new java.util.Date() + " : Frame " + i)
         ConcurrentUtils.parallelFor (0 until rdr.height) { y =>
             val row = new Array[SuperSamp](rdr.width)
             for (x <- 0 until rdr.width) {

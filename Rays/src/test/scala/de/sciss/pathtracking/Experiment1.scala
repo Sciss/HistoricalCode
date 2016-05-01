@@ -17,7 +17,6 @@ package de.sciss.pathtracking
 
 import java.awt.Color
 import java.awt.image.BufferedImage
-import java.time.LocalDateTime
 import javax.imageio.ImageIO
 
 import de.sciss.file._
@@ -113,7 +112,7 @@ object Experiment1 {
 
   def run(): Unit = {
     for (fr <- 0 until numFrames) {
-      println(s"${LocalDateTime.now()} : ----- frame $fr -----")
+      println(s"${new java.util.Date()} : ----- frame $fr -----")
       val f = outDir / s"frame-$fr.png"
       if (!f.exists()) {
         val rdr = new MonteCarloRenderer(w, h, scene(fr))
@@ -145,7 +144,7 @@ object Experiment1 {
   val ins = win.getInsets
 
   def render(iter: Int, rdr: Renderer): Unit = {
-    println(s"${LocalDateTime.now()} : iter $iter")
+    println(s"${new java.util.Date()} : iter $iter")
     ConcurrentUtils.parallelFor (0 until rdr.height) { y =>
       val row = new Array[SuperSamp](rdr.width)
       for (x <- 0 until rdr.width) {

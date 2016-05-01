@@ -1,6 +1,6 @@
 package scalapt
 
-import java.nio.file.{Files, Paths}
+import java.io.{FileInputStream, FileOutputStream}
 import java.util.NoSuchElementException
 
 import cats.data.Xor
@@ -78,12 +78,19 @@ object SceneIO {
     import Codecs._
 
     def load(fileName : String) : Scene = {
-        val encoded = new String(Files.readAllBytes(Paths.get(fileName)))
+        val fin = new FileInputStream(fileName)
+        val arr = new Array[Byte](fin.available())
+        fin.read(arr)
+        fin.close()
+        val encoded = new String(arr, "UTF-8")
         decode[Scene](encoded).valueOr(err => throw err)
     }
 
     def save(scene : Scene, fileName : String) = {
         val encoded = scene.asJson.spaces4
-        Files.write(Paths.get(fileName), encoded.getBytes)
+        val arr = encoded.getBytes("UTF-8")
+        val fout = new FileOutputStream(fileName)
+        fout.write(arr)
+        fout.close()
     }
 }
