@@ -40,6 +40,12 @@ object Experiment1 {
     def apply(frame: Int): Double = ((frame - start).linexp(0.0, numFrames, floor, amt1) - floor).clip(0.0, amt)
   }
 
+  case class EasyInEasyOut(numFrames: Int, from: Double, to: Double, start: Int = 0) {
+    def apply(frame: Int): Double = {
+      (frame - start).clip(0, numFrames).linexp(0.0, numFrames, math.Pi/2, 0).cos.squared.linlin(0, 1, from, to)
+    }
+  }
+
   case class Move(from: Point3, to: Point3, numFrames: Int, start: Int = 0) {
     def apply(frame: Int): Point3 = {
       val w = (frame - start).linlin(0.0, numFrames, 0.0, 1.0).clip(0.0, 1.0)
@@ -56,17 +62,21 @@ object Experiment1 {
     def seconds: Int = (d * fps).toInt
   }
 
-  val fdRed   = ExpFadeIn( 5.0.seconds, 0.997)
-  val fdGreen = ExpFadeIn( 7.5.seconds, 0.998)
-  val fdBlue  = ExpFadeIn(10.0.seconds, 0.999)
+  val fdInRed     = ExpFadeIn( 5.0.seconds, 0.997)
+  val fdInGreen   = ExpFadeIn( 7.5.seconds, 0.998)
+  val fdInBlue    = ExpFadeIn(10.0.seconds, 0.999)
 
-  val glassPos  = Move(Point3(27, 16.5, 47), Point3(73, 16.5, 78), 60.0.seconds)
-  val mirrorPos = Move(Point3(73, 16.5, 78), Point3(27, 16.5, 47), 60.0.seconds)
+  val fdOutRed    = EasyInEasyOut(from = 0.997, to = 0.0, start = 45.0.seconds, numFrames = 15.0.seconds)
+  val fdOutGreen  = EasyInEasyOut(from = 0.998, to = 0.0, start = 47.5.seconds, numFrames = 12.5.seconds)
+  val fdOutBlue   = EasyInEasyOut(from = 0.999, to = 0.0, start = 50.0.seconds, numFrames = 10.0.seconds)
+
+  val glassPos    = Move(Point3(27, 16.5, 47), Point3(73, 16.5, 78), 60.0.seconds)
+  val mirrorPos   = Move(Point3(73, 16.5, 78), Point3(27, 16.5, 47), 60.0.seconds)
 
   def objects(frame: Int): List[Shape] = {
-    val red   = fdRed  (frame)
-    val green = fdGreen(frame)
-    val blue  = fdBlue (frame)
+    val red   = fdInRed  (frame) min fdOutRed  (frame)
+    val green = fdInGreen(frame) min fdOutGreen(frame)
+    val blue  = fdInBlue (frame) min fdOutBlue (frame)
 
     val matRef  = Material.reflective(red, green, blue)
 
@@ -74,7 +84,7 @@ object Experiment1 {
       Plane("left"  , matRef, Axis.X, posFacing = true ,   1),
       Plane("right" , matRef, Axis.X, posFacing = false,  99),
       Plane("back"  , matRef, Axis.Z, posFacing = true ,   0),
-      Plane("front" , Material.diffuse   (RGB.black          ), Axis.Z, posFacing = false, 170),
+      Plane("front" , Material.diffuse(RGB.black), Axis.Z, posFacing = false, 170),
       Plane("bottom", matRef, Axis.Y, posFacing = true ,   0),
       Plane("top"   , matRef, Axis.Y, posFacing = false,  81.6),
 
@@ -94,6 +104,7 @@ object Experiment1 {
     ), objects(frame))
 
   val outDir = file("image_out")
+  if (!outDir.exists()) outDir.mkdirs()
 
   val w     = 1920
   val h     = 1080
