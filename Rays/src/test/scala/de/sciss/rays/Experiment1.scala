@@ -18,14 +18,12 @@
 
 package de.sciss.rays
 
-import java.awt.Color
+import java.awt.{Color, Insets}
 import java.awt.image.BufferedImage
 import javax.imageio.ImageIO
 
 import de.sciss.file._
 import de.sciss.numbers
-
-import scalapt.MyFrame
 
 object Experiment1 {
   def main(args: Array[String]): Unit = {
@@ -113,7 +111,8 @@ object Experiment1 {
   val h     = 1080
   val scale = 0.5
   val image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
-  val win   = new MyFrame("Exp", image, scale = scale)
+  val win   = new ImageFrame(title0 = "Exp", image0 = image, scale0 = scale)
+  win.open()
 
   val renderData  = new Array[Array[SuperSampling]](h)
   val gr2d        = image.getGraphics
@@ -131,7 +130,7 @@ object Experiment1 {
       if (!f.exists()) {
         val rdr = new MonteCarloRenderer(w, h, scene(fr))
         for (i <- 0 until numIter) {
-          if (!win.closing) {
+          if (!win.closed) {
             render(i, rdr)
           }
         }
@@ -155,7 +154,7 @@ object Experiment1 {
     }
   }
 
-  val ins = win.getInsets
+  val ins: Insets = win.viewer.insets
 
   def render(iter: Int, rdr: Renderer): Unit = {
     println(s"${new java.util.Date()} : iter $iter")
@@ -189,8 +188,8 @@ object Experiment1 {
     }
 
   private def colVecToInt(colour : RGB) : Int =
-       colDblToInt(colour.blue ) |
-      (colDblToInt(colour.green) << 8) |
+       colDblToInt(colour.blue )        |
+      (colDblToInt(colour.green) <<  8) |
       (colDblToInt(colour.red  ) << 16)
 
   private def colDblToInt(d : Double) : Int = {

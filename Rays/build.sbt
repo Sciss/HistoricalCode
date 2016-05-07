@@ -16,6 +16,7 @@ libraryDependencies ++= Seq(
 ).map(_ % circeVersion)
 
 libraryDependencies ++= Seq(
-  "de.sciss" %% "numbers"  % "0.1.1",
-  "de.sciss" %% "fileutil" % "1.1.1"
+  "de.sciss" %% "numbers"   % "0.1.1",
+  "de.sciss" %% "fileutil"  % "1.1.1",
+  "de.sciss" %% "swingplus" % "0.2.1"
 )

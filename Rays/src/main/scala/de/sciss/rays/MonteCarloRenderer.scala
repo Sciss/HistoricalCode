@@ -32,18 +32,16 @@ object ConcurrentUtils {
   final val processorCount = Runtime.getRuntime.availableProcessors
 
   def parallelFor(range: Range)(impl: Int => Unit) = {
-    val wait = Duration.create(10, TimeUnit.DAYS)
+    val wait      = Duration.create(10, TimeUnit.DAYS)
     val groupSize = range.size / processorCount
 
     range
       .sortBy(i => i % processorCount)
-      .grouped(groupSize).toList.map({ subRange =>
+      .grouped(groupSize).toList.map { subRange =>
       Future {
-        subRange.foreach {
-          impl(_)
-        }
+        subRange.foreach(impl)
       }
-    }).foreach(f => Await.result(f, wait))
+    } .foreach(f => Await.result(f, wait))
   }
 }
 

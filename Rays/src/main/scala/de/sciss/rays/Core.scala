@@ -139,12 +139,11 @@ final case class Scene(camera: Camera, shapes: List[Shape]) {
   /**
     * Finds the closest shape intersected by the ray.
     */
-  def intersect(ray: Ray): Option[(Shape, Point3)] = {
+  def intersect(ray: Ray): Option[(Shape, Point3)] =
     shapes
       .flatMap(obj => obj.intersect(ray).map(t => (obj, t)))
       .reduceOption(Scene.distance.min)
-      .map({ case (obj, t) => (obj, ray(t)) })
-  }
+      .map { case (obj, t) => (obj, ray(t)) }
 }
 
 /**
@@ -175,8 +174,8 @@ trait Renderer {
 
   def render(x: Int, y: Int): RNG.Type[SuperSampling] = {
     def subPixelRad(cx: Double, cy: Double): RNG.Type[RGB] = {
-      RNG.nextDouble.flatMap(d1 => {
-        RNG.nextDouble.flatMap(d2 => {
+      RNG.nextDouble.flatMap { d1 =>
+        RNG.nextDouble.flatMap { d2 =>
           val dx      = MathUtil.tent(d1)
           val dy      = MathUtil.tent(d2)
           val sx      = x + (0.5 + cx + dx) * 0.5
@@ -185,8 +184,8 @@ trait Renderer {
           val origin  = scene.camera.ray.origin
           val ray     = Ray(origin, dir)
           radiance(ray, 0)
-        })
-      })
+        }
+      }
     }
 
     for {
