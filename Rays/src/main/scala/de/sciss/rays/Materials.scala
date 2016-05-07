@@ -20,26 +20,24 @@ package de.sciss.rays
   *
   * @author Jon Hanson
   */
-final case class Diffuse(color: RGB, emColor: RGB, emis: Boolean = false) extends Material {
+final case class Diffuse(color: RGB, emColor: RGB, emit: Boolean = false) extends Material {
 
   def emission: RGB = emColor
 
-  def radiance(rdr: Renderer, ray: Ray, depth: Int, p: Point3, n: Vector3, nl: Vector3): RNG.Type[RGB] = {
-    RNG.nextDouble.flatMap(d1 => {
-      RNG.nextDouble.flatMap(r2 => {
-        val r1 = 2.0 * math.Pi * d1
-        val r2s = math.sqrt(r2)
-        val w = nl
-        val u = (if (math.abs(w.x) > 0.1) Vector3.YUnit else Vector3.XUnit).cross(w).normalize
-        val v = w.cross(u)
-        val d =
-          (u * math.cos(r1) * r2s
-            + v * math.sin(r1) * r2s
-            + w * math.sqrt(1.0 - r2)
-            ).normalize
-        rdr.radiance(Ray(p, d), depth)
-      })
-    })
+  def radiance(rdr: Renderer, ray: Ray, depth: Int, p: Point3, n: Vector3, nl: Vector3)(implicit rand: Random): RGB = {
+    val d1  = rand.nextDouble()
+    val r2  = rand.nextDouble()
+    val r1  = 2.0 * math.Pi * d1
+    val r2s = math.sqrt(r2)
+    val w   = nl
+    val u   = (if (math.abs(w.x) > 0.1) Vector3.YUnit else Vector3.XUnit).cross(w).normalize
+    val v   = w.cross(u)
+    val d   =
+      (u * math.cos(r1) * r2s
+        + v * math.sin(r1) * r2s
+        + w * math.sqrt(1.0 - r2)
+        ).normalize
+    rdr.radiance(Ray(p, d), depth)
   }
 }
 
@@ -51,7 +49,7 @@ final case class Diffuse(color: RGB, emColor: RGB, emis: Boolean = false) extend
 final case class Refractive(color: RGB, emColor : RGB) extends Material {
   def emission: RGB = emColor
 
-  def radiance(rdr: Renderer, ray: Ray, depth: Int, p: Point3, n: Vector3, nl: Vector3): RNG.Type[RGB] = {
+  def radiance(rdr: Renderer, ray: Ray, depth: Int, p: Point3, n: Vector3, nl: Vector3)(implicit rand: Random): RGB = {
     val nc          = 1.0
     val nt          = 1.5
     val reflectRay  = Ray(p, ray.dir - n * 2.0 * n.dot(ray.dir))
@@ -75,13 +73,14 @@ final case class Refractive(color: RGB, emColor : RGB) extends Material {
       val rp    = re / q
       val tp    = tr / (1.0 - q)
 
-      RNG.nextDouble.flatMap(rnd => {
-        if (rnd < q) {
-          rdr.radiance(reflectRay, depth).map(rad => rad * rp)
-        } else {
-          rdr.radiance(Ray(p, tDir), depth).map(rad => rad * tp)
-        }
-      })
+      val rnd = rand.nextDouble()
+      if (rnd < q) {
+        val rad = rdr.radiance(reflectRay, depth)
+        rad * rp
+      } else {
+        val rad = rdr.radiance(Ray(p, tDir), depth)
+        rad * tp
+      }
     }
   }
 }
@@ -94,7 +93,7 @@ final case class Refractive(color: RGB, emColor : RGB) extends Material {
 final case class Reflective(color: RGB, emColor: RGB) extends Material {
   def emission: RGB = emColor
 
-  def radiance(rdr: Renderer, ray: Ray, depth: Int, p: Point3, n: Vector3, nl: Vector3): RNG.Type[RGB] = {
+  def radiance(rdr: Renderer, ray: Ray, depth: Int, p: Point3, n: Vector3, nl: Vector3)(implicit rand: Random): RGB = {
     val d = ray.dir - n * 2 * n.dot(ray.dir)
     rdr.radiance(Ray(p, d), depth)
   }

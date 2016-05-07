@@ -20,17 +20,17 @@
             "name" : "left",
             "material" : {
                 "type" : "Diffuse",
-                "colour" : {
+                "color" : {
                     "red" : 0.75,
                     "green" : 0.25,
                     "blue" : 0.25
                 },
-                "emColour" : {
+                "emColor" : {
                     "red" : 0.0,
                     "green" : 0.0,
                     "blue" : 0.0
                 },
-                "emis" : false
+                "emit" : false
             },
             "side" : "X",
             "posFacing" : true,
@@ -41,17 +41,17 @@
             "name" : "right",
             "material" : {
                 "type" : "Diffuse",
-                "colour" : {
+                "color" : {
                     "red" : 0.25,
                     "green" : 0.25,
                     "blue" : 0.75
                 },
-                "emColour" : {
+                "emColor" : {
                     "red" : 0.0,
                     "green" : 0.0,
                     "blue" : 0.0
                 },
-                "emis" : false
+                "emit" : false
             },
             "side" : "X",
             "posFacing" : false,
@@ -62,17 +62,17 @@
             "name" : "back",
             "material" : {
                 "type" : "Diffuse",
-                "colour" : {
+                "color" : {
                     "red" : 0.75,
                     "green" : 0.75,
                     "blue" : 0.75
                 },
-                "emColour" : {
+                "emColor" : {
                     "red" : 0.0,
                     "green" : 0.0,
                     "blue" : 0.0
                 },
-                "emis" : false
+                "emit" : false
             },
             "side" : "Z",
             "posFacing" : true,
@@ -83,17 +83,17 @@
             "name" : "front",
             "material" : {
                 "type" : "Diffuse",
-                "colour" : {
+                "color" : {
                     "red" : 0.0,
                     "green" : 0.0,
                     "blue" : 0.0
                 },
-                "emColour" : {
+                "emColor" : {
                     "red" : 0.0,
                     "green" : 0.0,
                     "blue" : 0.0
                 },
-                "emis" : false
+                "emit" : false
             },
             "side" : "Z",
             "posFacing" : false,
@@ -104,17 +104,17 @@
             "name" : "bottom",
             "material" : {
                 "type" : "Diffuse",
-                "colour" : {
+                "color" : {
                     "red" : 0.75,
                     "green" : 0.75,
                     "blue" : 0.75
                 },
-                "emColour" : {
+                "emColor" : {
                     "red" : 0.0,
                     "green" : 0.0,
                     "blue" : 0.0
                 },
-                "emis" : false
+                "emit" : false
             },
             "side" : "Y",
             "posFacing" : true,
@@ -125,17 +125,17 @@
             "name" : "top",
             "material" : {
                 "type" : "Diffuse",
-                "colour" : {
+                "color" : {
                     "red" : 0.75,
                     "green" : 0.75,
                     "blue" : 0.75
                 },
-                "emColour" : {
+                "emColor" : {
                     "red" : 0.0,
                     "green" : 0.0,
                     "blue" : 0.0
                 },
-                "emis" : false
+                "emit" : false
             },
             "side" : "Y",
             "posFacing" : false,
@@ -146,12 +146,12 @@
             "name" : "mirror",
             "material" : {
                 "type" : "Reflective",
-                "colour" : {
+                "color" : {
                     "red" : 0.999,
                     "green" : 0.999,
                     "blue" : 0.999
                 },
-                "emColour" : {
+                "emColor" : {
                     "red" : 0.0,
                     "green" : 0.0,
                     "blue" : 0.0
@@ -169,12 +169,12 @@
             "name" : "glass",
             "material" : {
                 "type" : "Refractive",
-                "colour" : {
+                "color" : {
                     "red" : 0.999,
                     "green" : 0.999,
                     "blue" : 0.999
                 },
-                "emColour" : {
+                "emColor" : {
                     "red" : 0.0,
                     "green" : 0.0,
                     "blue" : 0.0
@@ -192,17 +192,17 @@
             "name" : "light",
             "material" : {
                 "type" : "Diffuse",
-                "colour" : {
+                "color" : {
                     "red" : 0.0,
                     "green" : 0.0,
                     "blue" : 0.0
                 },
-                "emColour" : {
+                "emColor" : {
                     "red" : 12.0,
                     "green" : 12.0,
                     "blue" : 12.0
                 },
-                "emis" : true
+                "emit" : true
             },
             "centre" : {
                 "x" : 50.0,

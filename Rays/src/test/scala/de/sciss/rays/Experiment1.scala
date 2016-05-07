@@ -60,6 +60,7 @@ object Experiment1 {
   val fps = 25
 
   implicit class TimeOps(private val d: Double) extends AnyVal {
+    /** Converts seconds to frames. */
     def seconds: Int = (d * fps).toInt
   }
 
@@ -162,7 +163,8 @@ object Experiment1 {
       val row = new Array[SuperSampling](rdr.width)
       for (x <- 0 until rdr.width) {
         val seed = (x+y*rdr.width)*(iter+1)
-        row(x) = rdr.render(x, y).runA(Random.randDouble(seed)).value
+        implicit val rand = Random(seed)
+        row(x) = rdr.render(x, y)
       }
 
       if (iter == 0)

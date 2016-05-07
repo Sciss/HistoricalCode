@@ -93,7 +93,7 @@ trait Material {
   def emColor : RGB
   def emission: RGB
 
-  def radiance(rdr: Renderer, ray: Ray, depth: Int, p: Point3, n: Vector3, nl: Vector3): RNG.Type[RGB]
+  def radiance(rdr: Renderer, ray: Ray, depth: Int, p: Point3, n: Vector3, nl: Vector3)(implicit rand: Random): RGB
 }
 
 /**
@@ -161,7 +161,7 @@ trait Renderer {
   def height: Int
   def scene : Scene
 
-  def radiance(ray: Ray, depth: Int): RNG.Type[RGB]
+  def radiance(ray: Ray, depth: Int)(implicit rand: Random): RGB
 
   // ---- impl ----
 
@@ -172,27 +172,25 @@ trait Renderer {
     cx * (xs / width  - 0.5) +
     cy * (ys / height - 0.5)
 
-  def render(x: Int, y: Int): RNG.Type[SuperSampling] = {
-    def subPixelRad(cx: Double, cy: Double): RNG.Type[RGB] = {
-      RNG.nextDouble.flatMap { d1 =>
-        RNG.nextDouble.flatMap { d2 =>
-          val dx      = MathUtil.tent(d1)
-          val dy      = MathUtil.tent(d2)
-          val sx      = x + (0.5 + cx + dx) * 0.5
-          val sy      = y + (0.5 + cy + dy) * 0.5
-          val dir     = scene.camera.ray.dir + camRay(sx, sy)
-          val origin  = scene.camera.ray.origin
-          val ray     = Ray(origin, dir)
-          radiance(ray, 0)
-        }
-      }
+  def render(x: Int, y: Int)(implicit rand: Random): SuperSampling = {
+    def subPixelRad(cx: Double, cy: Double): RGB = {
+      val d1      = rand.nextDouble()
+      val d2      = rand.nextDouble()
+      val dx      = MathUtil.tent(d1)
+      val dy      = MathUtil.tent(d2)
+      val sx      = x + (0.5 + cx + dx) * 0.5
+      val sy      = y + (0.5 + cy + dy) * 0.5
+      val dir     = scene.camera.ray.dir + camRay(sx, sy)
+      val origin  = scene.camera.ray.origin
+      val ray     = Ray(origin, dir)
+      radiance(ray, 0)
     }
 
-    for {
-      aa <- subPixelRad(0, 0)
-      ba <- subPixelRad(1, 0)
-      ab <- subPixelRad(0, 1)
-      bb <- subPixelRad(1, 1)
-    } yield SuperSampling(aa, ba, ab, bb)
+    val aa = subPixelRad(0, 0)
+    val ba = subPixelRad(1, 0)
+    val ab = subPixelRad(0, 1)
+    val bb = subPixelRad(1, 1)
+
+    SuperSampling(aa, ba, ab, bb)
   }
 }

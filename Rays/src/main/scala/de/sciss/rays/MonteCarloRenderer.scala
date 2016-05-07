@@ -17,8 +17,6 @@ package de.sciss.rays
 
 import java.util.concurrent.TimeUnit
 
-import cats.data.State
-
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
 
@@ -54,34 +52,35 @@ object ConcurrentUtils {
 final class MonteCarloRenderer(val width: Int, val height: Int, val scene: Scene)
   extends Renderer {
 
-  def radiance(ray: Ray, depth: Int): RNG.Type[RGB] = {
+  def radiance(ray: Ray, depth: Int)(implicit rand: Random): RGB = {
     scene.intersect(ray) match {
-      case None => State.pure(RGB.black)
+      case None => RGB.black
       case Some((prim, iSect)) =>
         val n  = prim.normal(iSect)
         val n1 = if (n.dot(ray.dir) < 0) n else -n
 
         val newDepth = depth + 1
 
-        val reflect: RNG.Type[RGB] = {
+        val reflect: RGB = {
           val color = prim.material.color
 
           if (newDepth > 5) {
             // Modified Russian roulette.
             val max = color.max * MathUtil.sqr(1.0 - depth / Renderer.MaxDepth)
-            RNG.nextDouble.flatMap(rnd => {
-              if (rnd >= max) {
-                State.pure(RGB.black)
-              } else {
-                prim.material.radiance(this, ray, newDepth, iSect, n, n1).map(r => r * color / max)
-              }
-            })
+            val rnd = rand.nextDouble()
+            if (rnd >= max) {
+              RGB.black
+            } else {
+              val r = prim.material.radiance(this, ray, newDepth, iSect, n, n1)
+              r * color / max
+            }
           } else {
-            prim.material.radiance(this, ray, newDepth, iSect, n, n1).map(r => r * color)
+            val r = prim.material.radiance(this, ray, newDepth, iSect, n, n1)
+            r * color
           }
         }
 
-        reflect.map(r => prim.material.emission + r)
+        prim.material.emission + reflect
     }
   }
 }

@@ -54,7 +54,8 @@ class MainFrame(frameTitle: String, val w: Int, val h: Int, val inFile: String, 
 
       System.out.print(s"$x : $y -> ")
 
-      val ss = rdr.render(x, y).runA(Random.randDouble(x + y * rdr.width)).value
+      implicit val rand = Random(x + y * rdr.width)
+      val ss = rdr.render(x, y)
       System.out.println(ss)
     }
   })
@@ -103,7 +104,8 @@ class MainFrame(frameTitle: String, val w: Int, val h: Int, val inFile: String, 
       val row = new Array[SuperSampling](rdr.width)
       for (x <- 0 until rdr.width) {
         val seed = (x + y * rdr.width) * (i + 1)
-        row(x) = rdr.render(x, y).runA(Random.randDouble(seed)).value
+        implicit val rand = Random(seed)
+        row(x) = rdr.render(x, y)
       }
 
       if (i == 0)
