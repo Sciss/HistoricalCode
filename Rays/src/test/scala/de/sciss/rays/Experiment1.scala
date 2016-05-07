@@ -18,8 +18,8 @@
 
 package de.sciss.rays
 
-import java.awt.{Color, Insets}
 import java.awt.image.BufferedImage
+import java.awt.{Color, Insets}
 import javax.imageio.ImageIO
 
 import de.sciss.file._
@@ -125,6 +125,7 @@ object Experiment1 {
   val numFrames   = 60.0.seconds
 
   def run(): Unit = {
+    val r = new Rendering(image)
     for (fr <- 0 until numFrames) {
       println(s"${new java.util.Date()} : ----- frame $fr -----")
       val f = outDir / s"frame-$fr.png"
@@ -132,7 +133,8 @@ object Experiment1 {
         val rdr = new MonteCarloRenderer(w, h, scene(fr))
         for (i <- 0 until numIter) {
           if (!win.closed) {
-            render(i, rdr)
+            r.iterate(i, rdr)
+            win.repaint()
           }
         }
         saveImage(f)
@@ -156,47 +158,4 @@ object Experiment1 {
   }
 
   val ins: Insets = win.viewer.insets
-
-  def render(iter: Int, rdr: Renderer): Unit = {
-    println(s"${new java.util.Date()} : iter $iter")
-    ConcurrentUtils.parallelFor (0 until rdr.height) { y =>
-      val row = new Array[SuperSampling](rdr.width)
-      for (x <- 0 until rdr.width) {
-        val seed = (x+y*rdr.width)*(iter+1)
-        implicit val rand = Random(seed)
-        row(x) = rdr.render(x, y)
-      }
-
-      if (iter == 0)
-        renderData(y) = row
-      else
-        merge(renderData(y), row, iter)
-
-      val mergedRow = renderData(y)
-
-      val sy = h - y - 1
-      for (sx <- 0 until w) {
-        image.setRGB(sx, sy, colVecToInt(mergedRow(sx).clamp))
-      }
-
-      // win.repaint(ins.left, ins.top + sy, w, 1)
-    }
-    win.repaint()
-  }
-
-  private def merge(lhs : Array[SuperSampling], rhs: Array[SuperSampling], n : Int): Unit =
-    for (i <- lhs.indices) {
-      lhs(i) = lhs(i).merge(rhs(i), n)
-    }
-
-  private def colVecToInt(colour : RGB) : Int =
-       colDblToInt(colour.blue )        |
-      (colDblToInt(colour.green) <<  8) |
-      (colDblToInt(colour.red  ) << 16)
-
-  private def colDblToInt(d : Double) : Int = {
-    val i = MathUtil.gammaCorr(d)
-    val j = i * 255.0 + 0.5
-    MathUtil.clamp(j, 0, 255).toInt
-  }
 }
