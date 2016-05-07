@@ -43,7 +43,7 @@ object Experiment1 {
 
   case class EasyInEasyOut(numFrames: Int, from: Double, to: Double, start: Int = 0) {
     def apply(frame: Int): Double = {
-      (frame - start).clip(0, numFrames).linexp(0.0, numFrames, math.Pi/2, 0).cos.squared.linlin(0, 1, from, to)
+      (frame - start).clip(0, numFrames).linlin(0.0, numFrames, math.Pi/2, 0).cos.squared.linlin(0, 1, from, to)
     }
   }
 
