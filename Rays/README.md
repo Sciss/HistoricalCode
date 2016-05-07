@@ -6,7 +6,7 @@
 ## statement
 
 Rays is a [Global Illumination](https://en.wikipedia.org/wiki/Global_illumination) renderer for the Scala programming language. 
-It is a fork from the [ScalaPT](https://github.com/jon-hanson/ScalaPT) project (C)opyright Jon Hanson by and originally 
+It is a fork from the [ScalaPT](https://github.com/jon-hanson/ScalaPT) project (C)opyright by Jon Hanson and originally 
 licensed under the [MIT License](https://raw.githubusercontent.com/jon-hanson/ScalaPT/master/LICENSE).
 
 New work (C)opyright 2016 by Hanns Holger Rutz. All rights reserved. Rays is released under the 
