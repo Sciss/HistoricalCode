@@ -1,5 +1,7 @@
 package scalapt
 
+import de.sciss.rays.{Axis, Camera, Material, Plane, Point3, RGB, Ray, Scene, SceneIO, Shape, Sphere, Vector3}
+
 object GenerateScenes {
 
     def main(args : Array[String]) : Unit = {

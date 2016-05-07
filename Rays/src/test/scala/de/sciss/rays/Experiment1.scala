@@ -1,19 +1,22 @@
 /*
-
-  Experiment-1
-  (path-tracking)
-
-  (C)opyright 2016 Hanns Holger Rutz. All rights reserved.
-
-  Source code and image output licensed under
-  Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License
-  (CC BY-NC-ND 3.0)
-
-  https://creativecommons.org/licenses/by-nc-nd/3.0/
-
+ * Experiment1.scala
+ * (Rays)
+ *
+ * Copyright (c) 2016 Hanns Holger Rutz. All rights reserved.
+ *
+ * This software is published under the GNU Lesser General Public License v2.1+
+ *
+ * Image output licensed under
+ * Creative Commons Attribution-NonCommercial-NoDerivs 3.0 Unported License
+ * (CC BY-NC-ND 3.0)
+ *
+ * https://creativecommons.org/licenses/by-nc-nd/3.0/
+ *
+ * For further information, please contact Hanns Holger Rutz at
+ * contact@sciss.de
  */
 
-package de.sciss.pathtracking
+package de.sciss.rays
 
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -22,7 +25,7 @@ import javax.imageio.ImageIO
 import de.sciss.file._
 import de.sciss.numbers
 
-import scalapt.{Axis, Camera, ConcurrentUtils, Material, MathUtil, MonteCarloRenderer, MyFrame, Plane, Point3, RGB, Random, Ray, Renderer, Scene, Shape, Sphere, SuperSamp, Vector3}
+import scalapt.MyFrame
 
 object Experiment1 {
   def main(args: Array[String]): Unit = {
@@ -112,7 +115,7 @@ object Experiment1 {
   val image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB)
   val win   = new MyFrame("Exp", image, scale = scale)
 
-  val renderData  = new Array[Array[SuperSamp]](h)
+  val renderData  = new Array[Array[SuperSampling]](h)
   val gr2d        = image.getGraphics
   gr2d.setColor(Color.RED)
   gr2d.drawRect(0, 0, w-1, h-1)
@@ -157,7 +160,7 @@ object Experiment1 {
   def render(iter: Int, rdr: Renderer): Unit = {
     println(s"${new java.util.Date()} : iter $iter")
     ConcurrentUtils.parallelFor (0 until rdr.height) { y =>
-      val row = new Array[SuperSamp](rdr.width)
+      val row = new Array[SuperSampling](rdr.width)
       for (x <- 0 until rdr.width) {
         val seed = (x+y*rdr.width)*(iter+1)
         row(x) = rdr.render(x, y).runA(Random.randDouble(seed)).value
@@ -180,7 +183,7 @@ object Experiment1 {
     win.repaint()
   }
 
-  private def merge(lhs : Array[SuperSamp], rhs: Array[SuperSamp], n : Int): Unit =
+  private def merge(lhs : Array[SuperSampling], rhs: Array[SuperSampling], n : Int): Unit =
     for (i <- lhs.indices) {
       lhs(i) = lhs(i).merge(rhs(i), n)
     }
