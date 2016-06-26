@@ -22,8 +22,8 @@ object SimpleClient {
     */
   def process(nframes: jack_nframes_t, arg: Ptr[_]): CInt = {
     // jack_default_audio_sample_t *in, *out;
-    val in  = jack_port_get_buffer (input_port , nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
-    val out = jack_port_get_buffer (output_port, nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
+    val in  = jack_port_get_buffer(input_port , nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
+    val out = jack_port_get_buffer(output_port, nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
     ??? // memcpy (out, in, sizeof[jack_default_audio_sample_t] * nframes)
     0
   }
@@ -56,32 +56,32 @@ object SimpleClient {
 //      exit (1)
 //    }
     if ((status & JackServerStarted) != 0) {
-      fprintf (stderr, c"JACK server started\n")
+      fprintf(stderr, c"JACK server started\n")
     }
     if ((status & JackNameNotUnique) != 0) {
       // client_name = jack_get_client_name(client)
       // fprintf (stderr, c"unique name `%s' assigned\n", client_name)
-      fprintf (stderr, c"unique name assigned\n")
+      fprintf(stderr, c"unique name assigned\n")
     }
 
     /* tell the JACK server to call `process()' whenever
        there is work to be done.
     */
 
-    jack_set_process_callback (client, process _, null)
+    jack_set_process_callback(client, process _, null)
 
     /* tell the JACK server to call `jack_shutdown()' if
        it ever shuts down, either entirely, or if it
        just decides to stop calling us.
     */
 
-    jack_on_shutdown (client, jack_shutdown _, null)
+    jack_on_shutdown(client, jack_shutdown _, null)
 
     /* display the current sample rate.
      */
 
     // " PRIu32 "
-    printf (c"engine sample rate: %d\n", jack_get_sample_rate (client))
+    printf(c"engine sample rate: %d\n", jack_get_sample_rate (client))
 
     /* create two ports */
 
@@ -90,15 +90,15 @@ object SimpleClient {
 
     if ((input_port == null) || (output_port == null)) {
       fprintf(stderr, c"no more JACK ports available\n")
-      exit (1)
+      exit(1)
     }
 
     /* Tell the JACK server that we are ready to roll.  Our
      * process() callback will start running now. */
 
     if (jack_activate (client) != 0) {
-      fprintf (stderr, c"cannot activate client")
-      exit (1)
+      fprintf(stderr, c"cannot activate client")
+      exit(1)
     }
 
     /* Connect the ports.  You can't do this before the client is
@@ -112,24 +112,24 @@ object SimpleClient {
     var ports = jack_get_ports(client, null, null, (JackPortIsPhysical | JackPortIsOutput).toULong)
     if (ports == null) {
       fprintf(stderr, c"no physical capture ports\n")
-      exit (1)
+      exit(1)
     }
 
-    if (jack_connect (client, ports(0), jack_port_name (input_port)) != 0)
-      fprintf (stderr, c"cannot connect input ports\n")
+    if (jack_connect(client, ports(0), jack_port_name (input_port)) != 0)
+      fprintf(stderr, c"cannot connect input ports\n")
 
-    free (ports)
+    free(ports)
 
     ports = jack_get_ports(client, null, null, (JackPortIsPhysical | JackPortIsInput).toULong)
     if (ports == null) {
       fprintf(stderr, c"no physical playback ports\n")
-      exit (1)
+      exit(1)
     }
 
-    if (jack_connect (client, jack_port_name (output_port), ports(0)) != 0)
-      fprintf (stderr, c"cannot connect output ports\n")
+    if (jack_connect(client, jack_port_name (output_port), ports(0)) != 0)
+      fprintf(stderr, c"cannot connect output ports\n")
 
-    free (ports)
+    free(ports)
 
     /* keep running until stopped by the user */
 
@@ -141,7 +141,7 @@ object SimpleClient {
        they would be important to call.
     */
 
-    jack_client_close (client)
-    exit (0)
+    jack_client_close(client)
+    exit(0)
   }
 }
