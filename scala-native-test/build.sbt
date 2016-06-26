@@ -29,6 +29,8 @@ lazy val root = project.in(file("."))
   .settings(ScalaNativePlugin.projectSettings)
   .settings(commonSettings)
   .settings(
+    // scala-native doesn't seem to suppor this:
+//    mainClass in (Compile, run) := Some("de.sciss.jacktest.SimpleClient"),
     nativeVerbose := true,
-    nativeClangOptions ++= Nil // Seq("-O2")
+    nativeClangOptions ++= Seq("-v") // Seq("-O2")
   )

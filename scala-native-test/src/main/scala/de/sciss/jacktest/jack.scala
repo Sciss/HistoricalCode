@@ -1,6 +1,6 @@
 package de.sciss.jacktest
 
-import scala.scalanative.native.{CInt, CString, Ptr, extern}
+import scala.scalanative.native.{CInt, CString, Ptr, Vararg, extern}
 
 @extern
 object jack {
@@ -122,8 +122,39 @@ jack_client_t *jack_client_open (const char *client_name,
 				 jack_status_t *status, ...) JACK_OPTIONAL_WEAK_EXPORT;
  */
 
-  def jack_client_open (client_name: CString, options: jack_options_t, status: Ptr[jack_status_t],
-                        server_name: CString /* , ... */): Ptr[jack_client_t] = extern
+  /** Opens an external client session with a JACK server.  This interface
+    * is more complex but more powerful than `jack_client_new()`.  With it,
+    * clients may choose which of several servers to connect, and control
+    * whether and how to start the server automatically, if it was not
+    * already running.  There is also an option for JACK to generate a
+    * unique client name, when necessary.
+    *
+    * @param client_name of at most `jack_client_name_size()` characters.
+    * The name scope is local to each server.  Unless forbidden by the
+    * `JackUseExactName` option, the server will modify this name to
+    * create a unique variant, if needed.
+    *
+    * @param options formed by OR-ing together `JackOptions` bits.
+    * Only the `JackOpenOptions` bits are allowed.
+    *
+    * @param status (if non-null) an address for JACK to return
+    * information from the open operation.  This status word is formed by
+    * OR-ing together the relevant `JackStatus` bits.
+    *
+    * @param  args
+    * <b>Optional parameters:</b> depending on corresponding [@a options
+    * bits] additional parameters may follow @a status (in this order).
+    * [@ref JackServerName] <em>(char *) server_name</em> selects
+    * from among several possible concurrent server instances.  Server
+    * names are unique to each user.  If unspecified, use "default"
+    * unless \$JACK_DEFAULT_SERVER is defined in the process environment.
+    *
+    * @return Opaque client handle if successful.  If this is `null`, the
+    * open operation failed, `status` includes `JackFailure` and the
+    * caller is not a JACK client.
+    */
+  def jack_client_open(client_name: CString, options: jack_options_t, status: Ptr[jack_status_t],
+                       server_name: CString, args: Vararg*): Ptr[jack_client_t] = extern
 
   /**
     * Disconnects an external client from a JACK server.
@@ -131,6 +162,8 @@ jack_client_t *jack_client_open (const char *client_name,
     * @return 0 on success, otherwise a non-zero error code
     */
   def jack_client_close (client: Ptr[jack_client_t]): CInt = extern
+
+  def jack_client_name_size: CInt = extern
 }
 
 trait jack_client_t // ???
