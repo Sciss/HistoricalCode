@@ -1,194 +1,12 @@
-package de.sciss.jacktest
+package de.sciss.jack
 
-import scala.scalanative.native._
+import scala.scalanative.native.{Ptr, ULong, Vararg, _}
 
 /** Scala bindings for the Jack audio connection kit C library.
   * See: https://github.com/jackaudio/headers/blob/master/jack.h
   */
 @extern
-object jack {
-  // ---- types.h ----
-
-  type jack_options_t = CInt
-  type jack_status_t  = CInt
-  type jack_nframes_t = UInt
-  type jack_uuid_t    = ULong
-  type jack_port_id_t = UInt
-  type jack_time_t    = ULong
-
-  type jack_default_audio_sample_t  = CFloat
-
-//  type jack_native_thread_t = pthread_t
-
-  type JackShutdownCallback   = FunctionPtr1[Ptr[_], Unit]
-  type JackProcessCallback    = FunctionPtr2[jack_nframes_t, Ptr[_], CInt]
-  type JackSampleRateCallback = FunctionPtr2[jack_nframes_t, Ptr[_], CInt]
-
-//  type JackLatencyCallback    = FunctionPtr2[jack_latency_callback_mode_t, Ptr[_], Unit]
-
-  val JACK_DEFAULT_AUDIO_TYPE = c"32 bit float mono audio"
-
-  object JackOptions {
-    /** Null value to use when no option bits are needed. */
-    val JackNullOption: CInt = 0x00
-
-    /** Do not automatically start the JACK server when it is not
-      * already running.  This option is always selected if
-      * \$JACK_NO_START_SERVER is defined in the calling process
-      * environment.
-      */
-    val JackNoStartServer: CInt = 0x01
-
-    /** Use the exact client name requested.  Otherwise, JACK
-      * automatically generates a unique one, if needed.
-      */
-    val JackUseExactName: CInt = 0x02
-
-    /** Open with optional <em>(char *) server_name</em> parameter. */
-    val JackServerName: CInt = 0x04
-
-    /** Load internal client from optional <em>(char *)
-      * load_name</em>.  Otherwise use the @a client_name.
-      */
-    val JackLoadName: CInt = 0x08
-
-    /** Pass optional <em>(char *) load_init</em> string to the
-      * jack_initialize() entry point of an internal client.
-      */
-    val JackLoadInit: CInt = 0x10
-
-    /** Pass a SessionID Token this allows the sessionmanager to identify the client again. */
-    val JackSessionID: CInt = 0x20
-  }
-
-  object JackStatus {
-      /**
-        * Overall operation failed.
-        */
-      val JackFailure: CInt = 0x01
-
-      /**
-        * The operation contained an invalid or unsupported option.
-        */
-      val JackInvalidOption: CInt = 0x02
-
-      /**
-        * The desired client name was not unique.  With the @ref
-        * JackUseExactName option this situation is fatal.  Otherwise,
-        * the name was modified by appending a dash and a two-digit
-        * number in the range "-01" to "-99".  The
-        * jack_get_client_name() function will return the exact string
-        * that was used.  If the specified @a client_name plus these
-        * extra characters would be too long, the open fails instead.
-        */
-      val JackNameNotUnique: CInt = 0x04
-
-      /**
-        * The JACK server was started as a result of this operation.
-        * Otherwise, it was running already.  In either case the caller
-        * is now connected to jackd, so there is no race condition.
-        * When the server shuts down, the client will find out.
-        */
-      val JackServerStarted: CInt = 0x08
-
-      /**
-        * Unable to connect to the JACK server.
-        */
-      val JackServerFailed: CInt = 0x10
-
-      /**
-        * Communication error with the JACK server.
-        */
-      val JackServerError: CInt = 0x20
-
-      /**
-        * Requested client does not exist.
-        */
-      val JackNoSuchClient: CInt = 0x40
-
-      /**
-        * Unable to load internal client
-        */
-      val JackLoadFailure: CInt = 0x80
-
-      /**
-        * Unable to initialize client
-        */
-      val JackInitFailure: CInt = 0x100
-
-      /**
-        * Unable to access shared memory
-        */
-      val JackShmFailure: CInt = 0x200
-
-      /**
-        * Client's protocol version does not match
-        */
-      val JackVersionError: CInt = 0x400
-
-      /*
-       * BackendError
-       */
-      val JackBackendError: CInt = 0x800
-
-      /*
-       * Client is being shutdown against its will
-       */
-      val JackClientZombie: CInt = 0x1000
-    }
-
-  object JackPortFlags {
-
-    /**
-      * if JackPortIsInput is set, then the port can receive
-      * data.
-      */
-    val JackPortIsInput: CInt = 0x1
-
-    /**
-      * if JackPortIsOutput is set, then data can be read from
-      * the port.
-      */
-    val JackPortIsOutput: CInt = 0x2
-
-    /**
-      * if JackPortIsPhysical is set, then the port corresponds
-      * to some kind of physical I/O connector.
-      */
-    val JackPortIsPhysical: CInt = 0x4
-
-    /**
-      * if JackPortCanMonitor is set, then a call to
-      * jack_port_request_monitor() makes sense.
-      *
-      * Precisely what this means is dependent on the client. A typical
-      * result of it being called with TRUE as the second argument is
-      * that data that would be available from an output port (with
-      * JackPortIsPhysical set) is sent to a physical output connector
-      * as well, so that it can be heard/seen/whatever.
-      *
-      * Clients that do not control physical interfaces
-      * should never create ports with this bit set.
-      */
-    val JackPortCanMonitor: CInt = 0x8
-
-    /**
-      * JackPortIsTerminal means:
-      *
-      *	for an input port: the data received by the port
-      *                    will not be passed on or made
-      *		           available at any other port
-      *
-      * for an output port: the data available at the port
-      *                    does not originate from any other port
-      *
-      * Audio synthesizers, I/O hardware interface clients, HDR
-      * systems are examples of clients that would set this flag for
-      * their ports.
-      */
-    val JackPortIsTerminal: CInt = 0x10
-  }
-
+object Jack {
   // ---- jack.h ----
 
   // ---- ClientFunctions Creating & manipulating clients ----
@@ -204,14 +22,11 @@ object jack {
     * The name scope is local to each server.  Unless forbidden by the
     * `JackUseExactName` option, the server will modify this name to
     * create a unique variant, if needed.
-    *
     * @param options formed by OR-ing together `JackOptions` bits.
     * Only the `JackOpenOptions` bits are allowed.
-    *
     * @param status (if non-null) an address for JACK to return
     * information from the open operation.  This status word is formed by
     * OR-ing together the relevant `JackStatus` bits.
-    *
     * @param  args
     * <b>Optional parameters:</b> depending on corresponding [@a options
     * bits] additional parameters may follow @a status (in this order).
@@ -219,7 +34,6 @@ object jack {
     * from among several possible concurrent server instances.  Server
     * names are unique to each user.  If unspecified, use "default"
     * unless \$JACK_DEFAULT_SERVER is defined in the process environment.
-    *
     * @return Opaque client handle if successful.  If this is `null`, the
     * open operation failed, `status` includes `JackFailure` and the
     * caller is not a JACK client.
@@ -349,7 +163,7 @@ object jack {
     * on.  It should be called before jack_client_activate().
     *
     * NOTE: if a client calls this AND jack_on_info_shutdown(), then
-    * the event of a client thread shutdown, the callback 
+    * the event of a client thread shutdown, the callback
     * passed to this function will not be called, and the one passed to
     * jack_on_info_shutdown() will.
     *
@@ -391,7 +205,7 @@ object jack {
     * execution. That means that it cannot call functions that might
     * block for a long time. This includes all I/O functions (disk, TTY, network),
     * malloc, free, printf, pthread_mutex_lock, sleep, wait, poll, select, pthread_join,
-    * pthread_cond_wait, etc, etc. 
+    * pthread_cond_wait, etc, etc.
     *
     * @return 0 on success, otherwise a non-zero error code, causing JACK
     * to remove that client from the process() graph.
@@ -536,14 +350,14 @@ object jack {
   //    */
   //  def jack_set_latency_callback(client: Ptr[jack_client_t], latency_callback: JackLatencyCallback,
   //                                arg: Ptr[_]): CInt //  JACK_WEAK_EXPORT
-  
+
   // ---- ServerControl Controlling & querying JACK server operation ----
 
   /** Starts/Stops JACK's "freewheel" mode.
     *
     * When in "freewheel" mode, JACK no longer waits for
     * any external event to begin the start of the next process
-    * cycle. 
+    * cycle.
     *
     * As a result, freewheel mode causes "faster than realtime"
     * execution of a JACK graph. If possessed, real-time
@@ -552,14 +366,13 @@ object jack {
     *
     * IMPORTANT: on systems using capabilities to provide real-time
     * scheduling (i.e. Linux kernel 2.4), if onoff is zero, this function
-    * must be called from the thread that originally called jack_activate(). 
-    * This restriction does not apply to other systems (e.g. Linux kernel 2.6 
+    * must be called from the thread that originally called jack_activate().
+    * This restriction does not apply to other systems (e.g. Linux kernel 2.6
     * or OS X).
     *
     * @param client pointer to JACK client structure
     * @param onoff  if non-zero, freewheel mode starts. Otherwise
     *                  freewheel mode ends.
-    *
     * @return 0 on success, otherwise a non-zero error code.
     */
   def jack_set_freewheel(client: Ptr[jack_client_t], onoff: CInt): CInt = extern
@@ -573,10 +386,8 @@ object jack {
     * should only be done at appropriate stopping points.
     *
     * @see jack_set_buffer_size_callback()
-    *
     * @param client pointer to JACK client structure.
     * @param nframes new buffer size.  Must be a power of two.
-    *
     * @return 0 on success, otherwise a non-zero error code
     */
   def jack_set_buffer_size (client: Ptr[jack_client_t], nframes: jack_nframes_t): CInt = extern
@@ -615,8 +426,8 @@ object jack {
     * name.  Exceeding that will cause the port registration to fail and
     * return NULL.
     *
-    * The @a port_name must be unique among all ports owned by this client. 
-    * If the name is not unique, the registration will fail. 
+    * The @a port_name must be unique among all ports owned by this client.
+    * If the name is not unique, the registration will fail.
     *
     * All ports have a type, which may be any non-NULL and non-zero
     * length string, passed as an argument.  Some port types are built
@@ -630,7 +441,6 @@ object jack {
     * @param flags `JackPortFlags` bit mask.
     * @param buffer_size must be non-zero if this is not a built-in @a
     * port_type.  Otherwise, it is ignored.
-    *
     * @return jack_port_t pointer on success, otherwise NULL.
     */
   def jack_port_register(client: Ptr[jack_client_t], port_name: CString, port_type: CString, flags: ULong,
@@ -648,7 +458,7 @@ object jack {
     * that can be written to; for an input port, it will be an area
     * containing the data from the port's connection(s), or
     * zero-filled. if there are multiple inbound connections, the data
-    * will be mixed appropriately.  
+    * will be mixed appropriately.
     *
     * Do not cache the returned address across process() callbacks.
     * Port buffers have to be retrieved in each callback for proper functionning.
@@ -708,9 +518,7 @@ object jack {
     *
     * The caller is responsible for calling jack_free(3) on any non-NULL
     * returned value.
-    *
     * @param port locally owned jack_port_t pointer.
-    *
     * @see jack_port_name_size(), jack_port_get_all_connections()
     */
   def jack_port_get_connections (port: Ptr[jack_port_t]): Ptr[CString] = extern
@@ -729,19 +537,19 @@ object jack {
     *          you cannot use it in a GraphReordered handler.
     *
     *     2) You need not be the owner of the port to get information
-    *          about its connections. 
+    *          about its connections.
     *
     * @see jack_port_name_size()
     */
   def jack_port_get_all_connections (client: Ptr[jack_client_t], port: Ptr[jack_port_t]): Ptr[CString] = extern
 
-  /** Modifies a port's short name.  May NOT be called from a callback handling a server event.  
+  /** Modifies a port's short name.  May NOT be called from a callback handling a server event.
     * If the resulting full name (including the @a "client_name:" prefix) is
     * longer than jack_port_name_size(), it will be truncated.
     *
     * @return 0 on success, otherwise a non-zero error code.
     *
-    * This differs from jack_port_set_name() by triggering PortRename notifications to 
+    * This differs from jack_port_set_name() by triggering PortRename notifications to
     * clients that have registered a port rename handler.
     */
   def jack_port_rename (client: Ptr[jack_client_t], port: Ptr[jack_port_t], port_name: CString): CInt = extern
@@ -753,7 +561,7 @@ object jack {
     * jack_port_unset_alias() is called, may be
     * used as a alternate name for the port.
     *
-    * Ports can have up to two aliases - if both are already 
+    * Ports can have up to two aliases - if both are already
     * set, this function will return an error.
     *
     * @return 0 on success, otherwise a non-zero error code.
@@ -762,18 +570,18 @@ object jack {
 
   /** Removes @a alias as an alias for @a port.  May be called at any time.
     *
-    * After a successful call, @a alias can no longer be 
+    * After a successful call, @a alias can no longer be
     * used as a alternate name for the port.
     *
     * @return 0 on success, otherwise a non-zero error code.
     */
   def jack_port_unset_alias (port: Ptr[jack_port_t], alias: CString): CInt = extern
 
-//  /* Gets any aliases known for @port.
-//   *
-//   * @return the number of aliases discovered for the port
-//   */
-//  def jack_port_get_aliases (port: Ptr[jack_port_t], char* const aliases[2]): CInt = extern
+  //  /* Gets any aliases known for @port.
+  //   *
+  //   * @return the number of aliases discovered for the port
+  //   */
+  //  def jack_port_get_aliases (port: Ptr[jack_port_t], char* const aliases[2]): CInt = extern
 
   /** If @ref JackPortCanMonitor is set for this @a port, turns input
     * monitoring on or off. Otherwise, does nothing.
@@ -784,7 +592,6 @@ object jack {
     * monitoring on or off. Otherwise, does nothing.
     *
     * @return 0 on success, otherwise a non-zero error code.
-    *
     * @see jack_port_name_size()
     */
   def jack_port_request_monitor_by_name (client: Ptr[jack_client_t], port_name: CString, onoff: CInt): CInt = extern
@@ -862,9 +669,9 @@ object jack {
     * this function may only be called in a buffer_size callback.
     */
   def jack_port_type_get_buffer_size (client: Ptr[jack_client_t], port_type: CString): CSize = extern // JACK_WEAK_EXPORT;
-  
+
   // ---- LatencyFunctions Managing and determining latency ----
-  
+
   // The purpose of JACK's latency API is to allow clients to
   // easily answer two questions:
   //
@@ -992,8 +799,8 @@ object jack {
     * latency of its port using  jack_port_set_latency
     * and wants to ensure that all signal pathways in the graph
     * are updated with respect to the values that will be returned
-    * by  jack_port_get_total_latency. It allows a client 
-    * to change multiple port latencies without triggering a 
+    * by  jack_port_get_total_latency. It allows a client
+    * to change multiple port latencies without triggering a
     * recompute for each change.
     *
     * @return zero for successful execution of the request. non-zero
@@ -1004,19 +811,17 @@ object jack {
   // ---- PortSearching Looking up ports ----
 
   /**
-    * @param port_name_pattern A regular expression used to select 
-    * ports by name.  If NULL or of zero length, no selection based 
+    * @param port_name_pattern A regular expression used to select
+    * ports by name.  If NULL or of zero length, no selection based
     * on name will be carried out.
-    * @param type_name_pattern A regular expression used to select 
-    * ports by type.  If NULL or of zero length, no selection based 
+    * @param type_name_pattern A regular expression used to select
+    * ports by type.  If NULL or of zero length, no selection based
     * on type will be carried out.
-    * @param flags A value used to select ports by their flags.  
+    * @param flags A value used to select ports by their flags.
     * If zero, no selection based on flags will be carried out.
-    *
     * @return a NULL-terminated array of ports that match the specified
     * arguments.  The caller is responsible for calling jack_free(3) any
     * non-NULL returned value.
-    *
     * @see jack_port_name_size(), jack_port_type_size()
     */
   def jack_get_ports (client: Ptr[jack_client_t], port_name_pattern: CString,
@@ -1161,6 +966,3 @@ object jack {
     */
   def jack_free(ptr: Ptr[_]): Unit = extern
 }
-
-sealed trait jack_client_t  // opaque
-sealed trait jack_port_t    // opaque

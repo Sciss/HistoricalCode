@@ -1,11 +1,14 @@
 package de.sciss.jacktest
 
+import de.sciss.jack
+
 import scala.scalanative.native._
 import scala.scalanative.native.stdio._
 import scala.scalanative.native.stdlib._
 
 object SimpleClient {
   import jack._
+  import Jack._
   import JackOptions._
   import JackStatus._
   import JackPortFlags._
@@ -20,11 +23,11 @@ object SimpleClient {
     * port to its output port. It will exit when stopped by
     * the user (e.g. using Ctrl-C on a unix-ish operating system)
     */
-  def process(nframes: jack_nframes_t, arg: Ptr[_]): CInt = {
+  val process: JackProcessCallback = { (nframes: jack_nframes_t, arg: Ptr[_]) =>
     // jack_default_audio_sample_t *in, *out;
     val in  = jack_port_get_buffer(input_port , nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
     val out = jack_port_get_buffer(output_port, nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
-    ??? // memcpy (out, in, sizeof[jack_default_audio_sample_t] * nframes)
+    // memcpy (out, in, sizeof[jack_default_audio_sample_t] * nframes)
     0
   }
 
@@ -32,7 +35,9 @@ object SimpleClient {
     * JACK calls this shutdown_callback if the server ever shuts down or
     * decides to disconnect the client.
     */
-  def jack_shutdown(arg: Ptr[_]): Unit = exit(1)
+  val jack_shutdown: JackShutdownCallback = { (arg: Ptr[_]) =>
+    exit(1)
+  }
 
   def main(args: Array[String]): Unit = {
     val x = jack_client_name_size
@@ -68,14 +73,15 @@ object SimpleClient {
        there is work to be done.
     */
 
-    jack_set_process_callback(client, process _, null)
+    val DUMMY = malloc(0)
+    jack_set_process_callback(client, process, DUMMY)
 
     /* tell the JACK server to call `jack_shutdown()' if
        it ever shuts down, either entirely, or if it
        just decides to stop calling us.
     */
 
-    jack_on_shutdown(client, jack_shutdown _, null)
+    jack_on_shutdown(client, jack_shutdown, DUMMY)
 
     /* display the current sample rate.
      */
@@ -88,10 +94,10 @@ object SimpleClient {
     val input_port  = jack_port_register(client, c"input" , JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput .toULong, 0.toULong)
     val output_port = jack_port_register(client, c"output", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput.toULong, 0.toULong)
 
-    if ((input_port == null) || (output_port == null)) {
-      fprintf(stderr, c"no more JACK ports available\n")
-      exit(1)
-    }
+//    if ((input_port == null) || (output_port == null)) {
+//      fprintf(stderr, c"no more JACK ports available\n")
+//      exit(1)
+//    }
 
     /* Tell the JACK server that we are ready to roll.  Our
      * process() callback will start running now. */
@@ -109,22 +115,23 @@ object SimpleClient {
      * it.
      */
 
-    var ports = jack_get_ports(client, null, null, (JackPortIsPhysical | JackPortIsOutput).toULong)
-    if (ports == null) {
-      fprintf(stderr, c"no physical capture ports\n")
-      exit(1)
-    }
+    val DUMMY1: CString = server_name
+    var ports = jack_get_ports(client, DUMMY1, DUMMY1, (JackPortIsPhysical | JackPortIsOutput).toULong)
+//    if (ports == null) {
+//      fprintf(stderr, c"no physical capture ports\n")
+//      exit(1)
+//    }
 
     if (jack_connect(client, ports(0), jack_port_name (input_port)) != 0)
       fprintf(stderr, c"cannot connect input ports\n")
 
     free(ports)
 
-    ports = jack_get_ports(client, null, null, (JackPortIsPhysical | JackPortIsInput).toULong)
-    if (ports == null) {
-      fprintf(stderr, c"no physical playback ports\n")
-      exit(1)
-    }
+    ports = jack_get_ports(client, DUMMY1, DUMMY1, (JackPortIsPhysical | JackPortIsInput).toULong)
+//    if (ports == null) {
+//      fprintf(stderr, c"no physical playback ports\n")
+//      exit(1)
+//    }
 
     if (jack_connect(client, jack_port_name (output_port), ports(0)) != 0)
       fprintf(stderr, c"cannot connect output ports\n")
