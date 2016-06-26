@@ -18,9 +18,9 @@ lazy val platformSettings = Seq(
     compilerPlugin("org.scala-native" %  s"nir_$toolScalaVersion"   % scalaNativeVersion),
     compilerPlugin("org.scala-native" %  s"util_$toolScalaVersion"  % scalaNativeVersion),
     //
-    // "org.scala-native" %% "clib"     % scalaNativeVersion,
-    "org.scala-native" %% "javalib"  % scalaNativeVersion,
-    "org.scala-native" %% "scalalib" % scalaNativeVersion
+    "org.scala-native" %% "nativelib" % scalaNativeVersion,
+    "org.scala-native" %% "javalib"   % scalaNativeVersion,
+    "org.scala-native" %% "scalalib"  % scalaNativeVersion
   )
 )
 
