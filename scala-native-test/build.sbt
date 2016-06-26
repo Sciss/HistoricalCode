@@ -32,5 +32,5 @@ lazy val root = project.in(file("."))
     // scala-native doesn't seem to suppor this:
 //    mainClass in (Compile, run) := Some("de.sciss.jacktest.SimpleClient"),
     nativeVerbose := true,
-    nativeClangOptions ++= Seq("-v") // Seq("-O2")
+    nativeClangOptions ++= Seq("/usr/lib/x86_64-linux-gnu/libjack.so") // Seq("-O2", "-v")
   )
