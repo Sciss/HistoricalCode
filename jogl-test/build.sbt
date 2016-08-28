@@ -14,3 +14,5 @@ libraryDependencies ++= Seq(
 )
 
 scalacOptions       ++= Seq("-deprecation", "-unchecked", "-feature", "-Xfuture", "-encoding", "utf8")
+
+mainClass in (Compile, run) := Some("com.jogamp.opengl.test.junit.jogl.demos.es2.av.MovieCube")
