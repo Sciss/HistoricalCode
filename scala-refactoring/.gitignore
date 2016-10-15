@@ -1,1 +1,10 @@
 target
+bin
+.cache-main
+.cache-tests
+.settings
+.attach_pid*
+**/*.tmpBin
+*.swp
+.idea
+.idea_modules
