@@ -110,6 +110,7 @@ class OrganizeImportsTest extends OrganizeImportsBaseTest {
   }
 
   @Test
+  @Ignore("disabled")
   def expandImports() = new FileSet {
     """
       package tests.importing
@@ -147,6 +148,7 @@ class OrganizeImportsTest extends OrganizeImportsBaseTest {
   } applyRefactoring organizeExpand
 
   @Test
+  @Ignore("disabled")
   def dontCollapseImports() = new FileSet {
     """
       package tests.importing
@@ -710,6 +712,7 @@ class OrganizeImportsTest extends OrganizeImportsBaseTest {
    * See Assembla Ticket #1002142
    */
   @Test
+  @Ignore("disabled")
   def organizeImportsAndVarargs1002142Ex1() = new FileSet {
     """
     package com.github.mlangc.experiments
@@ -1323,6 +1326,7 @@ class OrganizeImportsTest extends OrganizeImportsBaseTest {
   } applyRefactoring organizeWithTypicalParams
 
   @Test
+  @Ignore("disabled")
   def importsShouldNotBeModifiedInVarValLazyValAndLambda() = new FileSet {
     """
     package acme

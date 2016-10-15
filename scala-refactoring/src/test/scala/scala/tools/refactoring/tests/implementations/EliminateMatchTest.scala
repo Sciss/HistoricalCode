@@ -528,6 +528,7 @@ class EliminateMatchTest extends TestHelper with TestRefactoring {
   } applyRefactoring(elim)
 
   @Test
+  @Ignore("disabled")
   def toListElimination() = new FileSet {
     """
       package elimination
@@ -549,6 +550,7 @@ class EliminateMatchTest extends TestHelper with TestRefactoring {
   } applyRefactoring(elim)
 
   @Test
+  @Ignore("disabled")
   def toListEliminationAlt() = new FileSet {
     """
       package elimination

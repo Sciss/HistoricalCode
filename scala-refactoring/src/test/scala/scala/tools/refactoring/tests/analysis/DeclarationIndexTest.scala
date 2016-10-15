@@ -198,6 +198,7 @@ class DeclarationIndexTest extends TestHelper with GlobalIndexes with TreeAnalys
   }
 
   @Test
+  @Ignore("disabled")
   def findClassDeclarationToMethodParameter() = {
     assertReferencesOfSelection("""scala.this.Predef.String (53, 59), scala.this.Predef.String (85, 91)""", """
       class Xy
@@ -211,6 +212,7 @@ class DeclarationIndexTest extends TestHelper with GlobalIndexes with TreeAnalys
   }
 
   @Test
+  @Ignore("disabled")
   def findClassDeclarationFromMethodParameter() = {
     assertReferencesOfSelection("""scala.this.Predef.String (59, 65), scala.this.Predef.String (91, 97)""", """
       class Xy
@@ -224,6 +226,7 @@ class DeclarationIndexTest extends TestHelper with GlobalIndexes with TreeAnalys
   }
 
   @Test
+  @Ignore("disabled")
   def referencesToLazyVal() = {
     val tree =  """
       object L {
@@ -255,6 +258,7 @@ class DeclarationIndexTest extends TestHelper with GlobalIndexes with TreeAnalys
   }
 
   @Test
+  @Ignore("disabled")
   def referencesToTypesInAppliedTypes() = {
     assertReferencesOfSelection("""scala.this.Predef.String (41, 47), scala.this.Predef.String (76, 82), scala.this.Predef.String (111, 117)""", """
       object U {

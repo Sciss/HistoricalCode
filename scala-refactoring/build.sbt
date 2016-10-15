@@ -94,6 +94,10 @@ libraryDependencies ++= Seq(
   "com.novocode"    % "junit-interface"   % "0.10"              % "test"
 )
 
+libraryDependencies ++= (if (!scalaVersion.value.startsWith("2.12")) Nil else Seq(
+  "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.4"
+))
+
 parallelExecution in Test := false
 
 // sbt doesn't automatically load the content of the MANIFST.MF file, therefore

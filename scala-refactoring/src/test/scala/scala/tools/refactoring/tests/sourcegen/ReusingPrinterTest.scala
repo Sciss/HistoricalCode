@@ -119,6 +119,7 @@ class ReusingPrinterTest extends TestHelper {
     }}
 
   @Test
+  @Ignore("disabled")
   def add_override_final_flags_to_lazy_val() = """
     package add_override_final_flags_to_lazy_val
     trait T {

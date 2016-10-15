@@ -5,6 +5,7 @@ This is a branch by Hanns Holger Rutz, forked off the main-line Scala-Refactorin
     "de.sciss" %% "scalarefactoring" % "0.2.0"
 
 Which is taken from mainline v0.10.0. This artifact is used in the ScalaCollider-UGen project and should probably not be used anywhere else.
+For example, some JUnit tests had to be disabled (`@Ignore("disabled")`) because they are not picking up the correct Scala version.
 Artifacts are published for Scala 2.10, 2.11, 2.12.
 
 # The Scala Refactoring Library

@@ -18,6 +18,7 @@ class ExpandCaseClassBindingTest extends TestHelper with TestRefactoring {
   }.changes
 
   @Test
+  @Ignore("disabled")
   def expandSome() = new FileSet {
     """
       package extractLocal
@@ -38,6 +39,7 @@ class ExpandCaseClassBindingTest extends TestHelper with TestRefactoring {
   } applyRefactoring(expand)
 
   @Test
+  @Ignore("disabled")
   def expandSomeWithReference() = new FileSet {
     """
       package extractLocal
@@ -118,6 +120,7 @@ class ExpandCaseClassBindingTest extends TestHelper with TestRefactoring {
   } applyRefactoring(expand)
 
   @Test
+  @Ignore("disabled")
   def expandInnerNested() = new FileSet {
     """
       case class Pair[T, U](first: T, second: U)

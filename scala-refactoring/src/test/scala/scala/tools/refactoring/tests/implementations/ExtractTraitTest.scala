@@ -297,6 +297,7 @@ class ExtractTraitTest extends TestRefactoring {
   } applyRefactoring(extractTrait(("Squarify"), (name) => name == "square"))
 
   @Test
+  @Ignore("disabled")
   def withTypeParameters() = new FileSet {
     """
     package extractTrait.withTypeParameters

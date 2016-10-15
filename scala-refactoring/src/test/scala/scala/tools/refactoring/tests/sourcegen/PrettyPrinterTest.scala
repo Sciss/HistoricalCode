@@ -399,6 +399,7 @@ class ATest {
   }
 
   @Test
+  @Ignore("disabled")
   def patternMatchInAssignment() = global.ask { () =>
 
     val tree = treeFrom("""
@@ -706,6 +707,7 @@ class Demo2(a: String, b: Int)"""
   }
 
   @Test
+  @Ignore("disabled")
   def testMatches() = global.ask { () =>
     val tree = treeFrom("""
     object Functions {
@@ -801,6 +803,7 @@ class Demo2(a: String, b: Int)"""
   }
 
   @Test
+  @Ignore("disabled")
   def testStar() = global.ask { () =>
     val tree = treeFrom("""
     object Functions {
@@ -989,6 +992,7 @@ object A"""
   }
 
   @Test
+  @Ignore("disabled")
   def testFunctions() = global.ask { () =>
 
     val tree = treeFrom("""
@@ -1012,6 +1016,7 @@ object A"""
 
   @Test
   @ScalaVersion(matches="2.10")
+  @Ignore("disabled")
   def testTypeDefs() = global.ask { () =>
 
     val tree = treeFrom("""
@@ -1038,6 +1043,7 @@ object A"""
 
   @Test
   @ScalaVersion(matches="2.11")
+  @Ignore("disable")
   def testTypeDefs_211() = global.ask { () =>
 
     val tree = treeFrom("""
@@ -1063,6 +1069,7 @@ object A"""
   }
 
   @Test
+  @Ignore("disabled")
   def testTypes() = global.ask { () =>
 
     val tree = treeFrom("""

@@ -84,6 +84,7 @@ class PrependOrDropScalaPackageFromRecomputedTest extends OrganizeImportsBaseTes
   } applyRefactoring organizeDropScalaPackage
 
   @Test
+  @Ignore("disabled")
   def importFromPackageObject() = new FileSet {
     """
     import scala.collection.breakOut
