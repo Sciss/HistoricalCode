@@ -1,19 +1,25 @@
-name := "org.scala-refactoring.library"
+// name := "org.scala-refactoring.library"
+name := "ScalaRefactoring" // in order to better understand we publish a different version
 
-version := "0.10.0"
+// version := "0.10.0"
+version := "0.2.0" // in order to better understand we publish a different version
 
 scalaVersion := "2.11.8"
 
-moduleName := name.value
+// moduleName := name.value
 
-organization := "org.scala-refactoring"
+// ensure the Java classes use 1.6 compatible file format, even when compiling on JDK 7 or higher
+javacOptions in (Compile, compile) ++= Seq("-source", "1.6", "-target", "1.6")
 
-crossScalaVersions := Seq("2.10.6", "2.11.7", "2.11.8")
+// organization := "org.scala-refactoring"
+organization := "de.sciss" // in order to publish to our sonatype account
 
-crossVersion := CrossVersion.full
+crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0-RC2")
+
+// crossVersion := CrossVersion.full
 
 scalacOptions ++= (scalaBinaryVersion.value match {
-  case "2.11" => Seq(
+  case "2.11" | "2.12.0-RC2" => Seq(
     "-deprecation:false",
     "-encoding", "UTF-8",
     "-feature",
@@ -81,7 +87,7 @@ pomExtra := (
     </developer>
   </developers>)
 
-credentials += Credentials(Path.userHome / ".m2" / "credentials")
+// credentials += Credentials(Path.userHome / ".m2" / "credentials")
 
 libraryDependencies ++= Seq(
   "org.scala-lang"  % "scala-compiler"    % scalaVersion.value,

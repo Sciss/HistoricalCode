@@ -6,3 +6,5 @@ bin
 .attach_pid*
 **/*.tmpBin
 *.swp
+.idea
+.idea_modules
