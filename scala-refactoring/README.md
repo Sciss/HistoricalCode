@@ -1,3 +1,12 @@
+# Note!
+
+This is a branch by Hanns Holger Rutz, forked off the main-line Scala-Refactoring. The purpose is merely to publish an independent artifact
+
+    "de.sciss" %% "scalarefactoring" % "0.2.0"
+
+Which is taken from mainline v0.10.0. This artifact is used in the ScalaCollider-UGen project and should probably not be used anywhere else.
+Artifacts are published for Scala 2.10, 2.11, 2.12.
+
 # The Scala Refactoring Library
 
 The Scala Refactoring Library implements IDE independent refactoring support
