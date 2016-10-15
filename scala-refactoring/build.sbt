@@ -48,7 +48,7 @@ unmanagedSourceDirectories in Test += baseDirectory.value / (scalaBinaryVersion.
 
 publishMavenStyle := true
 
-useGpg := true
+// useGpg := true
 
 fork := true
 

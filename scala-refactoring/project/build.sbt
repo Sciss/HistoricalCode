@@ -1,4 +1,4 @@
-addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
+// addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 
 // We need to be able to not add the scoverage plugin to the scala-refactoring build.
 // This is necessary because scala-refactoring is built during Scala PR CI, which means
