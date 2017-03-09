@@ -37,3 +37,12 @@ From the [Wiki](https://github.com/imathis/octopress/wiki/3rd-Party-Octopress-Th
 (Not all links might actually still use Octopress!)
 
 ...quite a mono culture.
+
+-----
+
+Getting that Ruby based system to work
+
+- apt-get install ruby-dev
+- apt-get install nodejs
+- gem install jekyll
+
