@@ -71,6 +71,9 @@ have multiple instances of the same object). The `LiveCache` seems to be similar
 Addresses many serialization questions, such as multiple formats, blind de-serialization, cyclic graphs.
 Unfortunately seems to be slow and horribly buggy and incomplete. Code not documented at all. Heavy use of macros.
 
+Revisited August 2015. Source code still abomination. A total mess. The main problem is that we cannot just
+add an `S#Acc` parameter without rewriting the API.
+
 ### Storm-Enroute Reactive Collections
 
 - https://github.com/storm-enroute/reactive-collections
