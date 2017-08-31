@@ -15,3 +15,11 @@ Using sbt like most Scala projects.
 
 Please see the file [CONTRIBUTING.md](CONTRIBUTING.md)
 
+## overview
+
+Things I've been trying out:
+
+ - capture source code of a def macro invocation; this seems to work good with
+   lihaoyi's [`sourcecode.Text`](https://github.com/lihaoyi/sourcecode)
+ - embedded compiling from source can be adapted from [here](https://github.com/Sciss/SoundProcesses/blob/d1e60c419866d4c2271148f9befbe33868ca62c1/core/src/main/scala/de/sciss/synth/proc/impl/ActionImpl.scala#L93)
+ - I have _not_ tried out, [spore's](https://github.com/heathermiller/spores) approach of checking against unwanted capture of outside variables
