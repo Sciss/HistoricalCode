@@ -147,12 +147,23 @@ object CodeImpl {
     //             |  import __context__._
     //             |""".stripMargin)
     // val aTpe  = w.blockTag.tpe.toString
+//    val source =
+//    s"""package ${Code.UserPackage}
+//       |
+//         |final class $name extends $pkgAction.Body {
+//       |  def apply[S <: $pkgSys.Sys[S]](universe: $pkgAction.Universe[S])(implicit tx: S#Tx): Unit = {
+//       |    import universe._
+//       |$impS
+//       |${code.source}
+//       |  }
+//       |}
+//       |""".stripMargin
+
     val source =
     s"""package ${Code.UserPackage}
        |
-         |final class $name extends $pkgAction.Body {
-       |  def apply[S <: $pkgSys.Sys[S]](universe: $pkgAction.Universe[S])(implicit tx: S#Tx): Unit = {
-       |    import universe._
+         |final class $name extends Function0[Unit] {
+       |  def apply(): Unit = {
        |$impS
        |${code.source}
        |  }
@@ -172,9 +183,11 @@ object CodeImpl {
     def __context__(): A
   }
 
-  private val pkgAction = "de.sciss.synth.proc.Action"
-  private val pkgCode   = "de.sciss.synth.proc.impl.CodeImpl"
-  private val pkgSys    = "de.sciss.lucre.stm"
+//  private val pkgAction = "de.sciss.synth.proc.Action"
+//  private val pkgCode   = "de.sciss.synth.proc.impl.CodeImpl"
+  private val pkgAction = "de.sciss.funser.Action"
+  private val pkgCode   = "de.sciss.funser.CodeImpl"
+//  private val pkgSys    = "de.sciss.lucre.stm"
 
   // note: synchronous
   private def compileThunk(code: String, w: Wrapper[_, _, _], execute: Boolean)(implicit compiler: Code.Compiler): Any = {

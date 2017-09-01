@@ -10,17 +10,25 @@ object Action {
 
   def apply(body: Unit): Action = macro Impl.applyImpl
 
-//  def apply[S <: Sys[S]](name: String, jar: Array[Byte])(implicit tx: S#Tx): Action[S] =
-//    Impl.newConst(name, jar)
+  def newConst(name: String, jar: Array[Byte], source: String): Action =
+    Impl.newConst(name, jar, source = source)
+
+  def newConst(name: String, jar: String, source: String): Action = {
+    newConst(name, jar.getBytes("ISO-8859-1"), source)
+  }
 
   trait Universe
 
-  trait Body {
-    def apply(universe: Universe): Unit
-  }
-}
-trait Action {
-  def execute(universe: Action.Universe): Unit
+//  trait Body {
+//    def apply(universe: Universe): Unit
+//  }
 
-  def source: String
+  type Body = Function0[Unit]
+
+  type Action = (Body, String)
 }
+//trait Action {
+//  def execute(universe: Action.Universe): Unit
+//
+//  def source: String
+//}

@@ -8,7 +8,8 @@ lazy val root   = project.in(file("")).aggregate(macros, core)
 lazy val macros = project.in(file("macros"))
   .settings(
     libraryDependencies ++= Seq(
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value
+//      "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided"
+      "org.scala-lang" %  "scala-compiler" % scalaVersion.value
     )
   )
 
