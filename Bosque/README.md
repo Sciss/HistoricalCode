@@ -1,7 +1,5 @@
 # Bosque
 
-[![Flattr this](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=sciss&url=https%3A%2F%2Fgithub.com%2FSciss%2FBosque&title=Bosque&language=Scala&tags=github&category=software)
-
 ## statement
 
 Bosque is (C)opyright by 2006&ndash;2016 Hanns Holger. All rights reserved. It is released under the [GNU General Public License](http://github.com/Sciss/Bosque/blob/master/licenses/Bosque-License.txt) and comes with absolutely no warranties.
