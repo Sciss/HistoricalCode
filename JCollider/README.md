@@ -1,6 +1,5 @@
 # JCollider
 
-[![Flattr this](http://api.flattr.com/button/flattr-badge-large.png)](https://flattr.com/submit/auto?user_id=sciss&url=https%3A%2F%2Fgithub.com%2FSciss%2FJCollider&title=JCollider&language=Scala&tags=github&category=software)
 [![Build Status](https://travis-ci.org/Sciss/JCollider.svg?branch=master)](https://travis-ci.org/Sciss/JCollider)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.sciss/jcollider/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.sciss/jcollider)
 
