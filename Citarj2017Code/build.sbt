@@ -7,6 +7,7 @@ lazy val scalaMetaVersion = "2.0.1"
 lazy val fileUtilVersion  = "1.1.3"
 lazy val prefuseVersion   = "1.0.1"
 lazy val swingPlusVersion = "0.2.4"
+lazy val numbersVersion   = "0.1.3"
 
 lazy val commonSettings = Seq(
   version            := projectVersion,
@@ -28,6 +29,7 @@ lazy val root = Project(id = baseNameL, base = file("."))
       "org.scalameta" %% "scalameta"    % scalaMetaVersion,
       "de.sciss"      %% "fileutil"     % fileUtilVersion,
       "de.sciss"      %  "prefuse-core" % prefuseVersion,
-      "de.sciss"      %% "swingplus"    % swingPlusVersion
+      "de.sciss"      %% "swingplus"    % swingPlusVersion,
+      "de.sciss"      %% "numbers"      % numbersVersion
     )
   )

@@ -2,8 +2,8 @@ package de.sciss.citarj2017
 
 import de.sciss.file._
 
-import scala.meta._
-import scala.swing.{Component, MainFrame, Swing}
+import scala.meta.{Decl, _}
+import scala.swing.{Component, Dimension, MainFrame, Swing}
 
 object Main {
   def main(args: Array[String]): Unit = {
@@ -30,7 +30,7 @@ object Main {
     val srcFiles  = modules.flatMap { mod =>
       collectScala(baseDir / mod / "src" / "main" / "scala" / "de" / "sciss" / "wrtng")
     }
-    run(srcFiles.drop(2).take(1), dialects.Scala212)
+    run(srcFiles.drop(3).take(8), dialects.Scala212)
   }
 
   def run(srcFiles: Seq[File], d: Dialect): Unit = {
@@ -57,7 +57,7 @@ object Main {
 //        println(t.structure)
 //      }
 
-      if (fi == 0) render(root)
+      if (fi < 10) render(root, title0 = f.base)
     }
 
     val treeNamesSq = treeNames.toSeq.sorted
@@ -94,26 +94,63 @@ object Main {
     tn
   }
 
-  def render(meta: Tree): Unit = {
+  def getType(t: Tree): Int = {
+    Ctor
+    t match {
+      case _: Pkg         =>  0
+      case _: Import      =>  1
+      case _: Importee    =>  2
+      case _: Defn        =>  3
+      case _: Ctor        =>  4
+      case _: Decl        =>  5
+      case _: Enumerator  =>  6
+      case _: Importer    =>  7
+      case _: Init        =>  8
+      case _: Lit         =>  9
+      case _: Mod         => 10
+      case _: Name        => 11
+      case _: Pat         => 12
+      case _: Case        => 13
+      case _: Term        => 14
+      case _: Self        => 15
+      case _: Type        => 16
+      case _: Template    => 17
+      case _              => -1
+    }
+  }
+
+  def render(meta: Tree, title0: String): Unit = {
     Swing.onEDT {
       import prefuse.data.{Tree => PTree, Node => PNode, _}
       val t = new PTree
+      t.addColumn(TreeMap.COL_TPE, classOf[Int])
       t.addColumn("name", classOf[String])
-      val r = t.addRoot()
-      r.set("name", nameFor(meta))
+
+      def configure(n: PNode, m: Tree): Unit = {
+        val tn  = nameFor(m)
+        val tpe = getType(m)
+        n.set(TreeMap.COL_NAME, tn )
+        n.set(TreeMap.COL_TPE , tpe)
+      }
 
       def process(parent: PNode, cm: Tree): Unit = {
-        val tn = nameFor(cm)
-        val c  = t.addChild(parent)
-        c.set("name", tn)
+        val c = t.addChild(parent)
+        configure(c, cm)
         cm.children.foreach(process(c, _))
       }
 
+      val r = t.addRoot()
+      configure(r, meta)
       meta.children.foreach(cm => process(parent = r, cm = cm))
 
-      val map = new TreeMap(t, label = "name")
+      val numChildren = t.getNodeTable.getTupleCount
+      val extent      = (math.sqrt(numChildren) * 32 + 0.5).toInt
+
+      val map = new TreeMap(t, label = TreeMap.COL_NAME)
       new MainFrame {
+        title    = title0
         contents = Component.wrap(map)
+        map.setPreferredSize(new Dimension(extent, extent))
         pack().centerOnScreen()
         open()
       }

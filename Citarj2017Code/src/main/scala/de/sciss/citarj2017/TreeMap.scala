@@ -1,8 +1,8 @@
 package de.sciss.citarj2017
 
 import java.awt.event.{ComponentAdapter, ComponentEvent, MouseEvent}
-import java.awt.geom.{Line2D, Rectangle2D}
-import java.awt.{BasicStroke, BorderLayout, Color, Dimension, Font, Graphics2D, Shape}
+import java.awt.geom.Rectangle2D
+import java.awt.{BorderLayout, Color, Dimension, Font, Graphics2D, Shape}
 import javax.swing.{BorderFactory, JComponent, JFrame, JPanel, SwingConstants, Timer}
 
 import prefuse.action.animate.ColorAnimator
@@ -11,8 +11,8 @@ import prefuse.action.layout.Layout
 import prefuse.action.{ActionList, RepaintAction}
 import prefuse.controls.ControlAdapter
 import prefuse.data.Tree
-import prefuse.data.expression.{BooleanLiteral, Predicate}
 import prefuse.data.expression.parser.ExpressionParser
+import prefuse.data.expression.{BooleanLiteral, Predicate}
 import prefuse.data.io.TreeMLReader
 import prefuse.render.{AbstractShapeRenderer, DefaultRendererFactory, LabelRenderer}
 import prefuse.util.ui.{JFastLabel, UILib}
@@ -44,6 +44,9 @@ object TreeMap {
     res
   }
 
+  final val COL_NAME  = "name"
+  final val COL_TPE   = "type"
+
   private val tree      = "tree"
   private val treeNodes = "tree.nodes"
   private val treeEdges = "tree.edges"
@@ -52,7 +55,7 @@ object TreeMap {
   def main(argv: Array[String]): Unit = {
     UILib.setPlatformLookAndFeel()
     var infile = TREE_CHI
-    var label = "name"
+    var label = COL_NAME
     if (argv.length > 1) {
       infile  = argv(0)
       label   = argv(1)
@@ -65,7 +68,7 @@ object TreeMap {
     frame.setVisible(true)
   }
 
-  def demo: JComponent = demo(TREE_CHI, "name")
+  def demo: JComponent = demo(TREE_CHI, COL_NAME)
 
   def demo(datafile: String, label: String): JComponent = {
     val t = try
@@ -161,11 +164,58 @@ object TreeMap {
     // end of inner class LabelLayout
   }
 
+  private def mkRGB(tup: (Double, Double, Double)): Color =
+    new Color(tup._1.toFloat, tup._2.toFloat, tup._3.toFloat)
+
+  private def mkRGBI(tup: (Int, Int, Int)): Color =
+    new Color(tup._1, tup._2, tup._3)
+
+  final val GMT_wysiwyg: Array[Color] = Array(
+    (0.250980, 0.000000, 0.250980),
+    (0.250980, 0.000000, 0.752941),
+    (0.000000, 0.250980, 1.000000),
+    (0.000000, 0.501961, 1.000000),
+    (0.000000, 0.627451, 1.000000),
+    (0.250980, 0.752941, 1.000000),
+    (0.250980, 0.878431, 1.000000),
+    (0.250980, 1.000000, 1.000000),
+    (0.250980, 1.000000, 0.752941),
+    (0.250980, 1.000000, 0.250980),
+    (0.501961, 1.000000, 0.250980),
+    (0.752941, 1.000000, 0.250980),
+    (1.000000, 1.000000, 0.250980),
+    (1.000000, 0.878431, 0.250980),
+    (1.000000, 0.627451, 0.250980),
+    (1.000000, 0.376471, 0.250980),
+    (1.000000, 0.125490, 0.250980),
+    (1.000000, 0.376471, 0.752941),
+    (1.000000, 0.627451, 1.000000),
+    (1.000000, 0.878431, 1.000000),
+  ).map(mkRGB)
+  
+  val GreenArmytage: Array[Color] = Array(
+    (240,163,255), (  0,117,220), (153, 63,  0), ( 76,  0, 92),
+    ( 25, 25, 25), (  0, 92, 49), ( 43,206, 72), (255,204,153),
+    (128,128,128), (148,255,181), (143,124,  0), (157,204,  0),
+    (194,  0,136), (  0, 51,128), (255,164,  5), (255,168,187),
+    ( 66,102,  0), (255,  0, 16), ( 94,241,242), (  0,153,143),
+    (224,255,102), (116, 10,255), (153,  0,  0), (255,255,128),
+    (255,255,  0), (255, 80,  5)
+  ).map(mkRGBI)
+
   /**
     * A renderer for tree-map nodes. Draws simple rectangles, but defers
     * the bounds management to the layout.
     */
-  class NodeRenderer() extends AbstractShapeRenderer {
+  final class NodeRenderer(numTypes: Int) extends AbstractShapeRenderer {
+    private[this] val defaultPalette = GreenArmytage // GMT_wysiwyg
+
+    private[this] val colrTable = if (numTypes <= defaultPalette.length) defaultPalette else Array.tabulate(numTypes) { i =>
+      import de.sciss.numbers.Implicits._
+      val hue = i.linlin(0, numTypes, 0.0f, 1.0f)
+      Color.getHSBColor(hue, 1.0f, 1.0f)
+    }
+
     m_manageBounds = false
     private val m_bounds = new Rectangle2D.Double
 
@@ -174,24 +224,30 @@ object TreeMap {
       m_bounds
     }
 
-    private[this] val ln    = new Line2D.Double
-    private[this] val strk2 = new BasicStroke(2f)
+//    private[this] val ln    = new Line2D.Double
+//    private[this] val strk2 = new BasicStroke(2f)
 
     override def render(g: Graphics2D, item: VisualItem): Unit = {
       val shape = getShape(item)
       if (shape != null) {
-        drawShape(g, item, shape)
-        g.setColor(Color.red)
-        g.setStroke(strk2)
+        // drawShape(g, item, shape)
+//        g.setColor(Color.red)
+//        g.setStroke(strk2)
         val r = shape.getBounds2D
         val ni = item.asInstanceOf[NodeItem]
+        // println(ni.getString(COL_NAME))
 //        ni.getDepth
         val isLeaf  = ni.getChildCount == 0
-        val maxY    = if (isLeaf) r.getMaxY else r.getMinY + 16.0
-        ln.setLine(r.getMinX, r.getMinY, r. getMaxX, maxY)
-        g.draw(ln)
-        ln.setLine(r.getMaxX, r.getMinY, r. getMinX, maxY)
-        g.draw(ln)
+        val minY    = r.getMinY
+        val maxY    = if (isLeaf) r.getMaxY else minY + 16.0
+//        ln.setLine(r.getMinX, r.getMinY, r. getMaxX, maxY)
+//        g.draw(ln)
+//        ln.setLine(r.getMaxX, r.getMinY, r. getMinX, maxY)
+//        g.draw(ln)
+        val colrIdx = ni.getInt(COL_TPE)
+        if (colrIdx >= 0 && colrIdx < colrTable.length) g.setColor(colrTable(colrIdx))
+        r.setFrame(r.getMinX, r.getMinY, r.getWidth, maxY - minY)
+        g.fill(r)
       }
     }
 
@@ -199,7 +255,8 @@ object TreeMap {
   }
 }
 
-class TreeMap(val t: Tree, val label: String) extends Display(new Visualization) { // add the tree to the visualization
+class TreeMap(val t: Tree, val label: String, numTypes: Int = 18)
+  extends Display(new Visualization) { // add the tree to the visualization
 
   /* private val vt: VisualTree = */ m_vis.addTree(TreeMap.tree, t)
 
@@ -220,7 +277,7 @@ class TreeMap(val t: Tree, val label: String) extends Display(new Visualization)
     m_vis.addDecorators(TreeMap.labels, TreeMap.treeNodes, labelP, TreeMap.LABEL_SCHEMA)
     // set up the renderers - one for nodes and one for labels
     val rf = new DefaultRendererFactory
-    rf.add(new InGroupPredicate(TreeMap.treeNodes), new TreeMap.NodeRenderer)
+    rf.add(new InGroupPredicate(TreeMap.treeNodes), new TreeMap.NodeRenderer(numTypes))
     rf.add(new InGroupPredicate(TreeMap.labels)   , new LabelRenderer(label))
     m_vis.setRendererFactory(rf)
     // border colors
@@ -238,7 +295,7 @@ class TreeMap(val t: Tree, val label: String) extends Display(new Visualization)
     m_vis.putAction("animatePaint", animatePaint)
     // create the single filtering and layout action list
     val layout = new ActionList
-    val pad = 0.0 // 1.0
+    val pad = 1.0 // 1.0
     layout.add(new MyTreeMapLayout(TreeMap.tree, frameL = pad, frameT = 16.0, frameR = pad, frameB = pad))
 //    layout.add(new BalloonTreeLayout(TreeMap.tree))
     layout.add(new TreeMap.LabelLayout(TreeMap.labels))
@@ -248,17 +305,18 @@ class TreeMap(val t: Tree, val label: String) extends Display(new Visualization)
     // initialize our display
     setSize(700, 600)
     setItemSorter(new TreeDepthItemSorter)
-    addControlListener(new ControlAdapter() {
-      override def itemEntered(item: VisualItem, e: MouseEvent): Unit = {
-        item.setStrokeColor(borderColor.getColor(item))
-        item.getVisualization.repaint()
-      }
 
-      override def itemExited(item: VisualItem, e: MouseEvent): Unit = {
-        item.setStrokeColor(item.getEndStrokeColor)
-        item.getVisualization.repaint()
-      }
-    })
+//    addControlListener(new ControlAdapter() {
+//      override def itemEntered(item: VisualItem, e: MouseEvent): Unit = {
+//        item.setStrokeColor(borderColor.getColor(item))
+//        item.getVisualization.repaint()
+//      }
+//
+//      override def itemExited(item: VisualItem, e: MouseEvent): Unit = {
+//        item.setStrokeColor(item.getEndStrokeColor)
+//        item.getVisualization.repaint()
+//      }
+//    })
 
 //    m_vis.addFocusGroup(Visualization.SEARCH_ITEMS, searchQ.getSearchSet)
 //    searchQ.getPredicate.addExpressionListener(new UpdateListener() {
