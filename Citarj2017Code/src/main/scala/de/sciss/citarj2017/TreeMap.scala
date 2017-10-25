@@ -2,7 +2,7 @@ package de.sciss.citarj2017
 
 import java.awt.event.{ComponentAdapter, ComponentEvent, MouseEvent}
 import java.awt.geom.Rectangle2D
-import java.awt.{BorderLayout, Color, Dimension, Font, Graphics2D, Shape}
+import java.awt.{BorderLayout, Color, Dimension, Font, Graphics2D, RenderingHints, Shape}
 import javax.swing.{BorderFactory, JComponent, JFrame, JPanel, SwingConstants, Timer}
 
 import prefuse.action.animate.ColorAnimator
@@ -210,10 +210,17 @@ object TreeMap {
   final class NodeRenderer(numTypes: Int) extends AbstractShapeRenderer {
     private[this] val defaultPalette = GreenArmytage // GMT_wysiwyg
 
-    private[this] val colrTable = if (numTypes <= defaultPalette.length) defaultPalette else Array.tabulate(numTypes) { i =>
+    private[this] val bgColrTable = if (numTypes <= defaultPalette.length) defaultPalette else Array.tabulate(numTypes) { i =>
       import de.sciss.numbers.Implicits._
       val hue = i.linlin(0, numTypes, 0.0f, 1.0f)
       Color.getHSBColor(hue, 1.0f, 1.0f)
+    }
+
+    private[this] val fbColrTable = bgColrTable.map { colr =>
+      val Y = colr.getRed   / 255.0 * 0.2126 +
+              colr.getGreen / 255.0 * 0.7152 +
+              colr.getBlue  / 255.0 * 0.0722
+      if (Y < 0.5) Color.white else Color.black
     }
 
     m_manageBounds = false
@@ -227,6 +234,8 @@ object TreeMap {
 //    private[this] val ln    = new Line2D.Double
 //    private[this] val strk2 = new BasicStroke(2f)
 
+    private[this] val font = new Font("Liberation Sans Narrow", Font.PLAIN, 12)
+
     override def render(g: Graphics2D, item: VisualItem): Unit = {
       val shape = getShape(item)
       if (shape != null) {
@@ -238,6 +247,7 @@ object TreeMap {
         // println(ni.getString(COL_NAME))
 //        ni.getDepth
         val isLeaf  = ni.getChildCount == 0
+        val minX    = r.getMinX
         val minY    = r.getMinY
         val maxY    = if (isLeaf) r.getMaxY else minY + 16.0
 //        ln.setLine(r.getMinX, r.getMinY, r. getMaxX, maxY)
@@ -245,9 +255,21 @@ object TreeMap {
 //        ln.setLine(r.getMaxX, r.getMinY, r. getMinX, maxY)
 //        g.draw(ln)
         val colrIdx = ni.getInt(COL_TPE)
-        if (colrIdx >= 0 && colrIdx < colrTable.length) g.setColor(colrTable(colrIdx))
-        r.setFrame(r.getMinX, r.getMinY, r.getWidth, maxY - minY)
+        val colrOk  = colrIdx >= 0 && colrIdx < bgColrTable.length
+        if (colrOk) g.setColor(bgColrTable(colrIdx))
+        r.setFrame(minX, minY, r.getWidth, maxY - minY)
         g.fill(r)
+        if (colrOk) g.setColor(fbColrTable(colrIdx))
+        g.setFont(font)
+        val name = ni.getString(COL_NAME)
+//        val atOrig = g.getTransform
+//        g.translate(minX + 2, minY + 10)
+        val clpOrig = g.getClip
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+        g.clip(r)
+        g.drawString(name, (minX + 2).toFloat, (minY + 10).toFloat)
+        g.setClip(clpOrig)
+//        g.setTransform(atOrig)
       }
     }
 
@@ -278,7 +300,7 @@ class TreeMap(val t: Tree, val label: String, numTypes: Int = 18)
     // set up the renderers - one for nodes and one for labels
     val rf = new DefaultRendererFactory
     rf.add(new InGroupPredicate(TreeMap.treeNodes), new TreeMap.NodeRenderer(numTypes))
-    rf.add(new InGroupPredicate(TreeMap.labels)   , new LabelRenderer(label))
+//    rf.add(new InGroupPredicate(TreeMap.labels)   , new LabelRenderer(label))
     m_vis.setRendererFactory(rf)
     // border colors
     val borderColor = new TreeMap.BorderColorAction (TreeMap.treeNodes)
