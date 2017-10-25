@@ -1,28 +1,26 @@
 package de.sciss.citarj2017
 
-import java.awt.{BorderLayout, Color, Component, Dimension, Font, Shape}
 import java.awt.event.MouseEvent
 import java.awt.geom.Rectangle2D
+import java.awt.{BorderLayout, Color, Dimension, Font, Shape}
 import javax.swing.{BorderFactory, JComponent, JFrame, JPanel, SwingConstants}
 
-import prefuse.{Display, Visualization}
-import prefuse.action.{ActionList, RepaintAction}
 import prefuse.action.animate.ColorAnimator
 import prefuse.action.assignment.ColorAction
 import prefuse.action.layout.Layout
-import prefuse.action.layout.graph.SquarifiedTreeMapLayout
+import prefuse.action.{ActionList, RepaintAction}
 import prefuse.controls.ControlAdapter
 import prefuse.data.Tree
 import prefuse.data.expression.Predicate
 import prefuse.data.expression.parser.ExpressionParser
 import prefuse.data.io.TreeMLReader
-import prefuse.data.query.SearchQueryBinding
 import prefuse.render.{AbstractShapeRenderer, DefaultRendererFactory, LabelRenderer}
-import prefuse.util.{ColorLib, ColorMap, FontLib, PrefuseLib, UpdateListener}
 import prefuse.util.ui.{JFastLabel, UILib}
-import prefuse.visual.{DecoratorItem, NodeItem, VisualItem, VisualTree}
+import prefuse.util.{ColorLib, ColorMap, FontLib, PrefuseLib}
 import prefuse.visual.expression.InGroupPredicate
 import prefuse.visual.sort.TreeDepthItemSorter
+import prefuse.visual.{DecoratorItem, NodeItem, VisualItem}
+import prefuse.{Display, Visualization}
 
 
 /**
@@ -105,8 +103,8 @@ object TreeMap {
   }
 
   /**
-    * Set the stroke color for drawing treemap node outlines. A graded
-    * grayscale ramp is used, with higer nodes in the tree drawn in
+    * Set the stroke color for drawing tree-map node outlines. A graded
+    * gray scale ramp is used, with higher nodes in the tree drawn in
     * lighter shades of gray.
     */
   class BorderColorAction(val group: String) extends ColorAction(group, VisualItem.STROKECOLOR) {
@@ -121,7 +119,7 @@ object TreeMap {
   }
 
   /**
-    * Set fill colors for treemap nodes. Search items are colored
+    * Set fill colors for tree-map nodes. Search items are colored
     * in pink, while normal nodes are shaded according to their
     * depth in the tree.
     */
@@ -179,7 +177,7 @@ object TreeMap {
 
 class TreeMap(val t: Tree, val label: String) extends Display(new Visualization) { // add the tree to the visualization
 
-  private val vt: VisualTree = m_vis.addTree(TreeMap.tree, t)
+  /* private val vt: VisualTree = */ m_vis.addTree(TreeMap.tree, t)
 
 //  private lazy val searchQ = new SearchQueryBinding(vt.getNodeTable, label)
 
@@ -213,7 +211,8 @@ class TreeMap(val t: Tree, val label: String) extends Display(new Visualization)
     m_vis.putAction("animatePaint", animatePaint)
     // create the single filtering and layout action list
     val layout = new ActionList
-    layout.add(new SquarifiedTreeMapLayout(TreeMap.tree))
+    layout.add(new MyTreeMapLayout(TreeMap.tree, 4.0))
+//    layout.add(new BalloonTreeLayout(TreeMap.tree))
     layout.add(new TreeMap.LabelLayout(TreeMap.labels))
     layout.add(colors)
     layout.add(new RepaintAction)
