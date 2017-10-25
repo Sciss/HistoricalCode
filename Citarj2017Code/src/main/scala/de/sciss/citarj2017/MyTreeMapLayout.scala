@@ -30,8 +30,8 @@ import prefuse.visual.{NodeItem, VisualItem}
   * http://www.cs.umd.edu/hcil/treemap-history/</a>.
   * </p>
   *
-  * @version 1.0
   * @author <a href="http://jheer.org">jeffrey heer</a>
+  * @author Hanns Holger Rutz
   */
 object MyTreeMapLayout  { // column value in which layout stores area information
   val AREA = "_area"
@@ -53,17 +53,22 @@ object MyTreeMapLayout  { // column value in which layout stores area informatio
   * Creates a new MyTreeMapLayout with the specified spacing between
   * parent areas and their enclosed children.
   */
-class MyTreeMapLayout (val group: String, val frame: Double)
+class MyTreeMapLayout (val group: String, frameL: Double, frameT: Double, frameB: Double, frameR: Double)
   extends TreeLayout(group) {
 
-  type Items = java.util.List[VisualItem]
+  private type Items = java.util.List[VisualItem]
 
-  private val m_kids: Items = new java.util.ArrayList[VisualItem]
-  private val m_row : Items = new java.util.ArrayList[VisualItem]
-  private val m_r     = new Rectangle2D.Double
-  private var m_frame = 0.0 // space between parents border and children
+  private[this] val m_kids: Items = new java.util.ArrayList[VisualItem]
+  private[this] val m_row : Items = new java.util.ArrayList[VisualItem]
+  private[this] val m_r     = new Rectangle2D.Double
 
-  setFrameWidth(frame)
+  private[this] var m_frameL  = 0.0 // space between parents border and children
+  private[this] var m_frameT  = 0.0 // space between parents border and children
+  private[this] var m_frameB  = 0.0 // space between parents border and children
+  private[this] var m_frameR  = 0.0 // space between parents border and children
+  private[this] var noFrame   = true
+
+  setFrameWidth(frameL, frameT, frameB, frameR)
 
   /**
     * Creates a new MyTreeMapLayout with no spacing between
@@ -72,7 +77,7 @@ class MyTreeMapLayout (val group: String, val frame: Double)
     * @param group the data group to layout. Must resolve to a Graph instance.
     */
   def this(group: String) {
-    this(group, 0)
+    this(group, 0.0, 0.0, 0.0, 0.0)
   }
 
   /**
@@ -82,20 +87,30 @@ class MyTreeMapLayout (val group: String, val frame: Double)
     * change reflected. Negative frame values are not allowed and will result
     * in an IllegalArgumentException.
     *
-    * @param frame the frame width, 0 for no frames
+    * @param frameL the left frame width, 0 for no left frame
+    * @param frameT the left frame width, 0 for no left frame
+    * @param frameB the left frame width, 0 for no left frame
+    * @param frameR the left frame width, 0 for no left frame
     */
-  def setFrameWidth(frame: Double): Unit = {
-    if (frame < 0) throw new IllegalArgumentException("Frame value must be greater than or equal to 0.")
-    m_frame = frame
+  def setFrameWidth(frameL: Double, frameT: Double, frameB: Double, frameR: Double): Unit = {
+    if (frameL < 0) throw new IllegalArgumentException("frameL value must be greater than or equal to 0.")
+    if (frameT < 0) throw new IllegalArgumentException("frameT value must be greater than or equal to 0.")
+    if (frameB < 0) throw new IllegalArgumentException("frameB value must be greater than or equal to 0.")
+    if (frameR < 0) throw new IllegalArgumentException("frameR value must be greater than or equal to 0.")
+    m_frameL  = frameL
+    m_frameT  = frameT
+    m_frameB  = frameB
+    m_frameR  = frameR
+    noFrame   = frameL == 0.0 && frameT == 0.0 && frameB == 0.0 && frameR == 0.0
   }
 
-  /**
-    * Gets the amount of desired framing space, in pixels, between
-    * parent rectangles and their enclosed children.
-    *
-    * @return the frame width
-    */
-  def getFrameWidth: Double = m_frame
+//  /**
+//    * Gets the amount of desired framing space, in pixels, between
+//    * parent rectangles and their enclosed children.
+//    *
+//    * @return the frame width
+//    */
+//  def getFrameWidth: Double = m_frame
 
   /**
     * @see prefuse.action.Action#run(double)
@@ -187,12 +202,22 @@ class MyTreeMapLayout (val group: String, val frame: Double)
 
   private def updateArea(n: NodeItem, r: Rectangle2D): Unit = {
     val b = n.getBounds
-    if (m_frame == 0.0) { // if no framing, simply update bounding rectangle
+    if (noFrame) { // if no framing, simply update bounding rectangle
       r.setRect(b)
       return
     }
     // compute area loss due to frame
-    val dA = 2 * m_frame * (b.getWidth + b.getHeight - 2 * m_frame)
+//    val dA = 2 * m_frame * (b.getWidth + b.getHeight - 2 * m_frame)
+    val dA: Double = {
+      val w  = b.getWidth
+      val h  = b.getHeight
+      val tb = m_frameT + m_frameB
+      val lr = m_frameL + m_frameR
+      val hi = h  - tb
+      val d0 = w  * tb
+      val d1 = hi * lr
+      d0 + d1
+    }
     val A = n.getDouble(MyTreeMapLayout.AREA) - dA
     // compute renormalization factor
     var s = 0.0
@@ -209,7 +234,7 @@ class MyTreeMapLayout (val group: String, val frame: Double)
       c.setDouble(MyTreeMapLayout.AREA, c.getDouble(MyTreeMapLayout.AREA) * t)
     }
     // set bounding rectangle and return
-    r.setRect(b.getX + m_frame, b.getY + m_frame, b.getWidth - 2 * m_frame, b.getHeight - 2 * m_frame)
+    r.setRect(b.getX + m_frameL, b.getY + m_frameT, b.getWidth - (m_frameL + m_frameR), b.getHeight - (m_frameT + m_frameB))
   }
 
   private def squarify(c: Items, row: Items, w0: Double, r0: Rectangle2D): Unit = {

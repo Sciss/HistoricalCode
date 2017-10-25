@@ -29,6 +29,7 @@ import prefuse.{Display, Visualization}
   * is used to highlight changing search results.
   *
   * @author <a href="http://jheer.org">jeffrey heer</a>
+  * @author Hanns Holger Rutz
   */
 object TreeMap {
   val TREE_CHI = "/chi-ontology.xml.gz"
@@ -211,7 +212,8 @@ class TreeMap(val t: Tree, val label: String) extends Display(new Visualization)
     m_vis.putAction("animatePaint", animatePaint)
     // create the single filtering and layout action list
     val layout = new ActionList
-    layout.add(new MyTreeMapLayout(TreeMap.tree, 4.0))
+    val pad = 0.0 // 1.0
+    layout.add(new MyTreeMapLayout(TreeMap.tree, frameL = pad, frameT = 12.0, frameR = pad, frameB = pad))
 //    layout.add(new BalloonTreeLayout(TreeMap.tree))
     layout.add(new TreeMap.LabelLayout(TreeMap.labels))
     layout.add(colors)
