@@ -3,8 +3,9 @@ package de.sciss.citarj2017
 import de.sciss.file._
 
 import scala.meta._
+import scala.swing.{Component, MainFrame, Swing}
 
-object Test {
+object Main {
   def main(args: Array[String]): Unit = {
     runNew()
   }
@@ -29,34 +30,34 @@ object Test {
     val srcFiles  = modules.flatMap { mod =>
       collectScala(baseDir / mod / "src" / "main" / "scala" / "de" / "sciss" / "wrtng")
     }
-    run(srcFiles, dialects.Scala212)
+    run(srcFiles.drop(1).take(1), dialects.Scala212)
   }
 
   def run(srcFiles: Seq[File], d: Dialect): Unit = {
     var treeNames = Set.empty[String]
 
-    srcFiles.foreach { f =>
+    srcFiles.zipWithIndex.foreach { case (f, fi) =>
       println(s"\n========== ${f.base} ==========\n")
       val parsed: Parsed[Source] = d(f).parse[Source]
       val root: Tree = parsed.get.children.head
 //      println(root.children.size)
 
       def process(t: Tree): Unit = {
-        val tn0 = t.getClass.getName // getSimpleName
-        val tn1 = tn0.substring(11) // skip `scala.meta.`
-        val tn2 = tn1.replace('$', '.')
-        val tn  = tn2.substring(0, tn2.lastIndexOf('.'))  // without `...Impl`
-
+        val tn = nameFor(t)
         treeNames += tn
         t.children.foreach(process)
       }
 
       process(root)
 
+//      println(s"root type = ${root.getClass.getName}")
+
 //      root.children.foreach { t =>
 //        println("\n--------------------------\n")
 //        println(t.structure)
 //      }
+
+      if (fi == 0) render(root)
     }
 
     val treeNamesSq = treeNames.toSeq.sorted
@@ -76,12 +77,51 @@ object Test {
     // - Mod (e.g. Mod.Case, Mod.Covariant)
     // - Name (e.g. Name.Anonymous, Name.Indeterminate)
     // - Pat (e.g. Pat.Bind, Pat.Extract)
-    // - Pkg (e.g. Pkg, Pkg.Object)
+    // - Pkg (e.g. Pkg -- the type of each root, Pkg.Object)
     // - Self
     // - Template
     // - Term (e.g. Term.Apply, Term.If)
     // - Type (e.g. Type.Apply, Type.Bounds)
 
     println(treeNamesSq.mkString("\n"))
+  }
+
+  def nameFor(t: Tree): String = {
+    val tn0 = t.getClass.getName // getSimpleName
+    val tn1 = tn0.substring(11) // skip `scala.meta.`
+    val tn2 = tn1.replace('$', '.')
+    val tn  = tn2.substring(0, tn2.lastIndexOf('.'))  // without `...Impl`
+    tn
+  }
+
+  def render(meta: Tree): Unit = {
+    Swing.onEDT {
+      import prefuse.data.{Tree => PTree, Node => PNode, _}
+      val t = new PTree
+      t.addColumn("name", classOf[String])
+      val r = t.addRoot()
+      r.set("name", nameFor(meta))
+
+      def process(parent: PNode, cm: Tree): Unit = {
+        val tn = nameFor(cm)
+        val c  = t.addChild(parent)
+        c.set("name", nameFor(cm))
+        cm.children.foreach(process(c, _))
+      }
+
+      meta.children.foreach(cm => process(parent = r, cm = cm))
+
+      val map = new TreeMap(t, label = "Hallo")
+      new MainFrame {
+        contents = Component.wrap(map)
+        pack().centerOnScreen()
+        open()
+      }
+    }
+
+//    t match {
+//      case Pkg(ref, stats) =>
+//        val hd: Stat = stats.head
+//    }
   }
 }
