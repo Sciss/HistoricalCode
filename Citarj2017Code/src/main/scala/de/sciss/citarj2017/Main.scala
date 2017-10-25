@@ -7,12 +7,12 @@ import de.sciss.file._
 import de.sciss.submin.Submin
 
 import scala.meta._
-import scala.swing.{Action, Component, Dimension, MainFrame, MenuItem, PopupMenu, ScrollPane, Swing}
+import scala.swing.{Action, Component, Dimension, Frame, MenuItem, PopupMenu, ScrollPane, Swing}
 
 object Main {
   def main(args: Array[String]): Unit = {
     Submin.install(false)
-    runNew()
+    runOld() // runNew()
   }
 
   def collectScala(in: File): Seq[File] = {
@@ -26,24 +26,24 @@ object Main {
     val srcDir    = baseDir / "src" / "main" / "scala"
     val pkgDir    = srcDir / "de" / "sciss" / "grapheme"
     val srcFiles  = collectScala(pkgDir)
-    run(srcFiles, dialects.Scala210)
+    run(srcFiles, prefix = "", dialect = dialects.Scala210)
   }
 
   def runNew(): Unit = {
     val baseDir   = userHome / "Documents" / "devel" / "Wr_t_ng-M_ch_n_"
     val modules   = Seq("common", /* "control", */ "radio", "sound")
-    val srcFiles  = modules.flatMap { mod =>
-      collectScala(baseDir / mod / "src" / "main" / "scala" / "de" / "sciss" / "wrtng")
+    modules.foreach { mod =>
+      val srcFiles = collectScala(baseDir / mod / "src" / "main" / "scala" / "de" / "sciss" / "wrtng")
+      run(srcFiles /* .drop(3).take(6) */, prefix = s"$mod.", dialect = dialects.Scala212)
     }
-    run(srcFiles.drop(3).take(6), dialects.Scala212)
   }
 
-  def run(srcFiles: Seq[File], d: Dialect): Unit = {
+  def run(srcFiles: Seq[File], prefix: String, dialect: Dialect): Unit = {
     var treeNames = Set.empty[String]
 
-    srcFiles.zipWithIndex.foreach { case (f, fi) =>
+    srcFiles.zipWithIndex.foreach { case (f, _) =>
       println(s"\n========== ${f.base} ==========\n")
-      val parsed: Parsed[Source] = d(f).parse[Source]
+      val parsed: Parsed[Source] = dialect(f).parse[Source]
       val root: Tree = parsed.get.children.head
 //      println(root.children.size)
 
@@ -62,7 +62,8 @@ object Main {
 //        println(t.structure)
 //      }
 
-      if (fi < 10) render(root, title0 = f.base)
+//      if (fi < 10)
+        render(root, title0 = s"$prefix${f.base}")
     }
 
     val treeNamesSq = treeNames.toSeq.sorted
@@ -185,6 +186,7 @@ object Main {
   def getTypeColor(t: Tree): Int = {
     t match {
       case _: Pkg                                   =>  0
+      case _: Pkg.Object                            =>  0
       case _: Import                                =>  1
       case _: Importee                              =>  2
       case _: Defn                                  =>  3
@@ -243,12 +245,14 @@ object Main {
       val map   = new TreeMap(t, label = TreeMap.COL_NAME)
       val mapW  = Component.wrap(map)
 
-      new MainFrame {
+      new Frame {
         title    = title0
         contents = new ScrollPane(mapW)
         map.setPreferredSize(new Dimension(extent, extent))
         pack().centerOnScreen()
         open()
+
+        override def closeOperation(): Unit = dispose()
       }
 
       def checkPop(e: MouseEvent): Unit = if (e.isPopupTrigger) {
@@ -258,8 +262,10 @@ object Main {
               val initF = userHome / "Pictures" / s"$title0.pdf"
               val dlg = FileDialog.save(init = Some(initF), title = title)
               dlg.show(None).foreach { f =>
-                val size = map.getSize()
-                import size.{height, width}
+                val size    = map.getSize()
+                val width   = size.width
+                val height  = size.height // + 8   // XXX TODO --- some bug, last row might be cut
+//                import size.{height, width}
                 map.saveFrameAsPDF(file = f, width = width, height = height, dpi = 72)
 
 //                val b = map.isDoubleBuffered
