@@ -8,6 +8,9 @@ lazy val fileUtilVersion  = "1.1.3"
 lazy val prefuseVersion   = "1.0.1"
 lazy val swingPlusVersion = "0.2.4"
 lazy val numbersVersion   = "0.1.3"
+lazy val pdflitzVersion   = "1.2.2"
+lazy val subminVersion    = "0.2.2"
+lazy val desktopVersion   = "0.8.0"
 
 lazy val commonSettings = Seq(
   version            := projectVersion,
@@ -30,6 +33,9 @@ lazy val root = Project(id = baseNameL, base = file("."))
       "de.sciss"      %% "fileutil"     % fileUtilVersion,
       "de.sciss"      %  "prefuse-core" % prefuseVersion,
       "de.sciss"      %% "swingplus"    % swingPlusVersion,
-      "de.sciss"      %% "numbers"      % numbersVersion
+      "de.sciss"      %% "numbers"      % numbersVersion,
+      "de.sciss"      %% "pdflitz"      % pdflitzVersion,
+      "de.sciss"      %  "submin"       % subminVersion,
+      "de.sciss"      %% "desktop"      % desktopVersion
     )
   )

@@ -2,9 +2,13 @@ package de.sciss.citarj2017
 
 import java.awt.event.{ComponentAdapter, ComponentEvent, MouseEvent}
 import java.awt.geom.Rectangle2D
-import java.awt.{BorderLayout, Color, Dimension, Font, Graphics2D, RenderingHints, Shape}
+import java.awt.{BorderLayout, Color, Font, Graphics2D, RenderingHints, Shape}
+import java.io.{File, FileOutputStream}
 import javax.swing.{BorderFactory, JComponent, JFrame, JPanel, SwingConstants, Timer}
 
+import com.itextpdf.awt.PdfGraphics2D
+import com.itextpdf.text.pdf.PdfWriter
+import com.itextpdf.text.{Document => IDocument, Rectangle => IRectangle}
 import prefuse.action.animate.ColorAnimator
 import prefuse.action.assignment.ColorAction
 import prefuse.action.layout.Layout
@@ -14,7 +18,7 @@ import prefuse.data.Tree
 import prefuse.data.expression.parser.ExpressionParser
 import prefuse.data.expression.{BooleanLiteral, Predicate}
 import prefuse.data.io.TreeMLReader
-import prefuse.render.{AbstractShapeRenderer, DefaultRendererFactory, LabelRenderer}
+import prefuse.render.{AbstractShapeRenderer, DefaultRendererFactory}
 import prefuse.util.ui.{JFastLabel, UILib}
 import prefuse.util.{ColorLib, ColorMap, FontLib, PrefuseLib}
 import prefuse.visual.expression.InGroupPredicate
@@ -22,7 +26,7 @@ import prefuse.visual.sort.TreeDepthItemSorter
 import prefuse.visual.{DecoratorItem, NodeItem, VisualItem}
 import prefuse.{Display, Visualization}
 
-import scala.swing.Swing
+import scala.swing.{Dimension, Swing}
 
 
 /**
@@ -192,7 +196,8 @@ object TreeMap {
     (1.000000, 0.627451, 1.000000),
     (1.000000, 0.878431, 1.000000),
   ).map(mkRGB)
-  
+
+  // 26 colours
   val GreenArmytage: Array[Color] = Array(
     (240,163,255), (  0,117,220), (153, 63,  0), ( 76,  0, 92),
     ( 25, 25, 25), (  0, 92, 49), ( 43,206, 72), (255,204,153),
@@ -277,7 +282,7 @@ object TreeMap {
   }
 }
 
-class TreeMap(val t: Tree, val label: String, numTypes: Int = 18)
+class TreeMap(val t: Tree, val label: String, numTypes: Int = 19)
   extends Display(new Visualization) { // add the tree to the visualization
 
   /* private val vt: VisualTree = */ m_vis.addTree(TreeMap.tree, t)
@@ -359,4 +364,81 @@ class TreeMap(val t: Tree, val label: String, numTypes: Int = 18)
   private def mkLayout(): Unit = m_vis.run("layout")
 
 //  def getSearchQuery: SearchQueryBinding = searchQ
+
+//  private var _bufWidth  = 0
+//  private var _bufHeight = 0
+//
+//  def bufWidth : Int = if (_bufWidth  > 0) _bufWidth  else getWidth
+//  def bufHeight: Int = if (_bufHeight > 0) _bufHeight else getHeight
+//
+//  def bufWidth_=(value: Int): Unit = if (_bufWidth != value) {
+//    _bufWidth   = value
+//    m_offscreen = null
+//  }
+//
+//  def bufHeight_=(value: Int): Unit = if (_bufHeight != value) {
+//    _bufHeight  = value
+//    m_offscreen = null
+//  }
+//
+////  def clearBuf(): Unit = m_offscreen = null
+//
+//  override def paintComponent(g: Graphics): Unit = {
+//    if (m_offscreen == null) {
+//      m_offscreen = getNewOffscreenBuffer(bufWidth, bufHeight)
+//      damageReport()
+//    }
+//    val g2D     = g.asInstanceOf[Graphics2D]
+//    val buf_g2D = m_offscreen.getGraphics.asInstanceOf[Graphics2D]
+//    val sx      = bufWidth .toDouble / getWidth
+//    val sy      = bufHeight.toDouble / getHeight
+//    if (sx != 1.0 || sy != 1.0) buf_g2D.scale(sx, sy)
+//    paintDisplay(buf_g2D, getSize)
+//    paintBufferToScreen(g2D)
+//    firePostPaint(g2D)
+//    buf_g2D.dispose()
+//    nframes += 1
+//
+////    if (mark < 0) {
+////      mark      = System.currentTimeMillis()
+////      nframes   = 0
+////    }
+////    else if (nframes == sampleInterval) {
+////      val t     = System.currentTimeMillis()
+////      frameRate = (1000.0 * nframes) / (t - mark)
+////      mark      = t
+////      nframes   = 0
+////    }
+//  }
+
+  def saveFrameAsPDF(file: File, width: Int, height: Int, dpi: Double): Unit = {
+    val scale     = 72.0 / dpi
+    val widthU    = width  * scale // 'user units'
+    val heightH   = height * scale // 'user units'
+    val pageSize  = new IRectangle(0, 0, widthU.toFloat, heightH.toFloat)
+    val margin    = 0
+    val doc       = new IDocument(pageSize, margin, margin, margin, margin)
+    val stream    = new FileOutputStream(file)
+    val writer    = PdfWriter.getInstance(doc, stream)
+
+    doc.open()
+    try {
+      val cb = writer.getDirectContent
+      val tp = cb.createTemplate(width, height)
+      // use `onlyShapes = true` until we deal with the font-mapper!
+      val g2 = new PdfGraphics2D(tp, width, height, true /*, fontMapper */)
+      g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
+      try {
+        /* _dsp. */ damageReport() // force complete redrawing
+        /* _dsp. */ paintDisplay(g2, new Dimension(width, height))
+        // view.render(g2)
+      } finally {
+        g2.dispose()
+      }
+      // tp.setHorizontalScaling((scale * 100).toFloat)
+      cb.addTemplate(tp, margin, margin)
+    } finally {
+      doc.close()
+    }
+  }
 }
