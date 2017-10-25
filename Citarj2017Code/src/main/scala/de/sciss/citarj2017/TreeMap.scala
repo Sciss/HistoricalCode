@@ -1,9 +1,9 @@
 package de.sciss.citarj2017
 
-import java.awt.event.MouseEvent
-import java.awt.geom.Rectangle2D
-import java.awt.{BorderLayout, Color, Dimension, Font, Shape}
-import javax.swing.{BorderFactory, JComponent, JFrame, JPanel, SwingConstants}
+import java.awt.event.{ComponentAdapter, ComponentEvent, MouseEvent}
+import java.awt.geom.{Line2D, Rectangle2D}
+import java.awt.{BasicStroke, BorderLayout, Color, Dimension, Font, Graphics2D, Shape}
+import javax.swing.{BorderFactory, JComponent, JFrame, JPanel, SwingConstants, Timer}
 
 import prefuse.action.animate.ColorAnimator
 import prefuse.action.assignment.ColorAction
@@ -11,7 +11,7 @@ import prefuse.action.layout.Layout
 import prefuse.action.{ActionList, RepaintAction}
 import prefuse.controls.ControlAdapter
 import prefuse.data.Tree
-import prefuse.data.expression.Predicate
+import prefuse.data.expression.{BooleanLiteral, Predicate}
 import prefuse.data.expression.parser.ExpressionParser
 import prefuse.data.io.TreeMLReader
 import prefuse.render.{AbstractShapeRenderer, DefaultRendererFactory, LabelRenderer}
@@ -21,6 +21,8 @@ import prefuse.visual.expression.InGroupPredicate
 import prefuse.visual.sort.TreeDepthItemSorter
 import prefuse.visual.{DecoratorItem, NodeItem, VisualItem}
 import prefuse.{Display, Visualization}
+
+import scala.swing.Swing
 
 
 /**
@@ -38,7 +40,7 @@ object TreeMap {
     val res = PrefuseLib.getVisualItemSchema
     res.setDefault(VisualItem.INTERACTIVE, false)
     res.setDefault(VisualItem.TEXTCOLOR, ColorLib.gray(200))
-    res.setDefault(VisualItem.FONT, FontLib.getFont("Tahoma", 16))
+    res.setDefault(VisualItem.FONT, FontLib.getFont("Tahoma", 12))
     res
   }
 
@@ -160,7 +162,7 @@ object TreeMap {
   }
 
   /**
-    * A renderer for treemap nodes. Draws simple rectangles, but defers
+    * A renderer for tree-map nodes. Draws simple rectangles, but defers
     * the bounds management to the layout.
     */
   class NodeRenderer() extends AbstractShapeRenderer {
@@ -170,6 +172,27 @@ object TreeMap {
     override protected def getRawShape(item: VisualItem): Shape = {
       m_bounds.setRect(item.getBounds)
       m_bounds
+    }
+
+    private[this] val ln    = new Line2D.Double
+    private[this] val strk2 = new BasicStroke(2f)
+
+    override def render(g: Graphics2D, item: VisualItem): Unit = {
+      val shape = getShape(item)
+      if (shape != null) {
+        drawShape(g, item, shape)
+        g.setColor(Color.red)
+        g.setStroke(strk2)
+        val r = shape.getBounds2D
+        val ni = item.asInstanceOf[NodeItem]
+//        ni.getDepth
+        val isLeaf  = ni.getChildCount == 0
+        val maxY    = if (isLeaf) r.getMaxY else r.getMinY + 16.0
+        ln.setLine(r.getMinX, r.getMinY, r. getMaxX, maxY)
+        g.draw(ln)
+        ln.setLine(r.getMaxX, r.getMinY, r. getMinX, maxY)
+        g.draw(ln)
+      }
     }
 
     // end of inner class NodeRenderer
@@ -182,6 +205,8 @@ class TreeMap(val t: Tree, val label: String) extends Display(new Visualization)
 
 //  private lazy val searchQ = new SearchQueryBinding(vt.getNodeTable, label)
 
+  private[this] val resizeTimer = new Timer(1000, Swing.ActionListener(_ => mkLayout()))
+
   {
     m_vis.setVisible(TreeMap.treeEdges, null, false)
     // ensure that only leaf nodes are interactive
@@ -189,17 +214,18 @@ class TreeMap(val t: Tree, val label: String) extends Display(new Visualization)
     m_vis.setInteractive(TreeMap.treeNodes, noLeaf, false)
     // add labels to the visualization
     // first create a filter to show labels only at top-level nodes
-    val labelP: Predicate = ExpressionParser.parse("treedepth()=1").asInstanceOf[Predicate]
+//    val labelP: Predicate = ExpressionParser.parse("treedepth()=1").asInstanceOf[Predicate]
+    val labelP: Predicate = new BooleanLiteral(true)
     // now create the labels as decorators of the nodes
     m_vis.addDecorators(TreeMap.labels, TreeMap.treeNodes, labelP, TreeMap.LABEL_SCHEMA)
     // set up the renderers - one for nodes and one for labels
     val rf = new DefaultRendererFactory
     rf.add(new InGroupPredicate(TreeMap.treeNodes), new TreeMap.NodeRenderer)
-    rf.add(new InGroupPredicate(TreeMap.labels), new LabelRenderer(label))
+    rf.add(new InGroupPredicate(TreeMap.labels)   , new LabelRenderer(label))
     m_vis.setRendererFactory(rf)
     // border colors
-    val borderColor = new TreeMap.BorderColorAction(TreeMap.treeNodes)
-    val fillColor = new TreeMap.FillColorAction(TreeMap.treeNodes)
+    val borderColor = new TreeMap.BorderColorAction (TreeMap.treeNodes)
+    val fillColor   = new TreeMap.FillColorAction   (TreeMap.treeNodes)
     // color settings
     val colors = new ActionList
     colors.add(fillColor)
@@ -213,7 +239,7 @@ class TreeMap(val t: Tree, val label: String) extends Display(new Visualization)
     // create the single filtering and layout action list
     val layout = new ActionList
     val pad = 0.0 // 1.0
-    layout.add(new MyTreeMapLayout(TreeMap.tree, frameL = pad, frameT = 12.0, frameR = pad, frameB = pad))
+    layout.add(new MyTreeMapLayout(TreeMap.tree, frameL = pad, frameT = 16.0, frameR = pad, frameB = pad))
 //    layout.add(new BalloonTreeLayout(TreeMap.tree))
     layout.add(new TreeMap.LabelLayout(TreeMap.labels))
     layout.add(colors)
@@ -228,9 +254,7 @@ class TreeMap(val t: Tree, val label: String) extends Display(new Visualization)
         item.getVisualization.repaint()
       }
 
-      override
-
-      def itemExited(item: VisualItem, e: MouseEvent): Unit = {
+      override def itemExited(item: VisualItem, e: MouseEvent): Unit = {
         item.setStrokeColor(item.getEndStrokeColor)
         item.getVisualization.repaint()
       }
@@ -245,8 +269,14 @@ class TreeMap(val t: Tree, val label: String) extends Display(new Visualization)
 //      }
 //    })
     // perform layout
-    m_vis.run("layout")
+    mkLayout()
+
+    addComponentListener(new ComponentAdapter {
+      override def componentResized(e: ComponentEvent): Unit = resizeTimer.restart()
+    })
   }
+
+  private def mkLayout(): Unit = m_vis.run("layout")
 
 //  def getSearchQuery: SearchQueryBinding = searchQ
 }

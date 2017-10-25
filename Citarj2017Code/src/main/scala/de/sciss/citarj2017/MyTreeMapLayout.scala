@@ -104,14 +104,6 @@ class MyTreeMapLayout (val group: String, frameL: Double, frameT: Double, frameB
     noFrame   = frameL == 0.0 && frameT == 0.0 && frameB == 0.0 && frameR == 0.0
   }
 
-//  /**
-//    * Gets the amount of desired framing space, in pixels, between
-//    * parent rectangles and their enclosed children.
-//    *
-//    * @return the frame width
-//    */
-//  def getFrameWidth: Double = m_frame
-
   /**
     * @see prefuse.action.Action#run(double)
     */
@@ -186,7 +178,7 @@ class MyTreeMapLayout (val group: String, frameL: Double, frameT: Double, frameB
     Collections.sort(m_kids, MyTreeMapLayout.s_cmp)
     // do squarified layout of siblings
     val w = Math.min(r.getWidth, r.getHeight)
-    squarify(m_kids, m_row, w, r)
+    mkSquare(m_kids, m_row, w, r)
     m_kids.clear() // clear m_kids
 
     // recurse
@@ -237,9 +229,9 @@ class MyTreeMapLayout (val group: String, frameL: Double, frameT: Double, frameB
     r.setRect(b.getX + m_frameL, b.getY + m_frameT, b.getWidth - (m_frameL + m_frameR), b.getHeight - (m_frameT + m_frameB))
   }
 
-  private def squarify(c: Items, row: Items, w0: Double, r0: Rectangle2D): Unit = {
+  private def mkSquare(c: Items, row: Items, w0: Double, r0: Rectangle2D): Unit = {
     var worstVal = Double.MaxValue
-    var nworst = 0.0
+    var nWorst = 0.0
     var len = 0
     var w = w0
     var r = r0
@@ -253,18 +245,15 @@ class MyTreeMapLayout (val group: String, frameL: Double, frameT: Double, frameB
         c.remove(len - 1)
       } else {
         row.add(item)
-        nworst = worst(row, w)
-        if (nworst <= worstVal) {
+        nWorst = worst(row, w)
+        if (nWorst <= worstVal) {
           c.remove(len - 1)
-          worstVal = nworst
+          worstVal = nWorst
         }
         else {
           row.remove(row.size - 1) // remove the latest addition
-
           r = layoutRow(row, w, r) // layout the current row
-
-          w = Math.min(r.getWidth, r.getHeight) // recompute w
-
+          w = math.min(r.getWidth, r.getHeight) // recompute w
           row.clear() // clear the row
 
           worstVal = Double.MaxValue
@@ -278,20 +267,20 @@ class MyTreeMapLayout (val group: String, frameL: Double, frameT: Double, frameB
   }
 
   private def worst(rlist: Items, w0: Double) = {
-    var rmax = Double.MinValue
-    var rmin = Double.MaxValue
+    var rMax = Double.MinValue
+    var rMin = Double.MaxValue
     var s = 0.0
     var w = w0
     val iter = rlist.iterator
     while (iter.hasNext) {
       val r = iter.next().getDouble(MyTreeMapLayout.AREA)
-      rmin = Math.min(rmin, r)
-      rmax = Math.max(rmax, r)
+      rMin = math.min(rMin, r)
+      rMax = math.max(rMax, r)
       s += r
     }
     s = s * s
     w = w * w
-    Math.max(w * rmax / s, s / (w * rmin))
+    Math.max(w * rMax / s, s / (w * rMin))
   }
 
   private def layoutRow(row: Items, w: Double, r: Rectangle2D) = {

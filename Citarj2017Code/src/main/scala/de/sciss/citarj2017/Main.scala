@@ -30,7 +30,7 @@ object Main {
     val srcFiles  = modules.flatMap { mod =>
       collectScala(baseDir / mod / "src" / "main" / "scala" / "de" / "sciss" / "wrtng")
     }
-    run(srcFiles.drop(1).take(1), dialects.Scala212)
+    run(srcFiles.drop(2).take(1), dialects.Scala212)
   }
 
   def run(srcFiles: Seq[File], d: Dialect): Unit = {
@@ -105,13 +105,13 @@ object Main {
       def process(parent: PNode, cm: Tree): Unit = {
         val tn = nameFor(cm)
         val c  = t.addChild(parent)
-        c.set("name", nameFor(cm))
+        c.set("name", tn)
         cm.children.foreach(process(c, _))
       }
 
       meta.children.foreach(cm => process(parent = r, cm = cm))
 
-      val map = new TreeMap(t, label = "Hallo")
+      val map = new TreeMap(t, label = "name")
       new MainFrame {
         contents = Component.wrap(map)
         pack().centerOnScreen()
