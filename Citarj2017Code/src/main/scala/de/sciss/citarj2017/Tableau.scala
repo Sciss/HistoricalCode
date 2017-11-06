@@ -5,8 +5,8 @@ import de.sciss.packing2d.Packer.Algorithm
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import scala.meta.{Dialect, Parsed, Source, Tree, dialects}
-import scala.swing.{Component, Frame, ScrollPane, Swing}
+import scala.meta.{Dialect, Parsed, Source, dialects}
+import scala.swing.{Component, Frame, ScrollPane}
 
 object Tableau {
   final case class Config(
@@ -98,46 +98,37 @@ object Tableau {
     val dialect = mapDialect(config.dialect)
 
     val tempDir = File.createTemp(directory = true)
-    val imageFiles = sources.map { fSrc =>
+    val imageFiles = sources.flatMap { fSrc =>
       val fOut                    = tempDir / s"${fSrc.base}.png"
       val parsed: Parsed[Source]  = dialect(fSrc).parse[Source]
-      val root: Tree              = parsed.get.children.head
-      val tm                      = ViewTreeMap.mkMap(root)
-//      val numChildren             = tm.t.getNodeTable.getTupleCount
-//      val extent                  = (math.sqrt(numChildren) * 32 + 0.5).toInt
-//      tm.runLayout()
-//      tm.mkLayout()
+      val children                = parsed.get.children
+      children.headOption.flatMap { root =>
+        val tm = ViewTreeMap.mkMap(root)
 
-//      import scala.concurrent.ExecutionContext.Implicits.global
+        val frame = new Frame {
+          contents = new ScrollPane(Component.wrap(tm))
+          pack()
+        }
 
-      val frame = new Frame {
-        contents = new ScrollPane(Component.wrap(tm))
-        pack() // .open()
-      }
-
-//      while({
         val fut = tm.runWith[Boolean] {
           val bounds = tm.rootBounds
-          val ok = bounds.getWidth > 20 && bounds.getHeight > 20  // WTF -- prefuse horrible scheduling
+          val ok = bounds.getWidth > 20 && bounds.getHeight > 20 // WTF -- prefuse horrible scheduling
           val dw = math.ceil(bounds.getWidth).toInt
           val dh = math.ceil(bounds.getHeight).toInt
           if (ok) {
             println(s"${fOut.name} - width $dw, height $dh")
             tm.saveFrameAsBitmap(fOut, width = dw, height = dh)
             // Swing.onEDT {
-              frame.dispose()
+            frame.dispose()
             // }
           } else {
             println(s"Illegal bounds $dw, $dh")
           }
           ok
         }
-
-//        Thread.sleep(100)
-        Await.result(fut, Duration.Inf)
-//      }) ()
-
-      fOut
+        val _ok = Await.result(fut, Duration.Inf)
+        if (_ok) Some(fOut) else None
+      }
     }
 
     val packConfig = PackImages.Config(

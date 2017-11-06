@@ -17,3 +17,5 @@ This project builds using sbt. To run an example:
     sbt 'run -o test.png src'
 
 This creates a tableau of tree-maps from the source code in directory `src` and writes the result to file `test.png`.
+
+Add `--width <pixel-width>` to set the output image's width; the height is always automatically determined.
