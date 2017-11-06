@@ -30,6 +30,7 @@ lazy val commonSettings = Seq(
 lazy val root = Project(id = baseNameL, base = file("."))
   .settings(commonSettings)
   .settings(
+    mainClass in (Compile, run) := Some("de.sciss.citarj2017.Tableau"),
     libraryDependencies ++= Seq(
       "org.scalameta"     %% "scalameta"      % scalaMetaVersion,
       "de.sciss"          %% "fileutil"       % fileUtilVersion,

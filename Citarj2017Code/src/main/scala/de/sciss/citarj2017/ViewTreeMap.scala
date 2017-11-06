@@ -9,7 +9,7 @@ import de.sciss.submin.Submin
 import scala.meta._
 import scala.swing.{Action, Component, Dimension, Frame, MenuItem, PopupMenu, ScrollPane, Swing}
 
-object Main {
+object ViewTreeMap {
   def main(args: Array[String]): Unit = {
     Submin.install(false)
     runOld() // runNew()
@@ -63,7 +63,7 @@ object Main {
 //      }
 
 //      if (fi < 10)
-        render(root, title0 = s"$prefix${f.base}")
+        mkFrame(root, title0 = s"$prefix${f.base}")
     }
 
     val treeNamesSq = treeNames.toSeq.sorted
@@ -215,40 +215,44 @@ object Main {
     }
   }
 
-  def render(meta: Tree, title0: String): Unit = {
+  def mkMap(meta: Tree): TreeMap = {
+    import prefuse.data.{Node => PNode, Tree => PTree}
+    val t = new PTree
+    t.addColumn(TreeMap.COL_TPE, classOf[Int])
+    t.addColumn("name", classOf[String])
+
+    def configure(n: PNode, m: Tree): Unit = {
+      val tn  = getTypeName(m) // nameFor(m)
+      val tpe = getTypeColor(m)
+      n.set(TreeMap.COL_NAME, tn )
+      n.set(TreeMap.COL_TPE , tpe)
+    }
+
+    def process(parent: PNode, cm: Tree): Unit = {
+      val c = t.addChild(parent)
+      configure(c, cm)
+      cm.children.foreach(process(c, _))
+    }
+
+    val r = t.addRoot()
+    configure(r, meta)
+    meta.children.foreach(cm => process(parent = r, cm = cm))
+
+    val numChildren = t.getNodeTable.getTupleCount
+    val extent      = (math.sqrt(numChildren) * 32 + 0.5).toInt
+    val map         = new TreeMap(t, label = TreeMap.COL_NAME)
+    map.setPreferredSize(new Dimension(extent, extent))
+    map
+  }
+
+  def mkFrame(meta: Tree, title0: String): Unit = {
     Swing.onEDT {
-      import prefuse.data.{Node => PNode, Tree => PTree}
-      val t = new PTree
-      t.addColumn(TreeMap.COL_TPE, classOf[Int])
-      t.addColumn("name", classOf[String])
-
-      def configure(n: PNode, m: Tree): Unit = {
-        val tn  = getTypeName(m) // nameFor(m)
-        val tpe = getTypeColor(m)
-        n.set(TreeMap.COL_NAME, tn )
-        n.set(TreeMap.COL_TPE , tpe)
-      }
-
-      def process(parent: PNode, cm: Tree): Unit = {
-        val c = t.addChild(parent)
-        configure(c, cm)
-        cm.children.foreach(process(c, _))
-      }
-
-      val r = t.addRoot()
-      configure(r, meta)
-      meta.children.foreach(cm => process(parent = r, cm = cm))
-
-      val numChildren = t.getNodeTable.getTupleCount
-      val extent      = (math.sqrt(numChildren) * 32 + 0.5).toInt
-
-      val map   = new TreeMap(t, label = TreeMap.COL_NAME)
+      val map   = mkMap(meta)
       val mapW  = Component.wrap(map)
 
       new Frame {
         title    = title0
         contents = new ScrollPane(mapW)
-        map.setPreferredSize(new Dimension(extent, extent))
         pack().centerOnScreen()
         open()
 

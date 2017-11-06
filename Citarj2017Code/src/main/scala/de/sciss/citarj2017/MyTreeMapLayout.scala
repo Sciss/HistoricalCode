@@ -80,6 +80,8 @@ class MyTreeMapLayout (val group: String, frameL: Double, frameT: Double, frameB
     this(group, 0.0, 0.0, 0.0, 0.0)
   }
 
+  def getBounds: Rectangle2D = getLayoutRoot.getBounds
+
   /**
     * Sets the amount of desired framing space between parent rectangles and
     * their enclosed children. Use a value of 0 to remove frames altogether.
@@ -108,9 +110,10 @@ class MyTreeMapLayout (val group: String, frameL: Double, frameT: Double, frameB
     * @see prefuse.action.Action#run(double)
     */
   override def run(frac: Double): Unit = { // setup
-    val root = getLayoutRoot
-    val b = getLayoutBounds
+    val root  = getLayoutRoot
+    val b     = getLayoutBounds
     m_r.setRect(b.getX, b.getY, b.getWidth - 1, b.getHeight - 1)
+//    println(s"layout.run; m_r = $m_r")
     // process size values
     computeAreas(root)
     // layout root node

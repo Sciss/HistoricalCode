@@ -2,20 +2,22 @@ package de.sciss.citarj2017
 
 import java.awt.event.{ComponentAdapter, ComponentEvent, MouseEvent}
 import java.awt.geom.Rectangle2D
+import java.awt.image.BufferedImage
 import java.awt.{BorderLayout, Color, Font, Graphics2D, RenderingHints, Shape}
 import java.io.{File, FileOutputStream}
+import javax.imageio.ImageIO
 import javax.swing.{BorderFactory, JComponent, JFrame, JPanel, SwingConstants, Timer}
 
 import com.itextpdf.awt.PdfGraphics2D
 import com.itextpdf.text.pdf.PdfWriter
 import com.itextpdf.text.{Document => IDocument, Rectangle => IRectangle}
+import de.sciss.file._
 import prefuse.action.animate.ColorAnimator
 import prefuse.action.assignment.ColorAction
 import prefuse.action.layout.Layout
-import prefuse.action.{ActionList, RepaintAction}
+import prefuse.action.{Action, ActionList, RepaintAction}
 import prefuse.controls.ControlAdapter
 import prefuse.data.Tree
-import prefuse.data.expression.parser.ExpressionParser
 import prefuse.data.expression.{BooleanLiteral, Predicate}
 import prefuse.data.io.TreeMLReader
 import prefuse.render.{AbstractShapeRenderer, DefaultRendererFactory}
@@ -26,7 +28,9 @@ import prefuse.visual.sort.TreeDepthItemSorter
 import prefuse.visual.{DecoratorItem, NodeItem, VisualItem}
 import prefuse.{Display, Visualization}
 
+import scala.concurrent.{Future, Promise}
 import scala.swing.{Dimension, Swing}
+import scala.util.Try
 
 
 /**
@@ -291,11 +295,36 @@ class TreeMap(val t: Tree, val label: String, numTypes: Int = 19)
 
   private[this] val resizeTimer = new Timer(1000, Swing.ActionListener(_ => mkLayout()))
 
+  private[this] var tl: MyTreeMapLayout = _
+
+  // def treeLayout: MyTreeMapLayout = tl
+
+  def rootBounds: Rectangle2D = tl.getBounds
+
+  def runLayout(): Unit = tl.run(0.0)
+
+  private[this] var count = 0
+
+  def runWith[A](body: => A): Future[A] = {
+    val c = count + 1
+    count = c
+    val name = s"action-$c"
+    val p = Promise[A]()
+    m_vis.putAction(name, new Action {
+      def run(frac: Double): Unit = {
+        m_vis.removeAction(name)
+        p.tryComplete(Try(body))
+      }
+    })
+    m_vis.runAfter("layout", name)
+    p.future
+  }
+
   {
     m_vis.setVisible(TreeMap.treeEdges, null, false)
-    // ensure that only leaf nodes are interactive
-    val noLeaf: Predicate = ExpressionParser.parse("childcount()>0").asInstanceOf[Predicate]
-    m_vis.setInteractive(TreeMap.treeNodes, noLeaf, false)
+//    // ensure that only leaf nodes are interactive
+//    val noLeaf: Predicate = ExpressionParser.parse("childcount()>0").asInstanceOf[Predicate]
+//    m_vis.setInteractive(TreeMap.treeNodes, noLeaf, false)
     // add labels to the visualization
     // first create a filter to show labels only at top-level nodes
 //    val labelP: Predicate = ExpressionParser.parse("treedepth()=1").asInstanceOf[Predicate]
@@ -321,14 +350,15 @@ class TreeMap(val t: Tree, val label: String, numTypes: Int = 19)
     animatePaint.add(new RepaintAction)
     m_vis.putAction("animatePaint", animatePaint)
     // create the single filtering and layout action list
-    val layout = new ActionList
+    val actionLayout = new ActionList
     val pad = 1.0 // 1.0
-    layout.add(new MyTreeMapLayout(TreeMap.tree, frameL = pad, frameT = 16.0, frameR = pad, frameB = pad))
+    tl = new MyTreeMapLayout(TreeMap.tree, frameL = pad, frameT = 16.0, frameR = pad, frameB = pad)
+    actionLayout.add(tl)
 //    layout.add(new BalloonTreeLayout(TreeMap.tree))
-    layout.add(new TreeMap.LabelLayout(TreeMap.labels))
-    layout.add(colors)
-    layout.add(new RepaintAction)
-    m_vis.putAction("layout", layout)
+    actionLayout.add(new TreeMap.LabelLayout(TreeMap.labels))
+    actionLayout.add(colors)
+    actionLayout.add(new RepaintAction)
+    m_vis.putAction("layout", actionLayout)
     // initialize our display
     setSize(700, 600)
     setItemSorter(new TreeDepthItemSorter)
@@ -361,7 +391,7 @@ class TreeMap(val t: Tree, val label: String, numTypes: Int = 19)
     })
   }
 
-  private def mkLayout(): Unit = m_vis.run("layout")
+  def mkLayout(): Unit = m_vis.run("layout")
 
 //  def getSearchQuery: SearchQueryBinding = searchQ
 
@@ -440,5 +470,29 @@ class TreeMap(val t: Tree, val label: String, numTypes: Int = 19)
     } finally {
       doc.close()
     }
+  }
+
+  def saveFrameAsBitmap(file: File, width: Int, height: Int): Unit = {
+    val format    = if (file.extL == "jpg") "jpg" else "png"
+
+//    val scaleH    = width  / getWidth .toDouble
+//    val scaleV    = height / getHeight.toDouble
+//    val scale     = math.min(scaleH, scaleV) //  72.0 / dpi
+//    val widthU    = width  * scale // 'user units'
+//    val heightH   = height * scale // 'user units'
+
+    val img = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+    val g2 = img.createGraphics()
+    g2.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON)
+    try {
+      /* _dsp. */ damageReport() // force complete redrawing
+//      m_transform.setToScale(scale, scale)
+//      g2.scale(scale, scale)
+      /* _dsp. */ paintDisplay(g2, new Dimension(width, height))
+      // view.render(g2)
+    } finally {
+      g2.dispose()
+    }
+    ImageIO.write(img, format, file)
   }
 }
