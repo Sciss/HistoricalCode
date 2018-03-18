@@ -5,35 +5,35 @@ import ccampo133.nbody.{Body, Vec2D}
 import org.scalajs.dom
 import org.scalajs.dom.html
 
-import scala.scalajs.js.JSApp
+import scala.scalajs.js
 
 /**
  * @author Chris Campo
  */
-object NBodyApp extends JSApp {
-  val canvas =
+object NBodyApp {
+  val canvas: html.Canvas =
     dom.document
       .getElementById("canvas")
       .asInstanceOf[html.Canvas]
 
-  val ctx =
+  val ctx: dom.CanvasRenderingContext2D =
     canvas.getContext("2d")
       .asInstanceOf[dom.CanvasRenderingContext2D]
 
-  var delBodies = Set.empty[Body]
-  var bodies = Set.empty[Body]
-  var trails = true
+  var delBodies   = Set.empty[Body]
+  var bodies      = Set.empty[Body]
+  var trails      = true
   val numTrailPts = 150
-  val dt = 0.05
+  val dt          = 0.05
 
-  def main(): Unit = {
+  def main(args: Array[String]): Unit = {
     // Initial conditions
-    bodies += new Body(1000, 10, new Vec2D(0, 0), new Vec2D(0, 0))
-    bodies += new Body(0, 3, new Vec2D(50, 0), new Vec2D(0, -30))
-    bodies += new Body(0, 3, new Vec2D(75, 0), new Vec2D(0, 30))
+    bodies += new Body(1000, 10, Vec2D( 0, 0), Vec2D(0,   0))
+    bodies += new Body(   0,  3, Vec2D(50, 0), Vec2D(0, -30))
+    bodies += new Body(   0,  3, Vec2D(75, 0), Vec2D(0,  30))
 
     // Start the main animation loop
-    dom.setInterval(() => run(), 1000 / 60)
+    js.timers.setInterval(1000 / 60)(run())
   }
 
   def run(): Unit = {

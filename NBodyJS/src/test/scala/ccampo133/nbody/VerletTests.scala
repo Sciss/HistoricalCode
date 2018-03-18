@@ -14,10 +14,10 @@ object VerletTests extends TestSuite {
       val x = new Vec2D(0, 0)
       val v = new Vec2D(0, 0)
       val a = new Vec2D(1, 1)
-      val (x2, v2, a2) = Physics.verlet(x, v, a, 1, () => a)
+      val (x2, v2 /*, a2 */) = Physics.verlet(x, v, 1, _ => a)
       assert(math.abs(x2.x - 0.5) < epsilon && math.abs(x2.y - 0.5) < epsilon)
       assert(math.abs(v2.x - 1) < epsilon && math.abs(v2.y - 1) < epsilon)
-      assert(math.abs(a2.x - 1) < epsilon && math.abs(a2.y - 1) < epsilon)
+//      assert(math.abs(a2.x - 1) < epsilon && math.abs(a2.y - 1) < epsilon)
     }
   }
 }

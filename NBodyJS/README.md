@@ -1,6 +1,9 @@
-NBodyJS
+# NBodyJS
 
 An HTML5/JavaScript n-body simulator... written in Scala.
+
+    sbt fastOptJS
+    xdg-open demo.html
 
 See the `plain-js` branch to see a version of the app written in vanilla JavaScript :)
 

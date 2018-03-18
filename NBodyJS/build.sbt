@@ -1,15 +1,14 @@
 enablePlugins(ScalaJSPlugin)
 
-name := "NBodyJS"
+name            := "NBodyJS"
+scalaVersion    := "2.12.4"
+scalacOptions  ++= Seq("-deprecation", "-feature")
 
-scalaVersion := "2.11.7"
+scalaJSUseMainModuleInitializer := true
 
-persistLauncher in Compile := true
-
-persistLauncher in Test := false
-
-libraryDependencies += "com.lihaoyi" %%% "utest" % "0.3.0" % "test"
-
-libraryDependencies += "org.scala-js" %%% "scalajs-dom" % "0.8.0"
+libraryDependencies ++= Seq(
+  "org.scala-js"  %%% "scalajs-dom" % "0.9.5",
+  "com.lihaoyi"   %%% "utest"       % "0.6.3" % "test"
+)
 
 testFrameworks += new TestFramework("utest.runner.Framework")
