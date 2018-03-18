@@ -1,8 +1,5 @@
 package ccampo133.nbody
 
-/**
- * @author Chris Campo
- */
 case class Vec2D(x: Double, y: Double) {
   def + (other : Vec2D ): Vec2D = Vec2D(x + other.x, y + other.y)
   def - (other : Vec2D ): Vec2D = Vec2D(x - other.x, y - other.y)
@@ -14,4 +11,7 @@ case class Vec2D(x: Double, y: Double) {
   def length: Double = math.sqrt(this dot this)
 
   def toUnitVector: Vec2D = this / this.length
+}
+object Vec2D {
+  val zero = Vec2D(0.0, 0.0)
 }
