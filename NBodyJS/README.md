@@ -19,7 +19,7 @@ I haven't published the Scala version to GH pages yet, but you can see the (basi
 although of course less elegant ;) Kotlin version as a
 [demo on GitHub pages](http://ccampo133.github.com/NBodyJS).
 
-Below are some explanations from the original read-me:
+Below are some explanations based on the original read-me:
 
 ## Background
 
@@ -42,7 +42,7 @@ For the algorithm to work, first you need to specify the initial conditions of t
 
 This algorithm is executed every time you take a time step, `dt`.  Since every body exerts a force on every other body, computing the accelerations is done in O(N<sup>2</sup>) time.  There are quicker, yet similarily accurate algorithms out there, so feel free to implement your own version if you feel like experimenting!  Also note that this method can be used to integrate Newton's laws for nearly any force(s), not just gravity!
 
-NBodyJS utilizes the HTML5 canvas element for display, and [`kotlin-js`](https://kotlinlang.org/docs/tutorials/javascript/kotlin-to-javascript/kotlin-to-javascript.html) to transpile Kotlin to Javascript.
+NBodyJS utilizes the HTML5 canvas element for display, and [scala.js](http://www.scala-js.org/) to compile to JavaScript.
 
 You can view NBodyJS in action on [GitHub Pages](http://ccampo133.github.io/NBodyJS)!
 
@@ -53,4 +53,3 @@ For more information on N-body simulations in general, see [Scholarpedia](http:/
 * Click and fling to add new particles.
 * Hold-click and use the scroll wheel (or up/down arrows) to increase/decrease mass (and radius).
 * Press 't' to toggle trails, 'p' to pause, 'c' to clear, and 'r' reset to the initial conditions.
-
