@@ -1,13 +1,14 @@
 package org.jzy3d.demos.surface
 
 import org.jzy3d.chart.Chart
-import org.jzy3d.colors.{Color, ColorMapper}
 import org.jzy3d.colors.colormaps.ColorMapRainbow
+import org.jzy3d.colors.{Color, ColorMapper}
 import org.jzy3d.demos.{AbstractDemo, Launcher}
 import org.jzy3d.maths.Range
-import org.jzy3d.plot3d.builder.{Builder, Mapper}
 import org.jzy3d.plot3d.builder.concrete.OrthonormalGrid
+import org.jzy3d.plot3d.builder.{Builder, Mapper}
 import org.jzy3d.plot3d.primitives.Shape
+import org.jzy3d.plot3d.rendering.legends.colorbars.AWTColorbarLegend
 
 object MexicanDemo {
   def main(args: Array[String]): Unit = {
@@ -28,8 +29,9 @@ class MexicanDemo extends AbstractDemo {
     setFaceDisplayed(true)
     setWireframeDisplayed(true)
     setWireframeColor(Color.BLACK)
-    chart = new Chart
-    chart.getScene.getGraph.add(surface)
-    setLegend(new ColorbarLegend(surface, chart.getView.getAxe.getLayout))
+    val _chart = new Chart
+    chart = Some(_chart)
+    _chart.getScene.getGraph.add(surface)
+    setLegend(new AWTColorbarLegend(surface, _chart.getView.getAxe.getLayout))
   }
 }

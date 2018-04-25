@@ -37,7 +37,8 @@ class BuildSurfaceDemo extends AbstractDemo {
     setColorMapper(new ColorMapper(new ColorMapRainbow, getBounds.getZmin, getBounds.getZmax, new Color(1, 1, 1, 1f)))
     setWireframeDisplayed(true)
     setWireframeColor(org.jzy3d.colors.Color.BLACK)
-    chart = new Chart
-    chart.getScene.getGraph.add(surface)
+    val _chart = new Chart
+    chart = Some(_chart)
+    _chart.getScene.getGraph.add(surface)
   }
 }

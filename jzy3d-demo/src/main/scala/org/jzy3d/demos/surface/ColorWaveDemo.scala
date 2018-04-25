@@ -1,6 +1,7 @@
 package org.jzy3d.demos.surface
 
 import org.jzy3d.chart.Chart
+import org.jzy3d.chart.controllers.keyboard.camera.AWTCameraKeyController
 import org.jzy3d.colors.{Color, ColorMapper}
 import org.jzy3d.colors.colormaps.ColorMapRainbow
 import org.jzy3d.demos.{AbstractDemo, Launcher}
@@ -26,8 +27,9 @@ class ColorWaveDemo extends AbstractDemo {
     setColorMapper(new ColorMapper(new ColorMapRainbow, getBounds.getZmin, getBounds.getZmax, new Color(1, 1, 1, .5f)))
     setFaceDisplayed(true)
     setWireframeDisplayed(false)
-    chart = new Chart(Quality.Advanced)
-    chart.getScene.getGraph.add(surface)
-    chart.addController(new ChartKeyController)
+    val _chart = new Chart(Quality.Advanced)
+    chart = Some(_chart)
+    _chart.getScene.getGraph.add(surface)
+    _chart.addController(new AWTCameraKeyController)
   }
 }
