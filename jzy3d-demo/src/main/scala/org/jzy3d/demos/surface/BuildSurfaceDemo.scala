@@ -1,23 +1,18 @@
 package org.jzy3d.demos.surface
 
-import org.jzy3d.chart.AWTChart
+import org.jzy3d.chart.Chart
 import org.jzy3d.chart.factories.AWTChartComponentFactory
 import org.jzy3d.colors.colormaps.ColorMapRainbow
 import org.jzy3d.colors.{Color, ColorMapper}
-import org.jzy3d.demos.{AbstractDemo, Launcher}
+import org.jzy3d.demos.Demo
 import org.jzy3d.maths.Coord3d
 import org.jzy3d.plot3d.primitives.{Point, Polygon, Shape}
 import org.jzy3d.plot3d.rendering.canvas.Quality
 
 import scala.collection.JavaConverters._
 
-object BuildSurfaceDemo {
-  def main(args: Array[String]): Unit =
-    Launcher.openDemo(new BuildSurfaceDemo)
-}
-
-class BuildSurfaceDemo extends AbstractDemo {
-  def init(): Unit = {
+object BuildSurfaceDemo extends Demo {
+  def mkChart(): Chart = {
     val distDataProp = Array(Array(.25, .45, .20), Array(.56, .89, .45), Array(.6, .3, .7))
     val polygons = for {
       i <- distDataProp   .indices.init
@@ -39,8 +34,8 @@ class BuildSurfaceDemo extends AbstractDemo {
     setWireframeDisplayed(true)
     setWireframeColor(org.jzy3d.colors.Color.BLACK)
     val f = new AWTChartComponentFactory
-    val _chart = new AWTChart(f, Quality.Advanced)
-    chart = Some(_chart)
-    _chart.getScene.getGraph.add(surface)
+    val chart = new Chart(f, Quality.Advanced)
+    chart.getScene.getGraph.add(surface)
+    chart
   }
 }

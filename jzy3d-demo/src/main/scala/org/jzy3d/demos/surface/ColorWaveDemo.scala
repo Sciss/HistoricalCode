@@ -1,24 +1,19 @@
 package org.jzy3d.demos.surface
 
-import org.jzy3d.chart.AWTChart
+import org.jzy3d.chart.Chart
 import org.jzy3d.chart.controllers.keyboard.camera.AWTCameraKeyController
 import org.jzy3d.chart.factories.AWTChartComponentFactory
 import org.jzy3d.colors.colormaps.ColorMapRainbow
 import org.jzy3d.colors.{Color, ColorMapper}
-import org.jzy3d.demos.{AbstractDemo, Launcher}
+import org.jzy3d.demos.Demo
 import org.jzy3d.maths.Range
 import org.jzy3d.plot3d.builder.concrete.OrthonormalGrid
 import org.jzy3d.plot3d.builder.{Builder, Mapper}
 import org.jzy3d.plot3d.primitives.Shape
 import org.jzy3d.plot3d.rendering.canvas.Quality
 
-object ColorWaveDemo {
-  def main(args: Array[String]): Unit =
-    Launcher.openDemo(new ColorWaveDemo)
-}
-
-class ColorWaveDemo extends AbstractDemo {
-  def init(): Unit = {
+object ColorWaveDemo extends Demo {
+  def mkChart(): Chart = {
     val mapper: Mapper = (x: Double, y: Double) => x * math.sin(x * y)
     val range = new Range(-3, 3)
     val steps = 80
@@ -28,9 +23,9 @@ class ColorWaveDemo extends AbstractDemo {
     setFaceDisplayed(true)
     setWireframeDisplayed(false)
     val f = new AWTChartComponentFactory
-    val _chart = new AWTChart(f, Quality.Advanced)
-    chart = Some(_chart)
-    _chart.getScene.getGraph.add(surface)
-    _chart.addController(new AWTCameraKeyController)
+    val chart = new Chart(f, Quality.Advanced)
+    chart.getScene.getGraph.add(surface)
+    chart.addController(new AWTCameraKeyController)
+    chart
   }
 }

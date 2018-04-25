@@ -1,3 +1,10 @@
+# jzy-demo
+
+A fork from [here](https://github.com/retronym/jzy3d-demo), bringing it up to latest jzy3d and sbt.
+Some Scala demos for the jzy3d plotting library. Original read-me below:
+
+-----------
+
 An [SBT](http://scala-sbt.org) project to demonstrate the excellent [JZY3D](http://jzy3d.org)
 scientific plotting library.
 
