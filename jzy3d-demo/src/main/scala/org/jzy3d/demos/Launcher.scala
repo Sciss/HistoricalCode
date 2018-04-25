@@ -9,12 +9,10 @@ import org.jzy3d.chart.{ChartLauncher, Settings}
 import org.jzy3d.maths.Rectangle
 
 object Launcher {
-  def openDemo(demo: IDemo): Unit = {
-    openDemo(demo, DEFAULT_WINDOW)
-  }
+  var USE_ACCEL = false
 
-  def openDemo(demo: IDemo, rectangle: Rectangle): Unit = {
-    Settings.getInstance.setHardwareAccelerated(true)
+  def openDemo(demo: IDemo, rectangle: Rectangle = DEFAULT_WINDOW): Unit = {
+    if (USE_ACCEL) Settings.getInstance.setHardwareAccelerated(true)
     demo.init()
     val chart = demo.getChart
     ChartLauncher.instructions()
@@ -26,7 +24,7 @@ object Launcher {
   }
 
   def openStaticDemo(demo: IDemo, rectangle: Rectangle): Unit = {
-    Settings.getInstance.setHardwareAccelerated(true)
+    if (USE_ACCEL) Settings.getInstance.setHardwareAccelerated(true)
     val chart = demo.getChart
     ChartLauncher.openStaticChart(chart, rectangle, demo.getName)
     ChartLauncher.screenshot(demo.getChart, "./data/screenshots/" + demo.getName + ".png")
@@ -34,9 +32,9 @@ object Launcher {
 
   def openStaticSWTDemo(demo: IDemo): Unit = {
     Settings.getInstance.setHardwareAccelerated(true)
-    val chart = demo.getChart
+    val chart   = demo.getChart
     val display = new Display
-    val shell = new Shell(display)
+    val shell   = new Shell(display)
     shell.setLayout(new FillLayout)
     Bridge.adapt(shell, chart.getCanvas.asInstanceOf[Component])
     shell.setText(demo.getName)
@@ -48,6 +46,6 @@ object Launcher {
     display.dispose()
   }
 
-  protected var DEFAULT_CANVAS_TYPE: String = "awt"
-  protected var DEFAULT_WINDOW: Rectangle = new Rectangle(0, 0, 600, 600)
+  protected var DEFAULT_CANVAS_TYPE : String    = "awt"
+  protected var DEFAULT_WINDOW      : Rectangle = new Rectangle(0, 0, 600, 600)
 }

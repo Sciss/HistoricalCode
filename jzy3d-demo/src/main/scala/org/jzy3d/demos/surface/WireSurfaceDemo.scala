@@ -1,6 +1,7 @@
 package org.jzy3d.demos.surface
 
-import org.jzy3d.chart.Chart
+import org.jzy3d.chart.AWTChart
+import org.jzy3d.chart.factories.AWTChartComponentFactory
 import org.jzy3d.colors.colormaps.ColorMapRainbow
 import org.jzy3d.colors.{Color, ColorMapper}
 import org.jzy3d.demos.{AbstractDemo, Launcher}
@@ -29,7 +30,8 @@ class WireSurfaceDemo extends AbstractDemo {
     setFaceDisplayed(true)
     setWireframeDisplayed(true)
     setWireframeColor(Color.BLACK)
-    val _chart = new Chart(Quality.Advanced)
+    val f = new AWTChartComponentFactory
+    val _chart = new AWTChart(f, Quality.Advanced)
     chart = Some(_chart)
     _chart.getScene.getGraph.add(surface)
     val cBar = new AWTColorbarLegend(surface, _chart.getView.getAxe.getLayout)
