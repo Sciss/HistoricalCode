@@ -13,9 +13,8 @@ import org.jzy3d.plot3d.rendering.canvas.Quality
 import org.jzy3d.plot3d.rendering.legends.colorbars.AWTColorbarLegend
 
 object MexicanDemo {
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     Launcher.openDemo(new MexicanDemo)
-  }
 }
 
 class MexicanDemo extends AbstractDemo {

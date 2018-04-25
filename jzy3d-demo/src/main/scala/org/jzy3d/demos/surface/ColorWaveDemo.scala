@@ -13,9 +13,8 @@ import org.jzy3d.plot3d.primitives.Shape
 import org.jzy3d.plot3d.rendering.canvas.Quality
 
 object ColorWaveDemo {
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     Launcher.openDemo(new ColorWaveDemo)
-  }
 }
 
 class ColorWaveDemo extends AbstractDemo {

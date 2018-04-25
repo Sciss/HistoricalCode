@@ -1,23 +1,25 @@
-package org.jzy3d.demos.surface
+package org.jzy3d.demos
+
+import java.awt.EventQueue
 
 import org.jzy3d.chart.AWTChart
 import org.jzy3d.chart.factories.AWTChartComponentFactory
-import org.jzy3d.colors.colormaps.ColorMapRainbow
 import org.jzy3d.colors.{Color, ColorMapper}
-import org.jzy3d.demos.{AbstractDemo, Launcher}
+import org.jzy3d.colors.colormaps.ColorMapRainbow
 import org.jzy3d.maths.{Dimension, Range}
-import org.jzy3d.plot3d.builder.concrete.OrthonormalGrid
 import org.jzy3d.plot3d.builder.{Builder, Mapper}
+import org.jzy3d.plot3d.builder.concrete.OrthonormalGrid
 import org.jzy3d.plot3d.primitives.Shape
 import org.jzy3d.plot3d.rendering.canvas.Quality
 import org.jzy3d.plot3d.rendering.legends.colorbars.AWTColorbarLegend
 
-object WireSurfaceDemo {
-  def main(args: Array[String]): Unit =
-    Launcher.openDemo(new WireSurfaceDemo)
+object WTF {
+  def main(args: Array[String]): Unit = EventQueue.invokeLater(new Runnable {
+    def run(): Unit = Launcher.openDemo(new WTF)
+  })
 }
 
-class WireSurfaceDemo extends AbstractDemo {
+class WTF extends AbstractDemo {
 
   def init(): Unit = {
     val mapper: Mapper = (x: Double, y: Double) => 10 * math.sin(x / 10) * math.cos(y / 20) * x
