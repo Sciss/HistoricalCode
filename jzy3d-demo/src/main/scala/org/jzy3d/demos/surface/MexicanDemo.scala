@@ -1,7 +1,7 @@
 package org.jzy3d.demos.surface
 
+import org.jzy3d.chart.AWTChart
 import org.jzy3d.chart.factories.AWTChartComponentFactory
-import org.jzy3d.chart.{AWTChart, Chart}
 import org.jzy3d.colors.colormaps.ColorMapRainbow
 import org.jzy3d.colors.{Color, ColorMapper}
 import org.jzy3d.demos.{AbstractDemo, Launcher}
