@@ -12,13 +12,13 @@ import scala.collection.JavaConverters._
 import org.jzy3d.colors.{Color, ColorMapper}
 
 object BuildSurfaceDemo {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     Launcher.openDemo(new BuildSurfaceDemo)
   }
 }
 
 class BuildSurfaceDemo extends AbstractDemo {
-  def init() {
+  def init(): Unit = {
     val distDataProp = Array(Array(.25, .45, .20), Array(.56, .89, .45), Array(.6, .3, .7))
     val polygons = for {
       i <- distDataProp.indices.dropRight(1)

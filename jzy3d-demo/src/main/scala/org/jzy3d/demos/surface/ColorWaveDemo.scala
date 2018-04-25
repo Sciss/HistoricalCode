@@ -15,13 +15,13 @@ import org.jzy3d.plot3d.primitives.Shape
 import org.jzy3d.plot3d.rendering.canvas.Quality
 
 object ColorWaveDemo {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     Launcher.openDemo(new ColorWaveDemo)
   }
 }
 
 class ColorWaveDemo extends AbstractDemo {
-  def init() {
+  def init(): Unit = {
     val mapper: Mapper = (x: Double, y: Double) => x * math.sin(x * y)
     val range = new Range(-3, 3)
     val steps = 80

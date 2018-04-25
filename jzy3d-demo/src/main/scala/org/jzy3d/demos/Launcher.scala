@@ -11,11 +11,11 @@ import org.jzy3d.global.Settings
 import org.jzy3d.ui.ChartLauncher
 
 object Launcher {
-  def openDemo(demo: IDemo) {
+  def openDemo(demo: IDemo): Unit = {
     openDemo(demo, DEFAULT_WINDOW)
   }
 
-  def openDemo(demo: IDemo, rectangle: Rectangle) {
+  def openDemo(demo: IDemo, rectangle: Rectangle): Unit = {
     Settings.getInstance.setHardwareAccelerated(true)
     demo.init()
     val chart = demo.getChart
@@ -23,18 +23,18 @@ object Launcher {
     ChartLauncher.openChart(chart, rectangle, demo.getName)
   }
 
-  def openStaticDemo(demo: IDemo) {
+  def openStaticDemo(demo: IDemo): Unit = {
     openStaticDemo(demo, DEFAULT_WINDOW)
   }
 
-  def openStaticDemo(demo: IDemo, rectangle: Rectangle) {
+  def openStaticDemo(demo: IDemo, rectangle: Rectangle): Unit = {
     Settings.getInstance.setHardwareAccelerated(true)
     val chart = demo.getChart
     ChartLauncher.openStaticChart(chart, rectangle, demo.getName)
     ChartLauncher.screenshot(demo.getChart, "./data/screenshots/" + demo.getName + ".png")
   }
 
-  def openStaticSWTDemo(demo: IDemo) {
+  def openStaticSWTDemo(demo: IDemo): Unit = {
     Settings.getInstance.setHardwareAccelerated(true)
     val chart = demo.getChart
     val display = new Display

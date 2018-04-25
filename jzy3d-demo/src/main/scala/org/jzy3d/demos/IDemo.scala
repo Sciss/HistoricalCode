@@ -9,7 +9,7 @@ trait IDemo {
 
   def getChart: Chart
 
-  def init()
+  def init(): Unit
 
   def isInitialized: Boolean
 }

@@ -16,14 +16,14 @@ import org.jzy3d.plot3d.rendering.canvas.Quality
 import org.jzy3d.plot3d.rendering.legends.colorbars.ColorbarLegend
 
 object WireSurfaceDemo {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     Launcher.openDemo(new WireSurfaceDemo)
   }
 }
 
 class WireSurfaceDemo extends AbstractDemo {
 
-  def init() {
+  def init(): Unit = {
     val mapper: Mapper = (x: Double, y: Double) => 10 * math.sin(x / 10) * math.cos(y / 20) * x
     val range = new Range(-150, 150)
     val steps = 50
