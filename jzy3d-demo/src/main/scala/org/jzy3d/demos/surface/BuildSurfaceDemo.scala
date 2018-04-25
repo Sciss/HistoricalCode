@@ -2,14 +2,12 @@ package org.jzy3d.demos.surface
 
 import org.jzy3d.chart.Chart
 import org.jzy3d.colors.colormaps.ColorMapRainbow
-import org.jzy3d.demos.AbstractDemo
-import org.jzy3d.demos.Launcher
-import org.jzy3d.maths.Coord3d
-import org.jzy3d.plot3d.primitives.Point
-import org.jzy3d.plot3d.primitives.Polygon
-import org.jzy3d.plot3d.primitives.Shape
-import scala.collection.JavaConverters._
 import org.jzy3d.colors.{Color, ColorMapper}
+import org.jzy3d.demos.{AbstractDemo, Launcher}
+import org.jzy3d.maths.Coord3d
+import org.jzy3d.plot3d.primitives.{Point, Polygon, Shape}
+
+import scala.collection.JavaConverters._
 
 object BuildSurfaceDemo {
   def main(args: Array[String]): Unit = {
