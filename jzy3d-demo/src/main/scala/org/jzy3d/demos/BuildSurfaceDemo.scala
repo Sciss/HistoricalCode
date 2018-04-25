@@ -1,10 +1,9 @@
-package org.jzy3d.demos.surface
+package org.jzy3d.demos
 
 import org.jzy3d.chart.Chart
 import org.jzy3d.chart.factories.AWTChartComponentFactory
 import org.jzy3d.colors.colormaps.ColorMapRainbow
 import org.jzy3d.colors.{Color, ColorMapper}
-import org.jzy3d.demos.Demo
 import org.jzy3d.maths.Coord3d
 import org.jzy3d.plot3d.primitives.{Point, Polygon, Shape}
 import org.jzy3d.plot3d.rendering.canvas.Quality

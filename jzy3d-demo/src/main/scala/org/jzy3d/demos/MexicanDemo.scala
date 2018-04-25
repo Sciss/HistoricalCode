@@ -1,31 +1,33 @@
-package org.jzy3d.demos.surface
+package org.jzy3d.demos
 
 import org.jzy3d.chart.Chart
-import org.jzy3d.chart.controllers.keyboard.camera.AWTCameraKeyController
 import org.jzy3d.chart.factories.AWTChartComponentFactory
 import org.jzy3d.colors.colormaps.ColorMapRainbow
 import org.jzy3d.colors.{Color, ColorMapper}
-import org.jzy3d.demos.Demo
 import org.jzy3d.maths.Range
 import org.jzy3d.plot3d.builder.concrete.OrthonormalGrid
 import org.jzy3d.plot3d.builder.{Builder, Mapper}
 import org.jzy3d.plot3d.primitives.Shape
 import org.jzy3d.plot3d.rendering.canvas.Quality
+import org.jzy3d.plot3d.rendering.legends.colorbars.AWTColorbarLegend
 
-object ColorWaveDemo extends Demo {
+object MexicanDemo extends Demo {
+
   def mkChart(): Chart = {
-    val mapper: Mapper = (x: Double, y: Double) => x * math.sin(x * y)
-    val range = new Range(-3, 3)
-    val steps = 80
+    val sigma = 10
+    val mapper: Mapper = (x: Double, y: Double) => math.exp(-(x * x + y * y) / sigma) * math.abs(math.cos(2 * math.Pi * (x * x + y * y)))
+    val range = new Range(-0.5f, 0.5f)
+    val steps = 50
     val surface: Shape = Builder.buildOrthonormal(new OrthonormalGrid(range, steps, range, steps), mapper)
     import surface._
-    setColorMapper(new ColorMapper(new ColorMapRainbow, getBounds.getZmin, getBounds.getZmax, new Color(1, 1, 1, .5f)))
+    setColorMapper(new ColorMapper(new ColorMapRainbow, getBounds.getZmin, getBounds.getZmax))
     setFaceDisplayed(true)
-    setWireframeDisplayed(false)
+    setWireframeDisplayed(true)
+    setWireframeColor(Color.BLACK)
     val f = new AWTChartComponentFactory
     val chart = new Chart(f, Quality.Advanced)
     chart.getScene.getGraph.add(surface)
-    chart.addController(new AWTCameraKeyController)
+    setLegend(new AWTColorbarLegend(surface, chart.getView.getAxe.getLayout))
     chart
   }
 }
