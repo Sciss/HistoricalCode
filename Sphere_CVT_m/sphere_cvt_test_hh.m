@@ -61,26 +61,67 @@ function sphere_cvt_test01_hh ( )
 %
   n = 5; % 100;
   seed = 123456789;
-  [ xyz, seed ] = uniform_on_sphere01_map ( 3, n, seed );
-  r8mat_transpose_print ( 3, n, xyz, '  Initial points:' );
+  [ d_xyz, seed ] = uniform_on_sphere01_map ( 3, n, seed );
+  r8mat_transpose_print_hh ( 3, n, d_xyz, '  Initial points:' );
 
-  figure ( 1 )
-  sphere_voronoi_plot ( n, xyz )
+%  figure ( 1 )
+%  sphere_voronoi_plot ( n, xyz )
 
   for i = 1 : 200
 
-    centroid = sphere_cvt_step ( n, xyz );
+    centroid = sphere_cvt_step ( n, d_xyz );
 
-    xyz(1:3,1:n) = centroid(1:3,1:n);
+    d_xyz(1:3,1:n) = centroid(1:3,1:n);
 
   end
 
-  r8mat_transpose_print ( 3, n, xyz, '  Final points:' );
+  r8mat_transpose_print_hh ( 3, n, d_xyz, '  Final points:' );
+  
+%
+%  Compute the Delaunay triangulation.
+%
+  [ face_num, face ] = sphere_delaunay ( n, d_xyz );
+  i4mat_transpose_print ( 3, face_num, face, '  Delaunay vertices:' );
+%
+%  Compute the Delaunay triangle neighbor array.
+%
+  face_neighbors = triangulation_neighbor_triangles ( 3, face_num, face );
+  i4mat_transpose_print ( 3, face_num, face_neighbors, '  Delaunay neighbors:' );
+%
+%  For each Delaunay triangle, compute the normal vector, to get the 
+%  Voronoi vertex.
+%
+  v_xyz = voronoi_vertices ( n, d_xyz, face_num, face );
+  r8mat_transpose_print_hh ( 3, face_num, v_xyz , '  Voronoi vertices' );
+%
+%  Compute the order of each Voronoi polygon.
+%
+  order = voronoi_order ( n, face_num, face );
+  i4vec_print ( n, order, '  Voronoi orders:' );
+%
+%  Compute the Voronoi vertex lists that define the Voronoi polygons.
+%
+  [ first, list ] = voronoi_polygons ( n, face_num, face );
+  list_num = 2 * face_num;
+  i4list_print ( n, first, list_num, list, '  Voronoi polygons:' );
+%
+%  Compute the areas of the Voronoi polygons.
+%
+  v_num = face_num;
+  area = voronoi_areas ( n, first, list_num, list, d_xyz, v_num, v_xyz );
+  r8vec_print ( n, area, '  Voronoi areas:' );
+%
+%  Compute the centroids of the polygons.
+%
+  centroid = voronoi_centroids ( n, first, list_num, list, d_xyz, v_num, v_xyz );
+  r8mat_transpose_print_hh ( 3, n, centroid, '  Voronoi centroids' );
+  
+  
 %
 %  Plot the final data.
 %
   figure ( 2 )
-  sphere_voronoi_plot ( n, xyz );
+  sphere_voronoi_plot ( n, d_xyz );
 
   return
 end
