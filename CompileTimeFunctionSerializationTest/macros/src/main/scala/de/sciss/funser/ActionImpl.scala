@@ -33,9 +33,20 @@ object ActionImpl {
   def applyImpl(c: blackbox.Context)(body: c.Expr[Unit]): c.Expr[Action] = {
     val pos     = body.tree.pos
     val source  = pos.source.content
-    val portion = if (pos.isRange) new String(source.slice(pos.start, pos.start + pos.end - pos.start)) else {
+    val portion0 = if (pos.isRange) new String(source.slice(pos.start, pos.start + pos.end - pos.start)) else {
       c.error(pos, s"Could not extract source")
       ""
+    }
+    val portion1 = portion0.trim
+    val portion2 = if (portion1.startsWith("{") && portion1.endsWith("}")) portion1.substring(1, portion1.length - 1) else portion1
+    val portion = {
+      val arr0 = portion2.split("\n")
+      val arr1 = arr0.dropWhile(_.trim.isEmpty)
+      val arr  = arr1.reverse.dropWhile(_.trim.isEmpty).reverse
+      if (arr.isEmpty) portion2 else {
+        val drop = arr.map(_.prefixLength(_ == ' ')).min
+        arr.map(_.substring(drop)).mkString("\n")
+      }
     }
     val code  = Code.Action(portion)
     val name  = mkName()

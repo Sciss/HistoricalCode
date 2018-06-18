@@ -2,8 +2,11 @@ package de.sciss.funser
 
 object ActionTest {
   def main(args: Array[String]): Unit = {
+    val foo = "FOO"
+
     val (fun, source) = Action {
-      println("Hello world!") // yes
+      // val s = "Hello world!" // another comment
+      println(foo)  // yes!
     }
     println("Source code:\n")
     println(source)
