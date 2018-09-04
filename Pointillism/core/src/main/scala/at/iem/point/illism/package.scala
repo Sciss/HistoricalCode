@@ -2,7 +2,7 @@
  *  package.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,15 +14,16 @@
 package at.iem.point
 
 import java.awt.EventQueue
-import java.text.DecimalFormat
 import java.math.RoundingMode
-import collection.breakOut
-import collection.mutable
-import collection.generic.CanBuildFrom
-import collection.immutable.{IndexedSeq => Vec}
+import java.text.DecimalFormat
+
 import de.sciss.midi
-import midi.TickRate
-import language.higherKinds
+import de.sciss.midi.TickRate
+
+import scala.collection.generic.CanBuildFrom
+import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.collection.{breakOut, mutable}
+import scala.language.higherKinds
 
 package object illism {
   implicit final class IllismInt(val i: Int) extends AnyVal {
@@ -51,7 +52,7 @@ package object illism {
       it.sliding(2,1).map({ case Seq(low, high) => high to low }).toIndexedSeq
 
     def play()(implicit ev: A <:< ConvertibleToMIDI): Unit = {
-      implicit val rate = TickRate.tempo(120, 1024)
+      implicit val rate: TickRate = TickRate.tempo(120, 1024)
       val events0: Vec[midi.Event] = it.flatMap(_.toMIDI)(breakOut)
       val min     = events0.minBy(_.tick).tick
       val events  = events0.map(e => e.copy(tick = e.tick - min))
@@ -127,7 +128,7 @@ package object illism {
           val startTime = tick / r.value
           wait += (ch, pitch) -> (startTime, on)
 
-        case midi.Event(tick, off @ midi.NoteOff(ch, pitch, _)) if channel == -1 || channel == ch =>
+        case midi.Event(tick, midi.NoteOff(ch, pitch, _)) if channel == -1 || channel == ch =>
           val stopTime  = tick / r.value
           wait.remove(ch -> pitch).foreach { case (startTime, on) =>
             b += OffsetNote(offset = startTime, /* channel = ch, */ pitch = pitch.asPitch, duration = stopTime - startTime,

@@ -2,7 +2,7 @@
  *  Pitch.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -16,7 +16,7 @@ package at.iem.point.illism
 object Pitch {
   // cf. http://www.sengpielaudio.com/Rechner-notennamen.htm
 
-  implicit val ordering = Ordering.by[Pitch, Int](_.midi)
+  implicit val ordering: Ordering[Pitch] = Ordering.by[Pitch, Int](_.midi)
 
   def toString(midi: Int, lang: Language = Language.default): String = {
     val pc        = midi % 12
@@ -45,7 +45,7 @@ object Pitch {
   //  }
 }
 final class Pitch(val midi: Int) extends AnyVal {
-  override def toString = Pitch.toString(midi)
+  override def toString: String = Pitch.toString(midi)
 
   def to(that: Pitch): DirectedInterval = (this, that) // new DirectedInterval(math.abs(this.midi - that.midi))
 
@@ -77,5 +77,5 @@ object PitchClass {
 
 }
 final class PitchClass(val step: Int) extends AnyVal {
-  override def toString = PitchClass.toString(step)
+  override def toString: String = PitchClass.toString(step)
 }

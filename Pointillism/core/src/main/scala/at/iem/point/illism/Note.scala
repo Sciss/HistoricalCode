@@ -2,7 +2,7 @@
  *  Note.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,8 +14,9 @@
 package at.iem.point.illism
 
 import de.sciss.midi
-import midi.TickRate
-import collection.immutable.{IndexedSeq => Vec}
+import de.sciss.midi.TickRate
+
+import scala.collection.immutable.{IndexedSeq => Vec}
 
 sealed trait NoteLike {
   //  /**
@@ -53,9 +54,8 @@ sealed trait NoteLike {
 final case class Note(/* channel: Int, */ pitch: Pitch, duration: Double, velocity: Int /*, release: Int = 0 */)
   extends NoteLike {
 
-  override def toString = {
+  override def toString =
     s"$productPrefix($pitch, dur = $durationString, vel = $velocity})"
-  }
 
   def withOffset(offset: Double): OffsetNote =
     OffsetNote(offset = offset, /* channel = channel, */ pitch = pitch,
@@ -65,9 +65,8 @@ final case class Note(/* channel: Int, */ pitch: Pitch, duration: Double, veloci
 final case class OffsetNote(offset: Double, /* channel: Int, */ pitch: Pitch, duration: Double, velocity: Int /*, release: Int = 0 */)
   extends NoteLike with ConvertibleToMIDI with ConvertibleToNotes {
 
-  override def toString = {
+  override def toString =
     s"$productPrefix($pitch, off = $offsetString, dur = $durationString, vel = $velocity)"
-  }
 
   def replaceStart(newOffset: Double): OffsetNote = {
     val newDuration = duration - (newOffset - offset)

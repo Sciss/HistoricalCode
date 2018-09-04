@@ -2,7 +2,7 @@
  *  NoteOrRest.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,8 +13,9 @@
 
 package at.iem.point.illism.rhythm
 
-import language.implicitConversions
 import spire.math.Rational
+
+import scala.language.implicitConversions
 
 object NoteOrRest {
   implicit def fromInt(i: Int): NoteOrRest =
@@ -27,12 +28,12 @@ sealed trait NoteOrRest {
   def isRest: Boolean
 }
 final case class Note(dur: Rational) extends NoteOrRest {
-  def toNumber =  dur
+  def toNumber: Rational =  dur
   def *(factor: Rational): Note = copy(dur * factor)
   def isRest = false
 }
 final case class Rest(dur: Rational) extends NoteOrRest {
-  def toNumber = -dur
+  def toNumber: Rational = -dur
   def *(factor: Rational): Rest = copy(dur * factor)
   def isRest = true
 }

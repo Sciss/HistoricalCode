@@ -2,7 +2,7 @@
  *  Interval.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,8 +13,8 @@
 
 package at.iem.point.illism
 
-import annotation.switch
-import language.implicitConversions
+import scala.annotation.switch
+import scala.language.implicitConversions
 
 object Interval {
   // implicit val ordering = Ordering.by[Interval, Int](_.semitones)
@@ -42,14 +42,14 @@ sealed trait Interval extends Any {
 //  def map(fun: Int => Int): this.type
 }
 object UndirectedInterval {
-  implicit val ordering = Ordering.by[UndirectedInterval, Int](_.semitones)
+  implicit val ordering: Ordering[UndirectedInterval] = Ordering.by[UndirectedInterval, Int](_.semitones)
 }
 final class UndirectedInterval(val semitones: Int) extends AnyVal with Interval {
   def modOctave: Interval = if (semitones < 12) this else new UndirectedInterval(semitones % 12)
 
   def map(fun: Int => Int): Interval = new UndirectedInterval(fun(semitones))
 
-  override def toString = Interval.toString(semitones)
+  override def toString: String = Interval.toString(semitones)
 }
 object DirectedInterval {
 //  implicit def fromPitchTuple(tup: (Pitch, Pitch)): DirectedInterval = new DirectedInterval(tup._2.midi - tup._1.midi)
@@ -58,7 +58,7 @@ final class DirectedInterval(val steps: Int) extends AnyVal with Interval {
   def semitones: Int = math.abs(steps)
   def direction: Int = math.signum(steps)
 
-  override def toString = {
+  override def toString: String = {
     val und = Interval.toString(semitones)
     (direction: @switch) match {
       case  1 => "+" + und

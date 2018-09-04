@@ -2,7 +2,7 @@
  *  ContingencyChartPanel.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,15 +14,17 @@
 package at.iem.point.illism
 package chart
 
-import org.jfree.data.xy.{MatrixSeries, MatrixSeriesCollection}
-import org.jfree.chart.renderer.xy.XYBlockRenderer
-import org.jfree.chart.renderer.GrayPaintScale
+import java.awt.{Color, Font, Graphics2D}
+
 import org.jfree.chart.axis.NumberAxis
 import org.jfree.chart.plot.XYPlot
-import java.awt.{Graphics2D, Font, Color}
+import org.jfree.chart.renderer.GrayPaintScale
+import org.jfree.chart.renderer.xy.XYBlockRenderer
 import org.jfree.chart.{ChartPanel, JFreeChart}
+import org.jfree.data.xy.{MatrixSeries, MatrixSeriesCollection}
+import scalax.chart.XYChart
+
 import scala.swing.Panel
-import scalax.chart.{XYChart, Chart}
 
 object ContingencyChartPanel {
   private val DEBUG = false
@@ -62,12 +64,12 @@ object ContingencyChartPanel {
     val jchart     = new JFreeChart(title, plot)
     jchart.removeLegend()
     jchart.setBackgroundPaint(Color.white)
-    val _chart    = new XYChart {
-      lazy val peer = jchart
+    val _chart: XYChart = new XYChart {
+      lazy val peer: JFreeChart = jchart
     }
 
     val fnt = new Font("SansSerif", Font.BOLD, 18)
-    val panel = new ContingencyChartPanel {
+    val panel: ContingencyChartPanel = new ContingencyChartPanel {
       lazy val chart: XYChart = _chart
       override lazy val peer = new ChartPanel(jchart, false) with SuperMixin
       override protected def paintComponent(g: Graphics2D): Unit = {

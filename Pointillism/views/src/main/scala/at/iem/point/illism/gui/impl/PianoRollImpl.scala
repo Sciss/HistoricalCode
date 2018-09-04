@@ -2,7 +2,7 @@
  *  PianoRollImpl.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -15,8 +15,9 @@ package at.iem.point.illism
 package gui
 package impl
 
-import java.awt.{Dimension, Graphics, RenderingHints, Color, Graphics2D}
-import collection.immutable.{IndexedSeq => Vec}
+import java.awt.{Color, Dimension, Graphics, Graphics2D, RenderingHints}
+
+import scala.collection.immutable.{IndexedSeq => Vec}
 
 object PianoRollImpl {
   class JComponent extends javax.swing.JComponent with PianoRollImpl{
@@ -31,7 +32,7 @@ object PianoRollImpl {
     }
   }
 
-  private implicit val noteSpace        = (n: OffsetNote) => (n.offset, n.stop)
+  private implicit val noteSpace: OffsetNote => (Double, Double) = n => (n.offset, n.stop)
   private final val defaultTimeRange    = (0.0, 60.0)
   private final val defaultPitchRange   = (21, 109)
   private final val defaultKeyWidth     = 48
@@ -50,8 +51,8 @@ object PianoRollImpl {
   private final val colrChordOutline  = new Color(0xC0, 0x20, 0x40)
 }
 /* private[gui] */ trait PianoRollImpl extends PianoRoll {
-  import PianoRollImpl._
   import PianoRoll.NoteDecoration
+  import PianoRollImpl._
 
   protected def repaint(): Unit
 
@@ -71,7 +72,7 @@ object PianoRollImpl {
 
   recalcKeySize()
 
-  final def notes = _notes
+  final def notes: Vec[OffsetNote] = _notes
   final def notes_=(value: Vec[OffsetNote]): Unit = {
     _notes = value
     // _notesTree    = RangedSeq[OffsetNote, Double](value: _*)
@@ -85,7 +86,7 @@ object PianoRollImpl {
     repaint()
   }
 
-  final def chords = _chords
+  final def chords: Vec[Chord] = _chords
   def chords_=(value: Vec[Chord]): Unit = {
     _chords = value
     if (_autoRange && value.nonEmpty) {
@@ -96,7 +97,7 @@ object PianoRollImpl {
     repaint()
   }
 
-  final def pitchRange = _pitchRange
+  final def pitchRange: (Int, Int) = _pitchRange
   def pitchRange_=(value: (Int, Int)): Unit = {
     if (_pitchRange != value) {
       _pitchRange = value
@@ -104,7 +105,7 @@ object PianoRollImpl {
     }
   }
 
-  final def timeRange = _timeRange
+  final def timeRange: (Double, Double) = _timeRange
   def timeRange_=(value: (Double, Double)): Unit = {
     _autoRange = false
     if (_timeRange != value) {
@@ -113,20 +114,20 @@ object PianoRollImpl {
     }
   }
 
-  final def decoration = _decoration
+  final def decoration: Map[OffsetNote, NoteDecoration] = _decoration
   def decoration_=(value: Map[OffsetNote, NoteDecoration]): Unit = {
     _decoration = value
     if (_notes.nonEmpty) repaint()
   }
 
-  final def keyWidth = _keyWidth
+  final def keyWidth: Int = _keyWidth
   def keyWidth_=(value: Int): Unit =
     if (_keyWidth != value) {
       _keyWidth = value
       if (_showKeyboard) repaint()
     }
 
-  final def keyHeight = _keyHeight
+  final def keyHeight: Int = _keyHeight
   def keyHeight_=(value: Int): Unit = {
     val even = value & ~1
     if (_keyHeight != even) {
@@ -136,14 +137,14 @@ object PianoRollImpl {
     }
   }
 
-  final def showLines = _showLines
+  final def showLines: Boolean = _showLines
   def showLines_=(value: Boolean): Unit =
     if (_showLines != value) {
       _showLines = value
       repaint()
     }
 
-  final def showKeyboard = _showKeyboard
+  final def showKeyboard: Boolean = _showKeyboard
   def showKeyboard_=(value: Boolean): Unit =
     if (_showKeyboard != value) {
       _showKeyboard = value

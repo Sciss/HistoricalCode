@@ -5,7 +5,11 @@
 
 ## statement
 
-Pointillism is a utility library for the [IEM POINT](http://point.kug.ac.at/) project. It is (C)opyright 2013&ndash;2014 by IEM Graz / 2013&ndash;2016 by Hanns Holger Rutz. All rights reserved. Pointillism is released under the [GNU Lesser General Public License](https://raw.github.com/iem-projects/Pointillism/master/LICENSE) v2.1+ and comes with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
+Pointillism is a utility library for the [IEM POINT](http://point.kug.ac.at/) project.
+It is (C)opyright 2013&ndash;2014 by IEM Graz / 2013&ndash;2018 by Hanns Holger Rutz. All rights reserved.
+Pointillism is released under the
+[GNU Lesser General Public License](https://raw.github.com/iem-projects/Pointillism/master/LICENSE) v2.1+ and comes
+with absolutely no warranties. To contact the author, send an email to `contact at sciss.de`
 
 ## linking
 
@@ -24,7 +28,7 @@ The current version `v` is `"0.3.0"`.
 
 ## building
 
-Pointillism currently builds against Scala 2.11 and 2.10, using sbt 0.13.
+Pointillism currently builds against Scala 2.11 and 2.10, using sbt.
 
 ## contributing
 

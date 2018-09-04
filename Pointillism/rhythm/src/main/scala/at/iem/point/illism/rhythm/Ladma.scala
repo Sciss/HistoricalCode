@@ -2,7 +2,7 @@
  *  Ladma.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,8 +13,9 @@
 
 package at.iem.point.illism.rhythm
 
-import scala.collection.immutable.{IndexedSeq => Vec}
 import spire.math._
+
+import scala.collection.immutable.{IndexedSeq => Vec}
 
 // reference: http://vladimir_ladma.sweb.cz/english/music/articles/links/mrhythm.htm
 object Ladma {
@@ -24,7 +25,7 @@ object Ladma {
     val dursN   = cell.normalized.elements.map(_.dur)
     // we find the least common multiple of the elements' denominators.
     // this is the order k of rhythmical system
-    val k       = dursN.map(_.denominator).reduce(lcm(_, _))
+    val k       = dursN.map(_.denominator).reduce((a, b) => lcm(a, b))
     // the measure is based on the relative durations (e.g. multiplied by the order)
     val dursM   = dursN.map(_ * k)
     (dursM, k)

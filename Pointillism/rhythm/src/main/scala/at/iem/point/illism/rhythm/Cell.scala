@@ -2,7 +2,7 @@
  *  Cell.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,8 +14,9 @@
 package at.iem.point.illism.rhythm
 
 import spire.math._
-import collection.immutable.{IndexedSeq => Vec}
+
 import scala.annotation.tailrec
+import scala.collection.immutable.{IndexedSeq => Vec}
 
 object Cell {
   private val durationMap = Map(
@@ -43,7 +44,7 @@ final case class Cell(id: Int, elements: Vec[NoteOrRest], dur: Rational) {
   override def toString = s"Cell#$id($prettyElements}, dur = $dur)"
 
   /** Number of elements in the cell */
-  def size = elements.size
+  def size: Int = elements.size
 
   /** Pretty formatted string representation of the cell's elements */
   def prettyElements: String = elements.map(_.toNumber).mkString("[", ", ", "]")
@@ -69,7 +70,7 @@ final case class Cell(id: Int, elements: Vec[NoteOrRest], dur: Rational) {
   def usingIntegers: Cell = {
     val durs    = elements.map(_.dur)
     val denoms  = durs.map(_.denominator)
-    val k       = denoms.reduce(lcm(_, _))
+    val k       = denoms.reduce((a, b) => lcm(a, b))
     if (k == 1) return this
     val elemsM  = elements.map(_ * k)
     copy(elements = elemsM)

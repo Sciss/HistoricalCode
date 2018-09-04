@@ -2,7 +2,7 @@
  *  HarmonicFields.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,12 +14,14 @@
 package at.iem.point.illism
 package chart
 
-import scalax.chart.XYChart
-import org.jfree.chart.title.TextTitle
 import java.awt.{Color, Font}
-import org.jfree.chart.axis.{NumberTickUnit, NumberAxis}
-import collection.immutable.{IndexedSeq => Vec}
+
+import org.jfree.chart.axis.{NumberAxis, NumberTickUnit}
+import org.jfree.chart.title.TextTitle
+import scalax.chart.XYChart
 import scalax.chart.api._
+
+import scala.collection.immutable.{IndexedSeq => Vec}
 
 object HarmonicFields {
   def contingencyChart(notes: Vec[OffsetNote], allIntervals: Boolean = false,

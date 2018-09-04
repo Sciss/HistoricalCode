@@ -2,7 +2,7 @@
  *  LilyTimeSignature.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,8 +13,9 @@
 
 package at.iem.point.illism.rhythm
 
-import scala.annotation.switch
 import spire.math.Rational
+
+import scala.annotation.switch
 
 object LilyTimeSignature {
   def apply(id: Int): LilyTimeSignature = (id: @switch) match {
@@ -31,7 +32,7 @@ object LilyTimeSignature {
   case class Rounded(denom: Set[Int] = Set(1, 2, 4, 8)) extends LilyTimeSignature {
     private val denomRed = denom.filter { i => !denom.exists(j => j > i && j % i == 0) }
 
-    def id = Rounded.id
+    def id: Int = Rounded.id
     def apply(raw: Rational): (Rational, Float) = {
       val dint = raw.denominator.toInt
       if (denom.contains(dint)) return (raw, 0f)

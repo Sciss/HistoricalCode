@@ -2,7 +2,7 @@
  *  Chord.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -13,11 +13,12 @@
 
 package at.iem.point.illism
 
-import annotation.tailrec
-import collection.breakOut
-import collection.immutable.{IndexedSeq => Vec}
 import de.sciss.midi
-import midi.TickRate
+import de.sciss.midi.TickRate
+
+import scala.annotation.tailrec
+import scala.collection.breakOut
+import scala.collection.immutable.{IndexedSeq => Vec}
 
 /** A chord made of a sequence of notes. Notes must be in ascending order with respect to their
   * pitches.
@@ -70,5 +71,5 @@ final case class Chord(notes: Vec[OffsetNote]) extends ConvertibleToMIDI with Co
   def toMIDI(channel: Int)(implicit tickRate: TickRate): List[midi.Event] =
     notes.flatMap(_.toMIDI(channel))(breakOut)
 
-  def toNotes = notes
+  def toNotes: Vec[OffsetNote] = notes
 }

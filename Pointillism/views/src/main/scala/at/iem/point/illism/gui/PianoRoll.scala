@@ -2,7 +2,7 @@
  *  PianoRoll.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -15,9 +15,11 @@ package at.iem.point.illism
 package gui
 
 import java.awt.{Color, Graphics2D}
+
+import at.iem.point.illism.gui.impl.{PianoRollImpl => Impl}
 import javax.swing.JComponent
-import collection.immutable.{IndexedSeq => Vec}
-import impl.{PianoRollImpl => Impl}
+
+import scala.collection.immutable.{IndexedSeq => Vec}
 
 object PianoRoll {
   def apply(): PianoRoll = new Impl {

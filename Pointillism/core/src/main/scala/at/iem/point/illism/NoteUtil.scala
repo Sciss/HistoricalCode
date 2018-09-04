@@ -2,7 +2,7 @@
  *  NoteUtil.scala
  *  (Pointillism)
  *
- *  Copyright (c) 2013-2014 IEM Graz / Hanns Holger Rutz. All rights reserved.
+ *  Copyright (c) 2013-2018 IEM Graz / Hanns Holger Rutz. All rights reserved.
  *
  *  This software is published under the GNU Lesser General Public License v2.1+
  *
@@ -14,9 +14,10 @@
 package at.iem.point.illism
 
 import de.sciss.midi
-import midi.{Track, TickRate}
-import collection.immutable.{IndexedSeq => Vec}
-import annotation.tailrec
+import de.sciss.midi.{TickRate, Track}
+
+import scala.annotation.tailrec
+import scala.collection.immutable.{IndexedSeq => Vec}
 
 object NoteUtil {
   //  def findMonophones(in: Vec[OffsetNote], overlapTolerance: Double = 0.1): Vec[Vec[OffsetNote]] = {
@@ -62,7 +63,7 @@ object NoteUtil {
   }
 
   def stabbings(notes: Vec[OffsetNote]): Vec[Double] = {
-    notes.flatMap(n => n.offset :: n.stop :: Nil).toSet.toIndexedSeq.sorted
+    notes.flatMap(n => n.offset :: n.stop :: Nil).distinct.sorted
   }
 
   def splitMelodicHarmonic(notes: Vec[OffsetNote], minChordDuration: Double = 0.1, minSeq: Int = 2):
