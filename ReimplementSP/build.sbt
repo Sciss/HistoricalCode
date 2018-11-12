@@ -18,12 +18,14 @@ lazy val root = project.in(file("."))
   .settings(commonSettings)
   .settings(
     libraryDependencies ++= Seq(
-      "de.sciss" %% "fscape-core" % deps.main.soundProcesses
+      "de.sciss" %% "patterns"        % deps.main.patterns,
+      "de.sciss" %% "soundprocesses"  % deps.main.soundProcesses
     )
   )
 
 lazy val deps = new {
   val main = new {
+    val patterns       = "0.6.1"
     val soundProcesses = "3.21.3"
   }
 }
