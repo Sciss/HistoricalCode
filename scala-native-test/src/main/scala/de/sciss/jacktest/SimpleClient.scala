@@ -17,6 +17,8 @@ object SimpleClient {
   var input_port : Ptr[jack_port_t] = _
   var output_port: Ptr[jack_port_t] = _
 
+  final val phaseIncr = 440.0 / 48000 * 2 * Math.PI
+
   /** The process callback for this JACK application is called in a
     * special realtime thread once for each audio cycle.
     *
@@ -26,10 +28,20 @@ object SimpleClient {
     */
   val process: JackProcessCallback = { (nframes: jack_nframes_t, arg: Ptr[_]) =>
     // jack_default_audio_sample_t *in, *out;
-    val in  = jack_port_get_buffer(input_port , nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
-    val out = jack_port_get_buffer(output_port, nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
-    val numBytes = sizeof[jack_default_audio_sample_t] * nframes.toInt
-    string.memcpy(out.asInstanceOf[Ptr[Byte]], in.asInstanceOf[Ptr[Byte]], numBytes)
+    var frameCount: CLong = 0L
+//    val in  = jack_port_get_buffer(input_port , nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
+    val out = jack_port_get_buffer(output_port, nframes).cast[Ptr[jack_default_audio_sample_t]] // .asInstanceOf[Ptr[jack_default_audio_sample_t]]
+//    val numBytes = sizeof[jack_default_audio_sample_t] * nframes.toInt
+    val n: CInt      = nframes.toInt
+    var phase: CLong = frameCount
+    val stop: CLong  = phase + n
+    while (phase < stop) {
+      val x = (Math.sin(phase.toDouble * phaseIncr) * 0.5).toFloat: CFloat
+       out(0) = x
+      phase += 1
+    }
+    frameCount = stop
+//    string.memcpy(out.asInstanceOf[Ptr[Byte]], in.asInstanceOf[Ptr[Byte]], numBytes)
     // System.arraycopy(in, 0, out, 0, /* sizeof[jack_default_audio_sample_t].toInt * */ nframes.toInt) // crashes SN
     0
   }
@@ -51,7 +63,7 @@ object SimpleClient {
 //    const char **ports;
     val server_name: CString = null
     val options: jack_options_t = JackNullOption
-    val statusPtr: Ptr[jack_status_t] = malloc(sizeof[jack_status_t]).asInstanceOf[Ptr[jack_status_t]]
+    val statusPtr: Ptr[jack_status_t] = malloc(sizeof[jack_status_t]).cast[Ptr[jack_status_t]]
 
     /* open a client connection to the JACK server */
 
