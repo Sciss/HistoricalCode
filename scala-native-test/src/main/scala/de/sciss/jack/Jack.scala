@@ -1,6 +1,6 @@
 package de.sciss.jack
 
-import scala.scalanative.native.{Ptr, ULong, Vararg, _}
+import scala.scalanative.native.{Ptr, ULong, CVararg, _}
 
 /** Scala bindings for the Jack audio connection kit C library.
   * See: https://github.com/jackaudio/headers/blob/master/jack.h
@@ -39,7 +39,7 @@ object Jack {
     * caller is not a JACK client.
     */
   def jack_client_open(client_name: CString, options: jack_options_t, status: Ptr[jack_status_t],
-                       server_name: CString, args: Vararg*): Ptr[jack_client_t] = extern
+                       server_name: CString, args: CVararg*): Ptr[jack_client_t] = extern
 
   /** Disconnects an external client from a JACK server.
     *

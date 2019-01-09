@@ -35,7 +35,7 @@ object SimpleClient {
     * JACK calls this shutdown_callback if the server ever shuts down or
     * decides to disconnect the client.
     */
-  val jack_shutdown: JackShutdownCallback = { (arg: Ptr[_]) =>
+  val jack_shutdown: JackShutdownCallback = { arg: Ptr[_] =>
     exit(1)
   }
 
@@ -125,7 +125,8 @@ object SimpleClient {
     if (jack_connect(client, ports(0), jack_port_name (input_port)) != 0)
       fprintf(stderr, c"cannot connect input ports\n")
 
-    free(ports)
+//    free(ports)
+    jack_free(ports)
 
     ports = jack_get_ports(client, DUMMY1, DUMMY1, (JackPortIsPhysical | JackPortIsInput).toULong)
 //    if (ports == null) {
@@ -136,7 +137,8 @@ object SimpleClient {
     if (jack_connect(client, jack_port_name (output_port), ports(0)) != 0)
       fprintf(stderr, c"cannot connect output ports\n")
 
-    free(ports)
+//    free(ports)
+    jack_free(ports)
 
     /* keep running until stopped by the user */
 

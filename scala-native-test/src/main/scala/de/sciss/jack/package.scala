@@ -16,9 +16,9 @@ package object jack {
 
   //  type jack_native_thread_t = pthread_t
 
-  type JackShutdownCallback   = FunctionPtr1[Ptr[_], Unit]
-  type JackProcessCallback    = FunctionPtr2[jack_nframes_t, Ptr[_], CInt]
-  type JackSampleRateCallback = FunctionPtr2[jack_nframes_t, Ptr[_], CInt]
+  type JackShutdownCallback   = CFunctionPtr1[Ptr[_], Unit]
+  type JackProcessCallback    = CFunctionPtr2[jack_nframes_t, Ptr[_], CInt]
+  type JackSampleRateCallback = CFunctionPtr2[jack_nframes_t, Ptr[_], CInt]
 
   //  type JackLatencyCallback    = FunctionPtr2[jack_latency_callback_mode_t, Ptr[_], Unit]
 
