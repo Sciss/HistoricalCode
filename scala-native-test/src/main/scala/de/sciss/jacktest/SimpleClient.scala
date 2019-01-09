@@ -2,7 +2,7 @@ package de.sciss.jacktest
 
 import de.sciss.jack
 
-import scala.scalanative.native._
+import scala.scalanative.native.{sizeof, _}
 import scala.scalanative.native.stdio._
 import scala.scalanative.native.stdlib._
 
@@ -28,7 +28,8 @@ object SimpleClient {
     // jack_default_audio_sample_t *in, *out;
     val in  = jack_port_get_buffer(input_port , nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
     val out = jack_port_get_buffer(output_port, nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
-    // memcpy (out, in, sizeof[jack_default_audio_sample_t] * nframes
+    val numBytes = sizeof[jack_default_audio_sample_t] * nframes.toInt
+    string.memcpy(out.asInstanceOf[Ptr[Byte]], in.asInstanceOf[Ptr[Byte]], numBytes)
     // System.arraycopy(in, 0, out, 0, /* sizeof[jack_default_audio_sample_t].toInt * */ nframes.toInt) // crashes SN
     0
   }
@@ -44,6 +45,7 @@ object SimpleClient {
   def main(args: Array[String]): Unit = {
     val x = jack_client_name_size
     fprintf(stdout, c"Maximum client name size is %d\n", x)
+    fflush(stdout)  // why is this needed?
 
     val client_name: CString = c"simple"
 //    const char **ports;
@@ -90,6 +92,7 @@ object SimpleClient {
 
     // " PRIu32 "
     printf(c"engine sample rate: %d\n", jack_get_sample_rate (client))
+    fflush(stdout)  // why is this needed?
 
     /* create two ports */
 
@@ -144,10 +147,14 @@ object SimpleClient {
 
     /* keep running until stopped by the user */
 
-    fprintf(stdout, c"Running jack loop...\n")
+//    printf(c"Running jack loop...\n")
+    puts(c"Running jack loop...\n")
+    fflush(stdout)  // why is this needed?
 
     // sleep (-1)
-    while(true) ()
+    while(true) {
+      Thread.sleep(1)
+    }
 
     /* this is never reached but if the program
        had some other way to exit besides being killed,
