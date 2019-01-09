@@ -17,19 +17,28 @@ object SimpleClient {
   var input_port : Ptr[jack_port_t] = _
   var output_port: Ptr[jack_port_t] = _
 
-  final val phaseIncr = 440.0 / 48000 * 2 * Math.PI
-  var frameCount: Long = 0L
+  final val Pi2         = 2 * Math.PI
+  final val phaseInc0   = 440.0 / 48000 * Pi2
+  final val phaseInc1   = phaseInc0 * 2
+  final val phaseIncInc = 0.01 / 48000 * Pi2
 
-  def bla(n: Int, out: Ptr[jack_default_audio_sample_t]): Unit = {
-    var phase = frameCount
-    var i     = 0
+  var phase   : Double = 0.0
+  var phaseInc: Double = phaseInc0
+
+  def glissando(n: Int, out: Ptr[jack_default_audio_sample_t]): Unit = {
+    var _phase  = phase
+    var _inc    = phaseInc
+    var i       = 0
     while (i < n) {
-      val x   = (Math.sin(phase.toDouble * phaseIncr) * 0.5).toFloat
+      val x   = (Math.sin(_phase) * 0.5).toFloat
       out(i)  = x
-      phase  += 1
+      _phase  = (_phase + _inc) % Pi2
+      _inc   += phaseIncInc
+      if (_inc > phaseInc1) _inc = phaseInc0
       i      += 1
     }
-    frameCount = phase
+    phase = _phase
+    phaseInc = _inc
   }
 
   /** The process callback for this JACK application is called in a
@@ -39,14 +48,14 @@ object SimpleClient {
     * port to its output port. It will exit when stopped by
     * the user (e.g. using Ctrl-C on a unix-ish operating system)
     */
-  val process: JackProcessCallback = { (nframes: jack_nframes_t, arg: Ptr[_]) =>
+  val process: JackProcessCallback = { (nframes: jack_nframes_t, _: Ptr[_]) =>
     // jack_default_audio_sample_t *in, *out;
 //    val in  = jack_port_get_buffer(input_port , nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
     val out = jack_port_get_buffer(output_port, nframes).cast[Ptr[jack_default_audio_sample_t]] // .asInstanceOf[Ptr[jack_default_audio_sample_t]]
 //    val numBytes = sizeof[jack_default_audio_sample_t] * nframes.toInt
 //    string.memcpy(out.asInstanceOf[Ptr[Byte]], in.asInstanceOf[Ptr[Byte]], numBytes)
     // System.arraycopy(in, 0, out, 0, /* sizeof[jack_default_audio_sample_t].toInt * */ nframes.toInt) // crashes SN
-    bla(nframes.toInt, out)
+    glissando(nframes.toInt, out)
     0
   }
 
@@ -54,7 +63,7 @@ object SimpleClient {
     * JACK calls this shutdown_callback if the server ever shuts down or
     * decides to disconnect the client.
     */
-  val jack_shutdown: JackShutdownCallback = { arg: Ptr[_] =>
+  val jack_shutdown: JackShutdownCallback = { _: Ptr[_] =>
     exit(1)
   }
 
