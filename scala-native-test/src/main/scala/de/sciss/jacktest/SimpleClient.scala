@@ -6,6 +6,7 @@ import scala.scalanative.native._
 import scala.scalanative.native.stdio._
 import scala.scalanative.native.stdlib._
 
+// cf. https://github.com/jackaudio/example-clients/blob/master/simple_client.c
 object SimpleClient {
   import jack._
   import Jack._
@@ -27,7 +28,8 @@ object SimpleClient {
     // jack_default_audio_sample_t *in, *out;
     val in  = jack_port_get_buffer(input_port , nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
     val out = jack_port_get_buffer(output_port, nframes).asInstanceOf[Ptr[jack_default_audio_sample_t]]
-    // memcpy (out, in, sizeof[jack_default_audio_sample_t] * nframes)
+    // memcpy (out, in, sizeof[jack_default_audio_sample_t] * nframes
+    // System.arraycopy(in, 0, out, 0, /* sizeof[jack_default_audio_sample_t].toInt * */ nframes.toInt) // crashes SN
     0
   }
 
@@ -91,8 +93,8 @@ object SimpleClient {
 
     /* create two ports */
 
-    val input_port  = jack_port_register(client, c"input" , JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput .toULong, 0.toULong)
-    val output_port = jack_port_register(client, c"output", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput.toULong, 0.toULong)
+    input_port  = jack_port_register(client, c"input" , JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput .toULong, 0.toULong)
+    output_port = jack_port_register(client, c"output", JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput.toULong, 0.toULong)
 
 //    if ((input_port == null) || (output_port == null)) {
 //      fprintf(stderr, c"no more JACK ports available\n")
@@ -141,6 +143,8 @@ object SimpleClient {
     jack_free(ports)
 
     /* keep running until stopped by the user */
+
+    fprintf(stdout, c"Running jack loop...\n")
 
     // sleep (-1)
     while(true) ()
