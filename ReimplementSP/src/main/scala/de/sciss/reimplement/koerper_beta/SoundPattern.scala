@@ -157,6 +157,19 @@ object SoundPattern {
     }
   }
 
+  def set(e: Elem, coord: Coord)(implicit tx: Txn): Unit = {
+    import numbers.Implicits._
+    val amp   = coord(3).linLin(-1, +1, 0, 1).clip(0, 1)
+    val x     = coord(4).clip(-1, +1)
+    val y     = coord(5).clip(-1, +1)
+    val args: List[ControlSet] = List[ControlSet](
+      "x"   -> x,
+      "y"   -> y,
+      "amp" -> amp
+    )
+    e.syn.set(args: _*)
+  }
+
  */
   }
 }

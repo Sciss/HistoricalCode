@@ -93,5 +93,45 @@ Note that we can still use "normal" pull-based patterns to an extent, as `reset`
 the access to external inputs (e.g. attributes). So a "push-based" use case could perhaps normally expand a pattern,
 but pull after knowingly having prepared the input element which thus will have `hasNext == true` after the reset.
 At least for the first stage of experimentation this might be enough, and no pattern would have to be extended by
-an alternative push-based expansion stream.
+an alternative push-based expansion stream. Needless to say, calling `reset` for each input value would probably
+make it impossible to use nested patterns for the background synth?
 
+The problem is we have to (?) "think forward" here, which is contrary to how patterns work. The if-else indicates
+this problem.
+
+------
+
+```
+If (shouldSync) {
+  Bind(Bind.Map(
+    "play"    -> "foreground",
+    "timbre"  -> timbre
+  ))
+} Else {
+  val amp = lastCoord(3).linLin(-1, +1, 0, 1).clip(0, 1)
+  Bind(Bind.Map(
+    "play"    -> "background",
+    "timbre"  -> timbre,
+    "amp"     -> amp
+  ))
+}
+```
+
+This won't fly (patterns on the RHS in a bind). Should we attempt to model event types?
+
+```
+val voiceId: Pat[Int] = frame.bubble.flatMap(_._1)
+
+If (shouldSync) {
+  ...
+} Else {
+  val vm    = VoiceMgr(numVoices = ???)
+  val voice = vm.
+  val amp   = lastCoord(3).linLin(-1, +1, 0, 1).clip(0, 1)
+  Bind(Bind.Map(
+    "play"    -> "background",
+    "timbre"  -> timbre,
+    "amp"     -> amp
+  ))
+}
+```
