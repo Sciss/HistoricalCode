@@ -35,7 +35,8 @@ object FontEmbedTest extends SimpleSwingApplication {
     val frc         = new FontRenderContext(null, true, false)
     val sb          = fntRegular.getStringBounds("X", frc)
     val fntAscent   = math.ceil(-sb.getY).toInt
-    val fntAdvance  = sb.getWidth.toInt
+    val fntAdvanceF = sb.getWidth
+    val fntAdvance  = fntAdvanceF.toInt
     val lineSpacing = 1.12
     val lineHeight  = math.ceil(sb.getHeight * lineSpacing).toInt
 
@@ -80,7 +81,7 @@ object FontEmbedTest extends SimpleSwingApplication {
     }
 
     new MainFrame {
-      title = "FontEmbedTest"
+      title = s"Font advance = $fntAdvanceF"
       contents = c
     }
   }
