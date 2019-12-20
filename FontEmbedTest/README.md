@@ -8,6 +8,8 @@ rendering.
 
 Builds with [sbt](http://www.scala-sbt.org/). Run using `sbt run`
 
+This project released under Apache 2.0 license.
+
 See 
 
 - https://stackoverflow.com/questions/59428963/openjdk-11-swing-monospaced-font-rendering-problem-on-macos-retina-despite-turne
