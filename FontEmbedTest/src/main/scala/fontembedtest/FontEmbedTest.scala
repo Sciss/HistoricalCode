@@ -3,6 +3,7 @@ package fontembedtest
 import java.awt.font.{FontRenderContext, TextAttribute}
 import java.awt.{Color, Font, GraphicsEnvironment, RenderingHints}
 import java.text.AttributedString
+import java.util.Locale
 
 import scala.swing.{Component, Dimension, Frame, Graphics2D, MainFrame, SimpleSwingApplication}
 import scala.util.Try
@@ -78,6 +79,11 @@ object FontEmbedTest extends SimpleSwingApplication {
 
         g.drawString(as.getIterator, inset, inset + fntAscent + 2 * lineHeight)
       }
+    }
+
+    ge.getAvailableFontFamilyNames(Locale.US).sorted.foreach { n =>
+      val pre = if (n == family) "*" else " "
+      println(s"$pre $n")
     }
 
     new MainFrame {
