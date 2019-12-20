@@ -6,7 +6,7 @@ problem on macOS Retina with default monospaced font Menlo, where under certain 
 (OpenJDK 11), turning off fractional metrics has no effect when using `AttributedString`
 rendering.
 
-__INCOMPLETE__
+Builds with [sbt](http://www.scala-sbt.org/). Run using `sbt run`
 
 See 
 
