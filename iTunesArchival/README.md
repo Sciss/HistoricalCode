@@ -15,3 +15,11 @@ comes with absolutely no warranties. To contact the author, send an email to `co
 Builds with [sbt](http://www.scala-sbt.org/) against Scala 2.13.
 
 Needs `lame` installed for mp3 transcoding.
+
+## running
+
+Example arguments:
+
+```
+--library "/data/music_scanned/iTunes Music Library.xml" --move-from "/Users/rutz/Music/iTunes/iTunes Media/Music" --move-to "/data/music_scanned" --meta
+```

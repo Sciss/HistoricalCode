@@ -7,11 +7,15 @@ lazy val commonSettings = Seq(
   description       := "Personal utility for making backups",
   scalacOptions    ++= Seq("-deprecation", "-unchecked", "-feature", "-Xsource:2.13", "-encoding", "utf8"),
   libraryDependencies ++= Seq(
-    "de.sciss"                %%  "desktop"   % "0.10.5",
-    "de.sciss"                %%  "fileutil"  % "1.1.3",
-    "de.sciss"                %   "submin"    % "0.3.4",
-    "de.sciss"                %%  "kollflitz" % "0.2.3",
-    "org.scala-lang.modules"  %%  "scala-xml" % "1.2.0",
+//    "de.sciss"                %%  "desktop"         % "0.10.5",
+    "de.sciss"                %%  "fileutil"        % "1.1.3",
+//    "de.sciss"                %   "submin"          % "0.3.4",
+    "de.sciss"                %%  "kollflitz"       % "0.2.3",
+    "de.sciss"                %%  "swingplus"       % "0.4.2",
+    "de.sciss"                %%  "model"           % "0.3.4",
+    "org.rogach"              %%  "scallop"          % "3.3.2",
+//    "de.sciss"                %%  "treetable-scala" % "1.5.1",
+    "org.scala-lang.modules"  %%  "scala-xml"       % "1.2.0",
   )
 )
 
