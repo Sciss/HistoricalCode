@@ -1,0 +1,384 @@
+Walkthrough
+
+:::::: v0 ::::::
+
+root {
+   Some( w0 @ Node( 2, Some( w1 @ Node( 1, None ))))
+}
+
+==
+
+root {
+   val w1 = Node( 1, None )
+   val w0 = Node( 2, Some( w1 ))
+   Some( w0 )
+}
+
+==
+
+creation of w1:
+   w1.id    = tx.newID --> (w1Id, <>)
+   w1.value = tx.newIntVar( w1.id, 1 )
+      // alloc( pid ) --> (w1ValId, <>)
+      // intVar.setInit( 1 )
+      //// system.put( (w1ValId, <>), 1 )
+      ///// map.put( w1ValId, <>, 1 )
+      /////// idMap( w1ValId ) += (<>.sum, Write( <>, 1 ))
+      /////// ***markDirty***
+   w1.next  = tx.newVar[ Option[ Node ]]( w1.id, None )
+      // alloc( pid ) --> (w1NextId, <>)
+      // var.setInit( None )
+      //// system.put( (w1NextId, <>), None )
+      ///// map.put( w1NextId, <>, None )
+      /////// idMap( w1NextId ) += (<>.sum, Write( <>, None ))
+
+creation of w0
+   w0.id    = tx.newID --> (w0Id, <>)
+   w0.value = tx.newIntVar( w0.id, 2 )
+      // alloc( pid ) --> (w0ValId, <>)
+      // intVar.setInit( 2 )
+      //// system.put( (w0ValId, <>), 2 )
+      ///// map.put( w0ValId, <>, 2 )
+      /////// idMap( w0ValId ) += (<>.sum, Write( <>, 2))
+   w0.next  = tx.newVar[ Option[ Node ]]( w0.id, Some( w1 @ <> ))
+      // alloc( pid ) --> (w0NextId, <>)
+      // var.setInit( None )
+      //// system.put( (w0NextId, <>), Some( w1 @ <> ))
+      ///// map.put( w0NextId, <>, Some( w1 @ <> ))
+      /////// idMap( w0NextId ) += (<>.sum, Write( <>, Some( w1 @ <> )))
+
+access write:
+   setInit( Some( w0 @ <> ))
+   // system.put( (rootId, <>), Some( w0 @ <> ))
+   //// map.put( rootId, <>, Some( w0 @ <> ))
+   ///// idMap( rootId ) += (<>.sum, Write( <>, Some( w0 @ <> )))
+
+flush:
+   dirty foreach { write =>
+      pers.put( write.id, write.path.ADJUST, write.value )( tx, write.writer )
+   }
+
+question: do the unadjusted path components in write.value pose any problems?
+again step-by-step:
+
+   pers.put( rootId, <v0, v0>, Some( w0 @ <> ))
+   // eventually: ser.write( Some( w0 @ <> ))
+   //// byte 1 (Some)
+   //// w0.id.write
+   ////// writeInt( w0Id )
+   ////// <>.write --> ***!***
+   //// w0.value.write
+   ////// out.writeInt( w0ValId )
+   //// w0.next.write
+   ////// out.writeInt( w0NextId )
+
+so the answer is: YES (it could)
+
+[[[
+   recall how impl.Confluent is reading variables
+
+      final def get( implicit tx: Txn ) : A = access( id.path )
+
+      final def access( acc: S#Acc )( implicit tx: Txn ) : A = {
+         val (in, acc1) = system.access( id.id, acc )
+         readValue( in, acc1 (= suffix) )
+      }
+
+      where system.access finds the longest suffix and returns
+      acc1 = acc.drop( longestSuffixLen )
+]]]
+
+- thus, for example if the longest suffix is the full current path, acc1 is empty,
+  and thus the TxnSerializer's read method gets the empty suffix
+
+- still not clear whether ***!*** is actually problem?
+- i would think that _no_ in the non-melding case, but _yes_ in the melding case
+- because it is imaginable that the missing current version can be
+  gathered from the variable from which it is read (?) -- 
+  question is then if this causes a problem when 'chained'?
+
+- maybe it clears up once we determine who meld versus non-meld is decided
+
+:::::::::::::::::::::::::::::
+
+// v1 : "Invert order of input linked list"
+
+read access at <v0, v0> -->
+   we will find (<v0, v0>, Some( w0 @ <> ))
+   longest prefix has length 2, but we could pre.drop( (longest - 1) & ~1 ), yielding w0 @ <v0, v0>
+
+   read (w0 @ <v0, v0>).next, we find (<>, Some( w1 @ <> ))
+   thus the suffix pre.drop( (longest - 1) & ~1 ) is empty, but w0's accessed path is <v0, v0>, so
+   it yields Some( w1 @ <v0, v0> )
+
+   read (w1 @ <v0, v0>).next, we find None
+
+   w0 assign next
+   w0.next.set( None )
+      //// system.put( (w0NextId, <v0, v0>), None )
+      ///// map.put( w0NextId, <v0, v0>, None )
+      /////// idMap( w0NextId ) += (<v0, v0>.sum, Write( <v0, v0>, None ))
+// WHICH WILL BE RESOLVED AS                      Write( <v0, v1>, None ))
+
+   w1 assign next
+   w1.next.set( Some( w0 @ <v0, v0> ))
+      //// system.put( (w1NextId, <v0, v0>), Some( w0 @ <v0, v0> ))
+      ///// map.put( w1NextId, <v0, v0>, Some( w0 @ <v0, v0> ))
+      /////// idMap( w1NextId ) += (<v0, v0>.sum, Write( <v0, v0>, Some( w0 @ <v0, v0> )))
+// WHICH WILL BE RESOLVED AS                      Write( <v0, v1>, Some( w0 @ <v0, v0> ))
+
+   access.set( Some( w1 @ <v0, v0> ))
+   // system.put( (rootId, <v0, v0>), Some( w1 @ <v0, v0> ))
+   //// map.put( rootId, <v0, v0>, Some( w1 @ <v0, v0> ))
+   ///// idMap( rootId ) += (<v0, v0>.sum, Write( <v0, v0>, Some( w1 @ <v0, v0> )))
+// WHICH WILL BE RESOLVED AS               Write( <v0, v1>, Some( w1 @ <v0, v0> ))
+
+:::::::::::::::::::::::::::::
+
+// v2 : "Delete first node of list, allocate new node x=1, concatenate to input list"
+
+read access at <v0, v0> -->
+   we will find (<v0, v0>, Some( w0 @ <> ))
+   longest prefix has length 2, but we could pre.drop( (longest - 1) & ~1 ), yielding w0 @ <v0, v0>
+
+   read (w0 @ <v0, v0>).next, we find (<>, Some( w1 @ <> ))
+   thus the suffix pre.drop( (longest - 1) & ~1 ) is empty, but w0's accessed path is <v0, v0>, so
+   it yields Some( w1 @ <v0, v0> )
+
+   read (w1 @ <v0, v0>).next, we find None
+
+creation of w2:
+   w2.id    = tx.newID --> (w2Id, <>)
+   w2.value = tx.newIntVar( w2.id, 1 )
+      // alloc( pid ) --> (w2ValId, <>)
+      // intVar.setInit( 1 )
+      //// system.put( (w2ValId, <>), 1 )
+      ///// map.put( w2ValId, <>, 1 )
+      /////// idMap( w2ValId ) += (<>.sum, Write( <>, 1 ))
+      /////// ***markDirty***
+// WHICH WILL BE RESOLVED AS               Write( <v2, v2>, 1 )
+// !!! NOTE, IT'S PROBABLY OK AS WELL:     Write( <>, 1 ) !!!
+
+   w1 assign next
+   w1.next.set( Some( w2 @ <> ))
+      //// system.put( (w1NextId, <v0, v0>), Some( w2 @ <> ))
+      ///// map.put( w1NextId, <v0, v0>, Some( w2 @ <> ))
+      /////// idMap( w1NextId ) += (<v0, v0>.sum, Write( <v0, v0>, Some( w2 @ <> )))
+// WHICH WILL BE RESOLVED AS                      Write( <v0, v2>, Some( w2 @ <> ))
+
+   access.set( Some( w1 @ <v0, v0> ))
+   // system.put( (rootId, <v0, v0>), Some( w1 @ <v0, v0> ))
+   //// map.put( rootId, <v0, v0>, Some( w1 @ <v0, v0> ))
+   ///// idMap( rootId ) += (<v0, v0>.sum, Write( <v0, v0>, Some( w1 @ <v0, v0> )))
+// WHICH WILL BE RESOLVED AS               Write( <v0, v2>, Some( w1 @ <v0, v0> ))
+
+:::::::::::::::::::::::::::::
+
+// v3 : "Add +2 to all elements of right list. Concatenate left and right lists"
+
+read access at <v0, v2> -->
+   we will find (<v0, v2>, Some( w1 @ <v0, v0> ))
+   and through whatever mechanism yield w1 @ <v0, v2>
+
+read access at <v0, v1> -->
+   we will find (<v0, v1>, Some( w1 @ <v0, v0> ))
+   and through whatever mechanism yield w1 @ <v0, v1>
+
+   (w1 @ <v0, v2>).value.transform( _ + 2 )   // translates to set( get + 2 )
+      //// system.put( (w1ValId, <v0, v2>), 3 )
+      ///// map.put( w1ValId, <>, 3 )
+      /////// idMap( w1ValId ) += (<v0, v2>.sum, Write( <v0, v2>, 3 ))
+      /////// ***markDirty***
+// WHICH WILL BE RESOLVED AS                     Write( <v0, v2, v3, v3>, 3 ))
+// AND NOT                                       Write( <v0, v3>, 3 ))
+
+read (w1 @ <v0, v2>).next
+   we will find (<v0, v2>, Some( w2 @ <> ))
+   and through whatever mechanism yield w1 @ <v2, v2>
+
+   (w2 @ <v2, v2>).value.transform( _ + 2 )
+      //// system.put( (w2ValId, <v2, v2>), 3 )
+      ///// map.put( w2ValId, <v2, v2>, 3 )
+      /////// idMap( w2ValId ) += (<v2, v2>.sum, Write( <v2, v2>, 3 ))
+// WHICH WILL BE RESOLVED AS                     Write( <v2, v2, v3, v3>, 3 )
+// AND NOT                                       Write( <v2, v3>, 3 )
+
+read (w1 @ <v0, v1>).next
+   we will find (<v0, v1>, Some( w0 @ <v0, v0> ))
+   and through whatever mechanism yield w0 @ <v0, v1>
+
+read (w0 @ <v0, v1>).next
+   we will find None
+
+(w0 @ <v0, v1>).next.set( Some( w1 @ <v0, v2> ))
+      //// system.put( (w0NextId, <v0, v1>), Some( w1 @ <v0, v2> ))
+      ///// map.put( w0NextId, <v0, v1>, Some( w1 @ <v0, v2> ))
+      /////// idMap( w0NextId ) += (<v0, v1>.sum, Write( <v0, v1>, Some( w1 @ <v0, v2> )))
+// WHICH WILL BE RESOLVED AS                      Write( <v0, v1, v3, v3>, Some( w1 @ <v0, v2> ))
+// AND NOT                                        Write( <v0, v3>, Some( w1 @ <v0, v2> ))
+
+IMPLICIT:   // actually this isn't needed???
+   access.set( Some( w1 @ <v0, v1> ))
+   // system.put( (rootId, <v0, v1>), Some( w1 @ <v0, v1> ))
+   //// map.put( rootId, <v0, v1>, Some( w1 @ <v0, v1> ))
+   ///// idMap( rootId ) += (<v0, v1>.sum, Write( <v0, v1>, Some( w1 @ <v0, v1> )))
+// WHICH WILL BE RESOLVED AS               Write( <v0, v1, v3, v3>, Some( w1 @ <v0, v1> ))
+// AND NOT                                 Write( <v0, v3>, Some( w1 @ <v0, v1> ))
+
+----- so how do we detect the meld here, yielding the desired resolved writes?
+-> in this case, it would be detecting that idMap( w0Id ) has writes for different terminals of the same tree (v0, v1 versus v0, v2)
+-> but is this always the case?
+-> that is to say, can we construct a meld case, where a node appears twice, but only one of its two variants has entries in the write map?
+
+let's try: say we re-construct v3 wihtout adding +2 to the right list:
+
+:::::::::::::::::::::::::::::
+
+// v3 : "Concatenate left and right lists"
+
+read access at <v0, v2> -->
+   we will find (<v0, v2>, Some( w1 @ <v0, v0> ))
+   and through whatever mechanism yield w1 @ <v0, v2>
+
+read access at <v0, v1> -->
+   we will find (<v0, v1>, Some( w1 @ <v0, v0> ))
+   and through whatever mechanism yield w1 @ <v0, v1>
+
+(w0 @ <v0, v1>).next.set( Some( w1 @ <v0, v2> ))
+      //// system.put( (w0NextId, <v0, v1>), Some( w1 @ <v0, v2> ))
+      ///// map.put( w0NextId, <v0, v1>, Some( w1 @ <v0, v2> ))
+      /////// idMap( w0NextId ) += (<v0, v1>.sum, Write( <v0, v1>, Some( w1 @ <v0, v2> )))
+// WHICH WILL BE RESOLVED EITHER AS               Write( <v0, v1, v3, v3>, Some( w1 @ <v0, v2> )
+// OR                                             Write( <v0, v3>, Some( w1 @ <v0, v2> )
+
+IMPLICIT:   // actually this isn't needed???
+   access.set( Some( w1 @ <v0, v1> ))
+   // system.put( (rootId, <v0, v1>), Some( w1 @ <v0, v1> ))
+   //// map.put( rootId, <v0, v1>, Some( w1 @ <v0, v1> ))
+   ///// idMap( rootId ) += (<v0, v1>.sum, Write( <v0, v1>, Some( w1 @ <v0, v1> )))
+// WHICH WILL BE RESOLVED EITHER AS        Write( <v0, v1, v3, v3>, Some( w1 @ <v0, v1> ))
+// OR                                      Write( <v0, v3>, Some( w1 @ <v0, v1> ))
+
+----- now let's try to traverse the list with extended and non-extended paths
+
+the expected sequence is w1/1, w0/2, w1/1, w2/1
+
+read access at <v0, v3>
+--> wooop, the 'implicit' access.set was indeed needed! otherwise we'd have v1 and v2 as possible candidates?
+; but well, let's assume for a moment, we stick to the non-expanded path, and we'll have v1 as nearest ancestor of v3!
+
+so we'd have w1 @ <v0, v3>
+
+    w1.x    --> 1
+    w1.next --> ...
+	it would depend on whether v1 was created before or after v2. so FAILURE
+
+:::::::::::::::::::::::::::::
+
+so the path extension is crucial, and we need to be able to detect the meld.
+- difficult, because var.set(...) doesn't know whether the value is mutable or not.
+(1) could have an overly pessimistic approach -- whenever another version is accessed, we assume the meld
+  (without verifying that that version is actually written anywhere)
+  --> disadvantage: could lead to unnessesary expansions
+(2) could have a re-write, e.g. when detecting an id.write that would require a meld, re-do the whole
+  cached Write seq
+  --> disadvantage: could slow down the write phase unnessarily
+
+a transparent solution could be roughly as follows:
+- we would have a meld { ... } to gather objects from another version.
+- we rely on the these objects being written to a variable, ending up in the Write seq cache....
+- if not, the writing instance would need to declare those objects somehow?
+
+:::::::::::::::::::::::::::::
+
+Is (2) feasible? -- re-executing the flush?
+- it consists basically of a chain of persistent.put call
+- so the question is only, what remains in the 'wrong' writes, do they cause any problems (do they need to be undone)?
+
+For the moment, let us assume the pessimistic approach - a meld is assumed as soon as an independant access is performed in a txn
+
+:::::::::::::::::::::::::::::
+
+ok, then assume the expanded paths in v3, perform traversal:
+
+read access yields w1 @ <v0, v1, v3, v3>
+   x = 1
+next -> we will find (<v0, v1>, Some( w0 @ <v0, v0> ))
+   and through whatever mechanism yield w0 @ <v0, v1, v3, v3>
+   x = 2
+next -> we will find ( <v0, v1, v3, v3>, Some( w1 @ <v0, v2> ))
+   and through whatever mechanism yield w1 @ <v0, v2, v3, v3>
+   x = 3
+next -> we will find ( <v0, v2>, Some( w2 @ <> ))
+   and through whatever mechanism yield w2 @ <v2, v2, v3, v3>
+   x = 3
+
+ok
+
+:::::::::::::::::::::::::::::
+
+thus, so far we have
+(originating id --> longest prefix --> stored value's path --> substituted path)
+
+<v0, v0> --> <v0, v0> --> <> --> <v0, v0>
+suffix = <>
+prefix.term = <v0>
+stored is empty --> duplicate prefix.term = <v0, v0>
+                    plus suffix <> --> <v0, v0>
+
+<v0, v2> --> <v0, v2> --> <v0, v0> --> <v0, v2>
+suffix = <>
+prefix.term = <v2>
+stored is <v0, v0> --> replace term = <v0, v2>
+                       plus suffix <> --> <v0, v2>
+
+<v0, v1> --> <v0, v1> --> <v0, v0> --> <v0, v1>
+suffix = <>
+prefix.term = <v1>
+stored is <v0, v0> --> replace term = <v0, v1>
+                       plus suffix <> --> <v0, v1>
+
+<v0, v2> --> <v0, v2> --> <> --> <v2, v2>
+suffix = <>
+prefix.term = <v2>
+stored is empty --> duplicate prefix.term = <v2, v2>
+                    plus suffix <> --> <v2, v2>
+
+<v0, v1, v3, v3> --> <v0, v1 --> <v0, v0> --> <v0, v1, v3, v3>
+suffix = <v3, v3>
+prefix.term = <v1>
+stored is <v0, v0> --> replace term = <v0, v1>
+                       plus suffix <v3, v3> --> <v0, v1, v3, v3>
+
+<v0, v1, v3, v3> --> <v0, v1, v3, v3> --> <v0, v2> --> <v0, v2, v3, v3>
+suffix = <>
+prefix.term = <v3>
+stored is <v0, v2> --> replace term = <v0, v3>
+                       plus suffix --> <v0, v3> OUCH
+solution? stored doubleterm is <v0, v2>, prefix.doubleterm = <v3, v3>. 
+doubleterm's head elements don't match --> hence add doubleterm (instead of replace term), thus: <v0, v2, v3, v3>
+
+<v0, v2, v3, v3> --> <v0, v2> --> <> --> <v2, v2, v3, v3>
+suffix = <v3, v3>
+prefix.term = <v2>
+stored is empty --> duplicate prefix.term = <v2, v2>
+                    plus suffix <v3, v3> --> <v2, v2, v3, v3>
+
+I still wonder if it wouldn't be easier to just add the resolved current version's suffix when flushing
+
+:::::::::::::::::::::::::::::
+
+the next steps:
+
+- remove `dirty` from cache map -- it's redundant with idMapRef.isEmpty
+- idMapRef clearly needs to be TxnLocal
+- thus, the best would be if indeed Txn would _mix in_ the cache map
+- then we can decide whether idMapRef has to be wrapped in TxnLocal at all,
+  maybe it just needs to be thread safe somehow, e.g. as java.util.concurrent.ConcurrentHashMap ?
+(but as long as Txn are single threaded, we can assume that there will only be concurrent Txns,
+ each carrying their own idMapRef -- they would in any case be independant, because two Txns
+ mean we end up with two new version vertices. And then concurrency is only an issue in flush,
+ and there we would have collisions handled by the db)
+- that is to say, a Txn is created like this: TxnExecutor.defaultAtomic { tx => Txn( tx ); ... }
+  and hence when a Txn is retried, its idMapRef will be empty again, so it should be fine to
+  just store a plain map in the Txn.

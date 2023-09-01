@@ -1,0 +1,21 @@
+::::::: cache maps :::::::
+
+(1)
+
+DurableCacheMapImpl
+   ^
+   |
+DurableConfluentMap
+   ^
+   |
+DataStore
+
+(2)
+
+InMemoryCacheMapImpl
+   ^
+   |
+InMemoryConfluentMap
+   ^
+   |
+TMap
