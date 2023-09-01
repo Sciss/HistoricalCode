@@ -1,0 +1,51 @@
+/*
+ *  NuagesShapeRenderer.scala
+ *  (MutagenTx)
+ *
+ *  Copyright (c) 2015-2016 Hanns Holger Rutz. All rights reserved.
+ *
+ *  This software is published under the GNU General Public License v3+
+ *
+ *
+ *  For further information, please contact Hanns Holger Rutz at
+ *  contact@sciss.de
+ */
+
+package de.sciss.mutagentx
+package visual
+
+import java.awt.Shape
+import java.awt.geom.Ellipse2D
+
+import de.sciss.lucre.stm.Sys
+import prefuse.render.AbstractShapeRenderer
+import prefuse.visual.VisualItem
+
+import scala.swing.Graphics2D
+
+class NuagesShapeRenderer[S <: Sys[S]](size: Int)
+  extends AbstractShapeRenderer {
+
+  private val ellipse = new Ellipse2D.Float()
+
+  protected def getRawShape(vi: VisualItem): Shape = {
+    var x = vi.getX
+    if (x.isNaN || x.isInfinity) x = 0.0
+    var y = vi.getY
+    if (y.isNaN || y.isInfinity) y = 0.0
+    val diam = size * vi.getSize
+    if (diam > 1) {
+      x -= diam / 2
+      y -= diam / 2
+    }
+    ellipse.setFrame(x, y, diam, diam)
+    ellipse
+  }
+
+  override def render(g: Graphics2D, vi: VisualItem): Unit = {
+    val data = vi.get(Visual.COL_MUTA).asInstanceOf[VisualNode[S]]
+    if (data == null) return
+    data.update(getShape(vi))
+    data.render(g, vi)
+  }
+}
