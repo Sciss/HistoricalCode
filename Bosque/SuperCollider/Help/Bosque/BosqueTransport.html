@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; min-height: 17.0px}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0019ba}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #1337a8}
+span.s2 {color: #214fdb}
+span.s3 {font: 13.0px Monaco; color: #1337a8}
+span.s4 {font: 13.0px Monaco; color: #284599}
+span.s5 {font: 13.0px Monaco}
+span.s6 {color: #1949e0}
+span.s7 {font: 13.0px Monaco; color: #516528}
+span.s8 {color: #1142e6}
+span.s9 {color: #0d32ac}
+span.s10 {color: #4c6724}
+span.s11 {color: #606060}
+span.s12 {color: #083aec}
+span.s13 {font: 13.0px Monaco; color: #0d32ac}
+span.s14 {color: #062cb0}
+span.s15 {color: #0019ba}
+span.s16 {color: #2b6f11}
+span.s17 {color: #000000}
+span.s18 {color: #0024b5}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">BosqueTransport</p>
+<p class="p2"><br></p>
+<p class="p3">This class is managing timeline transport (e.g. realtime playback) of a session. The transport is accessible from</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~transp = <span class="s1">Bosque</span>.default.session.transport;</p>
+<p class="p6"><br></p>
+<p class="p3">On the one hand, the transport has methods to start, stop and cue the transport. On the other hand, the transport serves as a model to which observers can listen. Using the standard SuperCollider dependancy system (see <a href="SC://Object"><span class="s2">Object</span></a> help file), observers can monitor transport activity.</p>
+<p class="p6"><br></p>
+<p class="p3"><b>play( &lt;(Integer) pos&gt;, &lt;(Float) rate = 1&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Starts the transport. If the transport is already playing, this does nothing. The optional <span class="s3">pos</span> argument specifies the frame to start to play from. If omitted, transport starts from the document's current cursor position (<span class="s4">Bosque</span><span class="s5">.default.session.timelineView.cursor.position).</span> The <span class="s3">rate</span> argument specifies the playback speed, where the default of <span class="s3">1.0</span> is normal speed, <span class="s3">0.5</span> would be half speed, <span class="s3">-1</span> would be reverse, etc. Note that not all parts of Bosque support playback rates other than <span class="s3">1.0</span> (e.g. the <a href="BosqueAudioPlayer.html"><span class="s6">BosqueAudioPlayer</span></a>).</p>
+<p class="p4"><br></p>
+<p class="p3">When the playback is started, the transport fires a notification <span class="s5">( </span><span class="s7">\play</span><span class="s5">, pos, rate )</span> using the <span class="s3">changed</span> method.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>stop( &lt;(Boolean) setPosition = true&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Stops the transport. If the transport was not playing, this does nothing. When the <span class="s3">setPosition</span> argument is <span class="s3">true</span>, the document's cursor position is set to the current playback frame position. If <span class="s3">setPosition</span> is <span class="s3">false</span>, the cursor will jump back to the initial cursor position before transport was started.</p>
+<p class="p4"><br></p>
+<p class="p3">When the playback is stopped, the transport fires a notification <span class="s5">( </span><span class="s7">\stop</span><span class="s5"> )</span> using the <span class="s3">changed</span> method.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>pause</b></p>
+<p class="p4"><br></p>
+<p class="p3">Pauses the transport. When the playback is paused, the transport fires a notification <span class="s5">( </span><span class="s7">\pause</span><span class="s5"> )</span> using the <span class="s3">changed</span> method.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>resume( &lt;Integer) pos&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">When the playback is resumed, the transport fires a notification <span class="s5">( </span><span class="s7">\resume</span><span class="s5">, pos, rate )</span> using the <span class="s3">changed</span> method.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>currentFrame</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns an <a href="SC://Integer"><span class="s8">Integer</span></a> indicating the current playback position (in sample frames, referring to the document's sample-rate as found in the <a href="BosqueTimeline.html"><span class="s8">BosqueTimeline</span></a> object). For convenience, when transport is not currently playing, this method returns the document's current cursor position (see <a href="BosqueTimelineCursor.html"><span class="s8">BosqueTimelineCursor</span></a>).</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>rate, rate_( &lt;(Float) newValue&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Queries or sets the transports playback speed. When the transport is not already playing, this does nothing. Otherwise, the internal state is adjusted, and the transport fires a notification <span class="s5">( </span><span class="s7">\rate</span><span class="s5">, pos, rate )</span> using the <span class="s3">changed</span> method.<span class="Apple-converted-space"> </span></p>
+<p class="p4"><br></p>
+<p class="p3">Note that the rate is a <b><i>relative</i></b> rate, so that <span class="s3">1.0</span> is normal speed. The time base reference (in frames per second), which is also used for the <span class="s3">currentFrame</span> calculation, is found in the document's <a href="BosqueTimeline.html"><span class="s8">BosqueTimeline</span></a> object instead.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>loop, loop_( &lt;(Span) newLoop&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Queries or sets the transports playback loop <span class="s3">Span</span>. A value of <span class="s3">nil</span> indicates that no loop is used in the playback. If the current playback position is ahead of the loop span, the loop span is also ignored until the cursor is positioned before or inside the loop span.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>isRunning, isPaused</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns a <a href="SC://Boolean"><span class="s8">Boolean</span></a> indicating whether the transport is currently playing or paused.</p>
+<p class="p6"><br></p>
+<p class="p7">Observer example</p>
+<p class="p4"><br></p>
+<p class="p3">An observer is registered with the transport using the standard addDependant method. The helper class <a href="../../../../../workspace/SwingOSC/SuperCollider/Help/SwingOSC/UpdateListener.html"><span class="s8">UpdateListener</span></a> from SwingOSC wraps any function into a proper observer and registers it:</p>
+<p class="p4"><br></p>
+<p class="p5">(</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~updTransp = <span class="s9">UpdateListener</span>.newFor( ~transp, { <span class="s9">arg</span> upd, t, what, pos, rate;</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>[ what, pos, rate ].postln;</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( (what === <span class="s10">\play</span>) or: { what === <span class="s10">\resume</span> }, {</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~obsRout = fork { <span class="s9">inf</span>.do({</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s11">"currentFrame: %\n"</span>.postf( t.currentFrame );</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>0.1.wait;</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>})};</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, { if( (what === <span class="s10">\stop</span>) or: { what === <span class="s10">\pause</span> }, {</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~obsRout.stop; ~obsRout = <span class="s9">nil</span>;</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>})});</p>
+<p class="p5"><span class="Apple-tab-span">	</span>});</p>
+<p class="p5">)</p>
+<p class="p8"><br></p>
+<p class="p3">You see, the transport doesn't produce any timed notifications while running, instead we start a custom <a href="SC://Routine"><span class="s12">Routine</span></a> that loops at any desired rate.</p>
+<p class="p4"><br></p>
+<p class="p3">To remove this observer:</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~updTransp.remove;</p>
+<p class="p8"><span class="Apple-tab-span">	</span></p>
+<p class="p3">If we are just interested in getting the current playback frame at a given interval, without specific notifications about the starting and stopping of the transport, we can use the shortcut method <span class="s13">followCursor</span> in the <a href="Bosque.html"><span class="s8">Bosque</span></a> class:</p>
+<p class="p4"><br></p>
+<p class="p5">(</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~observer = <span class="s14">Bosque</span>.followCursor({ <span class="s14">arg</span> frame;</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s11">"currentFrame: %\n"</span>.postf( frame )});</p>
+<p class="p5">)</p>
+<p class="p4"><br></p>
+<p class="p3">To remove this observer:</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~observer.remove;</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p7">Dynamic playback rate example</p>
+<p class="p4"><br></p>
+<p class="p3">Finally, an example is presented that maps an envelope region to the playback speed. First the creation of the envelope region:</p>
+<p class="p4"><br></p>
+<p class="p5">(</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s15">Bosque</span>.default.session;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~transp<span class="Apple-tab-span">	</span>= ~doc.transport;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor<span class="Apple-tab-span">	</span>= <span class="s15">Bosque</span>.default.timelineEditor;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~span<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s15">Span</span>( 0, 30 * 44100 );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor.insertSpan( ~doc, ~span );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.editScroll( -1, ~span );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~track<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= ~editor.addTrack( ~doc, <span class="s16">\Speed</span> );</p>
+<p class="p9"><span class="s17"><span class="Apple-tab-span">	</span>~edit<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= </span>JSyncCompoundEdit<span class="s17">( </span><span class="s11">"Customize Track"</span><span class="s17"> );</span></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~track.editCtrlSpec( -1, <span class="s15">ControlSpec</span>( 0.125, 4.0, <span class="s16">\exp</span>, units: <span class="s11">" x"</span> ), ~edit );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.undoManager.addEdit( ~edit.performAndEnd );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~stake<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s15">BosqueEnvRegionStake</span>( ~span, <span class="s16">\Env</span>, ~track, env: [ 0, 0, 7, 1, 10, 0.6 ]);</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor.addStake( ~doc, ~stake );</p>
+<p class="p5">)</p>
+<p class="p8"><br></p>
+<p class="p5">(</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~observer = <span class="s14">Bosque</span>.followCursor({ <span class="s14">arg</span> frame;</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~transp.rate = ~track.map( frame )}, offline: <span class="s18">false</span> );</p>
+<p class="p5">)</p>
+<p class="p8"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~transp.play( 0, ~track.map( 0 ));</p>
+<p class="p8"><br></p>
+<p class="p3">To remove this speed adjustment:</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~observer.remove;</p>
+<p class="p4"><br></p>
+<p class="p10"><br></p>
+<p class="p11">__________</p>
+<p class="p11">this file last modified: 25-aug-08</p>
+</body>
+</html>

@@ -1,0 +1,15 @@
+
+	.doTimeline({ arg tl; tl.rate_(44100).span_(Span(0, 10584000))})
+	.doTimelineView({ arg tlv; tlv.span_(Span(618716, 3264716)).doCursor({ arg csr; csr.position_(0)}).doSelection({ arg sel; sel.span_(Span(0, 0))})})
+	.doAudioFiles({ arg af; af.addAll(this,
+	[ BosqueAudioFile("/Volumes/egm/snd/hh/CrosshatchCutL.wav"), BosqueAudioFile("/Volumes/egm/snd/hh/CrosshatchCutCutFd.aif"), BosqueAudioFile("/Volumes/egm/snd/hh/FranzieFBCombCut.aif") ])})
+	.doBusConfigs({ arg b; b.addAll(this,
+	[ BosqueBusConfig(0, 1, 1).name_('Bus 1').connections_([ [ 1.0 ] ]), BosqueBusConfig(1, 1, 1).name_('Silent') ])})
+	.doTracks({ arg tr; tr.addAll(this,
+	[ BosqueTrack(-1).name_('Markers'), BosqueTrack(0).name_('Track_1').busConfig_(BosqueBusConfig(1, 1, 1).name_('Silent')), BosqueTrack(1).name_('Track_2'), BosqueTrack(2).name_('Track_3'), BosqueTrack(3).name_('Track_4') ])})
+	.doTrail({ arg tr; tr.rate_(44100).addAll(this,
+	[ BosqueAudioRegionStake(Span(45693, 892821), "CrosshatchCutL", BosqueTrack(0).name_('Track_1').busConfig_(BosqueBusConfig(1, 1, 1).name_('Silent')), Color(0.4375, 0.5, 0.0, 1.0), BosqueFade('lin', 0, 0), BosqueFade('lin', 0, 0), 1.0, 0, BosqueAudioFile("/Volumes/egm/snd/hh/CrosshatchCutCutFd.aif")), BosqueFuncRegionStake(Span(914637, 980458), 'Pause', BosqueTrack(3).name_('Track_4'), Color(0.6, 0.0, 0.0, 1.0), BosqueFade('lin', 0, 0), BosqueFade('lin', 0, 0), 1.0, "~pause", nil, 'pre'), BosqueAudioRegionStake(Span(1009385, 1896864), "FranzieFBCombCut", BosqueTrack(0).name_('Track_1').busConfig_(BosqueBusConfig(1, 1, 1).name_('Silent')), Color(0.0, 0.6, 0.0, 1.0), BosqueFade('lin', 0, 0), BosqueFade('lin', 0, 0), 1.0, 0, BosqueAudioFile("/Volumes/egm/snd/hh/FranzieFBCombCut.aif")), BosqueFuncRegionStake(Span(1911560, 1977381), 'Pause', BosqueTrack(3).name_('Track_4'), Color(0.6, 0.0, 0.0, 1.0), BosqueFade('lin', 0, 0), BosqueFade('lin', 0, 0), 1.0, "~pause", nil, 'pre') ])})
+	.doVolEnv({ arg tr; tr.rate_(44100).addAll(this,
+	[  ])})
+	.doMarkers({ arg m; m.rate_(nil).addAll(this,
+	[ BosqueMarkerStake(24923, 'Pt1'), BosqueMarkerStake(992770, 'Pt2') ])})

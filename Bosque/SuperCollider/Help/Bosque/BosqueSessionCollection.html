@@ -1,0 +1,104 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {font: 13.0px Monaco; color: #0000bf}
+span.s2 {color: #0000ff}
+span.s3 {font: 13.0px Monaco; color: #000000}
+span.s4 {font: 13.0px Monaco; color: #007300}
+span.s5 {font: 13.0px Monaco}
+span.s6 {color: #606060}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">BosqueSessionCollection</p>
+<p class="p2"><br></p>
+<p class="p3">The <span class="s1">BosqueSessionCollection</span> is a class with many similarities to a regular SuperCollider <a href="SC://SequenceableCollection"><span class="s2">SequenceableCollection</span></a> class: If has methods to add or remove elements, and those elements<span class="Apple-converted-space">  </span>can be accessed by an <a href="SC://Integer"><span class="s2">Integer</span></a> index.</p>
+<p class="p4"><br></p>
+<p class="p3">However, <span class="s1">BosqueSessionCollection</span> is specialized in that it assumes its elements implement some methods, e.g. name to return their names, and its manipulation methods usually take a <span class="s1">source</span> object as their first argument, indicating that this source is the originator of the manipulation. Whenever source is not nil, the collection will notify registered observers about the manipulation.</p>
+<p class="p5"><br></p>
+<p class="p3"><b>add( &lt;(Object) source&gt;, &lt;(Object) object&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Adds an <span class="s1">object</span> to the collection. If <span class="s1">source</span> is not <span class="s1">nil</span>, delivers a notification <span class="s3">( </span><span class="s4">\add</span><span class="s3">, object )</span> to registered observers. Note that <span class="s1">object.name</span> must be <b><i>unique</i></b>, e.g. there cannot be two objects in the collection that have the same name. If you try to add an object with a name that is already found in the collection, an error is thrown.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addAll( &lt;(Object) source&gt;, &lt;(Collection) objects&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Adds several <span class="s1">objects</span> to the collection. If <span class="s1">source</span> is not <span class="s1">nil</span>, delivers a notification <span class="s5">( </span><span class="s4">\add</span><span class="s5">, *objects )</span> to registered observers.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>remove( &lt;(Object) source&gt;, &lt;(Object) object&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Removes an <span class="s1">object</span> from the collection. If <span class="s1">source</span> is not <span class="s1">nil</span> and the <span class="s1">object</span> was included in the collection, delivers a notification <span class="s5">( </span><span class="s4">\remove</span><span class="s5">, object )</span> to registered observers.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>removeAll( &lt;(Object) source&gt;, &lt;(Collection) objects&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Removes several <span class="s1">objects</span> from the collection. If <span class="s1">source</span> is not <span class="s1">nil</span>, delivers a notification <span class="s5">( </span><span class="s4">\remove</span><span class="s5">, *objects )</span> to registered observers.</p>
+<p class="p4"><b></b><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>size</b></p>
+<p class="p4"><b></b><br></p>
+<p class="p3">Returns the number of elements in the collection (<a href="SC://Integer"><span class="s2">Integer</span></a>).</p>
+<p class="p4"><b></b><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>isEmpty, notEmpty</b></p>
+<p class="p4"><b></b><br></p>
+<p class="p3">Returns whether the collection is empty or not empty (<a href="SC://Integer"><span class="s2">Boolean</span></a>).</p>
+<p class="p4"><b></b><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>at( &lt;(Integer) index&gt; )</b></p>
+<p class="p4"><b></b><br></p>
+<p class="p3">Returns the element at a given <span class="s1">index</span>, or <span class="s1">nil</span> if the <span class="s1">index</span> is out of range.</p>
+<p class="p4"><b></b><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>indexOf</b></p>
+<p class="p4"><b></b><br></p>
+<p class="p3">Returns the <a href="SC://Integer"><span class="s2">Integer</span></a> index of an element in the collection, or <span class="s1">nil</span> if the element is not included in the collection.</p>
+<p class="p4"><b></b><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>getAll</b></p>
+<p class="p4"><b></b><br></p>
+<p class="p3">Returns a <a href="SC://SequenceableCollection"><span class="s2">SequenceableCollection</span></a> with all elements in the collection. This is a copy so it's safe to manipulate the result.</p>
+<p class="p2"><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>do, collect, select, detect</b></p>
+<p class="p4"><b></b><br></p>
+<p class="p3">Convenience methods that reproduce some of the regular <a href="SC://SequenceableCollection"><span class="s2">SequenceableCollection</span></a> behaviour.</p>
+<p class="p4"><b></b><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>find( &lt;(Symbol) name&gt; )</b></p>
+<p class="p4"><b></b><br></p>
+<p class="p3">Returns the element in the collection that has a given name, or <span class="s1">nil</span> if no element with that name was found.</p>
+<p class="p4"><b></b><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>includes( &lt;(Object) object&gt; )</b></p>
+<p class="p4"><b></b><br></p>
+<p class="p3">Detects whether an object is included in the collection or not (<a href="SC://Boolean"><span class="s2">Boolean</span></a>).</p>
+<p class="p4"><b></b><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>createUniqueName( &lt;(String) ptrn&gt;, &lt;(Integer) count&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Creates a unique name for an element to be inserted into the collection. This method takes a <span class="s1">ptrn</span> (pattern) argument and a start <span class="s1">count</span> (counter) argument to synthesize the name. The pattern string should contain a percent character <span class="s1">%</span> which is replaced by the <span class="s1">count</span> argument. If a name with a given <span class="s1">count</span> already exists in the collection, the <span class="s1">count</span> value is incremented and a new name is synthesized, until a unique name has been found and is returned (<a href="SC://Symbol"><span class="s2">Symbol</span></a>). Example:</p>
+<p class="p4"><br></p>
+<p class="p6"><span class="Apple-tab-span">	</span>myCollection.createUniqueName( <span class="s6">"Track_%"</span>, 1 );</p>
+<p class="p4"><br></p>
+<p class="p7"><br></p>
+<p class="p8">__________</p>
+<p class="p8">this file last modified: 17-aug-08</p>
+</body>
+</html>

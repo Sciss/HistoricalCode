@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #0000ff}
+span.s2 {font: 13.0px Monaco; color: #0000bf}
+span.s3 {color: #0000bf}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">BosqueAudioFile</p>
+<p class="p2"><br></p>
+<p class="p3">This class represents an audio file contained in a <a href="BosqueSession.html"><span class="s1">BosqueSession</span></a>. A <a href="BosqueSessionCollection.html"><span class="s1">BosqueSessionCollection</span></a> containing all <span class="s2">BosqueAudioFile</span> objects is found via</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc = <span class="s3">Bosque</span>.default.session;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~audioFiles = ~doc.audioFiles;</p>
+<p class="p6"><br></p>
+<p class="p3"><b>*&lt;&gt;overviews</b></p>
+<p class="p4"><br></p>
+<p class="p3">This global <a href="SC://Boolean"><span class="s1">Boolean</span></a> parameter specifies whether the <a href="BosqueTimelineEditor.html"><span class="s1">BosqueTimelineEditor</span></a> window should display <a href="BosqueAudioRegionStake.html"><span class="s1">BosqueAudioRegionStake</span></a> objects with a corresponding waveform overview or not. The current implementation is very bad regarding memory usage (since for each audio file a separate <a href="../../../../../workspace/SwingOSC/SuperCollider/Help/SwingOSC/JSCSoundFileView.html"><span class="s1">JSCSoundFileView</span></a> with its own dedicated double buffered image is kept), so you might encounter <span class="s2">OutOfMemoryErrors</span> when using two many audio files with overviews enabled. In that case, the only solution at the moment is to switch of overviews (using <span class="s2">BosueqAudioFile.overviews_( false )</span> before launching <a href="Bosque.html"><span class="s1">Bosque</span></a>).</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>path</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the full path (<a href="SC://String"><span class="s1">String</span></a>) of the audio file. Currently, no information about relative directory structures is stored with a <a href="BosqueSession.html"><span class="s1">BosqueSession</span></a>, so when you copy a session along with its audio files to a new location, you will get errors when trying to open the session. The current workaround is to open the session <span class="s2">.txt</span> file with a text editor and using find-and-replace to move the audio file paths to the new location.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>name</b></p>
+<p class="p4"><br></p>
+<p class="p3">The human readable name (<a href="SC://String"><span class="s1">String</span></a>) of the audio file, basically the filename without extension.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>numChannels</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the number of channels (<a href="SC://Integer"><span class="s1">Integer</span></a>) the audio file has.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>numFrames</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the number of sample frames (<a href="SC://Integer"><span class="s1">Integer</span></a>) the audio file has.</p>
+<p class="p4"><br></p>
+<p class="p7"><br></p>
+<p class="p8">__________</p>
+<p class="p8">this file last modified: 17-aug-08</p>
+</body>
+</html>

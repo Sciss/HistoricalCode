@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {font: 13.0px Monaco; color: #0019ba}
+span.s2 {color: #0000ff}
+</style>
+</head>
+<body>
+<p class="p1">BosqueTrail</p>
+<p class="p2"><br></p>
+<p class="p3">A <span class="s1">BosqueTrail</span> is a class competing with <a href="BosqueSessionCollection.html"><span class="s2">BosqueSessionCollection</span></a>. However, the trail sorts its elements (instances of <span class="s1">Stake</span>, e.g. <a href="BosqueRegionStake.html"><span class="s2">BosqueRegionStake</span></a> or <a href="BosqueMarkerStake.html"><span class="s2">BosqueMarkerStake</span></a> objects) by time and allows you to access objects by time frames or time spans. Also, the stakes are considered immutable objects, so editing a stake is basically creating a modified copy of a stake, removing the old stake and adding the new one.</p>
+<p class="p4"><br></p>
+<p class="p3">The trail manages a double-sorted list of the stakes: once sorted by their span's start value, once sorted by their span's stop value. Many methods have a <span class="s1">byStart</span> argument that specifies whether the operation is to be performed on the list sorted by start value (<span class="s1">true</span>, the default) or the one sorted by stop values (<span class="s1">false</span>).</p>
+<p class="p5"><br></p>
+<p class="p3"><b>span</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <span class="s1">Span</span> covered by the trail, e.g. the <span class="s1">Span</span> between the start of the first stake and the stop of the last stake.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>get( &lt;(Integer) idx&gt;, &lt;(Boolean) byStart = true&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <span class="s1">Stake</span> at a given index <span class="s1">idx</span>.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>numStakes</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the number of stakes (<a href="SC://Integer"><span class="s2">Integer</span></a>) included in the trail.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>contains( &lt;(Stake) stake&gt; )</b></p>
+<p class="p4"><b></b><br></p>
+<p class="p3">Queries whether a given <span class="s1">stake</span> is included in the trail or not (<a href="SC://Boolean"><span class="s2">Boolean</span></a>).</p>
+<p class="p4"><b></b><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>indexOf( &lt;(Stake) stake&gt;, &lt;(Boolean) byStart = true&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the index (<span class="s1">Integer</span>) of a given <span class="s1">stake</span> in one of the two stake lists maintained by the trail. A value <span class="s1">&lt; 0</span> indicates that the stake is not included in the trail.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>indexOfPos( &lt;(Integer) pos&gt;, &lt;(Boolean) byStart = true&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the "insertion index" (<a href="SC://Integer"><span class="s2">Integer</span></a>) of a given frame <span class="s1">pos</span> (position) in the trail. If a stake exists whose span contains the given position, its index is returned. Otherwise the returned value is <span class="s1">(-(insertion point) - 1)</span>. The insertion point is defined as the point at which a stake with a given span's start (for <span class="s1">byStart == true</span>) or stop (for <span class="s1">byStart == false</span>) would be inserted into the trail's list: the index of the first stake whose start/stop value is greater than <span class="s1">pos</span>, or <span class="s1">numStakes</span>, if all stakes in the list have a span start/stop of less than the specified <span class="s1">pos</span>.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>getAll( &lt;(Boolean) byStart = true&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns a copy of the internal <span class="s1">Collection</span> of stakes, either sorted by start or by stop.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>add( &lt;(Object) source&gt;, &lt;(Stake) stake&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Inserts a <span class="s1">stake</span> into the trail. The <span class="s1">source</span> object is used to identify the originator of the modification when firing a notification.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addAll( &lt;(Object) source&gt;, &lt;(Collection) stakes&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Inserts several <span class="s1">stakes</span> into the trail. The <span class="s1">source</span> object is used to identify the originator of the modification when firing a notification.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>remove( &lt;(Object) source&gt;, &lt;(Stake) stake&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Removes a <span class="s1">stake</span> from the trail. The <span class="s1">source</span> object is used to identify the originator of the modification when firing a notification.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>removeAll( &lt;(Object) source&gt;, &lt;(Collection) stakes&gt; )</b></p>
+<p class="p6"><br></p>
+<p class="p3">Removes several <span class="s1">stakes</span> from the trail. The <span class="s1">source</span> object is used to identify the originator of the modification when firing a notification.</p>
+<p class="p6"><br></p>
+<p class="p7">__________</p>
+<p class="p7">this file last modified: 17-aug-08</p>
+</body>
+</html>

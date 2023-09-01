@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #0024b5}
+span.s2 {color: #0030f2}
+span.s3 {font: 13.0px Monaco; color: #062cb0}
+span.s4 {font: 13.0px Monaco}
+span.s5 {font: 13.0px Monaco; color: #2b6f11}
+span.s6 {color: #0022f8}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">BosqueTimelineSelection</p>
+<p class="p2"><br></p>
+<p class="p3">This class represents a (graphical user interface) selection span in a session's timeline. At the moment, there is exactly one selection available:</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc <span class="Apple-converted-space">      </span>= <span class="s1">Bosque</span>.default.session;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~selection = ~doc.timelineView.selection;</p>
+<p class="p6"><br></p>
+<p class="p3"><b>timeline</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="BosqueTimeline.html"><span class="s2">BosqueTimeline</span></a> instance to which this selection refers.</p>
+<p class="p6"><br></p>
+<p class="p3"><b>span, span_( &lt;(Span) newSpan&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Queries or sets the selection span (start and stop are measured in sample frames). <b>Note</b> however, that you should not call <span class="s3">span_</span> directly, but use the <span class="s3">editSelect</span> method of the <a href="BosqueSession.html"><span class="s2">BosqueSession</span></a> instead, since that way the selecting operation is properly inserted in the undo manager.</p>
+<p class="p4"><br></p>
+<p class="p3">Modification of the selection span results in a notification <span class="s4">( </span><span class="s5">\changed</span><span class="s4">, newSpan )</span> being delivered to registered observers. Often you want to observe the <a href="BosqueTimelineView.html"><span class="s6">BosqueTimelineView</span></a> instead however.</p>
+<p class="p4"><br></p>
+<p class="p7"><br></p>
+<p class="p8">__________</p>
+<p class="p8">this file last modified: 17-aug-08</p>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #606060}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #2b6f11}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; min-height: 17.0px}
+p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #0019ba}
+span.s2 {color: #0022f8}
+span.s3 {font: 13.0px Monaco; color: #0024b5}
+span.s4 {font: 13.0px Monaco}
+span.s5 {font: 13.0px Monaco; color: #2b6f11}
+span.s6 {color: #000000}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">BosqueTimelineView</p>
+<p class="p2"><br></p>
+<p class="p3">This class represents a (graphical user interface) view of a session's timeline. At the moment, there is exactly one view available:</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc<span class="Apple-converted-space">  </span>= <span class="s1">Bosque</span>.default.session;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~view = ~doc.timelineView;</p>
+<p class="p6"><br></p>
+<p class="p3">However, in a future version, there might be several views, allowing you to see different zoom levels of the timeline in different panels. The timeline view comprises a visible span, a cursor, and a selection.</p>
+<p class="p6"><br></p>
+<p class="p3"><b>timeline</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="BosqueTimeline.html"><span class="s2">BosqueTimeline</span></a> instance to which this view refers.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>cursor</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="BosqueTimelineCursor.html"><span class="s2">BosqueTimelineCursor</span></a> instance displayed in this view.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>selection</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="BosqueTimelineSelection.html"><span class="s2">BosqueTimelineSelection</span></a> instance displayed in this view.</p>
+<p class="p4"><br></p>
+<p class="p7"><br></p>
+<p class="p3"><b>span, span_( &lt;(Span) newSpan&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Queries or sets the time <span class="s3">Span</span> (the part of the timeline) displayed in this view. Adjusting the span will zoom in or out in the <a href="BosqueTimelineEditor.html"><span class="s2">BosqueTimelineEditor</span></a> window. <b>Note</b> however, that you should not call <span class="s3">span_</span> directly, but use the <span class="s3">editScroll</span> method of the <a href="BosqueSession.html"><span class="s2">BosqueSession</span></a> instead, since that way the scrolling/zooming operation is properly inserted in the undo manager.</p>
+<p class="p4"><br></p>
+<p class="p6"><br></p>
+<p class="p8">Observing the view</p>
+<p class="p4"><br></p>
+<p class="p3">When the view's span is adjusted, a notification <span class="s4">( </span><span class="s5">\scrolled</span><span class="s4">, span )</span> is delivered to registered observers. While the cursor and selection objects have their own notification delivery, for convenience their notifications are forwarded to observers of the view: If the cursor position is modified, a notification <span class="s4">( </span><span class="s5">\positioned</span><span class="s4">, pos )</span> is delivered, if the selection span changes, a notification <span class="s4">( </span><span class="s5">\selected</span><span class="s4">, span )</span> is delivered.</p>
+<p class="p4"><br></p>
+<p class="p3">Here is an example of listening for selection changes:</p>
+<p class="p4"><br></p>
+<p class="p5">(</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~updView = <span class="s1">UpdateListener</span>.newFor( ~view, { <span class="s1">arg</span> upd, view, newSpan;</p>
+<p class="p9"><span class="s6"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>"Now the selection is %\n"<span class="s6">.postf( newSpan );</span></p>
+<p class="p10"><span class="s6"><span class="Apple-tab-span">	</span>}, </span>\scrolled<span class="s6"> );</span></p>
+<p class="p5">)</p>
+<p class="p11"><br></p>
+<p class="p3">Now programmatically scroll the view to test our observer:</p>
+<p class="p11"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.editScroll( -1, <span class="s1">Span</span>( 44100, 88200 ));</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.editScroll( -1, <span class="s1">Span</span>( 88200, 220500 ));</p>
+<p class="p11"><br></p>
+<p class="p3">To remove the observer:</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~updView.remove;</p>
+<p class="p4"><br></p>
+<p class="p7"><br></p>
+<p class="p12">__________</p>
+<p class="p12">this file last modified: 17-aug-08</p>
+</body>
+</html>

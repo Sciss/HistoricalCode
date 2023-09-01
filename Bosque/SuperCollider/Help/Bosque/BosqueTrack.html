@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #2c4796}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; min-height: 17.0px}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #606060}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #ad1d13}
+p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p13 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {font: 13.0px Monaco; color: #344b90}
+span.s2 {color: #4565c0}
+span.s3 {color: #355ccc}
+span.s4 {color: #0019ba}
+span.s5 {font: 13.0px Monaco; color: #304993}
+span.s6 {color: #4062c4}
+span.s7 {color: #3b5fc8}
+span.s8 {font: 13.0px Monaco; color: #2c4796}
+span.s9 {font: 13.0px Monaco; color: #606060}
+span.s10 {color: #2f58d1}
+span.s11 {color: #000000}
+span.s12 {color: #2b6f11}
+span.s13 {color: #606060}
+span.s14 {color: #1142e6}
+span.s15 {color: #2854d6}
+span.s16 {font: 13.0px Monaco; color: #1e3fa0}
+span.s17 {color: #193ba4}
+span.s18 {color: #062cb0}
+span.s19 {color: #1949e0}
+span.s20 {font: 13.0px Monaco; color: #193ba4}
+span.s21 {font: 13.0px Monaco; color: #0d32ac}
+span.s22 {color: #083aec}
+span.s23 {font: 13.0px Monaco; color: #45691f}
+span.s24 {color: #0030f2}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">BosqueTrack</p>
+<p class="p2"><br></p>
+<p class="p3">A <span class="s1">BosqueTrack</span> represents a track in a <a href="BosqueSession.html"><span class="s2">BosqueSession</span></a>. The tracks of a session are organized as a <a href="BosqueSessionCollection.html"><span class="s3">BosqueSessionCollection</span></a> accessible from</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="s4">Bosque</span>.default.session.tracks;</p>
+<p class="p4"><span class="Apple-tab-span">	</span></p>
+<p class="p3">The currently selected tracks are accessible from</p>
+<p class="p4"><span class="Apple-tab-span">	</span></p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="s4">Bosque</span>.default.session.selectedTracks;</p>
+<p class="p4"><span class="Apple-tab-span">	</span></p>
+<p class="p3">A track is uniquely identified by its <span class="s5">trackID</span> field. A track can be associated with an audio bus in the form of a <a href="BosqueBusConfig.html"><span class="s6">BosqueBusConfig</span></a> stored in its <span class="s5">busConfig</span> field, a control bus in the form of a <a href="SC://Integer"><span class="s6">Integer</span></a> index stored in its <span class="s5">ctrlBusIndex</span> field, and a <a href="SC://ControlSpec"><span class="s6">ControlSpec</span></a> for mapping breakpoint function (envelope) values, stored in its <span class="s5">ctrlSpec</span> field. A track has a human readable <span class="s5">name</span> <a href="SC://String"><span class="s7">String</span></a>, and has a <a href="SC://Boolean"><span class="s7">Boolean</span></a> <span class="s5">muted</span> flag.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p6">Programmatically creating a track</p>
+<p class="p7"><br></p>
+<p class="p3">Let's just first create a new track in the current session that we will use for programmatic manipulation.</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc = <span class="s4">Bosque</span>.default.session;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor = <span class="s4">Bosque</span>.default.timelineEditor;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~track = ~editor.addTrack( ~doc );</p>
+<p class="p7"><br></p>
+<p class="p6">Undo-aware manipulation methods</p>
+<p class="p7"><br></p>
+<p class="p3">Instead of setting these values directly, using the methods <span class="s8">busConfig_</span>, <span class="s8">ctrlBusIndex_</span>, <span class="s8">ctrlSpec_</span> etc., you will usually use the UndoManager-aware methods <span class="s8">editBusConfig</span>, <span class="s8">editCtrlBusIndex</span>, <span class="s8">editCtrlSpec</span>, <span class="s8">editRename</span>, and <span class="s8">editMute</span>. There basic signature is</p>
+<p class="p4"><br></p>
+<p class="p8"><span class="Apple-tab-span">	</span>edit&lt;PropertyName&gt;( &lt;source&gt;, &lt;propertyValue&gt;, &lt;edit&gt; );</p>
+<p class="p9"><br></p>
+<p class="p3"><span class="s8">propertyName</span> is usually one of the above mentioned, e.g. <span class="s9">"busConfig"</span>, or <span class="s9">"ctrlSpec"</span>. The first letter is capitalized in the method name, so the methods are <span class="s8">editBusConfig</span>, <span class="s8">editCtrlSpec</span>, etc. <span class="s8">source</span> is an arbitrary object that serves as a handle to the originator to the edit (manipulation). Some classes look at that source to determine if they were manipulating an object themselves or if the originator was something different.<span class="Apple-converted-space">  </span><span class="s8">propertyValue</span> is the value to which the property should be set, e.g. an instance of <a href="BosqueBusConfig.html"><span class="s10">BosqueBusConfig</span></a>, a <a href="SC://ControlSpec"><span class="s10">ControlSpec</span></a>, etc. Finally, <span class="s8">edit</span> is an instance of <span class="s8">JSyncCompoundEdit</span>, the object representing the edit (or a series of edits that belong together). The actual manipulation (e.g. renaming the track) is performed when the <span class="s8">performEdit</span> method is called on the <span class="s8">edit</span>. The edit should then be ended using the <span class="s8">end</span> method (or we just use the shortcut call to <span class="s8">performAndEnd</span>), and registered with the undo manager, using its <span class="s8">addEdit</span> method.</p>
+<p class="p4"><br></p>
+<p class="p3">Let us rename our track, and set the control-spec and control-bus-index:</p>
+<p class="p9"><br></p>
+<p class="p5">(</p>
+<p class="p10"><span class="s11"><span class="Apple-tab-span">	</span>~edit = </span><span class="s4">JSyncCompoundEdit</span><span class="s11">( </span>"Track Customization"<span class="s11"> );</span></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~track.editRename( -1, <span class="s12">\MyTrack</span>, ~edit );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~track.editCtrlSpec( -1, <span class="s4">ControlSpec</span>( 30, 16000, <span class="s12">\exp</span>, 0.0, 1000, <span class="s13">" Hz"</span> ), ~edit );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~track.editCtrlBusIndex( -1, 100, ~edit );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.undoManager.addEdit( ~edit.performAndEnd );</p>
+<p class="p5">)</p>
+<p class="p4"><br></p>
+<p class="p6">Shortcut for finding a track</p>
+<p class="p7"><br></p>
+<p class="p3">The <a href="Bosque.html"><span class="s14">Bosque</span></a> class provides a utility method to retrieve a track by its name:</p>
+<p class="p4"><br></p>
+<p class="p11"><span class="s11"><span class="Apple-tab-span">	</span></span><span class="s4">Bosque</span><span class="s11">.track( </span><span class="s12">\MyTrack</span><span class="s11"> );<span class="Apple-tab-span">	</span></span>// --&gt; a BosqueTrack</p>
+<p class="p7"><br></p>
+<p class="p6">Evaluating breakpoint functions (envelopes)</p>
+<p class="p4"><br></p>
+<p class="p3">When a breakpoint function is placed on a track, in form of a <a href="BosqueEnvRegionStake.html"><span class="s15">BosqueEnvRegionStake</span></a>, we can read the envelopes values through the methods <span class="s16">level</span> and <span class="s16">map</span> in <span class="s16">BosqueTrack</span>. Both take a frame argument that specifies the position in the timeline in sample frames (with the default rate of 44100, a position of 15 seconds corresponds to frame index 15 * 44100 = 661500). If the frame argument is not specified, the current timeline cursor or transport position (when transport is running) is taken instead.</p>
+<p class="p4"><br></p>
+<p class="p3"><span class="s16">level</span> will output the envelope level between 0 and 1, while <span class="s16">map</span> will apply the track's <span class="s16">ctrlSpec</span> to the normalized level (calling the spec's map method). As an example, let's first assure we have got a simple envelope on <span class="s16">~track</span>:</p>
+<p class="p4"><br></p>
+<p class="p5">(</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor.insertSpan( ~doc, <span class="s17">Span</span>( 0, 661500 ));</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~env = [ 0, 0.0, 7, 1.0, 10, 0.0 ];</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~stake = <span class="s17">BosqueEnvRegionStake</span>( <span class="s17">Span</span>( 44100, 485100 ), <span class="s13">"Env"</span>, ~track, env: ~env );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor.addStake( ~doc, ~stake );</p>
+<p class="p5">)</p>
+<p class="p9"><br></p>
+<p class="p3">Now we are ready to read the envelope values with respect to the global timeline base:</p>
+<p class="p4"><br></p>
+<p class="p5">(</p>
+<p class="p5">fork { <span class="s18">var</span> frame, level, map; 30.do({ <span class="s18">arg</span> i;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>frame = i * 22050;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>level = ~track.level( frame );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>map <span class="Apple-converted-space">  </span>= ~track.map( frame );</p>
+<p class="p10"><span class="s11"><span class="Apple-tab-span">	</span></span>"At time % envelope value is % (mapped %%)\n"<span class="s11">.postf( i/2,</span></p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>level !? { level.round( 0.01 )},</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>map <span class="Apple-converted-space">  </span>!? { map.round( 0.1 )}, ~track.ctrlSpec.units);</p>
+<p class="p5"><span class="Apple-tab-span">	</span>0.1.wait</p>
+<p class="p5">})};</p>
+<p class="p5">)</p>
+<p class="p12"><br></p>
+<p class="p6">Continuously reading envelopes (during transport)</p>
+<p class="p7"><br></p>
+<p class="p3">The envelopes can be sampled at a regular interval in two ways: An observer can be registered with the session's <a href="BosqueTransport.html"><span class="s19">BosqueTransport</span></a> and spawn a <a href="SC://Routine"><span class="s19">Routine</span></a> during playback. Or the <a href="BosqueAudioPlayer.html"><span class="s19">BosqueAudioPlayer</span></a> can provide a synth that writes the envelope on the control bus specified by the track's <span class="s20">ctrlBusIndex</span>. The first is covered in this section, the latter is covered in the following section.</p>
+<p class="p4"><br></p>
+<p class="p3">While the dependancy notification of the transport is covered in the <a href="BosqueTransport.html"><span class="s19">BosqueTransport</span></a> help file, we will just use a quick helper method here to realize the Routine:</p>
+<p class="p4"><br></p>
+<p class="p5">(</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~observer = <span class="s4">Bosque</span>.followCursor({ <span class="s4">arg</span> frame;</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>[ <span class="s13">"frame"</span>, frame, <span class="s13">"map"</span>, ~track.map( frame )].postln;</p>
+<p class="p11"><span class="s11"><span class="Apple-tab-span">	</span></span>// request updates 10 times per second,</p>
+<p class="p11"><span class="s11"><span class="Apple-tab-span">	</span></span>// and 'true' is to include manual cursor movement</p>
+<p class="p5"><span class="Apple-tab-span">	</span>}, 10, <span class="s4">true</span> );</p>
+<p class="p5">)</p>
+<p class="p9"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.transport.play( 0 );</p>
+<p class="p9"><br></p>
+<p class="p3">Remove the observer and stop the transport:</p>
+<p class="p9"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~observer.remove;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.transport.stop;</p>
+<p class="p7"><br></p>
+<p class="p6">Supplying breakpoint functions on a control bus</p>
+<p class="p7"><br></p>
+<p class="p3">If the <span class="s21">ctrlBusIndex</span> has been set for a track, the <a href="BosqueAudioPlayer.html"><span class="s22">BosqueAudioPlayer</span></a> will automatically spawn a <a href="SC://Synth"><span class="s22">Synth</span></a> during transport playback that writes the envelope's mapped values onto that control bus. This is useful if the envelope is supposed to directly control synths since you don't need to send values from a <a href="SC://Routine"><span class="s22">Routine</span></a> in the client to scsynth, and also this way you avoid timing jitter. As of the current version, the only limitation for the control bus Synth is that it cannot handle variable transport rates, so <b>only works for normal playback speed</b>.</p>
+<p class="p4"><br></p>
+<p class="p3">In the above section "Undo-aware manipulation methods" we have already set the <span class="s21">ctrlBusIndex</span> to 100, so let's use it to control the frequency of the <span class="s23">\default</span> sawtooth synth. If we have a custom <a href="SC://SynthDef"><span class="s22">SynthDef</span></a>, we can use an <span class="s21">In.kr</span> to read the control bus value. For other SynthDefs, we can use the map method in <a href="SC://Node"><span class="s22">Node</span></a> to turn a <a href="SC://Control"><span class="s22">Control</span></a> UGen into reading from a control bus:</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>x = <span class="s4">Synth</span>( <span class="s12">\default</span>, [ <span class="s12">\amp</span>, 0.1 ]);</p>
+<p class="p5"><span class="Apple-tab-span">	</span>x.map( <span class="s12">\freq</span>, ~track.ctrlBusIndex );</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.transport.play( 0 );</p>
+<p class="p9"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>x.free;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.transport.stop;</p>
+<p class="p9"><span class="Apple-tab-span">	</span></p>
+<p class="p3">Note: if you want to spawn the synths automatically when the transport starts and stop them when the transport stops, you may want to use a <a href="BosqueFuncRegionStake.html"><span class="s24">BosqueFuncRegionStake</span></a>.</p>
+<p class="p12"><br></p>
+<p class="p13">__________</p>
+<p class="p13">this file last modified: 17-aug-08</p>
+</body>
+</html>

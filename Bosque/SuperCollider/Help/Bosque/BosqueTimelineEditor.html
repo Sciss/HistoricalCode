@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #bf0000}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #0022f8}
+span.s2 {color: #0000bf}
+span.s3 {font: 13.0px Monaco; color: #0000bf}
+span.s4 {color: #0000ff}
+span.s5 {color: #007300}
+span.s6 {color: #bf0000}
+span.s7 {color: #606060}
+span.s8 {color: #000000}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">BosqueTimelineEditor</p>
+<p class="p2"><br></p>
+<p class="p3">This class both represents the editor GUI windows of <a href="Bosque.html"><span class="s1">Bosque</span></a>, but also contains helper methods to programmatically modify a <a href="BosqueSession.html"><span class="s1">BosqueSession</span></a>.</p>
+<p class="p4"><br></p>
+<p class="p3">The GUI windows are described in a separate document, <a href="Bosque_Editing.html"><span class="s1">Bosque_Editing</span></a>.</p>
+<p class="p4"><br></p>
+<p class="p3">The editor instance can be accessed via</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor = <span class="s2">Bosque</span>.default.timelineEditor;</p>
+<p class="p6"><br></p>
+<p class="p3">Although Bosque currently uses a single-document-model, this may change in the future, and consquently most methods require that you explicitly pass in a <a href="BosqueSession.html"><span class="s1">BosqueSession</span></a> object. The current session is usually found like this:</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc = <span class="s2">Bosque</span>.default.session;</p>
+<p class="p6"><br></p>
+<p class="p3"><b>addTrack( &lt;(BosqueSession) doc&gt;, &lt;(Symbol) name&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Creates and adds a track to the timeline. If the <span class="s3">name</span> argument is omitted, a default name is created. The new <a href="BosqueTrack.html"><span class="s4">BosqueTrack</span></a> is returned.</p>
+<p class="p4"><br></p>
+<p class="p3">Example:</p>
+<p class="p4"><br></p>
+<p class="p7"><span class="Apple-tab-span">	</span>~myTrack = ~editor.addTrack( ~doc, <span class="s5">\TestTrack</span> );</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addStake( &lt;(BosqueSession) doc&gt;, &lt;(BosqueRegionStake) stake&gt;, &lt;(Boolean) select = true&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Adds a new stake to the timeline. Note that timeline position and track placement are already stored in the stake object, so this simply adds the stake to the trail and fires a notification. Besides, the addition is registered with the undo manager. If select is true (default), the stake is also added to the collection of selected stakes. If the stake overlaps with other stakes of the same track, the underlying stakes are truncated so that no overlaps occur.</p>
+<p class="p4"><br></p>
+<p class="p3">For the following example, we assume the code of the previous section was run. Additionally, the timeline should cover at least ten seconds. The following line ensures this condition:</p>
+<p class="p4"><br></p>
+<p class="p7"><span class="Apple-tab-span">	</span>if( ~doc.timeline.span.length &lt; 441000, { ~editor.insertSpan( ~doc, <span class="s2">Span</span>( 0, 441000 ))});</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3">The following code will add a function region to our custom track:</p>
+<p class="p4"><br></p>
+<p class="p5">(</p>
+<p class="p7"><span class="Apple-tab-span">	</span>~myStake = <span class="s2">BosqueFuncRegionStake</span>( <span class="s2">Span</span>( 44100, 176400 ), <span class="s5">\MyFunc</span>, ~myTrack );</p>
+<p class="p7"><span class="Apple-tab-span">	</span>~editor.addStake( ~doc, ~myStake );</p>
+<p class="p5">)</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>replaceStake( &lt;(BosqueSession) doc&gt;, &lt;(BosqueRegionStake) oldStake&gt;, &lt;(BosqueRegionStake) newStake&gt;, &lt;(String) editName&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Stakes are considered immutable objects, correspondinly, editing a stake means that you create a modified copy of it. To actually make an inplace exchange of the original and the modified stake, you need to remove the old stake from the trail and add the new one. This is what this method does for you. Additionally, the exchange is made undoable and registered with the undo management, using the given <span class="s3">editName</span> (or a default name, if <span class="s3">editName</span> is <span class="s3">nil</span>).</p>
+<p class="p4"><br></p>
+<p class="p3">As an example, assuming the code of the previous sections was run, the following code will rename our custom stake:</p>
+<p class="p4"><br></p>
+<p class="p5">(</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~oldStake<span class="Apple-tab-span">	</span>= ~myStake;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~newStake<span class="Apple-tab-span">	</span>= ~oldStake.rename( <span class="s5">\MyNewFunc</span> );<span class="Apple-converted-space">  </span><span class="s6">// creates a new modified stake</span></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor.replaceStake( ~doc, ~oldStake, ~newStake, <span class="s7">"Rename Stake"</span> );</p>
+<p class="p5">)</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addMarker( &lt;(BosqueSession) doc&gt;, &lt;(Integer) pos&gt;, &lt;(Symbol) name&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Creates and adds a marker to the marker track of the session. The addition is registered with the undo manager. Returns the new <a href="BosqueMarkerStake.html"><span class="s4">BosqueMarkerStake</span></a>. Example:</p>
+<p class="p4"><br></p>
+<p class="p7"><span class="Apple-tab-span">	</span>~myMark = ~editor.addMarker( ~doc, 22050, <span class="s5">\MyMark</span> );</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addAudioFile( &lt;(BosqueSession) doc&gt;, &lt;(String) path&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Adds an audio file to the collection of audio files of the session. This creates and returns an instance of <a href="BosqueAudioFile.html"><span class="s4">BosqueAudioFile</span></a>. The file is added to the <span class="s3">audioFiles</span> <a href="BosqueSessionCollection.html"><span class="s4">BosqueSessionCollection</span></a> of the session (<span class="s3">~doc.audioFiles</span>). If an audio file with the same path already exists in this collection, the old entry will be returned. The addition is registered with the undo manager. To actually add an audio file region to the timeline, please refer to <a href="BosqueAudioRegionStake.html"><span class="s4">BosqueAudioRegionStake</span></a>. Example:</p>
+<p class="p4"><br></p>
+<p class="p7"><span class="Apple-tab-span">	</span>~myAudioFile = ~editor.addAudioFile( ~doc, <span class="s7">"sounds/a11wlk01-44_1.aiff"</span>.absolutePath );</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addBusConfig( &lt;(BosqueSession) doc&gt;, &lt;(Integer) numInputs&gt;, &lt;(Integer) numOutputs&gt;, &lt;(Symbol) name&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Adds a new audio bus configuration to the collection of configurations of the session. This creates and returns an instance of <a href="BosqueBusConfig.html"><span class="s4">BosqueBusConfig</span></a>. The <span class="s3">connections</span> matrix of the config is initially empty, so you will usually want to modify the returned object by calling <span class="s3">editConnections</span>, or more simple, using a track's <span class="s3">editBusConfig</span>. An example that demonstrates this approach is found in the section "Audio player utility methods" of the <a href="BosqueFuncRegionStake.html"><span class="s4">BosqueFuncRegionStake</span></a> help file. The <span class="s3">name</span> argument is optional, if omitted a default name is generated. The addition is registered with the undo manager.</p>
+<p class="p4"><br></p>
+<p class="p8"><br></p>
+<p class="p3"><b>insertSpan( &lt;(BosqueSession) doc&gt;, &lt;(Span) span&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Inserts a time span in the session's timeline. All stakes whose span's start frame lies at or after the insertion <span class="s3">span</span>'s <span class="s3">start</span>, are shifted to the right by <span class="s3">span.length</span>. All stakes whose span intersects with the insertion <span class="s3">span</span> are cutted at the insertion <span class="s3">span</span>'s <span class="s3">start</span>, and the right part if advanced by <span class="s3">span.length</span>. The insertion and the cutting and moving of stakes are registered with the undo manager.</p>
+<p class="p4"><br></p>
+<p class="p3">Example:</p>
+<p class="p4"><br></p>
+<p class="p9"><span class="s8"><span class="Apple-tab-span">	</span></span>// insert ten seconds of silence, beginning at two seconds</p>
+<p class="p7"><span class="Apple-tab-span">	</span>~editor.insertSpan( ~doc, <span class="s2">Span</span>( 88200, 529200 ));</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>removeSpan( &lt;(BosqueSession) doc&gt;, &lt;(Span) span&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Removes a time span from the session's timeline. All stakes whose span's start frame lies at or after the removal <span class="s3">span</span>'s <span class="s3">stop</span>, are shifted to the left by <span class="s3">span.length</span>. All stakes whose span lies inside the removal span, are removed. For all stakes whose span intersects with the removal <span class="s3">span</span>, the intersections are removed. The insertion and the cutting and removing of stakes are registered with the undo manager.</p>
+<p class="p4"><br></p>
+<p class="p3">Example:</p>
+<p class="p4"><br></p>
+<p class="p9"><span class="s8"><span class="Apple-tab-span">	</span></span>// remove the first five seconds of the timeline</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor.removeSpan( ~doc, <span class="s2">Span</span>( 0, 220500 ));</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>clearSpan( &lt;(BosqueSession) doc&gt;, &lt;(Span) span&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Clears a time span in the session's timeline. For all stakes whose span intersects with the insertion <span class="s3">span</span>, the intersections are removed. The cutting and removing of stakes are registered with the undo manager.</p>
+<p class="p4"><br></p>
+<p class="p3">Example:</p>
+<p class="p4"><br></p>
+<p class="p9"><span class="s8"><span class="Apple-tab-span">	</span></span>// clears the span between 7.5 and 8 seconds</p>
+<p class="p5"><span class="Apple-tab-span">	</span>~editor.clearSpan( ~doc, <span class="s2">Span</span>( 330750, 352800 ));</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p10">__________</p>
+<p class="p10">this file last modified: 08-sep-08</p>
+</body>
+</html>

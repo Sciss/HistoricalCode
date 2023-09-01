@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {font: 13.0px Monaco; color: #0024b5}
+span.s2 {color: #0000ff}
+span.s3 {font: 13.0px Monaco; color: #007300}
+</style>
+</head>
+<body>
+<p class="p1">BosqueEnvSegmentStake</p>
+<p class="p2"><br></p>
+<p class="p3">The <span class="s1">env</span> object of a <a href="BosqueEnvRegionStake.html"><span class="s2">BosqueEnvRegionStake</span></a> is a <a href="BosqueTrail.html"><span class="s2">BosqueTrail</span></a> whose elements are instances of <span class="s1">BosqueEnvSegmentStake</span>. For computational ease, the breakpoint function / envelope is not stored as a list of <b><i>points</i></b> but instead as a list of <b><i>segments</i></b>. Each segment has a duration (specified by the stake's <span class="s1">span</span>), a <span class="s1">startLevel</span> (the value of the curve at the span's <span class="s1">start</span>) and a <span class="s1">stopLevel</span> (the value of the curve at the span's <span class="s1">stop</span>). For internal consistency, the <span class="s1">startLevel</span> of a segment should always be equal to the <span class="s1">stopLevel</span> of the predecessor segment.</p>
+<p class="p4"><br></p>
+<p class="p3">Furthermore, a <span class="s1">shape</span> (type) and <span class="s1">curve</span> value can be specified in accordance to the SuperCollider <a href="SC://Env"><span class="s2">Env</span></a> object. However, as of the current version, only linear segments (<span class="s1">shape == \lin</span> and <span class="s1">curve == 0.0</span>) are supported. This may change in a future version.</p>
+<p class="p5"><br></p>
+<p class="p3"><b>startLevel</b></p>
+<p class="p4"><br></p>
+<p class="p3">The value (<a href="SC://Float"><span class="s2">Float</span></a> between 0 and 1) of the segment at the span's <span class="s1">start</span>.</p>
+<p class="p6"><br></p>
+<p class="p6"><br></p>
+<p class="p3"><b>stopLevel</b></p>
+<p class="p4"><br></p>
+<p class="p3">The value (<a href="SC://Float"><span class="s2">Float</span></a> between 0 and 1) of the segment at the span's <span class="s1">stop</span>.</p>
+<p class="p6"><br></p>
+<p class="p6"><br></p>
+<p class="p3"><b>shape</b></p>
+<p class="p4"><br></p>
+<p class="p3">The segments shape (<a href="SC://Symbol"><span class="s2">Symbol</span></a>). Must be <span class="s3">\lin</span> at the moment.</p>
+<p class="p4"><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>curve</b></p>
+<p class="p4"><br></p>
+<p class="p3">Additional curvature parameter depending on the <span class="s1">shape</span> of the segment. Should be <span class="s1">0</span> at the moment.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>level( &lt;(Integer) frame&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Calculates the level (<span class="s1">Float</span> between 0 and 1) of the segment at a given <span class="s1">frame</span> position. The <span class="s1">frame</span> should be contained in the stake's <span class="s1">span</span>.</p>
+<p class="p6"><br></p>
+<p class="p7">__________</p>
+<p class="p7">this file last modified: 18-aug-08</p>
+</body>
+</html>

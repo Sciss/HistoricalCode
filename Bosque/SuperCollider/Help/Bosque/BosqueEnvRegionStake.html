@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {font: 13.0px Monaco; color: #0024b5}
+span.s2 {color: #0022f8}
+</style>
+</head>
+<body>
+<p class="p1">BosqueEnvRegionStake</p>
+<p class="p2"><br></p>
+<p class="p3">A region stake that represents a breakpoint function (envelope). To add a stake to the session's trail, use the <span class="s1">addStake</span> method in <a href="BosqueTimelineEditor.html"><span class="s2">BosqueTimelineEditor</span></a>.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>env</b></p>
+<p class="p5"><br></p>
+<p class="p3">Points to a <a href="BosqueTrail.html"><span class="s2">BosqueTrail</span></a> containing the envelope segments. Each segment is an instance of <a href="BosqueEnvSegmentStake.html"><span class="s2">BosqueEnvSegmentStake</span></a>. The trail has a normalized origin, e.g. its span starts at zero.</p>
+<p class="p5"><br></p>
+<p class="p5"><br></p>
+<p class="p3"><b>level( &lt;(Integer) frame&gt; )</b></p>
+<p class="p5"><br></p>
+<p class="p3">Queries the envelope value (<span class="s1">Float</span> between 0 and 1) at a given frame. The frame is measured against the global time base, i.e. against the trail containing the env region stake, i.e. the session timeline's span.</p>
+<p class="p5"><br></p>
+<p class="p3">Usually you will prefer to query envelope values via the <span class="s1">level</span> and <span class="s1">map</span> methods of <a href="BosqueTrack.html"><span class="s2">BosqueTrack</span></a>.</p>
+<p class="p5"><br></p>
+<p class="p6"><br></p>
+<p class="p7">__________</p>
+<p class="p7">this file last modified: 17-aug-08</p>
+</body>
+</html>

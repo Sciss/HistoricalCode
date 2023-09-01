@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="1038.32">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px 'Helvetica Neue'}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 18.0px 'Helvetica Neue'; color: #ff221b}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px 'Helvetica Neue'}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px 'Helvetica Neue'; min-height: 16.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0d32ac}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Neue'}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Neue'; min-height: 14.0px}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 21.0px 'Helvetica Neue'; min-height: 25.0px}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px 'Helvetica Neue'}
+span.s1 {text-decoration: underline ; color: #0000ee}
+span.s2 {text-decoration: underline}
+span.s3 {font: 13.0px Monaco; color: #0d32ac}
+span.s4 {color: #062cb0}
+span.s5 {font: 11.0px Monaco; color: #0d32ac}
+span.s6 {font: 13.0px Monaco; color: #062cb0}
+span.s7 {color: #083aec}
+</style>
+</head>
+<body>
+<p class="p1">Bosque - Installation</p>
+<p class="p2"><b>--obsolete document--</b></p>
+<p class="p3"><br></p>
+<p class="p4"><span class="s1"><a href="Bosque.html">Bosque</a></span> is currently distributed in the form of Subversion (SVN) repository as part of my Ph.D. project whose worktitle is Tintantmare : <span class="s2">http://sourceforge.net/projects/tintantmare/</span> .</p>
+<p class="p5"><br></p>
+<p class="p4">In the current version, there are two related branches which must be installed. In a future version, these branches might be fusioned together. The branches are <span class="s3">bosque</span> (the SuperCollider classes) and <span class="s3">timebased</span> (the Java classes). To create a new checkout:</p>
+<p class="p5"><br></p>
+<p class="p6">$ cd &lt;mainDir&gt;</p>
+<p class="p6">$ svn co https://tintantmare.svn.sourceforge.net/svnroot/tintantmare/bosque bosque</p>
+<p class="p6">$ svn co https://tintantmare.svn.sourceforge.net/svnroot/tintantmare/timebased timebased</p>
+<p class="p5"><br></p>
+<p class="p4">The SuperCollider classes and help files from the <span class="s3">bosque</span> folder should be installed in a proper extensions location. The best approach is to create a symlink so updating the working copy is automatically reflected in SuperCollider:</p>
+<p class="p5"><br></p>
+<p class="p6">$ ln -s &lt;mainDir&gt;/bosque/SuperCollider &lt;extDir/bosque</p>
+<p class="p5"><br></p>
+<p class="p4">where <span class="s3">&lt;extDir&gt;</span> typically is</p>
+<p class="p5"><br></p>
+<p class="p7"><span class="s4">thisProcess</span>.platform.userExtensionDir</p>
+<p class="p5"><br></p>
+<p class="p8">Bosque relies on some classes from my private library, e.g. the timebased framework that was independantly developed, that is why there are three class files folders (<span class="s5">bosque</span>, <span class="s5">sciss</span>, <span class="s5">egm2</span>).</p>
+<p class="p9"><br></p>
+<p class="p4">The Java extensions file <span class="s6">TimeBased.jar</span> can basically remain in your working copy location since you will set up the path in the <a href="Bosque_Configuration.html"><span class="s7">Bosque_Configuration</span></a> process.</p>
+<p class="p10"><br></p>
+<p class="p11">SuperCollider and SwingOSC versions</p>
+<p class="p5"><br></p>
+<p class="p4">- Typically a recent SVN version of SuperCollider 3.2+ should be used. I am successfully using revision 7716.</p>
+<p class="p4">- While a suitable <span class="s6">SwingOSC.jar</span> binary is included in the timebased branch, any current SVN version of SwingOSC should work. I am successfully using revision 95.</p>
+<p class="p5"><br></p>
+<p class="p8">__________</p>
+<p class="p8">this file last modified: 17-aug-08</p>
+</body>
+</html>

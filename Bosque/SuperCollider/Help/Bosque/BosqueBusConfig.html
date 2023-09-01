@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #0000ff}
+span.s2 {font: 13.0px Monaco; color: #0019ba}
+</style>
+</head>
+<body>
+<p class="p1">BosqueBusConfig</p>
+<p class="p2"><br></p>
+<p class="p3">A bus configuration describes the mapping of a set of input audio channels to a set of output audio channels. Each <a href="BosqueTrack.html"><span class="s1">BosqueTrack</span></a> can be associated with a <span class="s2">BosqueBusConfig</span>. In order to make the <a href="BosqueAudioPlayer.html"><span class="s1">BosqueAudioPlayer</span></a> play back <a href="BosqueAudioRegionStake.html"><span class="s1">BosqueAudioRegionStake</span></a> objects, the track on which the region stake is placed must have a <span class="s2">BosqueBusConfig</span> associated with it.</p>
+<p class="p4"><br></p>
+<p class="p3">A <span class="s2">BosqueBusConfig</span> consists of a number of input and a number of output channels and a 2-dimensional connections array that describes the "matrix" of the bus configuration (which input channel goes to which output channel at which gain). The outer array of connections has a size of <span class="s2">numInputs</span>, and each inner array has a size of <span class="s2">numOutputs</span>.</p>
+<p class="p4"><br></p>
+<p class="p3">For example, imagine a track on which monophonic <a href="BosqueAudioRegionStake.html"><span class="s1">BosqueAudioRegionStake</span></a> objects are placed. If they should be played both on the left and right speaker, a <span class="s2">BosqueBusConfig</span> with <span class="s2">numInputs == 1</span> and <span class="s2">numOutputs == 2</span> must be associated with that track, and the first element of its connections must consists of two equal gain values (e.g. <span class="s2">[[ 1.0, 1.0 ]]</span>).<span class="Apple-converted-space"> </span></p>
+<p class="p5"><br></p>
+<p class="p3"><b>busCfgID</b></p>
+<p class="p4"><br></p>
+<p class="p3">A unique identifier (<a href="SC://Integer"><span class="s1">Integer</span></a>) that is used to look-up and distinguish bus configurations.</p>
+<p class="p6"><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>name</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the human readable (<a href="SC://String"><span class="s1">String</span></a>) name of the config.</p>
+<p class="p6"><br></p>
+<p class="p6"><br></p>
+<p class="p3"><b>numInputs, numOutputs</b></p>
+<p class="p6"><br></p>
+<p class="p3">The number of input and output channels. <span class="s2">numInputs</span> should correspond to the number of channels the audio regions placed on the track have. <span class="s2">numOutputs</span> should be <span class="s2">&lt;= Bosque.masterBusNumChannels</span>.</p>
+<p class="p6"><br></p>
+<p class="p4"><b></b><br></p>
+<p class="p3"><b>connections</b></p>
+<p class="p6"><br></p>
+<p class="p3">Returns (a copy of) the connections matrix of the bus configuration.</p>
+<p class="p4"><br></p>
+<p class="p6"><br></p>
+<p class="p7">__________</p>
+<p class="p7">this file last modified: 17-aug-08</p>
+</body>
+</html>

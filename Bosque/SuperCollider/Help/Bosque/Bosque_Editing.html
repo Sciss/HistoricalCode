@@ -1,0 +1,294 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 16.0px Times; min-height: 19.0px}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #9d281b}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0030f2}
+p.p13 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+p.p14 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #ad1d13; min-height: 17.0px}
+p.p15 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #ad1d13}
+span.s1 {color: #1142e6}
+span.s2 {color: #0022f8}
+span.s3 {font: 12.0px Helvetica}
+span.s4 {color: #0024b5}
+span.s5 {color: #000000}
+span.s6 {font: 13.0px Monaco; color: #0024b5}
+span.s7 {color: #0030f2}
+span.s8 {font: 14.0px Helvetica Neue}
+span.s9 {color: #9d281b}
+span.s10 {text-decoration: underline ; color: #002ce2}
+span.s11 {font: 13.0px Monaco; color: #0019ba}
+span.s12 {font: 13.0px Monaco; color: #606060}
+span.s13 {font: 13.0px Monaco; color: #0000bf}
+span.s14 {color: #0019ba}
+span.s15 {color: #2b6f11}
+span.s16 {color: #606060}
+span.s17 {color: #ad1d13}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">Bosque - Editing</p>
+<p class="p2"><br></p>
+<p class="p3">This document describes the GUI based editing facilities of <a href="Bosque.html"><span class="s1">Bosque</span></a>. The programmatic facilities are described in the help files of the respective classes, e.g. <a href="BosqueTimelineEditor.html"><span class="s1">BosqueTimelineEditor</span></a>, <a href="BosqueSession.html"><span class="s1">BosqueSession</span></a>, <a href="BosqueFuncRegionStake.html"><span class="s1">BosqueFuncRegionStake</span></a>, etc.</p>
+<p class="p4"><br></p>
+<p class="p5"><br></p>
+<p class="p6">The Menu Window</p>
+<p class="p4"><br></p>
+<p class="p3">When Bosque is launched, a few windows appear in <a href="../../../../../workspace/SwingOSC/SuperCollider/Help/SwingOSC/SwingOSC.html"><span class="s2">SwingOSC</span></a>. There is a "menu" window which allows you to show and hide all the other windows. Closing the windows via the titlebar close button is disabled.</p>
+<p class="p4"><br></p>
+<p class="p7"><span class="s3"><img src="attachments/Bosque_Editing/shotMenu.png" alt="attachments/Bosque_Editing/shotMenu.png"></span></p>
+<p class="p8"><br></p>
+<p class="p3">Furthermore the menu window has a drop down menu labelled "Action" which contains utility functions:</p>
+<p class="p4"><br></p>
+<p class="p3"><span class="Apple-tab-span">	</span><b>Audio Rec.</b> -- brings up a GUI for recording output from scsynth. The bus is already configured to record from Bosque's master bus.</p>
+<p class="p3"><span class="Apple-tab-span">	</span><b>OSC Mem Play</b> -- brings up a GUI to playback OpenSoundControl data. In this window clicking on the ellipsis (...) in the top right corner lets you select an OSC file (created with the OSC recorder described in the next paragraph). The loop or infinity symbol button indicates whether the transport is slaved (button blue / active) or not (button grey / off) to the main bosque transport. The Offset field can be used to specify a relative time offset when playing back in sync to the main transport.</p>
+<p class="p3"><span class="Apple-tab-span">	</span><b>OSC Rec</b> -- brings up a GUI to record OSC data received by sclang. File names are automatically created inside the folder specified in the top of the window (again clicking on the ellipsis (...) brings up a folder chooser dialog). The key text field specifies a filter for incoming OSC messages. Only messages beginning with the key are recorded. If "Ignore Bundle Times" is checked, messages are written into the file with a timetag corresponding to the arrival time in sclang. The loop or infinity symbol button indicates whether the transport is slaved (button blue / active) or not (button grey / off) to the main bosque transport. When slaved, a new file is automatically recorded each time the main transport playback starts.</p>
+<p class="p3"><span class="Apple-tab-span">	</span><b>Fullbody</b> -- brings up a view of the EGM fullbody OSC data (3D skeleton broken up into three 2D views).</p>
+<p class="p4"><br></p>
+<p class="p8"><br></p>
+<p class="p6">The Timeline Window</p>
+<p class="p5"><br></p>
+<p class="p3">This is the main editing window for the bosque sessions. The timeline is shown with time on the horizontal axis and tracks on the vertical axis.</p>
+<p class="p5"><br></p>
+<p class="p7"><span class="s3"><img src="attachments/Bosque_Editing/shotTimeline.png" alt="attachments/Bosque_Editing/shotTimeline.png"></span></p>
+<p class="p8"><br></p>
+<p class="p3">To begin editing a session, you will first need to insert some amount of time, by choosing the screenbar menu item Timeline -&gt; Insert Span and entering a duration in seconds. The timeline axis on the top part of the window shows the currently visible span, corresponding to<span class="Apple-converted-space"> </span></p>
+<p class="p4"><br></p>
+<p class="p9"><span class="Apple-tab-span">	</span>~doc = <span class="s4">Bosque</span>.default.session;</p>
+<p class="p10"><span class="s5"><span class="Apple-tab-span">	</span>~visiSpan = ~doc.timelineView.span; </span>// the visible span in the timeline window</p>
+<p class="p4"><br></p>
+<p class="p3">Note that <span class="s6">Span</span> objects in <a href="Bosque.html"><span class="s7">Bosque</span></a> are always specified in sample frames (where the default sample rate is 44.1 kHz), whereas the GUI timeline axis shows time in (HH:)MM:SS(.millis).</p>
+<p class="p4"><br></p>
+<p class="p3">To navigate in time, the following keyboard shortcuts are available:</p>
+<p class="p4"><br></p>
+<p class="p3"><span class="Apple-tab-span">	</span><b>Ctrl+Cursor Left/Right</b> -- Zoom in/out</p>
+<p class="p3"><span class="Apple-tab-span">	</span><b>Cmd+Shift+Cursor Left</b> -- Zoom completely out</p>
+<p class="p4"><span class="Apple-tab-span">	</span></p>
+<p class="p11"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>BUG:<span class="Apple-tab-span">	</span>sometimes the keyboard shortcuts don't work. In that case hide and re-open the window by clicking</p>
+<p class="p11"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>twice on the "Timeline" button of the Menu window.</p>
+<p class="p4"><br></p>
+<p class="p3">The visible portion can be moved with the scrollbar on the bottom of the window.</p>
+<p class="p4"><br></p>
+<p class="p3">A red vertical line indicates the current timeline <b>cursor position</b>, corresponding to</p>
+<p class="p4"><br></p>
+<p class="p9"><span class="Apple-tab-span">	</span>~doc.timelineView.cursor.position;</p>
+<p class="p4"><br></p>
+<p class="p3">... when the transport is not running, or ...</p>
+<p class="p4"><span class="Apple-converted-space"> </span></p>
+<p class="p9"><span class="s8"><span class="Apple-converted-space"> </span></span><span class="Apple-tab-span">	</span>~doc.transport.currentFrame;</p>
+<p class="p4"><br></p>
+<p class="p3">... when the transport is running.</p>
+<p class="p4"><br></p>
+<p class="p3">The cursor position is used</p>
+<p class="p3"><span class="Apple-tab-span">	</span>- as the starting point for playback</p>
+<p class="p3"><span class="Apple-tab-span">	</span>- as the insertion point for the menu item Edit -&gt; Paste</p>
+<p class="p3"><span class="Apple-tab-span">	</span>- as the cutting point when using the menu item Timeline -&gt; Split Objects</p>
+<p class="p3"><span class="Apple-tab-span">	</span>- for dropping audio regions from the Collections window (see separate section)</p>
+<p class="p4"><span class="Apple-tab-span">	</span></p>
+<p class="p3">The cursor position can be altered by clicking anywhere inside the timeline axis.</p>
+<p class="p4"><br></p>
+<p class="p3">A blue shaded rectangle indicates the current timeline selection, corresponding to</p>
+<p class="p4"><br></p>
+<p class="p9"><span class="Apple-tab-span">	</span>~doc.timelineView.selection.span;</p>
+<p class="p4"><br></p>
+<p class="p3">A blue shaded rectangle indicates the current <b>timeline selection</b>. It can be altered by performing a Shift+Click inside the timeline axis. Alt+Click in the timeline axis clears the selection span. Stake and track selections are described in other sections of this text.</p>
+<p class="p4"><br></p>
+<p class="p3">The timeline selection is used</p>
+<p class="p3"><span class="Apple-tab-span">	</span>- for loop playback</p>
+<p class="p3"><span class="Apple-tab-span">	</span>- for the menu items Timeline -&gt; Clear Span and Remove Span</p>
+<p class="p3"><span class="Apple-tab-span">	</span>- for inserting objects using the menu items Timeline -&gt; Insert Env and Insert Func</p>
+<p class="p3"><span class="Apple-tab-span">	</span>- for changing the master volume envelope gain using Timeline -&gt; Change Gain</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>Tracks</b></p>
+<p class="p4"><br></p>
+<p class="p3">The objects in a session are not only organized by their location on a timeline, but also by being part of a track (see also: <a href="BosqueTrack.html"><span class="s7">BosqueTrack</span></a>). When Bosque is launched, only the special marker track exists, other tracks onto which region boxes can be placed must first be created from the Collections window, by selecting the "Tracks" tab and pressing the "+" button. The tracks are reflected programmatically in</p>
+<p class="p4"><br></p>
+<p class="p12"><span class="s5"><span class="Apple-tab-span">	</span>~doc.tracks; </span><span class="s9">// --&gt; <a href="BosqueSessionCollection.html"><span class="s7">BosqueSessionCollection</span></a></span></p>
+<p class="p4"><br></p>
+<p class="p3">A track has a name, an optional bus configuration (see <a href="BosqueBusConfig.html"><span class="s7">BosqueBusConfig</span></a>), an optional <a href="SC://ControlSpec"><span class="s7">ControlSpec</span></a> and <a href="SC://Bus"><span class="s7">Bus</span></a> for k-rate envelopes. These properties are accessible in the "Track" tab of the Observer window.</p>
+<p class="p4"><br></p>
+<p class="p3">Tracks are used to <i>visually organize</i> the regions, but also to <i>associate</i> audio and control <i>busses</i> with them.<span class="Apple-converted-space"> </span></p>
+<p class="p4"><br></p>
+<p class="p3">Tracks can be selected and deselected. To select or deselect a track, Shift+Click on its name in the left side of the timeline window. Cmd+Click inverts the selection of all tracks. Alt+Click selects or deselects all tracks. Simply clicking on an unselected track will clear the selection and only select that track.</p>
+<p class="p4"><br></p>
+<p class="p3">The track selection is used</p>
+<p class="p3"><span class="Apple-tab-span">	</span>- for the menu items Timeline -&gt; Insert Env and Insert Func</p>
+<p class="p3"><span class="Apple-tab-span">	</span>- for dropping audio regions from the Collections window (see separate section)</p>
+<p class="p4"><br></p>
+<p class="p3">The track selection is reflected programmatically in</p>
+<p class="p4"><br></p>
+<p class="p12"><span class="s5"><span class="Apple-tab-span">	</span>~doc.selectedTracks; </span><span class="s9">// --&gt; <a href="BosqueSessionCollection.html"><span class="s7">BosqueSessionCollection</span></a></span></p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>Stakes</b></p>
+<p class="p4"><br></p>
+<p class="p3">The regions placed in the timeline on tracks are called stakes in Bosque (with the common superclass being <a href="BosqueRegionStake.html"><span class="s7">BosqueRegionStake</span></a>). The region list or region organization structure is called trail (see <a href="BosqueTrail.html"><span class="s7">BosqueTrail</span></a>). In the GUI you don't see the trail directly, but the stakes are rendered as rectangular graphical objects in the tracks of the timeline.</p>
+<p class="p4"><br></p>
+<p class="p3">Two types of stakes can be generated ex nihilo: the functional object stakes (<a href="BosqueFuncRegionStake.html"><span class="s7">BosqueFuncRegionStake</span></a>) and the envelope (breakpoint function) stakes (<a href="BosqueEnvRegionStake.html"><span class="s7">BosqueEnvRegionStake</span></a>). To create them, make a timeline selection that covers the span of the stake to create, select a track on which the stake should be placed. Then choose Timeline -&gt; Insert Env or Timeline -&gt; Insert Func.</p>
+<p class="p4"><br></p>
+<p class="p3">A third type of stakes are audio region stakes (<a href="BosqueAudioRegionStake.html"><span class="s7">BosqueAudioRegionStake</span></a>). They are created by choosing an audio file from the "Audio Files" tab of the Collections window and choosing "Drop Region" from that tab's Action dropdown menu. Another way to create audio regions is to drop a region description string into the audio file drag sink and choosing Edit -&gt; Paste (see the section "Audio File Drag-Sink" for details).</p>
+<p class="p4"><br></p>
+<p class="p3">Stakes can be selected, deselected or moved with the "Move" timeline tool, their span's boundaries can be adjusted with the "Resize" timeline tool. Envelope regions can be edited with the "Env" timeline tool. See the "Mouse-Tools" section for details.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>Markers</b></p>
+<p class="p4"><br></p>
+<p class="p3">In fact, a forth type of stake is the marker stake (<a href="BosqueMarkerStake.html"><span class="s7">BosqueMarkerStake</span></a>). The markers have their own trail though and also appear separately on their own marker track in the GUI. Markers can be used to structure the timeline but also be read programmatically. To create a marker in the GUI, double click on the marker axis. To delete one, Alt+Click on it. To rename it or edit its position textually, double click on one. To move a marker, press the button over it and drag it to a new position.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>Master Volume Envelope</b></p>
+<p class="p4"><br></p>
+<p class="p3">The bottom part of the timeline window contains a special envelope view that controls the master volume of the audio player. Double-click to insert a breakpoint, Alt+click to remove one.</p>
+<p class="p4"><br></p>
+<p class="p11"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>BUG:<span class="Apple-tab-span">	</span>the view currently doesn't zoom and scroll along with the rest of the timeline.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>Audio File Drag-Sink</b></p>
+<p class="p4"><br></p>
+<p class="p3">The drag sink widget in the top left corner of the window is meant to be used along with the Eisenkraut sound file editor (<a href="http://www.sciss.de/eisenkraut/"><span class="s10">www.sciss.de/eisenkraut</span></a>).<span class="Apple-converted-space"> </span></p>
+<p class="p4"><br></p>
+<p class="p3">To use a part of a sound file which is currently opened in Eisenkraut, select that part and make a drag-n-drop, by pressing the mouse over the drag source widget (<span class="s3"><img src="attachments/Bosque_Editing/shotEisKDrag.png" alt="attachments/Bosque_Editing/shotEisKDrag.png"></span>), and releasing the mouse over the Bosque drag sink widget. The name of the sound file appears in the drag sink. Now move the timeline cursor to the preferred insertion point and choose Edit -&gt; Paste. Currently, the region is placed on the first track of the session, in a future version the currently selected track may be honored.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>Mouse-Tools</b></p>
+<p class="p4"><br></p>
+<p class="p3">The stakes can be edited using three different mouse tools: "Move", "Resize", and "Env". The currently selected tool is displayed right to the waveform zoom slider in the top part of the timeline window. To switch tools use the Tool menu or their keyboard equivalents (Cmd+1, Cmd+2, Cmd+3).</p>
+<p class="p4"><br></p>
+<p class="p3">The <b>"Move"</b> tool is used to select or deselect stakes and to move them around. To select a stake click on it. To deselect it, Shift+Click on a selected stake. To extend the selection, Shift+Click on another unselected stake. To clear the selection, click anywhere outside the stakes. To move the selected stakes around, press the button over a selected stake and start dragging the mouse around. To constrain motion horizontally or vertically, press the Shift key before starting the drag.</p>
+<p class="p4"><br></p>
+<p class="p3">The <b>"Resize"</b> tool is used to adjust the bounds of the selected stakes. You can also use it like the Move tool to select or deselect stakes. To adjust the left boundary of the stakes (span's start frame), press the mouse anywhere near the start inside a selected stake and start dragging. To adjust the right boundary of the stakes (span's stop frame), press the mouse anywhere near the stop inside a selected stake and start dragging.<span class="Apple-converted-space"> </span></p>
+<p class="p4"><br></p>
+<p class="p3">The <b>"Env"</b> tool is used to edit the envelope of an envelope stake. To add a breakpoint, Double-Click at the desired position inside the stake. To remove a point, Alt+Click on it. To move a point, press the mouse over it and start dragging.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>Waveform Zoom</b></p>
+<p class="p4"><br></p>
+<p class="p3">The slider in the top part of the timeline window can be used to adjust the "contrast" (or vertical zoom) of the audio region waveform display. Moving the slider to the right will increase the vertical zoom of all audio region waveforms, moving it left will do the opposite.</p>
+<p class="p4"><br></p>
+<p class="p3">Note that the waveforms are only displayed, if <span class="s11">BosqueAudioFile</span><span class="s6">.overviews</span> is <span class="s6">true</span>.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>Loading and Saving Sessions</b></p>
+<p class="p4"><br></p>
+<p class="p3">The sessions can be stored and recalled in simple text files. This is acomplished by calling <span class="s6">asCompileString</span> on the session and <span class="s6">interpret</span> on the file contents. In the GUI, this corresponds to choosing File -&gt; Save and File -&gt; Open. If a session was not saved before, choosing File -&gt; Save will prompt you for a folder on the harddisk and a name. Although not necessary, it is recommended to use the file extension <span class="s12">".txt"</span>.</p>
+<p class="p4"><br></p>
+<p class="p3">After saving a session, the filename will appear in the timeline window's title bar. A bullet character • in front of the window title indicates that the session contains unsaved changes.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>Important:</b> If a SuperCollider code file in RTF format having a related filename exists, it is automatically loaded and executed when you load a session. This way you can group all the code fragments for functional object regions in one file that is associated with your session. The filename for the code fragments should be the same as the session file (and be placed in the same folder), but ending with "Func.rtf", e.g.</p>
+<p class="p4"><br></p>
+<p class="p3"><span class="Apple-tab-span">	</span>Session file: <span class="s13">MySession.txt</span></p>
+<p class="p3"><span class="Apple-tab-span">	</span>Code fragment file: <span class="s13">MySessionFunc.rtf</span></p>
+<p class="p4"><br></p>
+<p class="p3">To clear the session and start over, choose File -&gt; New.</p>
+<p class="p4"><br></p>
+<p class="p11"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>BUG:<span class="Apple-tab-span">	</span>there is some problems with some old settings surviving File -&gt; New, so at the moment it is recommended to kill and restart</p>
+<p class="p11"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>Bosque to start a new empty session.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p6">The Transport Window</p>
+<p class="p5"><br></p>
+<p class="p3">This window gives you controls to start and stop realtime playback (see also <a href="BosqueTransport.html"><span class="s2">BosqueTransport</span></a>). The current time is shown in the right side of the window.</p>
+<p class="p4"><br></p>
+<p class="p7"><span class="s3"><img src="attachments/Bosque_Editing/shotTransport.png" alt="attachments/Bosque_Editing/shotTransport.png"></span></p>
+<p class="p4"><br></p>
+<p class="p3">The window also contains a slider for adjusting the overall (master) volume of the audio player. Gain is shown in decibels. Note that their is always a limiter in the master bus, so it's safe to boost levels.</p>
+<p class="p4"><br></p>
+<p class="p3">The "recycling" button is switching on and off loop playback. When switching loop playback on, the loop span is taken from the current timeline selection. The "star" button was used as a trigger for the Forest project and should be ignored.</p>
+<p class="p5"><br></p>
+<p class="p6">The Observer Window</p>
+<p class="p5"><br></p>
+<p class="p3">The observer window is something that is called "Inspector" in other applications: It shows you the parameters of currently selected objects. These can be stakes (called "Regions" here) and tracks:</p>
+<p class="p4"><br></p>
+<p class="p3"><b>Regions</b></p>
+<p class="p4"><br></p>
+<p class="p7"><span class="s3"><img src="attachments/Bosque_Editing/shotObserverRegions.png" alt="attachments/Bosque_Editing/shotObserverRegions.png"></span></p>
+<p class="p13"><br></p>
+<p class="p3">The data in this tab reflects the currently selected stake(s). If the text fields are greyed out, this indicates that no stakes are selected. Note that if more than one stake is selected, the data merely reflects the stake that was first selected! However, when you edit any of the parameters and confirm by pressing the return key, the changes are applied to all selected stakes. This way you can easily change the colour of a range of stakes at once, for example.</p>
+<p class="p4"><br></p>
+<p class="p3">Each stake has a name that is shown in the title bar of the graphical rectangle drawn in the timeline window, and a colour for this rectangle's title bar. The current colour is shown in the quadratic field on the left side, the rainbow bar on the right side serves as a colour chooser widget.</p>
+<p class="p4"><br></p>
+<p class="p3">The fade-in and fade-out times are specified in milliseconds. The gain boost or attenuation is specified in decibels. Fades and gain have a defined behaviour for audio stakes, their meaning for functional object stakes depends on your functional code, and for envelope stakes they are not used.</p>
+<p class="p4"><br></p>
+<p class="p3">The last three fields are only used by functional object stakes: The "F Evt Var" is the "functional environment variable", a text fragment that when evaluated by the SuperCollider interpreter should yield a reference to an <a href="SC://Event"><span class="s2">Event</span></a> or <span class="s6">AnyMap</span> object (see <a href="BosqueFuncRegionStake.html"><span class="s2">BosqueFuncRegionStake</span></a> for details), so usually you will put an environment lookup string here (like <span class="s6">~myEvent</span>). "F Modtrack" specifies the modulated track. It can be modified by dragging a BosqueTrack object to it, e.g. by going to the "Tracks" tab of the Collections window, selecting a track and making a drag (Ctrl+Press+Move mouse). The "F Position" selection determines whether the synths of the functional object should act on a pre- or post-panorama level.</p>
+<p class="p8"><br></p>
+<p class="p3"><b>Track</b></p>
+<p class="p8"><br></p>
+<p class="p7"><span class="s3"><img src="attachments/Bosque_Editing/shotObserverTrack.png" alt="attachments/Bosque_Editing/shotObserverTrack.png"></span></p>
+<p class="p13"><br></p>
+<p class="p3">The name of the selected track is currently not editable (you can do this programmatically if desired). The next three parameters are modified by dropping appropriate objects on the drag sink widgets: The "Bus Config" should be a <a href="BosqueBusConfig.html"><span class="s2">BosqueBusConfig</span></a> object, defining the track's audio bus. Usually, you will go to the "Busses" tab of the Collections window, select a bus and make a drag (Ctrl+Press+Move mouse). For the "Ctrl Spec" you should have a <a href="SC://ControlSpec"><span class="s2">ControlSpec</span></a> object at hand. The easiest way to create one is to type it's spec in a SuperCollider <a href="SC://Document"><span class="s2">Document</span></a> window, select the text and start a drag – the text selection will automatically be evaluated by the Interpreter, and the resulting (ControlSpec) object can be dropped on the drag sink, e.g.</p>
+<p class="p4"><br></p>
+<p class="p9"><span class="Apple-tab-span">	</span><span class="s14">ControlSpec</span>( 30, 20000, <span class="s15">\exp</span>, 0.0, 1000, <span class="s16">" Hz"</span> ); <span class="s17">// &lt;-- select that and drag it</span></p>
+<p class="p14"><span class="Apple-tab-span">	</span></p>
+<p class="p3">The same is true for the "Ctrl Bus" parameter: The object here should be a monophonic k-rate Bus, e.g.</p>
+<p class="p4"><br></p>
+<p class="p9"><span class="Apple-tab-span">	</span><span class="s14">Bus</span>( <span class="s15">\control</span>, 100, 1, <span class="s14">Bosque</span>.default.scsynth ); <span class="s17">// &lt;-- select that and drag it</span></p>
+<p class="p4"><br></p>
+<p class="p3">Alternatively (and much more simple) you can drop an Integer object (since the control bus needs to be monophonic anyways):</p>
+<p class="p4"><br></p>
+<p class="p15"><span class="s5"><span class="Apple-tab-span">	</span>101 </span>// &lt;-- select that and drag it</p>
+<p class="p4"><br></p>
+<p class="p3">The "Mute" switch can be used to tell the audio player not to playback stakes placed on that track.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p6">The Collections Window</p>
+<p class="p5"><br></p>
+<p class="p3">There are three groups of objects associated with a session that are administrated with this window: Audio Files - the sound files used in the session (as a whole or as sub-regions), Busses - the audio bus configurations used to route inputs to outputs, and Tracks.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>Audio Files</b></p>
+<p class="p4"><br></p>
+<p class="p7"><span class="s3"><img src="attachments/Bosque_Editing/shotCollAudioFiles.png" alt="attachments/Bosque_Editing/shotCollAudioFiles.png"></span></p>
+<p class="p13"><br></p>
+<p class="p3">A list of audio files used in the session. Note that this is not a list of audio file <i>regions</i>, e.g. if you have three regions referring to the same audio file, you will still just have one element (the parent file) in this list. You can add a file by pressing the "+" button in the top right corner. A file chooser will prompt you for the file on the harddisk. Do remove a file from the list, select it and hit the "-" button. If there are any regions in the session referring to the file, a dialog will ask you to confirm the deletion (the associated stakes will also be removed if you confirm). Files which are currently not used in the session are removed without dialog confirmation.</p>
+<p class="p4"><br></p>
+<p class="p3">To place an audio file on the timeline, i.e. to create a <a href="BosqueAudioRegionStake.html"><span class="s2">BosqueAudioRegionStake</span></a>, select the audio file in the list and choose "Drop Region" from the Action dropdown menu. The file is placed as a region spanning the whole duration of the file on the currently selected track (or on the first selected track if there is more than one track selected), starting at the current timeline cursor position.</p>
+<p class="p4"><br></p>
+<p class="p3">The "File replace File" action will replace a sound file with different one that you choose from a file dialog. The new file is added to the list, and all regions referring to the (old) selected file will be modified to use the new file instead. This is useful if you discover that you want to make a global modification to a sound file, e.g. apply a global equalizer or rearrange the channels.</p>
+<p class="p4"><br></p>
+<p class="p3">In contrast, the "Regions replace File" will replace the audio file of all selected audio stakes with the currently selected file. This is useful if you wish to make a local colourization of a sound, e.g. replace it's occurence in one place with a version which was dynamically changed (compressed, expanded, etc.) or modulated (pitched, equalized, reversed, ring-modulated, etc.).</p>
+<p class="p4"><br></p>
+<p class="p3">The last item of the "Action" dropdown menu, called "Consolidate", will create a new sound file based on the selected soundfile, which only contains the chunks of audio actually used in the session. This new file will replace the old one in the list and all audio stakes using that file will be redirected to the consolidated file. This way you can save harddisk space before backing up your session at the end of a production, because in many cases you only use a small percentage of the sound contained in one file.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>Busses</b></p>
+<p class="p4"><br></p>
+<p class="p7"><span class="s3"><img src="attachments/Bosque_Editing/shotCollBusses.png" alt="attachments/Bosque_Editing/shotCollBusses.png"></span></p>
+<p class="p8"><br></p>
+<p class="p3">The busses should actually be called "Routing Configuration" as they essentially point to an audio-rate Bus object, but more importantly specify a matrix of connections. For example, you might do an octophonic piece, so the master bus has eight channels, but not all soundfiles used have eight channels, there may be some monophonic or stereophonic files as well. To properly route them to the master busses, you may use a mono-to-octo or a stereo-to-octo configuration. Note that the bus configurations are static matrices, e.g. you cannot use them to create a panorama automation or the like.</p>
+<p class="p4"><br></p>
+<p class="p3">To create a new configuration, press the "+" button. A dialog requests you to enter a name and the number of input and output channels for the new configuration. The matrix will be initially clear, so the next step is to make the proper connections by clicking in the cells of the matrix GUI object. A dark red colour indicates a "0 decibel" connection. You may use the slider on the left side though to attenuate a specific node. For example, in a stereo setup, you may choose to route monophonic files equally to the left and right channel but with a 3 dB attenuation, or you may have a configuration that includes a subwoofer and the level of the woofer is lower than full gain.</p>
+<p class="p4"><br></p>
+<p class="p3">Note that any modification of the matrix needs to be confirmed by pressing the "Apply" button.</p>
+<p class="p4"><br></p>
+<p class="p3">To use the configuration for a particular track, select the track in the timeline window, open the Observer window and view the "Track" tab, then select the bus configuration and perform a drag-and-drop: Ctrl+Press over the Busses list gadget, move the mouse over to the Observer window and release it over the drag-sink gadget labelled "Bus Config".</p>
+<p class="p4"><br></p>
+<p class="p3">To delete a configuration, select it in the list and press the "-" button. If the config is used by one or several tracks, a dialog will ask you to confirm the deletion.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>Tracks</b></p>
+<p class="p4"><br></p>
+<p class="p7"><span class="s3"><img src="attachments/Bosque_Editing/shotCollTracks.png" alt="attachments/Bosque_Editing/shotCollTracks.png"></span></p>
+<p class="p13"><br></p>
+<p class="p3">Here you can create, delete and select tracks. To create a track, press the "+" button. The new track is appended to the end of the list, the name is automatically created. To delete one, select it and press the "-" button. The selection is automatically reflected in the timeline window (the selected tracks are shown in blue background colour).</p>
+<p class="p4"><br></p>
+<p class="p3">This window can also be used to drag-and-drop a track to a functional object stake's modification-track parameter (in the "Regions" tab of the Observer window). A drag is performed by holding down the Control key and pressing the mouse of the track list, then dragging the mouse and releasing it over a drag sink gadget.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p11">__________</p>
+<p class="p11">this file last modified: 13-sep-08</p>
+</body>
+</html>

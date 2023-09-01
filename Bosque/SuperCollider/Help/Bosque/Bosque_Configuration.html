@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #606060}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #9d281b}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #ad1d13}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; min-height: 17.0px}
+span.s1 {color: #083aec}
+span.s2 {color: #0024b5}
+span.s3 {font: 13.0px Monaco; color: #606060}
+span.s4 {color: #000000}
+span.s5 {color: #9d281b}
+span.s6 {font: 13.0px Monaco; color: #0024b5}
+span.s7 {color: #606060}
+span.s8 {color: #ad1d13}
+span.s9 {color: #0019ba}
+span.s10 {color: #0030f2}
+span.s11 {color: #0022f8}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">Bosque - Configuration</p>
+<p class="p2"><br></p>
+<p class="p3">This file describes how to configure and launch the <a href="Bosque.html"><span class="s1">Bosque</span></a> application from within SuperCollider.</p>
+<p class="p4"><br></p>
+<p class="p3">Basically, to the approach is</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="s2"><span class="Apple-tab-span">	</span>Bosque</span>.timeBasedJar = &lt;urlToTheJar&gt;;</p>
+<p class="p5"><span class="s2"><span class="Apple-tab-span">	</span>Bosque</span>.soundCard = &lt;mySoundCard&gt;;</p>
+<p class="p5"><span class="s2"><span class="Apple-tab-span">	</span>Bosque</span>.numInputBusChannels = &lt;numChans&gt;;</p>
+<p class="p5"><span class="Apple-tab-span">	</span>...</p>
+<p class="p5"><span class="s2"><span class="Apple-tab-span">	</span>Bosque</span>.launch;</p>
+<p class="p4"><br></p>
+<p class="p3">If you are heavily using Bosque, you could put all this configuration in a separate RTF file (e.g. <span class="s3">"run.rtf"</span>) and configure SuperCollider to execute that file when you press Cmd+R (the following line could go in your <span class="s3">"startup.rtf"</span>):</p>
+<p class="p4"><br></p>
+<p class="p6"><span class="s4"><span class="Apple-tab-span">	</span></span><span class="s2">ScissUtil</span><span class="s4">.runPath = </span>"&lt;mainDir&gt;/bosque/sc_tests/run.rtf"<span class="s4">;<span class="Apple-converted-space">  </span></span><span class="s5">// your path here</span></p>
+<p class="p4"><br></p>
+<p class="p3">The following class fields in Bosque exist for configuration:</p>
+<p class="p4"><br></p>
+<p class="p3"><b>*timeBasedJar</b></p>
+<p class="p4"><br></p>
+<p class="p3">the URL String pointing to the <span class="s6">TimeBased.jar</span> file. Basically, you take the (Unix) pathname of the JAR and prepend <span class="s3">"file:"</span> to it. This JAR is registered with the SwingOSC instance used by Bosque (Bosque stores a reference of <span class="s6">SwingOSC.default</span> in its <span class="s6">swing</span> field when launching). If you create a symlink to this JAR file in your extensions folder, it would be:</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="s2">Bosque</span>.timeBasedJar = <span class="s7">"file:"</span> ++ <span class="s2">thisProcess</span>.platform.userExtensionDir +/+ <span class="s7">"TimeBased.jar"</span>; <span class="s8">// this is the default location</span></p>
+<p class="p4"><br></p>
+<p class="p3">If you leave this field to <span class="s6">nil</span>, the JAR is not added. In this case, you are responsible for launching SwingOSC with the TimeBased.jar in its classpath (either the custom classpath provided by the <span class="s6">-cp</span> option to java, or a systemwide classpath, e.g. <span class="s6">/Library/Java/Extensions</span>).</p>
+<p class="p4"><br></p>
+<p class="p3"><b>*soundCard, *numInputBusChannels, *numOutputBusChannels</b></p>
+<p class="p4"><br></p>
+<p class="p3">The sound card (audio hardware device) and number of hardware channels to use when launching Bosque. These are irrelevant if you boot scsynth beforehand (Bosque stores a reference of <span class="s6">Server.default</span> in its <span class="s6">scsynth</span> field when launching). When <span class="s6">soundCard</span> is <span class="s6">nil</span>, Bosque will <b><i>not</i></b> boot scsynth.</p>
+<p class="p4"><br></p>
+<p class="p3">Example:</p>
+<p class="p4"><br></p>
+<p class="p7"><span class="s4"><span class="Apple-tab-span">	</span></span><span class="s2">Bosque</span><span class="s4">.soundCard<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= </span><span class="s7">"MOTU Traveler"</span><span class="s4">; </span>// corresponds to s.options.device</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="s2">Bosque</span>.numInputBusChannels<span class="Apple-tab-span">	</span>= 18;</p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="s2">Bosque</span>.numOutputBusChannels<span class="Apple-tab-span">	</span>= 18;</p>
+<p class="p4"><br></p>
+<p class="p3"><b>*workDir</b></p>
+<p class="p4"><br></p>
+<p class="p3">This folder is used to store the audio file waveform cache (in the subfolder <span class="s3">"cache"</span>), and is used by some utilitizes, e.g. the OSC file recording uses it as the parent folder. Typically you will set it so</p>
+<p class="p4"><br></p>
+<p class="p8"><span class="s4"><span class="Apple-tab-span">	</span></span><span class="s9">Bosque</span><span class="s4">.workDir = </span><span class="s7">"~/Bosque/"</span><span class="s4">.absolutePath; </span>// this is the default location</p>
+<p class="p4"><br></p>
+<p class="p3"><b>*masterBusNumChannels, *masterChanMap</b></p>
+<p class="p4"><br></p>
+<p class="p3">This configures the main audio output of Bosque and is discussed in the <a href="Bosque_Audio.html"><span class="s10">Bosque_Audio</span></a> document.</p>
+<p class="p9"><br></p>
+<p class="p3"><b>*midiInDev, *midiOutDev</b></p>
+<p class="p4"><br></p>
+<p class="p3">This configures the MIDI controller and is discussed in the <a href="BosqueMIDIController.html"><span class="s11">BosqueMIDIController</span></a> document.</p>
+<p class="p9"><br></p>
+<p class="p10">Launching Bosque</p>
+<p class="p4"><br></p>
+<p class="p3">After the configuration is complete, Bosque can simply be launched by calling</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="s2">Bosque</span>.launch;</p>
+<p class="p11"><br></p>
+<p class="p3">The sound synthesis server and the SwingOSC GUI server will be booted, the Bosque GUI will come up, and the current Bosque instance is stored in <span class="s6">Bosque.default</span>.</p>
+</body>
+</html>

@@ -1,0 +1,427 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #ad1d13}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #0019ba}
+span.s1 {color: #0019ba}
+span.s2 {color: #2b6f11}
+span.s3 {color: #ad1d13}
+span.s4 {color: #000000}
+span.s5 {color: #606060}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">s.boot;</p>
+<p class="p2"><br></p>
+<p class="p3">////////////////////////////////////////////////////////////////////</p>
+<p class="p3">// hell, Dbufrd makes it _way_ more easy (25-jun-08)</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="s1">SynthDef</span>( <span class="s2">\envTest4</span>, { <span class="s1">arg</span> i_timbuf, i_valbuf, i_outbus;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">var</span> dur, freq;</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>dur<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s1">Dbufrd</span>( i_timbuf, <span class="s1">Dseries</span>( 0, 1, <span class="s1">inf</span> ));</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>freq<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s1">Dbufrd</span>( i_valbuf, <span class="s1">Dseries</span>( 0, 1, <span class="s1">inf</span> ));</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>freq <span class="Apple-tab-span">	</span>= <span class="s1">DemandEnvGen</span>.ar( freq, dur );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>freq.poll; <span class="s3">//</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">Out</span>.ar( i_outbus, freq + <span class="s1">Impulse</span>.ar( 0 ))</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>// request buffer updates</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>SendTrig.ar( rotaI, 0, PulseCount.ar( rotaI ));</p>
+<p class="p1"><span class="Apple-tab-span">	</span>}).send( s );</p>
+<p class="p2"><br></p>
+<p class="p1">~bus = <span class="s1">Bus</span>.audio( s, 1 );</p>
+<p class="p1">~timBuf = <span class="s1">Buffer</span>.alloc( s, 10 );</p>
+<p class="p1">~valBuf = <span class="s1">Buffer</span>.alloc( s, 10 );</p>
+<p class="p2"><br></p>
+<p class="p1">~timBuf.sendCollection([ 1, 2, <span class="Apple-converted-space">  </span>3,<span class="Apple-converted-space">    </span>4, 5, <span class="Apple-converted-space">  </span>5, <span class="Apple-converted-space">  </span>4, <span class="Apple-converted-space">  </span>3, 2, 1 ]); <span class="s3">// the last value is the dur of going back to idx 0</span></p>
+<p class="p1">~valBuf.sendCollection([ 0, 1, 0.5, 0.25, 0, 1.0, 0.5, 0.25, 0, 1 ]);</p>
+<p class="p2"><br></p>
+<p class="p1">g.boot;</p>
+<p class="p1"><span class="s1">GUI</span>.swing;</p>
+<p class="p1">~bus.scope</p>
+<p class="p2"><br></p>
+<p class="p4"><span class="s4">r = </span>SimpleRecorder<span class="s4">( s );</span></p>
+<p class="p1">r.numChannels = 1;</p>
+<p class="p1">r.channelOffset = ~bus.index;</p>
+<p class="p1">r.makeWindow;</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1">x = <span class="s1">Synth</span>( <span class="s2">\envTest4</span>, [ <span class="s2">\i_outbus</span>, ~bus.index, <span class="s2">\i_timbuf</span>, ~timBuf.bufnum, <span class="s2">\i_valbuf</span>, ~valBuf.bufnum ]);</p>
+<p class="p1">x.free</p>
+<p class="p1">x.trace</p>
+<p class="p2"><br></p>
+<p class="p1">r.stop;</p>
+<p class="p1">r.revealInFinder;</p>
+<p class="p2"><br></p>
+<p class="p3">// the question remains: how to SendTrig the buf update requests now?</p>
+<p class="p3">// it would anyway make more sense if they would come after a fixed</p>
+<p class="p3">// amount N of values, instead of setting a fixed timedur! --&gt; so</p>
+<p class="p3">// that individual envelopes would fire their SendTrig at different</p>
+<p class="p3">// times, maybe relaxing the async server command load</p>
+<p class="p2"><br></p>
+<p class="p3">////////////////////////////////////////////////////////////////////////</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="s1">var</span> dur, val;</p>
+<p class="p2"><br></p>
+<p class="p1">(</p>
+<p class="p1">x = { <span class="s1">arg</span> nada = 0; <span class="s1">var</span> dur, env, val, valRead;</p>
+<p class="p1">dur = <span class="s1">Dseries</span>( 1, 0 );</p>
+<p class="p1">val = <span class="s1">Dseries</span>( 1, 1 );</p>
+<p class="p1">env = <span class="s1">DemandEnvGen</span>.ar( val, dur );</p>
+<p class="p3">//valRead = Demand.kr( nada, 0, val );</p>
+<p class="p1">valRead = <span class="s1">Duty</span>.kr( dur, 0, val );</p>
+<p class="p3">//valRead.postcs;</p>
+<p class="p1">env.poll( label: <span class="s5">"env"</span> );</p>
+<p class="p1">valRead.poll( label: <span class="s5">"read"</span> );</p>
+<p class="p4">Silent<span class="s4">.ar;</span></p>
+<p class="p1">}.play</p>
+<p class="p1">)</p>
+<p class="p2"><br></p>
+<p class="p3">/////////////////////////////////////////////////////////</p>
+<p class="p2"><br></p>
+<p class="p3">/**</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span>This example demonstrates the use of arbitrary long</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span>envelopes picked up at arbitrary moments. Instead</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span>of an EnvGen ugen we use a DemandEnvGen that is</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span>fed from time and amplitude values read from a</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span>buffer. This example still misses some refinements:</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span>- the buffer size should be limited and the buffer</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span><span class="Apple-converted-space">  </span>content dynamically updated (double or triple buffering)</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span>- (FIXED) upon envelope modification during playback,</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span><span class="Apple-converted-space">  </span>we hear some tiny artifacts; should only replace</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span><span class="Apple-converted-space">  </span>envSynth if changes are in the present or near</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span><span class="Apple-converted-space">  </span>future; if in the far future, update old buffer</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span><span class="Apple-converted-space">  </span>; if in the past, don't update at all</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span>- we could use curve-forms like sine, welch etc.</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span>- lot's of FAILURE /n_free while manipulating;</p>
+<p class="p3"><span class="Apple-converted-space"> </span>* <span class="Apple-tab-span">	</span><span class="Apple-converted-space">  </span>they are harmless but not very pretty</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span>@author<span class="Apple-tab-span">	</span>Hanns Holger Rutz</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*<span class="Apple-tab-span">	</span>@version<span class="Apple-tab-span">	</span>0.1, 26-Jun-08</p>
+<p class="p3"><span class="Apple-converted-space"> </span>*/</p>
+<p class="p2"><br></p>
+<p class="p3">// HERE</p>
+<p class="p1">(</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="s1">var</span> latencyFrames, envSpan, envGroup;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-tab-span">	</span>latencyFrames = (s.latency * s.sampleRate).asInteger;</p>
+<p class="p1"><span class="Apple-tab-span">	</span>envSpan = <span class="s1">Span</span>( 220500, 1102500 );</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-tab-span">	</span>~cBus = <span class="s1">Bus</span>.control( s );</p>
+<p class="p1"><span class="Apple-tab-span">	</span>~counter = 0;</p>
+<p class="p2"><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span>envGroup = <span class="s1">Group</span>( s );</p>
+<p class="p2"><br></p>
+<p class="p3">//<span class="Apple-tab-span">	</span>SynthDef( \envSend, { arg i_buf, i_outbus, i_off = 0;</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>var dur, val;</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>dur<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= Dbufrd( i_buf, Dseries( i_off, 2, inf ));</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>val<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= Dbufrd( i_buf, Dseries( i_off + 1, 2, inf ));</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>val<span class="Apple-tab-span">	</span> <span class="Apple-tab-span">	</span>= DemandEnvGen.kr( val, dur );</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>Out.kr( i_outbus, val );</p>
+<p class="p3">//<span class="Apple-tab-span">	</span>}).send( s );</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="s1">SynthDef</span>( <span class="s2">\envSendX</span>, { <span class="s1">arg</span> i_buf, i_outbus, i_off = 0, i_atk = 0, gate = 1;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">var</span> dur, val, line;</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>dur<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s1">Dbufrd</span>( i_buf, <span class="s1">Dseries</span>( i_off, 2, <span class="s1">inf</span> ));</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>val<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s1">Dbufrd</span>( i_buf, <span class="s1">Dseries</span>( i_off + 1, 2, <span class="s1">inf</span> ));</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>val<span class="Apple-tab-span">	</span> <span class="Apple-tab-span">	</span>= DemandEnvGen.ar( val, dur );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>val<span class="Apple-tab-span">	</span> <span class="Apple-tab-span">	</span>= <span class="s1">DemandEnvGen</span>.kr( val, dur );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>line<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s1">EnvGen</span>.kr( <span class="s1">Env</span>.asr( i_atk, curve: <span class="s2">\lin</span> ), gate, doneAction: 2 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">Out</span>.kr( i_outbus, (val * line) + (<span class="s1">In</span>.kr( i_outbus ) * (1 - line)) );</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>XOut.kr( i_outbus, Line.kr( 0, 1, 0.1 ), val );</p>
+<p class="p1"><span class="Apple-tab-span">	</span>}).send( s );</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="s1">SynthDef</span>( <span class="s2">\tone</span>, { <span class="s1">arg</span> i_freqbus, i_outbus = 0;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">var</span> osc, freq;</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>freq<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= In.ar( i_freqbus ).linexp( 0, 1, 100, 4000 );</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>freq<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= LinExp.ar( In.ar( i_freqbus ), 0, 1, 100, 4000 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>freq<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= (<span class="s1">In</span>.kr( i_freqbus ) * 64 + 48).midicps;</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>freq.poll;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>osc<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s1">SinOsc</span>.ar( freq, mul: 0.5 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">Out</span>.ar( i_outbus, <span class="s1">Pan2</span>.ar( osc ));</p>
+<p class="p1"><span class="Apple-tab-span">	</span>}).send( s );</p>
+<p class="p2"><span class="Apple-tab-span">	</span></p>
+<p class="p3">//<span class="Apple-tab-span">	</span>~cBus.set( 0.0 );</p>
+<p class="p3">//<span class="Apple-tab-span">	</span>~cBus.set( 0.5 );</p>
+<p class="p2"><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span>~win = <span class="s1">JSCWindow</span>( <span class="s5">"EnvTest"</span>, <span class="s1">Rect</span>( 0, 0, 600, 400 ), resizable: <span class="s1">false</span> );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="s1">ScissUtil</span>.positionOnScreen( ~win );</p>
+<p class="p1"><span class="Apple-tab-span">	</span>~ggEnv = <span class="s1">JSCEnvelopeView</span>( ~win, <span class="s1">Rect</span>( 100, 30, 400, 200 ))</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.drawLines_( <span class="s1">true</span> )</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.selectionColor_( <span class="s1">Color</span>.red )</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.resize_( 8 )</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.thumbSize_( 5 )</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.value_([[ 0.0, 0.5, 1.0 ], [ 0.0, 1.0, 0.0 ]])<span class="Apple-converted-space">  </span><span class="s3">// set the initial node values (x and y)</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.clipThumbs_( <span class="s1">true</span> )</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.horizontalEditMode_( <span class="s2">\relay</span> )</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.canFocus_( <span class="s1">false</span> )</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.lockBounds_( <span class="s1">true</span> )</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.action_({ <span class="s1">arg</span> view;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>view.changed( <span class="s2">\values</span> );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>})</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.mouseDownAction_({ <span class="s1">arg</span> view, x, y, modifiers, button, clicks;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">var</span> sel, frame, level, bounds, times, values, index, indices, time;</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( clicks == 2, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>bounds<span class="Apple-tab-span">	</span>= view.bounds;</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>visiSpan<span class="Apple-tab-span">	</span>= doc.timeline.visibleSpan;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>time<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= ((x - bounds.left) / bounds.width) * 1.0;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>level<span class="Apple-tab-span">	</span>= 1.0 - ((y - bounds.top) / bounds.height); <span class="s3">//.linlin( 0, 1, 12, -48 );</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>#times, values = view.value;</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>("times = " ++ times).postln;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>index<span class="Apple-tab-span">	</span>= 0;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>block { <span class="s1">arg</span> break;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>times.do({ <span class="s1">arg</span> t; if( t &gt; time, break ); index = index + 1 });</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>};</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>("time " ++ time ++ "; level " ++ level ++ "; index " ++ index).postln;</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>view.value = [ times.copyFromStart( index - 1 ) ++ time ++ times.copyToEnd( index ),</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-converted-space"> <span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span> </span>values.copyFromStart( index - 1 ) ++ level ++ values.copyToEnd( index )];</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>view.changed( <span class="s2">\values</span> );</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, { if( (modifiers &amp; 0x00080000) != 0, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>sel<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= view.selection;</p>
+<p class="p3"><span class="s4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>sel[0]<span class="Apple-tab-span">	</span>= </span><span class="s1">false</span><span class="s4">;<span class="Apple-tab-span">	</span></span>// not allowed to remove the first ...</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>sel[sel.size-1] = <span class="s1">false</span>; <span class="s3">// ...<span class="Apple-converted-space">  </span>and last point</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( sel.detect(<span class="s1">_</span> == <span class="s1">true</span> ).notNil, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>#times, values = view.value;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>times = times.reject({ <span class="s1">arg</span> t, idx; sel[ idx ]});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>values= values.reject({ <span class="s1">arg</span> t, idx; sel[ idx ]});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>view.value = [ times, values ];</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>view.changed( <span class="s2">\values</span> );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>})});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span>~playStartPos = 0;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-tab-span">	</span>~ggPlay = <span class="s1">JSCButton</span>( ~win, <span class="s1">Rect</span>( 20, 105, 60, 30 ))</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.states_([[ <span class="s5">"Play"</span> ], [ <span class="s5">"Stop"</span> ]])</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.action_({ <span class="s1">arg</span> view;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( view.value == 0, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~playStartPos = ((<span class="s1">thisThread</span>.seconds - ~playStartTime) * 44100 + ~playStartPos) % 1323000;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>view.changed( <span class="s2">\stop</span> );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~playStartTime = <span class="s1">thisThread</span>.seconds;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>view.changed( <span class="s2">\play</span> );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span>~currentPos = 0;</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span>~ggPlayPos = <span class="s1">JSCUserView</span>( ~win, <span class="s1">Rect</span>( 0, 4, 600, 20 ))</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.canFocus_( <span class="s1">false</span> )</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.background_( <span class="s1">Color</span>.white )</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>.drawFunc_({ <span class="s1">arg</span> view; <span class="s1">var</span> x;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">JPen</span>.strokeColor = <span class="s1">Color</span>.red;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>x = ~currentPos / 1323000 * view.bounds.width;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">JPen</span>.line( x @ 4, x @ 24 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">JPen</span>.stroke;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span>~playPosMouseFunc = { <span class="s1">arg</span> view, x, y, modifiers, button, clicks;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( ~ggPlay.value == 0, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~playStartPos = clip( (x - view.bounds.left) / view.bounds.width, 0, 1 ) * 1323000;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~currentPos = ~playStartPos;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~ggPlayPos.refresh;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>};</p>
+<p class="p2"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span>~ggPlayPos.mouseDownAction_( ~playPosMouseFunc ).mouseMoveAction_( ~playPosMouseFunc );</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="s1">UpdateListener</span>.newFor( ~ggPlay, { <span class="s1">arg</span> upd, obj, what;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">var</span> trnspThread = <span class="s1">thisThread</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( what === <span class="s2">\play</span>, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~routPos = fork {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">inf</span>.do({</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~currentPos = ((trnspThread.seconds - ~playStartTime) * 44100 + ~playStartPos) % 1323000;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~ggPlayPos.refresh;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>0.05.wait;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>};</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, { if( what === <span class="s2">\stop</span>, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~routPos.stop; ~routPos = <span class="s1">nil</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>})});</p>
+<p class="p1"><span class="Apple-tab-span">	</span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="s1">UpdateListener</span>.newFor( ~ggPlay, { <span class="s1">arg</span> upd, obj, what;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">var</span> pos, time, pos2, c1, isPlaying = <span class="s1">false</span>, span, playStartTime;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>c1 = ~counter;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( what === <span class="s2">\play</span>, {</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~toneSynth = Synth( \tone, [ \i_freqbus, ~cBus.index ]);</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~routAudio = fork {</p>
+<p class="p1">if( ~counter == c1, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~counter = ~counter + 1;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>playStartTime = <span class="s1">thisThread</span>.seconds;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">inf</span>.do({ <span class="s1">arg</span> iter;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>pos = (((<span class="s1">thisThread</span>.seconds - playStartTime) * 44100).asInteger + latencyFrames + ~playStartPos) % 1323000;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>span = <span class="s1">Span</span>( pos, pos + 8820 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( isPlaying, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( span.containsPos( envSpan.stop ), {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>time = (envSpan.stop - pos + latencyFrames) / s.sampleRate;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>s.makeBundle( time, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~toneSynth.free; ~toneSynth = <span class="s1">nil</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>isPlaying = <span class="s1">false</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( (iter == 0) and: { span.overlaps( envSpan )} or: { span.containsPos( envSpan.start )}, { <span class="s1">var</span> bufSize, outerThread, bndl, syncID, envTime, w, data, envIdx, startVal, dt, envSynth, buf, times, freqs, toneSynth, c2 = ~counter;</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~buf.setn( ... );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>pos2 = max( pos, envSpan.start );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>#times, freqs = ~ggEnv.value;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envTime = (pos2 - envSpan.start) / envSpan.length;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envIdx = (block { <span class="s1">arg</span> break; times.do({ <span class="s1">arg</span> t, i; if( t &gt;= envTime, { break.value( i )})}); times.size } - 1).max( 0 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>dt = envTime - times[ envIdx ];</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>w = dt / ((times[ envIdx + 1 ] ? 1.0) - times[ envIdx ]); <span class="s3">// XXX envAt</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>startVal = (freqs[ envIdx ] * (1.0 - w)) + ((freqs[ envIdx + 1 ] ? 0.0) * w );</p>
+<p class="p3">//[ "envTime", envTime, "envIdx", envIdx, "dt", dt, "w", w, "startVal", startVal ].postln;</p>
+<p class="p1">[ <span class="s5">"envIdx"</span>, envIdx, <span class="s5">"w"</span>, w.round( 0.01 ), <span class="s5">"startVal"</span>, startVal.round( 0.01 )].postln;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>times = ([ envTime ] ++ times.copyToEnd( envIdx + 1 )).slide( 2 ).clump( 2 ).collect({ <span class="s1">arg</span> group; (group.last - group.first) * 20.0 }) ++ [ 100, 100 ]; <span class="s3">// Note: the 100 / 100 times and the duplicated last freq are there to not make the Dbufrd wrap around</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>freqs = [ startVal ] ++ freqs.copyToEnd( envIdx + 1 ) ++ [ freqs.last ];</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">Assertion</span>({ times.size == freqs.size });</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>data = (times ++ freqs).unlace( freqs.size ).flatten;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>bufSize = data.size;</p>
+<p class="p3">//data.postcs;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>buf = <span class="s1">Buffer</span>( s, bufSize, 1 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>bndl = <span class="s1">Array</span>( 2 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>bndl.add( buf.allocMsg( buf.setnMsg( 0, data )));</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>syncID = <span class="s1">UniqueID</span>.next;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>bndl.add([ <span class="s2">'/sync'</span>, syncID ]);</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>s.listSendBundle( <span class="s1">nil</span>, bndl );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>outerThread = <span class="s1">thisThread</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">OSCpathResponder</span>( s.addr, [ <span class="s2">'/synced'</span>, syncID ], { <span class="s1">arg</span> time, resp, msg;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">var</span> pos3, pos4;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( ~counter == c2, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>pos3 = (((outerThread.seconds - playStartTime) * 44100).asInteger + latencyFrames + ~playStartPos) % 1323000;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>time = (pos2 - pos3 + latencyFrames) / s.sampleRate;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>s.makeBundle( time, {</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envSynth = Synth( \envSend, [ \i_buf, buf.bufnum, \i_outbus, ~cBus.index ]);</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envSynth = <span class="s1">Synth</span>( <span class="s2">\envSendX</span>, [ <span class="s2">\i_buf</span>, buf.bufnum, <span class="s2">\i_outbus</span>, ~cBus.index, <span class="s2">\i_atk</span>, 0 ], envGroup, <span class="s2">\addToTail</span> );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~envSynth = envSynth;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>toneSynth = <span class="s1">Synth</span>.after( envGroup, <span class="s2">\tone</span>, [ <span class="s2">\i_freqbus</span>, ~cBus.index ]);</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~toneSynth = toneSynth;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>toneSynth.register;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envSynth.register;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">UpdateListener</span>.newFor( toneSynth, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( c2 != ~counter, { toneSynth.free; isPlaying = <span class="s1">false</span> });</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, <span class="s2">\n_go</span> );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">UpdateListener</span>.newFor( envSynth, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( c2 != ~counter, {</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envSynth.free;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envSynth.release( 0.1 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, <span class="s2">\n_go</span> );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">UpdateListener</span>.newFor( envSynth, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>buf.free;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( ~envSynth == envSynth, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~envSynth = <span class="s1">nil</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, <span class="s2">\n_end</span> );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>isPlaying = <span class="s1">true</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>buf.free;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>resp.remove;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}).add;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>0.1.wait;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1">});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>};</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, { if( what === <span class="s2">\stop</span>, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~counter = ~counter + 1;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~routAudio.stop; ~routAudio = <span class="s1">nil</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~toneSynth.free; ~toneSynth = <span class="s1">nil</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~envSynth.free; ~envSynth = <span class="s1">nil</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>isPlaying = <span class="s1">false</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>})});</p>
+<p class="p1"><span class="Apple-tab-span">	</span>});</p>
+<p class="p2"><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="s1">UpdateListener</span>.newFor( ~ggEnv, { <span class="s1">arg</span> upd, obj, what;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~counter = ~counter + 1;</p>
+<p class="p3"><span class="s4"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span>// XXX could use maybe XOut to smoothen things?</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( ~envSynth.notNil, { <span class="s1">var</span> buf, bndl, syncID, outerThread, times, freqs, envTime, envIdx, dt, w, startVal, data, bufSize, pos, pos2, c2, playStartTime, envSynth;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>playStartTime = ~playStartTime;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>pos = (((<span class="s1">thisThread</span>.seconds - playStartTime) * 44100).asInteger + latencyFrames + ~playStartPos) % 1323000;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>pos2 = max( pos, envSpan.start );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>#times, freqs = ~ggEnv.value;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envTime = (pos2 - envSpan.start) / envSpan.length;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envIdx = (block { <span class="s1">arg</span> break; times.do({ <span class="s1">arg</span> t, i; if( t &gt;= envTime, { break.value( i )})}); times.size } - 1).max( 0 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>dt = envTime - times[ envIdx ];</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>w = dt / ((times[ envIdx + 1 ] ? 1.0) - times[ envIdx ]); <span class="s3">// XXX envAt</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>startVal = (freqs[ envIdx ] * (1.0 - w)) + ((freqs[ envIdx + 1 ] ? 0.0) * w);</p>
+<p class="p3">//[ "envTime", envTime, "envIdx", envIdx, "dt", dt, "w", w, "startVal", startVal ].postln;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>times = ([ envTime ] ++ times.copyToEnd( envIdx + 1 )).slide( 2 ).clump( 2 ).collect({ <span class="s1">arg</span> group; (group.last - group.first) * 20.0 }) ++ [ 100, 100 ]; <span class="s3">// Note: the 100 / 100 times and the duplicated last freq are there to not make the Dbufrd wrap around</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>freqs = [ startVal ] ++ freqs.copyToEnd( envIdx + 1 ) ++ [ freqs.last ];</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">Assertion</span>({ times.size == freqs.size });</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>data = (times ++ freqs).unlace( freqs.size ).flatten;</p>
+<p class="p3">//data.postcs;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>bufSize = data.size;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>buf = <span class="s1">Buffer</span>( s, bufSize, 1 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>bndl = <span class="s1">Array</span>( 2 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>bndl.add( buf.allocMsg( buf.setnMsg( 0, data )));</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>syncID = <span class="s1">UniqueID</span>.next;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>bndl.add([ <span class="s2">'/sync'</span>, syncID ]);</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>s.listSendBundle( <span class="s1">nil</span>, bndl );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>outerThread = <span class="s1">thisThread</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>c2 = ~counter;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">OSCpathResponder</span>( s.addr, [ <span class="s2">'/synced'</span>, syncID ], { <span class="s1">arg</span> time, resp, msg;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">var</span> pos3, pos4;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( ~counter == c2, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>pos3 = (((outerThread.seconds - playStartTime) * 44100).asInteger + latencyFrames + ~playStartPos) % 1323000;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>time = (pos2 - pos3 + latencyFrames) / s.sampleRate;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>s.makeBundle( time, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( ~envSynth.notNil, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~envSynth.free;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envSynth = Synth( \envSend, [ \i_buf, buf.bufnum, \i_outbus, ~cBus.index ]);</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envSynth = <span class="s1">Synth</span>( <span class="s2">\envSendX</span>, [ <span class="s2">\i_buf</span>, buf.bufnum, <span class="s2">\i_outbus</span>, ~cBus.index, <span class="s2">\i_atk</span>, 0.1 ], envGroup, <span class="s2">\addToTail</span> );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~envSynth = envSynth;</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>toneSynth = Synth.after( envSynth, \tone, [ \i_freqbus, ~cBus.index ]);</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~toneSynth = toneSynth;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>toneSynth.register;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envSynth.register;</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>UpdateListener.newFor( toneSynth, {</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( c2 != ~counter, { toneSynth.free; isPlaying = false });</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, \n_go );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">UpdateListener</span>.newFor( envSynth, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( c2 != ~counter, {</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envSynth.free;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>envSynth.release( 0.1 );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, <span class="s2">\n_go</span> );</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s1">UpdateListener</span>.newFor( envSynth, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>buf.free;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( ~envSynth == envSynth, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~envSynth = <span class="s1">nil</span>;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, <span class="s2">\n_end</span> );</p>
+<p class="p3">//<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>isPlaying = true;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, {</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>buf.free;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>resp.remove;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}).add;</p>
+<p class="p1"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p1"><span class="Apple-tab-span">	</span>}, <span class="s2">\values</span> );</p>
+<p class="p2"><span class="Apple-tab-span">	</span></p>
+<p class="p1"><span class="Apple-tab-span">	</span>~win.front;<span class="Apple-tab-span">	</span></p>
+<p class="p1">)</p>
+</body>
+</html>

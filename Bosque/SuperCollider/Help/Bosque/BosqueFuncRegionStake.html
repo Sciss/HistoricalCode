@@ -1,0 +1,355 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 17.0px Helvetica Neue}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0000bf}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #23429c}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 18.0px Helvetica Neue; min-height: 22.0px}
+p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p13 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; min-height: 17.0px}
+p.p14 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000}
+p.p15 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000; min-height: 17.0px}
+p.p16 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #bf0000}
+p.p17 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #214fdb}
+span.s2 {font: 13.0px Monaco; color: #23429c}
+span.s3 {font: 13.0px Monaco; color: #0000bf}
+span.s4 {font: 14.0px Helvetica Neue; color: #000000}
+span.s5 {color: #1949e0}
+span.s6 {font: 13.0px Monaco; color: #1337a8}
+span.s7 {color: #0019ba}
+span.s8 {color: #2b6f11}
+span.s9 {color: #ad1d13}
+span.s10 {color: #606060}
+span.s11 {font: 13.0px Monaco; color: #0d32ac}
+span.s12 {color: #1142e6}
+span.s13 {font: 13.0px Monaco; color: #062cb0}
+span.s14 {color: #0000bf}
+span.s15 {color: #bf0000}
+span.s16 {color: #007300}
+span.s17 {color: #000000}
+span.s18 {color: #083aec}
+span.s19 {font: 13.0px Monaco; color: #007300}
+span.s20 {color: #0000ff}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">BosqueFuncRegionStake</p>
+<p class="p2"><br></p>
+<p class="p3">A stake whose purpose is to execute arbitrary SuperCollider code during realtime playback. This is done by specifying the name of a function object (typically an instance of <a href="SC://Event"><span class="s1">Event</span></a> or <span class="s2">AnyMap</span>) in the <span class="s2">eventName</span> field. The name is looked up the the current <a href="SC://Environment"><span class="s1">Environment</span></a> and should begin with a tilde character <span class="s2">~</span>.</p>
+<p class="p4"><br></p>
+<p class="p3">Furthermore to ease the organization of the function object, an additonal <a href="BosqueTrack.html"><span class="s1">BosqueTrack</span></a> can be associated with the stake through the <span class="s2">modTrack</span> field. For example, a <span class="s2">BosqueFuncRegionStake</span> may be used to modulate or filter the sound coming from <a href="BosqueAudioRegionStake.html"><span class="s1">BosqueAudioRegionStake</span></a> objects placed on a neighbouring track. In that case, the neighbouring track can be placed in the <span class="s2">modTrack</span> field so that the function object can look up the track more easily.</p>
+<p class="p4"><br></p>
+<p class="p3">Another field, <span class="s2">position</span>, specifies the position in the <a href="SC://Group"><span class="s1">Group</span></a> hierarchy at which the function object should insert custom <a href="SC://Synth"><span class="s1">Synth</span></a>s (e.g. pre- or post-panorama).</p>
+<p class="p5"><br></p>
+<p class="p3"><b>eventName</b></p>
+<p class="p4"><br></p>
+<p class="p3">The name (<a href="SC://String"><span class="s1">String</span></a>) of an <a href="SC://Environment"><span class="s1">Environment</span></a> variable holding the function object (whose properties are described in the next section), beginning with a tilde character <span class="s2">~</span>.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>modTrack</b></p>
+<p class="p4"><br></p>
+<p class="p3">An instance of <a href="BosqueTrack.html"><span class="s1">BosqueTrack</span></a> (or <span class="s3">nil</span>) that can be used by the function object as a reference track. See the section about <span class="s3">addFuncSynth</span> for an example usage.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>position</b></p>
+<p class="p4"><br></p>
+<p class="p3">A <a href="SC://Symbol"><span class="s1">Symbol</span></a> indicating whether <a href="SC://Synth"><span class="s1">Synth</span></a>s produced by the function object should be placed pre- or post-panorama (i.e. before or after the routing done by the track's <a href="BosqueBusConfig.html"><span class="s1">BosqueBusConfig</span></a>). Accordingly, the <span class="s2">numChannels</span> argument passed into the <span class="s2">playToBundle</span> call on the function object corresponds either to the bus-config's <span class="s2">numInputs</span> (for <span class="s2">position === \pre</span>) or <span class="s2">numOutputs</span> (for <span class="s2">position === \post)</span>. The same happens with the <span class="s2">group</span> argument.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p6">The function object</p>
+<p class="p4"><br></p>
+<p class="p3">The object stored in the <a href="SC://Environment"><span class="s1">Environment</span></a> under the name <span class="s2">eventName</span> should respond at least to the two messages <span class="s2">playToBundle</span> and <span class="s2">stopToBundle</span> which are forwarded by the <span class="s3">BosqueFuncRegionStake</span> from the <a href="BosqueAudioPlayer.html"><span class="s1">BosqueAudioPlayer</span></a>.</p>
+<p class="p4"><br></p>
+<p class="p7">playToBundle</p>
+<p class="p5"><br></p>
+<p class="p3">Whenever the realtime playback position advances to a <span class="s2">BosqueFuncRegionStake</span>, the <a href="BosqueAudioPlayer.html"><span class="s1">BosqueAudioPlayer</span></a> will call <span class="s2">playToBundle</span> on that stake. In this moment, the stake will <b><i>interpret</i></b> the String denoted by <span class="s2">eventName</span> and when the result is not <span class="s2">nil</span>, it will invoke <span class="s2">playToBundle</span> on that object (which we call "function object" here). A lot of arguments are passed in with this call:</p>
+<p class="p4"><br></p>
+<p class="p8"><span class="Apple-tab-span">	</span>funcObj.playToBundle( &lt;funcObj&gt;, &lt;(BosqueFuncRegionStake) stake&gt;,</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">                      </span>&lt;(OSCBundle) bndl&gt;, &lt;(BosqueAudioPlayer) player&gt;,</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">                      </span>&lt;(Float) durSecs&gt;, &lt;(Integer) frameOffset&gt;,</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">                      </span>&lt;(Integer) busIndex&gt;, &lt;(Integer) numChannels&gt;,</p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">                      </span>&lt;(Group) group&gt;, &lt;(Symbol) position&gt; );</p>
+<p class="p9"><br></p>
+<p class="p10"><span class="s4">- </span>stake<span class="s4"> is the </span>BosqueFuncRegionStake<span class="s4"> itself.</span></p>
+<p class="p3">- <span class="s2">bndl</span> can be used to add messages, such as <span class="s2">Synth</span> creations, so they are scheduled at the right time</p>
+<p class="p3">- <span class="s2">player</span> provides a lot of useful methods (see next section)</p>
+<p class="p3">- <span class="s2">durSecs</span> is the remaining duration of the stake. If the stake is entered regularly by the transport, this equals <span class="s2">stake.span.length / doc.timeline.rate</span>. However, when the transport is started in the <b><i>middle</i></b> of the stake, this will correspond to the remaining time till the end of the stake.</p>
+<p class="p3">- <span class="s2">frameOffset</span> similarily is zero if the stake is entered regularly by the transport, but provides the offset into the stake in sample frames, if the transport was started in the middle of the stake.</p>
+<p class="p3">- <span class="s2">busIndex</span> corresponds to the input bus (for <span class="s2">position === \pre</span>) or output bus (for <span class="s2">position === \post</span>) of the <span class="s2">modTrack</span>'s bus config, and is <span class="s2">nil</span> if no mod-track has been specified.</p>
+<p class="p3">- <span class="s2">numChannels</span> is the number of channels of the bus referred to by <span class="s2">busIndex</span></p>
+<p class="p3">- <span class="s2">group</span> is the <a href="SC://Group"><span class="s1">Group</span></a> in which <a href="SC://Synth"><span class="s1">Synth</span></a>s should be played</p>
+<p class="p3">- <span class="s2">position</span> is copied from the stake's <span class="s2">position</span> field and indicates whether the stake is pre- or post-panorama.</p>
+<p class="p9"><br></p>
+<p class="p3">Typically, the <span class="s2">playToBundle</span> method of the function object will call some of the methods of the audio player (see next section) such as <span class="s2">makeFuncDur</span> to create a synth that terminates after <span class="s2">durSecs</span> and notifies the player that the stake has finished playing (so it will be re-spawned if entered again by the transport).</p>
+<p class="p4"><br></p>
+<p class="p3"><b>Important:</b> <span class="s2">playToBundle</span> must return a <a href="SC://Boolean"><span class="s5">Boolean</span></a> indicating whether the stake actually started playing (<span class="s2">true</span>) or not (<span class="s2">false</span>). In the latter case, the player will re-try and call <span class="s2">playToBundle</span> again in its next cycle. Usually you will return <span class="s6">true</span>.</p>
+<p class="p4"><br></p>
+<p class="p7">stopToBundle</p>
+<p class="p11"><br></p>
+<p class="p3">The second method to be implemented by the function object is <span class="s2">stopToBundle</span> which is called with the following arguments:</p>
+<p class="p4"><br></p>
+<p class="p10"><span class="Apple-tab-span">	</span>funcObj.stopToBundle( &lt;funcObj&gt;, &lt;(BosqueFuncRegionStake) stake&gt;, &lt;(OSCBundle) bndl&gt;,</p>
+<p class="p10"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">                      </span>&lt;(BosqueAudioPlayer) player&gt; )</p>
+<p class="p9"><br></p>
+<p class="p3">This is called for example, if the transport is stopped while the stake is playing. Typically this is a no-op for most function objects, as the processes spawned by the audio player's utility methods are independantly shut down (e.g. all <a href="SC://Synth"><span class="s1">Synth</span></a>s are freed, all <a href="SC://Routine"><span class="s1">Routine</span></a>s are stopped, all <a href="../../../../../workspace/SwingOSC/SuperCollider/Help/SwingOSC/UpdateListener.html"><span class="s1">UpdateListener</span></a>s are removed).</p>
+<p class="p4"><br></p>
+<p class="p9"><br></p>
+<p class="p6">Audio player utility methods</p>
+<p class="p9"><br></p>
+<p class="p3">In order to execute the examples in this chapter, we prepare two tracks that we will use for function objects:</p>
+<p class="p4"><br></p>
+<p class="p12">(</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~doc<span class="Apple-converted-space">    </span>= <span class="s7">Bosque</span>.default.session;</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~editor = <span class="s7">Bosque</span>.default.timelineEditor;</p>
+<p class="p12"><span class="Apple-tab-span">	</span>if( ~doc.timeline.span.length &lt; 882000, {</p>
+<p class="p12"><span class="Apple-tab-span">	</span><span class="Apple-converted-space">    </span>~editor.insertSpan( ~doc, <span class="s7">Span</span>( ~doc.timeline.span.stop, 882000 ));</p>
+<p class="p12"><span class="Apple-tab-span">	</span>});</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~audioTrack1 = ~editor.addTrack( ~doc, <span class="s8">\Audio_1</span> );</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~audioTrack2 = ~editor.addTrack( ~doc, <span class="s8">\Audio_2</span> );</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~funcTrack <span class="Apple-converted-space">  </span>= ~editor.addTrack( ~doc, <span class="s8">\Func</span> );</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~busConfig <span class="Apple-converted-space">  </span>= ~editor.addBusConfig( ~doc, 1, 2 ); <span class="s9">// mono-to-stereo</span></p>
+<p class="p12"><span class="Apple-tab-span">	</span>~edit<span class="Apple-converted-space">        </span>= <span class="s7">JSyncCompoundEdit</span>( <span class="s10">"Customize Track"</span> );</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~busConfig.editConnections( -1, [[ 1, 1 ]], ~edit );</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~audioTrack2.editBusConfig( -1, ~busConfig, ~edit );</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~doc.undoManager.addEdit( ~edit.performAndEnd );</p>
+<p class="p12">)</p>
+<p class="p13"><br></p>
+<p class="p3">And we add a <span class="s11">BosqueFuncRegionStake</span> that we are going to adjust in the examples below:</p>
+<p class="p13"><br></p>
+<p class="p12">(</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~funcStake = <span class="s7">BosqueFuncRegionStake</span>( <span class="s7">Span</span>( 88200, 705600 ), <span class="s8">\MyFunc</span>, ~funcTrack );</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~editor.addStake( ~doc, ~funcStake );</p>
+<p class="p12">)</p>
+<p class="p4"><br></p>
+<p class="p3"><b>scsynth</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="SC://Server"><span class="s1">Server</span></a> instance used by the audio player, e.g. the one that should be used to spawn synths.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>doc</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="BosqueSession.html"><span class="s1">BosqueSession</span></a> used by the audio player.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>sampleRate</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the nominal sample rate (<a href="SC://Float"><span class="s1">Float</span></a>) at which the server is running.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addFuncUpd( &lt;(Stake) stake&gt;, &lt;(UpdateListener) upd&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Adds an <a href="../../../../../workspace/SwingOSC/SuperCollider/Help/SwingOSC/UpdateListener.html"><span class="s12">UpdateListener</span></a> to a playing stake. This <a href="../../../../../workspace/SwingOSC/SuperCollider/Help/SwingOSC/UpdateListener.html"><span class="s12">UpdateListener</span></a> is automatically removed when the stake stops playing.</p>
+<p class="p4"><br></p>
+<p class="p3">For brevity, in the following example we will just listen for <a href="SC://Server"><span class="s12">Server</span></a> status updates and use them to track the current CPU load. A balancing mechanism will add and remove <a href="SC://Synth"><span class="s12">Synth</span></a>s to achieve an extra CPU load of around 10%. To achieve that, we use the <span class="s11">addFuncSynth</span> and <span class="s13">makeFuncDur</span> methods explained later. First we define the function object (using the <span class="s2">AnyMap</span> class):</p>
+<p class="p4"><br></p>
+<p class="p14">(</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~mapUpd = <span class="s14">AnyMap</span>.new;</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~mapUpd.playToBundle = { <span class="s14">arg</span> map, stake, bndl, play, dur, off, bus, numChannels, group, pos;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s14">var</span> synths = [], initialCPU = play.scsynth.avgCPU;</p>
+<p class="p15"><br></p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>play.makeFuncDur( stake, dur );</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>play.addFuncUpd( stake, <span class="s14">UpdateListener</span>.newFor( play.scsynth, { <span class="s14">arg</span> upd, s;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s14">var</span> synth, newCPU = s.avgCPU;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>(<span class="s10">"CPU : "</span> ++ newCPU.round( 0.1 )).postln;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>rrand( 7, 14 ).do({</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( (newCPU - initialCPU) &lt; 10, { <span class="s15">// add a new synth</span></p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>synth = <span class="s14">Synth</span>( <span class="s16">\default</span>, [ <span class="s16">\amp</span>, 0.0, <span class="s16">\freq</span>, exprand( 200, 4000 )], group );</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>play.addFuncSynth( stake, synth );</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>synths = synths.add( synth );</p>
+<p class="p16"><span class="s17"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, { </span>// kill a synth</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>synth = synths.choose; synths.remove( synth );</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>synth.release;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>});</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>if( synths.size &gt; 0, { group.set( <span class="s16">\amp</span>, 0.5 / synths.size )});</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>}, <span class="s16">\counts</span> ));</p>
+<p class="p16"><span class="s17"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span><span class="s14">true</span><span class="s17">; </span>// playToBundle was successfull</p>
+<p class="p14"><span class="Apple-tab-span">	</span>};</p>
+<p class="p14">)</p>
+<p class="p15"><span class="Apple-tab-span">	</span></p>
+<p class="p16">// since Stakes are immutable objects, modifying a parameter such as the event name</p>
+<p class="p16">// means to create a duplicate version that incorporates the modification.</p>
+<p class="p16">// replaceEventName returns the new stake and we replace the old one by using</p>
+<p class="p16">// the editor's replaceStake method</p>
+<p class="p14">(</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~oldStake = ~funcStake; ~funcStake = ~funcStake.replaceEventName( <span class="s10">"~mapUpd"</span> );</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~editor.replaceStake( ~doc, ~oldStake, ~funcStake );</p>
+<p class="p14">)</p>
+<p class="p15"><br></p>
+<p class="p14"><span class="Apple-tab-span">	</span>s.aliveThreadPeriod = 0.7; s.startAliveThread; <span class="s15">// make sure the \counts come frequently</span></p>
+<p class="p14"><span class="Apple-tab-span">	</span>~doc.transport.play( 0 ); <span class="s15">// play from the beginning</span></p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>addFuncSynth( &lt;(Stake) stake&gt;, &lt;(Synth) synth&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Calling this method will register a <a href="SC://Synth"><span class="s18">Synth</span></a> with the audio player. This means that the audio player will automatically free it when the stake playback is finished (either by stopping the transport or as soon as the end of the stake's <span class="s13">Span</span> is reached). For an example, see the previous section about <span class="s13">addFuncUpd</span>.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>funcPreviousBus( &lt;(Stake) stake&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">A convenient way to refer from a function region to another track (e.g. to apply filtering to the objects played from that track) is to use the <span class="s3">modTrack</span> field provided for the <span class="s3">BosqueFuncRegionStake</span>. For example, we might want to apply ring modulation to a sound file played from out <span class="s19">\Audio_2</span> track:</p>
+<p class="p4"><br></p>
+<p class="p12">(</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~af = ~editor.addAudioFile( ~doc, <span class="s10">"sounds"</span>.absolutePath +/+ <span class="s10">"a11wlk01-44_1.aiff"</span> );</p>
+<p class="p14"><span class="Apple-tab-span">	</span>4.do({ <span class="s14">arg</span> i;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>~editor.addStake( ~doc,</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s14">BosqueAudioRegionStake</span>( <span class="s14">Span</span>( 132300, 239820 ).shift( i * 120000 ), <span class="s16">'a11wlk01-44_1'</span>,</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-converted-space">                        </span>~audioTrack2, audioFile: ~af );</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>);</p>
+<p class="p14"><span class="Apple-tab-span">	</span>});</p>
+<p class="p12">)</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3">First of all, to just play back the original sound file, we could remove the function object by replacing the event name again to something that doesn't yet exist...</p>
+<p class="p4"><br></p>
+<p class="p12">(</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~oldStake = ~funcStake; ~funcStake = ~funcStake.replaceEventName( <span class="s10">"~mapModTrack"</span> );</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~editor.replaceStake( ~doc, ~oldStake, ~funcStake );</p>
+<p class="p12">)</p>
+<p class="p4"><br></p>
+<p class="p3">...and we play back the timeline...</p>
+<p class="p13"><br></p>
+<p class="p12"><span class="Apple-tab-span">	</span>~doc.transport.play( 88200 );</p>
+<p class="p13"><span class="Apple-tab-span">	</span></p>
+<p class="p3">Now for quick access to the track's <span class="s3">busConfig</span>, we define the <span class="s19">\Audio_2</span> track to be the <span class="s3">modTrack</span> of the <span class="s19">\Func</span> track:</p>
+<p class="p4"><br></p>
+<p class="p12">(</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~oldStake = ~funcStake; ~funcStake = ~funcStake.replaceModTrack( ~audioTrack2 );</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~editor.replaceStake( ~doc, ~oldStake, ~funcStake );</p>
+<p class="p12">)</p>
+<p class="p4"><br></p>
+<p class="p3">The <span class="s3">busConfig</span> is handed in to our <span class="s3">playToBundle</span> function as the 7th (<span class="s3">index</span>) and 8th (<span class="s3">numChannels</span>) arguments, whereby <span class="s3">numChannels</span> depends on the <span class="s3">position</span> of the func region. For the default of a <span class="s19">\pre</span> panorama position, <span class="s3">numChannels</span> corresponds to the number of inputs to the panorama stage, i.e. the number of channels the source audio file has. For simplicity, we will assume that the modulated bus is monophonic. Here is the code to set up an insert filter that applies ring-modulation to the <span class="s3">modTrack</span>'s audio signal:</p>
+<p class="p4"><br></p>
+<p class="p12">(</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="s14">SynthDef</span>( <span class="s16">\ringMod</span>, { <span class="s14">arg</span> bus, freq = 440, fadeIn, dur, fadeOut;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s14">var</span> env, filter;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>filter<span class="Apple-tab-span">	</span>= <span class="s14">In</span>.ar( bus ) * <span class="s14">SinOsc</span>.ar( freq );</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>env<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>= <span class="s14">EnvGen</span>.kr( <span class="s14">Env</span>.linen( fadeIn, dur - (fadeIn + fadeOut), fadeOut ));</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s14">XOut</span>.ar( bus, env, filter );</p>
+<p class="p14"><span class="Apple-tab-span">	</span>}).send( s );</p>
+<p class="p15"><span class="Apple-tab-span">	</span></p>
+<p class="p14"><span class="Apple-tab-span">	</span>~mapModTrack = <span class="s14">AnyMap</span>.new;</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~mapModTrack.playToBundle = { <span class="s14">arg</span> map, stake, bndl, play, dur, off, bus, numChannels, group, pos;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>play.makeFuncDur( stake, dur );<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>play.makeFuncSynth( stake, <span class="s16">\ringMod</span>, [ <span class="s16">\bus</span>, bus, <span class="s16">\fadeIn</span>,</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>play.funcFadeIn( stake, dur, off ), <span class="s16">\dur</span>, dur, play.funcFadeOut( stake, dur, off )]);</p>
+<p class="p16"><span class="s17"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span><span class="s14">true</span><span class="s17">; </span>// playToBundle was successfull</p>
+<p class="p14"><span class="Apple-tab-span">	</span>};</p>
+<p class="p12">)</p>
+<p class="p4"><br></p>
+<p class="p12"><span class="Apple-tab-span">	</span>~doc.transport.play( 88200 );</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3">Note that we have already prepared to code to allow the effect to fade in and fade out: Each track has <span class="s3">fadeIn</span> and <span class="s3">fadeOut</span> fields which are also visualized in the timeline editor. The helper methods <span class="s3">funcFadeIn</span> and <span class="s3">funcFadeOut</span> return the fading times for a stake in seconds. Let's set up a long fade-in time:</p>
+<p class="p4"><br></p>
+<p class="p12">(</p>
+<p class="p16"><span class="s17"><span class="Apple-tab-span">	</span></span>// online linear fades (\lin) are supported at the moment</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~oldStake = ~funcStake; ~funcStake = ~funcStake.replaceFadeIn( <span class="s14">BosqueFade</span>( <span class="s16">\lin</span>, 441000 ));</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~editor.replaceStake( ~doc, ~oldStake, ~funcStake );</p>
+<p class="p12">)</p>
+<p class="p4"><br></p>
+<p class="p16"><span class="s17"><span class="Apple-tab-span">	</span></span>// Note: currently the reported fadeIn time becomes zero if we start</p>
+<p class="p16"><span class="s17"><span class="Apple-tab-span">	</span></span>// to play after the beginning of the stake. So make sure here that</p>
+<p class="p16"><span class="s17"><span class="Apple-tab-span">	</span></span>// the transport is playing from somewhere before the stake!</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~doc.transport.play( 78000 );</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3">Finally, let's use the other audio track as the modulation input (instead of the sine oscillator). We synthesize a sound file containing a chirp that will be placed on the <span class="s19">\Audio_1</span> track:</p>
+<p class="p4"><br></p>
+<p class="p14">(</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~chirpPath = <span class="s14">thisProcess</span>.platform.recordingsDir +/+ <span class="s10">"chirp.aif"</span>;</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~chirpFile = <span class="s14">SoundFile</span>.openWrite( ~chirpPath );</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~chirpFile.writeData( <span class="s14">Signal</span>.fill( 441000, { <span class="s14">arg</span> i; sin( i.linexp( 0, 441000, 2pi, 20000pi ))}));</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~chirpFile.close;</p>
+<p class="p14">)</p>
+<p class="p4"><br></p>
+<p class="p3">We put it onto the track...</p>
+<p class="p4"><br></p>
+<p class="p12">(</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~af2 = ~editor.addAudioFile( ~doc, ~chirpPath );</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~editor.addStake( ~doc,</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s14">BosqueAudioRegionStake</span>( <span class="s14">Span</span>( 132300, 573300 ), <span class="s16">'chirp'</span>, ~audioTrack1, audioFile: ~af2 );</p>
+<p class="p14"><span class="Apple-tab-span">	</span>);</p>
+<p class="p12">)</p>
+<p class="p4"><br></p>
+<p class="p3">...assign a dummy bus to it (that has an empty matrix so the file won't be played)...</p>
+<p class="p4"><br></p>
+<p class="p12">(</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~busConfig2<span class="Apple-converted-space">  </span>= ~editor.addBusConfig( ~doc, 1, 1 ); <span class="s9">// dummy mono</span></p>
+<p class="p12"><span class="Apple-tab-span">	</span>~edit<span class="Apple-converted-space">        </span>= <span class="s7">JSyncCompoundEdit</span>( <span class="s10">"Customize Track"</span> );</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~audioTrack1.editBusConfig( -1, ~busConfig2, ~edit );</p>
+<p class="p12"><span class="Apple-tab-span">	</span>~doc.undoManager.addEdit( ~edit.performAndEnd );</p>
+<p class="p12">)</p>
+<p class="p4"><br></p>
+<p class="p3">...and redefine the function object...</p>
+<p class="p4"><br></p>
+<p class="p12">(</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="s14">SynthDef</span>( <span class="s16">\crossMod</span>, { <span class="s14">arg</span> bus, modBus;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s14">var</span> env, filter;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>filter<span class="Apple-tab-span">	</span>= <span class="s14">In</span>.ar( bus ) * <span class="s14">In</span>.ar( modBus );</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s14">ReplaceOut</span>.ar( bus, filter );</p>
+<p class="p14"><span class="Apple-tab-span">	</span>}).send( s );</p>
+<p class="p15"><span class="Apple-tab-span">	</span></p>
+<p class="p14"><span class="Apple-tab-span">	</span>~mapPrevBus = <span class="s14">AnyMap</span>.new;</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~mapPrevBus.playToBundle = { <span class="s14">arg</span> map, stake, bndl, play, dur, off, bus, numChannels, group, pos;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span><span class="s14">var</span> pbus;</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>pbus = play.funcPreviousBus( stake );</p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>play.makeFuncDur( stake, dur );<span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></p>
+<p class="p14"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span>play.makeFuncSynth( stake, <span class="s16">\crossMod</span>, [ <span class="s16">\bus</span>, bus, <span class="s16">\modBus</span>, pbus ]);</p>
+<p class="p16"><span class="s17"><span class="Apple-tab-span">	</span><span class="Apple-tab-span">	</span></span><span class="s14">true</span><span class="s17">; </span>// playToBundle was successfull</p>
+<p class="p14"><span class="Apple-tab-span">	</span>};</p>
+<p class="p15"><span class="Apple-tab-span">	</span></p>
+<p class="p14"><span class="Apple-tab-span">	</span>~oldStake = ~funcStake; ~funcStake = ~funcStake.replaceFadeIn( <span class="s14">BosqueFade</span>.new );</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~editor.replaceStake( ~doc, ~oldStake, ~funcStake );</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~oldStake = ~funcStake; ~funcStake = ~funcStake.replaceEventName( <span class="s10">"~mapPrevBus"</span> );</p>
+<p class="p14"><span class="Apple-tab-span">	</span>~editor.replaceStake( ~doc, ~oldStake, ~funcStake );</p>
+<p class="p12">)</p>
+<p class="p4"><br></p>
+<p class="p12"><span class="Apple-tab-span">	</span>~doc.transport.play( 88200 );</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>makeFuncSynth( &lt;(Stake) stake&gt;, &lt;(Symbol) defName&gt;, &lt;(Collection) args&gt;, &lt;target&gt;, &lt;(Symbol) addAction = \addToHead )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Instantiates and returns a <a href="SC://Synth"><span class="s20">Synth</span></a> and adds a <span class="s3">newMsg</span> to the bundle to play in sync with the rest of the audio system when the stake is entered. Registers the <a href="SC://Synth"><span class="s20">Synth</span></a> and takes care of freeing it when the transport is stopped or the stake span is left. See the section about <span class="s3">funcPreviousBus</span> for an example.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>makeFuncDur( &lt;(Stake) stake&gt;, &lt;(Float) dur&gt;, &lt;(Group) group&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Creates and returns a synth that terminates after <span class="s3">dur</span> seconds and notifies the player that the stake has finished playing (so it will be re-spawned if entered again by the transport). An example is shown in the <span class="s3">addFuncUpd</span> section.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>makeFuncFullbody( &lt;(Stake) stake&gt;, &lt;(Symbol) name = \fullbody&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Adds and returns a special <a href="../../../../../workspace/SwingOSC/SuperCollider/Help/SwingOSC/UpdateListener.html"><span class="s20">UpdateListener</span></a> for the <span class="s3">EGMFullbodyTracker</span> class. The <span class="s3">name</span> argument specifies a message (dictionary key or method) to the function object that returns the <a href="SC://Function"><span class="s20">Function</span></a> to invoke upon updates.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>makeFuncControlBus( &lt;(Stake) stake&gt;, &lt;(Integer) numChannels = 1&gt;, &lt;(Symbol) name = \cbus )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Allocates and returns a control rate <a href="SC://Bus"><span class="s20">Bus</span></a> to use during playback. The <a href="SC://Bus"><span class="s20">Bus</span></a> is automatically freed when the stake stops playing.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>makeFuncRout( &lt;(Stake) stake&gt;, &lt;(Function) func&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Forks and returns a <a href="SC://Routine"><span class="s20">Routine</span></a> executing the passed in <span class="s3">func</span> on the <a href="SC://SystemClock"><span class="s20">SystemClock</span></a>. The <a href="SC://Routine"><span class="s20">Routine</span></a> is automatically stopped when the stake stops playing.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p17">__________</p>
+<p class="p17">this file last modified: 31-aug-08</p>
+</body>
+</html>

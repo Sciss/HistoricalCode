@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #0019ba}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; min-height: 17.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #0022f8}
+span.s2 {font: 13.0px Monaco; color: #1337a8}
+span.s3 {color: #000000}
+span.s4 {font: 13.0px Monaco; color: #606060}
+span.s5 {font: 13.0px Monaco; color: #0019ba}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">BosqueMIDIController</p>
+<p class="p2"><br></p>
+<p class="p3"><br></p>
+<p class="p4">Bosque has a very basic MIDI controller integration. This allows you to enter break point functions in realtime via a MIDI fader box, such as the Behringer BCF-2000. When Bosque is launched, it will initialize the MIDI system and connect a <a href="SC://MIDIIn"><span class="s1">MIDIIn</span></a> to listen for controller input. In the follow-mode described below, a <a href="SC://MIDIOut"><span class="s1">MIDIOut</span></a> is used to write back to the controller.</p>
+<p class="p3"><br></p>
+<p class="p4">The device to be used is specified as name strings in the <span class="s2">*midiInDev</span> and <span class="s2">*midiOutDev</span> fields of <a href="Bosque.html"><span class="s1">Bosque</span></a>. The proper name of the <span class="s2">MIDIEndPoint</span>'s device field is printed when calling</p>
+<p class="p3"><br></p>
+<p class="p5"><span class="s3"><span class="Apple-tab-span">	</span></span>MIDIClient<span class="s3">.init;</span></p>
+<p class="p6"><span class="Apple-tab-span">	</span></p>
+<p class="p4">e.g. the line</p>
+<p class="p6"><span class="Apple-tab-span">	</span></p>
+<p class="p5"><span class="Apple-tab-span">	</span>MIDIEndPoint("IAC Driver", "Bus 1")</p>
+<p class="p6"><span class="Apple-tab-span">	</span></p>
+<p class="p4">indicates that the device <span class="s4">"IAC Driver"</span> is available. By default, Bosque will try to connect to <span class="s4">"BCF2000"</span>.</p>
+<p class="p7"><br></p>
+<p class="p8">Controller Mapping</p>
+<p class="p7"><br></p>
+<p class="p4">The controller mapping is very simple: Every successive <a href="BosqueTrack.html"><span class="s1">BosqueTrack</span></a> in the <a href="BosqueSession.html"><span class="s1">BosqueSession</span></a> is mapped to a successive fader. A fader is considered to be a continous controller (CC) in 14-bit mode, starting at indices 0 (for MSB) and 32 (for LSB) . E.g.:</p>
+<p class="p3"><br></p>
+<p class="p4"><span class="Apple-tab-span">	</span>The first track is mapped to CCs 0 (MSB) and 32 (LSB).</p>
+<p class="p4"><span class="Apple-tab-span">	</span>The second track is mapped to CCs 1 (MSB) and 33 (LSB).</p>
+<p class="p4"><span class="Apple-tab-span">	</span>For the <i>Nth</i> track (N counting from zero!), the CCs are N (MSB) and N+32 (LSB).</p>
+<p class="p3"><span class="Apple-tab-span">	</span></p>
+<p class="p4">The number of faders is given in <span class="s5">BosqueMIDIController.numFaders</span> and defaults to <span class="s5">8</span>.</p>
+<p class="p3"><br></p>
+<p class="p3"><br></p>
+<p class="p8">Playback Envelope Following</p>
+<p class="p3"><br></p>
+<p class="p4">Controller <b>N+16</b> is a toggle switch (0 = off, 127 = on) for fader-read-follow. When switched on, the faders follow the movements of the track's breakpoint functions. <span class="s5">BosqueMIDIController.period</span> determines the update period of the controller. The default of <span class="s5">0.05</span> means that MIDI data is sent every 50 ms (so at 20 Hz) to the controller.</p>
+<p class="p3"><br></p>
+<p class="p7"><br></p>
+<p class="p8">Live Recording of Fader Motion</p>
+<p class="p3"><br></p>
+<p class="p4">Controller <b>N+8</b> is a toggle switch (0 = off, 127 = on) for automation-write. When switched on, moving the fader while transport is running will write the fader motions as a new breakpoint function (envelope) region into the track. Write is automatically switched off when transport stops.</p>
+<p class="p3"><br></p>
+<p class="p4">A post processing of the recorded motion will apply a smoothing to the data in order to thin out the amount of breakpoints. The smoothing is controlled by the <span class="s5">BosqueMIDIController.smoothing</span> setting. The default of <span class="s5">0.01</span> means that all points are discarded which lie on a line through the previous points with a maximum deviation of 1%. If a point appears that lies outside the +-1% error margin, a new ramp is started.</p>
+<p class="p3"><br></p>
+<p class="p9"><br></p>
+<p class="p10">__________</p>
+<p class="p10">this file last modified: 17-aug-08</p>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #083aec}
+span.s2 {color: #0022f8}
+span.s3 {color: #0024b5}
+span.s4 {font: 13.0px Monaco; color: #0024b5}
+span.s5 {color: #0030f2}
+span.s6 {color: #0000ff}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">BosqueAudioPlayer</p>
+<p class="p2"><br></p>
+<p class="p3">This class is responsible for spawning <a href="SC://Synth"><span class="s1">Synth</span></a>s on the scsynth <a href="SC://Server"><span class="s1">Server</span></a> during realtime playback (see <a href="BosqueTransport.html"><span class="s2">BosqueTransport</span></a>). The audio player is accessible from</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span><span class="s3">Bosque</span>.default.session.audioPlayer;</p>
+<p class="p4"><br></p>
+<p class="p3">The audio player will manage the invocation of the <span class="s4">playToBundle</span> and <span class="s4">stopToBundle</span> methods of the session trail's <a href="BosqueRegionStake.html"><span class="s5">BosqueRegionStake</span></a> objects, such as <a href="BosqueAudioRegionStake.html"><span class="s5">BosqueAudioRegionStake</span></a>, <a href="BosqueEnvRegionStake.html"><span class="s5">BosqueEnvRegionStake</span></a>, and <a href="BosqueFuncRegionStake.html"><span class="s5">BosqueFuncRegionStake</span></a>.</p>
+<p class="p4"><br></p>
+<p class="p3">The audio player is passed in to the <span class="s4">playToBundle</span> method of a <a href="BosqueFuncRegionStake.html"><span class="s1">BosqueFuncRegionStake</span></a>'s function object, and has many useful methods for the function object. They are described in the help file for <a href="BosqueFuncRegionStake.html"><span class="s1">BosqueFuncRegionStake</span></a>.</p>
+<p class="p6"><br></p>
+<p class="p3">For an organization scheme of the <a href="SC://Group"><span class="s6">Group</span></a> graph, see <a href="Bosque_Audio.html"><span class="s6">Bosque_Audio</span></a>.</p>
+<p class="p6"><br></p>
+<p class="p3">As of the current version, the audio player cannot handle dynamic playback speed changes, so only works properly for a constant playback rate of 1.0.</p>
+<p class="p4"><br></p>
+<p class="p6"><br></p>
+<p class="p7">__________</p>
+<p class="p7">this file last modified: 17-aug-08</p>
+</body>
+</html>

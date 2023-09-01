@@ -1,0 +1,25 @@
+<?xml version="1.0" ?> 
+<!--                               -->
+<!-- ANT BUILD FILE FOR BOSQUE     -->
+<!--                               -->
+<project name="Bosque" default="main">
+	<property name="dist.dir"		value="dist"/>
+	<property name="version"		value="0.12"/>
+	<property name="debug"			value="true"/>
+
+	<target name="clean">
+<!--		<delete dir="${build.dir}" /> -->
+		<delete dir="${dist.dir}" />
+<!--		<delete includeemptydirs="true">
+			<fileset dir="${lib.dir}" excludes="*.jar"/>
+		</delete> -->
+	</target>
+	<target name="main" depends="dist" />
+	<target name="dist" depends="clean">
+		<!-- sucky zip task don't create separate folder -->
+		<dirname property="parent.dir" file="${basedir}"/>
+		<basename property="folder.name" file="${basedir}"/>
+		<mkdir dir="${dist.dir}"/>
+		<zip destfile="${dist.dir}/${ant.project.name}-${version}.zip" basedir="${parent.dir}" includes="${folder.name}/**" excludes="${folder.name}/${dist.dir}, **/.DS_Store"/>
+	</target>
+</project>

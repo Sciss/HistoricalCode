@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="1038.25">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px 'Helvetica Neue'}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px 'Helvetica Neue'}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px 'Helvetica Neue'; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px 'Helvetica Neue'; min-height: 24.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px 'Helvetica Neue'}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Neue'; min-height: 14.0px}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px 'Helvetica Neue'; color: #001fe8}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; min-height: 17.0px}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #737373}
+p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000}
+p.p13 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px 'Helvetica Neue'}
+span.s1 {color: #1142e6}
+span.s2 {color: #083aec}
+span.s3 {color: #0019ba}
+span.s4 {color: #0030f2}
+span.s5 {text-decoration: underline ; color: #001fe8}
+span.s6 {text-decoration: underline ; color: #0000ff}
+span.s7 {color: #000000}
+span.s8 {text-decoration: underline}
+span.s9 {font: 13.0px Monaco; color: #0d32ac}
+span.s10 {font: 13.0px Monaco; color: #0019ba}
+span.s11 {color: #0022f8}
+span.s12 {color: #ad1d13}
+span.s13 {color: #2400cf}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">BosqueSession</p>
+<p class="p2"><br></p>
+<p class="p3">This class represents the document which contains all the tracks and regions, timeline information etc. The session can be loaded and saved via the <a href="BosqueTimelineEditor.html"><span class="s1">BosqueTimelineEditor</span></a>. Since <a href="Bosque.html"><span class="s2">Bosque</span></a> is a single-document-application, the session can always be accessed via</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc = <span class="s3">Bosque</span>.default.session;</p>
+<p class="p6"><br></p>
+<p class="p7">Instance fields / getter methods</p>
+<p class="p4"><br></p>
+<p class="p3"><b>timeline</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="BosqueTimeline.html"><span class="s4">BosqueTimeline</span></a> instance.</p>
+<p class="p8"><br></p>
+<p class="p3"><b>timelineView</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="BosqueTimelineView.html"><span class="s4">BosqueTimelineView</span></a> instance which allows you to access the <a href="BosqueTimelineCursor.html"><span class="s4">BosqueTimelineCursor</span></a> and the <a href="BosqueTimelineSelection.html"><span class="s4">BosqueTimelineSelection</span></a>.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>transport</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="BosqueTransport.html"><span class="s4">BosqueTransport</span></a> instance.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>tracks</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns a <a href="BosqueSessionCollection.html"><span class="s4">BosqueSessionCollection</span></a> containing all <a href="BosqueTrack.html"><span class="s4">BosqueTrack</span></a> objects.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>selectedTracks</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns a <a href="BosqueSessionCollection.html"><span class="s4">BosqueSessionCollection</span></a> containing all currently selected <a href="BosqueTrack.html"><span class="s4">BosqueTrack</span></a> objects.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>audioFiles</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns a <a href="BosqueSessionCollection.html"><span class="s5">BosqueSessionCollection</span></a> containing all <a href="BosqueAudioFile.html"><span class="s6">BosqueAudioFile</span></a> objects.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>busConfigs</b></p>
+<p class="p4"><br></p>
+<p class="p9"><span class="s7">Returns a <a href="BosqueSessionCollection.html"><span class="s8">BosqueSessionCollection</span></a> containing all <a href="BosqueBusConfig.html"><span class="s8">BosqueBusConfig</span></a> objects.</span></p>
+<p class="p4"><br></p>
+<p class="p3"><b>trail</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns a <a href="BosqueTrail.html"><span class="s4">BosqueTrail</span></a> containing all <a href="BosqueRegionStake.html"><span class="s4">BosqueRegionStake</span></a> objects.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>selectedRegions</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns a <a href="BosqueSessionCollection.html"><span class="s4">BosqueSessionCollection</span></a> containing all currently selected <a href="BosqueRegionStake.html"><span class="s4">BosqueRegionStake</span></a> objects.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>audioPlayer</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="BosqueAudioPlayer.html"><span class="s4">BosqueAudioPlayer</span></a> instance.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>markers</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns a <a href="BosqueTrail.html"><span class="s4">BosqueTrail</span></a> containing all <a href="BosqueMarkerStake.html"><span class="s4">BosqueMarkerStake</span></a> objects.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>path</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the file (<a href="SC://String"><span class="s4">String</span></a>) to which the session was saved, or <span class="s9">nil</span>.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>name</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the name of the session, i.e. a human readable <a href="SC://String"><span class="s4">String</span></a> take from the <span class="s9">path</span>.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>undoManager</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <span class="s10">ScissUndoManager</span> instance.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>isDirty</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns a <a href="SC://Boolean"><span class="s11">Boolean</span></a> indicating whether unsaved modifications have been done to the session.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p7">Instance methods</p>
+<p class="p4"><br></p>
+<p class="p3"><b>editPosition( &lt;(Object) source&gt;, &lt;(Integer) pos&gt; )</b></p>
+<p class="p8"><br></p>
+<p class="p3">Sets the timeline view's cursor position to a new value. <span class="s10">source</span> refers to the object originating the modification. Example:</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.editPosition( -1, 22050 );<span class="Apple-tab-span">	</span><span class="Apple-converted-space">  </span><span class="s12">// go to 0:00.500</span></p>
+<p class="p8"><br></p>
+<p class="p8"><br></p>
+<p class="p3"><b>editSelect( &lt;(Object) source&gt;, &lt;(Span) span&gt; )</b></p>
+<p class="p8"><br></p>
+<p class="p3">Sets the timeline view's selection <span class="s10">Span</span> to a new value. <span class="s10">source</span> refers to the object originating the modification. Example:</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.editSelect( -1, <span class="s3">Span</span>( 10000, 100000 ));<span class="Apple-tab-span">	</span></p>
+<p class="p10"><span class="Apple-tab-span">	</span></p>
+<p class="p8"><br></p>
+<p class="p3"><b>editScroll( &lt;(Object) source&gt;, &lt;(Span) span&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Sets the timeline view's visible <span class="s10">Span</span> to a new value. <span class="s10">source</span> refers to the object originating the modification. Example:</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~doc.editScroll( -1, <span class="s3">Span</span>( 0, 88200 )); <span class="s12">// zoom to seconds 0...2</span></p>
+<p class="p10"><span class="Apple-tab-span">	</span></p>
+<p class="p4"><br></p>
+<p class="p3"><b>editInsertTimeSpan( &lt;(Object) source&gt;, &lt;(Integer) span&gt;, &lt;(JSyncCompoundEdit) ce&gt; )</b></p>
+<p class="p8"><br></p>
+<p class="p3">Adds the operation of inserting a time span into the session to a given compound edit object. You will most likely use the more simple way of calling <a href="BosqueTimelineEditor.html"><span class="s11">BosqueTimelineEditor</span></a>'s <span class="s10">insertSpan</span> method instead.</p>
+<p class="p8"><br></p>
+<p class="p8"><br></p>
+<p class="p3"><b>editRemoveTimeSpan( &lt;(Object) source&gt;, &lt;(Integer) span&gt;, &lt;(JSyncCompoundEdit) ce&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Adds the operation of removing a time span from the session to a given compound edit object. You will most likely use the more simple way of calling <a href="BosqueTimelineEditor.html"><span class="s11">BosqueTimelineEditor</span></a>'s <span class="s10">removeSpan</span> method instead.</p>
+<p class="p8"><br></p>
+<p class="p8"><br></p>
+<p class="p3"><b>editClearTimeSpan( &lt;(Object) source&gt;, &lt;(Integer) span&gt;, &lt;(JSyncCompoundEdit) ce&gt;, &lt;(Function) filter&gt; )</b></p>
+<p class="p8"><br></p>
+<p class="p3">Adds the operation of clearing a time span in the session to a given compound edit object. You will most likely use the more simple way of calling <a href="BosqueTimelineEditor.html"><span class="s11">BosqueTimelineEditor</span></a>'s <span class="s10">clearSpan</span> method instead.</p>
+<p class="p8"><br></p>
+<p class="p8"><br></p>
+<p class="p3"><b>clear</b></p>
+<p class="p8"><br></p>
+<p class="p3">Clears the session, that is it removes all its objects and resets the timeline. <b>Warning:</b> there is no way to undo this operation and this method will not ask you to confirm when there are unsaved changes to the document.</p>
+<p class="p8"><br></p>
+<p class="p8"><br></p>
+<p class="p7">Kontur</p>
+<p class="p8"><br></p>
+<p class="p3">Rudimentary export of Bosque sessions to Kontur is provided:</p>
+<p class="p8"><br></p>
+<p class="p11"><span class="s7"><span class="Apple-tab-span">	</span>w = </span><span class="s13">File</span><span class="s7">( </span>"~/Desktop/TestSession"<span class="s7">.absolutePath, </span>"w"<span class="s7"> );</span></p>
+<p class="p12"><span class="Apple-tab-span">	</span>w.put( <span class="s13">Bosque</span>.default.session.konturExport );</p>
+<p class="p12"><span class="Apple-tab-span">	</span>w.close;</p>
+<p class="p8"><br></p>
+<p class="p13">__________</p>
+<p class="p13">this file last modified: 03-feb-10</p>
+</body>
+</html>

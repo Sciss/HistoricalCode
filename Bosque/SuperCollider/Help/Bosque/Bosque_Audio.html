@@ -1,0 +1,92 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 10.0px Monaco; color: #9d281b}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; min-height: 17.0px}
+p.p11 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000}
+p.p12 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {font: 13.0px Monaco; color: #0d32ac}
+span.s2 {font: 13.0px Monaco; color: #062cb0}
+span.s3 {color: #083aec}
+span.s4 {color: #000000}
+span.s5 {font: 13.0px Monaco; color: #0024b5}
+span.s6 {color: #0030f2}
+span.s7 {color: #0022f8}
+span.s8 {font: 14.0px Helvetica Neue}
+span.s9 {color: #0024b5}
+span.s10 {color: #0000bf}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">Bosque - Audio</p>
+<p class="p2"><br></p>
+<p class="p3">Although you don't necessarily need to use Bosque's audio system, it will be initialized upon launch and provides a useful skeleton of groups and busses.</p>
+<p class="p4"><br></p>
+<p class="p3">Bosque uses <span class="s1">Server.default</span> for audio synthesis. If scsynth was not booted when launching Bosque, it will do that for you if you have set its <span class="s2">soundCard</span> field, taking into account settings made for <span class="s1">numInputBusChannels</span> and <span class="s1">numOutputBusChannels</span> (see <a href="Bosque_Configuration.html"><span class="s3">Bosque_Configuration</span></a>).</p>
+<p class="p4"><br></p>
+<p class="p5"><br></p>
+<p class="p6">Group Structure</p>
+<p class="p5"><br></p>
+<p class="p3">The node tree created by Bosque looks like this:</p>
+<p class="p4"><br></p>
+<p class="p7">localhost</p>
+<p class="p7">NODE TREE Group 0</p>
+<p class="p7"><span class="Apple-converted-space">   </span>1 group</p>
+<p class="p8"><span class="s4"><span class="Apple-converted-space">      </span>1014 group<span class="Apple-tab-span">	</span></span>// Bosque.default.diskGroup</p>
+<p class="p8"><span class="s4"><span class="Apple-converted-space">      </span>1013 group<span class="Apple-tab-span">	</span></span>// Bosque.default.preFilterGroup</p>
+<p class="p8"><span class="s4"><span class="Apple-converted-space">      </span>1012 group<span class="Apple-tab-span">	</span></span>// Bosque.default.panGroup</p>
+<p class="p8"><span class="s4"><span class="Apple-converted-space">      </span>1011 group<span class="Apple-tab-span">	</span></span>// Bosque.default.postFilterGroup</p>
+<p class="p8"><span class="s4"><span class="Apple-converted-space">      </span>1010 group<span class="Apple-tab-span">	</span></span>// Bosque.default.mixGroup</p>
+<p class="p8"><span class="s4"><span class="Apple-converted-space">      </span>1000 group<span class="Apple-tab-span">	</span></span>// Bosque.default.masterGroup</p>
+<p class="p7"><span class="Apple-converted-space">         </span>1001 bosqueMaster8</p>
+<p class="p7"><span class="Apple-converted-space">         </span>1002 bosqueRoute1</p>
+<p class="p7"><span class="Apple-converted-space">         </span>1003 bosqueRoute1</p>
+<p class="p7"><span class="Apple-converted-space">         </span>1004 bosqueRoute1</p>
+<p class="p7"><span class="Apple-converted-space">         </span>1005 bosqueRoute1</p>
+<p class="p7"><span class="Apple-converted-space">         </span>1006 bosqueRoute1</p>
+<p class="p7"><span class="Apple-converted-space">         </span>1007 bosqueRoute1</p>
+<p class="p7"><span class="Apple-converted-space">         </span>1008 bosqueRoute1</p>
+<p class="p7"><span class="Apple-converted-space">         </span>1009 bosqueRoute1</p>
+<p class="p4"><br></p>
+<p class="p3">The disk group (<span class="s5">Bosque.default.diskGroup</span>) is used for the Synths playing back audio file regions (also see <a href="BosqueAudioPlayer.html"><span class="s6">BosqueAudioPlayer</span></a>). Next follows the pre-filter group where Synths can be placed that act on the output of the audio player directly, before it goes into the panorama section. Synths placed by the audio player in the panorama group will route the input channels of the audio player to logical bus channels as defined by a track's bus configuration (see <a href="BosqueTrack.html"><span class="s7">BosqueTrack</span></a> and <a href="BosqueBusConfig.html"><span class="s7">BosqueBusConfig</span></a>). If a synth is to act on the bus of a <span class="s5">BosqueBusConfig</span>, e.g. after panorama processing, it should be placed in the post-filter group. The mix group is used to route the channels of each <span class="s5">BosqueBusConfig</span>'s internal bus to the logical (internal) master bus.</p>
+<p class="p4"><br></p>
+<p class="p5"><br></p>
+<p class="p6">Master Section</p>
+<p class="p4"><br></p>
+<p class="p3">The Synths in the master group (<span class="s2">Bosque.default.masterGroup</span>) are created depending on the <span class="s2">masterBusNumChannels</span> and <span class="s2">masterChanMap</span> settings. The Synth "bosqueMaster8" was created for <span class="s2">masterBusNumChannels := 8</span> and contains a limiter and master volume control. The "bosqueRoute1" synths provide the routing from logical master channels to physical sound card channels as defined by <span class="s2">masterChanMap</span>.</p>
+<p class="p4"><br></p>
+<p class="p3"><span class="s2">masterChanMap</span> is an array of integers describing the mapping from logical master channels to physical sound card channels. For example, if you want a master bus of four channels going to sound card channels 13, 14, 15, 16 (or indices 12, 13, 14, 15 when starting to count from zero), you would do</p>
+<p class="p4"><br></p>
+<p class="p9"><span class="s8"><span class="Apple-tab-span">	</span></span><span class="s9">Bosque</span>.masterBusNumChannels = 4;</p>
+<p class="p9"><span class="Apple-tab-span">	</span><span class="s9">Bosque</span>.masterChanMap = [ 12, 13, 14, 15 ];</p>
+<p class="p10"><span class="Apple-tab-span">	</span></p>
+<p class="p3">If you leave <span class="s2">masterChanMap</span> at <span class="s2">nil</span>, it will just connect to the first soundcard channels, e.g. <span class="s2">[ 0, 1, 2, 3, … ]</span>.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p6">Master Volume</p>
+<p class="p5"><br></p>
+<p class="p3">The current master volume as visualized in the transport window can be read and set like this:</p>
+<p class="p4"><br></p>
+<p class="p11"><span class="Apple-tab-span">	</span><span class="s10">Bosque</span>.default.masterVolume;</p>
+<p class="p11"><span class="Apple-tab-span">	</span><span class="s10">Bosque</span>.default.masterVolume = -6.dbamp;</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p12">__________</p>
+<p class="p12">this file last modified: 17-aug-08</p>
+</body>
+</html>

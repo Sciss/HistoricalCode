@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; color: #604030; min-height: 12.0px}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p10 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {text-decoration: underline ; color: #001fe8}
+span.s2 {font: 13.0px Monaco; color: #23429c}
+span.s3 {color: #0024b5}
+span.s4 {color: #214fdb}
+span.s5 {text-decoration: underline ; color: #1e49cd}
+span.s6 {color: #0022f8}
+span.s7 {color: #1949e0}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">Bosque</p>
+<p class="p2"><br></p>
+<p class="p3">Bosque is an application built on top of SuperCollider and SwingOSC. It is a successor of the software used for the "Forest 2" project during the Weimar TanzMedienAkademie 2007 ("bosque" = Spanish for forest). Version 0.29 is the result of a visit at the IEM Graz in July 2009 for the EGM (embodied generative music) project.</p>
+<p class="p4"><br></p>
+<p class="p3">Bosque is basically a multi-track editor that allows you to place regions in a timeline and playback that timeline. Regions can be audio files, breakpoint functions (envelopes) or SuperCollider code fragments. The timeline and transport can be programmatically controlled via SuperCollider. The editor's display window is a custom Java component accessed via the SwingOSC framework.</p>
+<p class="p4"><br></p>
+<p class="p3">The following help files are available:</p>
+<p class="p4"><br></p>
+<p class="p3"><span class="s1"><a href="Bosque_Installation.html">Bosque_Installation</a></span> - which files are needed and where they go</p>
+<p class="p3"><span class="s1"><a href="Bosque_Configuration.html">Bosque_Configuration</a></span> - how to set up and launch the application</p>
+<p class="p3"><span class="s1"><a href="Bosque_Editing.html">Bosque_Editing</a></span> - basic tutorial for the timeline editor</p>
+<p class="p3"><span class="s1"><a href="Bosque_Audio.html">Bosque_Audio</a></span> - description of the audio engine</p>
+<p class="p5"><br></p>
+<p class="p5"><br></p>
+<p class="p6">Bosque Class</p>
+<p class="p7"><br></p>
+<p class="p3"><b>*launch</b></p>
+<p class="p4"><br></p>
+<p class="p3">Instantiates and launches the <span class="s2">Bosque</span> application. If no scsynth server has been booted, it will do this as well. The new <span class="s2">Bosque</span> instance is available through the <span class="s2">*default</span> method.</p>
+<p class="p4"><br></p>
+<p class="p8"><span class="Apple-tab-span">	</span><span class="s3">Bosque</span>.launch;</p>
+<p class="p7"><br></p>
+<p class="p3"><b>*default</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the default instance of <span class="s2">Bosque</span>. This class field is automatically set when Bosque is instantiated for the first time (using <span class="s2">*new</span> or <span class="s2">*launch</span>).</p>
+<p class="p4"><br></p>
+<p class="p3"><b>*version</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the version (<a href="SC://Float"><span class="s4">Float</span></a>) of the Bosque class library.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>*soundCard, *numInputBusChannels, *numOutputBusChannels, *workDir, *masterBusNumChannels, *masterChanMap, *timeBasedJar, *midiInDev, *midiOutDev</b></p>
+<p class="p4"><br></p>
+<p class="p3">These are covered in the <a href="Bosque_Configuration.html"><span class="s5">Bosque_Configuration</span></a> help file.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>*track( &lt;(Symbol) name&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Shortcut for returning a <a href="BosqueTrack.html"><span class="s6">BosqueTrack</span></a> from the current session.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>*mark( &lt;(Symbol) name&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Shortcut for returning a <a href="BosqueMarkerStake.html"><span class="s6">BosqueMarkerStake</span></a> from the current session.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>swing</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <a href="../../../../../workspace/SwingOSC/SuperCollider/Help/SwingOSC/SwingOSC.html"><span class="s4">SwingOSC</span></a> server used for the Bosque GUI.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>scsynth</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the scsynth <a href="SC://Server"><span class="s4">Server</span></a> used for the Bosque audio engine.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>session</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the current <a href="BosqueSession.html"><span class="s4">BosqueSession</span></a> document. Bosque is a single-document-application (SDA), so there is always exactly one document available.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>masterGroup, masterVolume, diskGroup, preFilterGroup, postFilterGroup, panGroup, mixGroup, masterBus</b></p>
+<p class="p4"><br></p>
+<p class="p3">These are covered in the <a href="Bosque_Audio.html"><span class="s7">Bosque_Audio</span></a> help file.</p>
+<p class="p4"><br></p>
+<p class="p3"><b>timelineEditor</b></p>
+<p class="p9"><br></p>
+<p class="p3">returns an instance of <a href="BosqueTimelineEditor.html"><span class="s7">BosqueTimelineEditor</span></a>, the class resposible for setting up the main Bosque GUI.</p>
+<p class="p9"><br></p>
+<p class="p10">__________</p>
+<p class="p10">this file last modified: 17-aug-08</p>
+</body>
+</html>

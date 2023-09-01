@@ -1,0 +1,60 @@
+<?xml version="1.0" ?> 
+<!--                               -->
+<!-- ANT BUILD FILE FOR TIMEBASED  -->
+<!--                               -->
+<project name="TimeBased" default="main">
+	<property name="src.dir"		value="src"/>
+	<property name="build.dir"		value="build"/>
+	<property name="dist.dir"		value="dist"/>
+	<property name="classes.dir"	value="${build.dir}/classes"/>
+	<property name="jar.file"		value="${ant.project.name}.jar"/>
+	<property name="resources.dir"	value="resources"/>
+	<property name="main-class"		value="de.sciss.timebased.Main"/>
+	<property name="lib.dir"		value="libraries"/>
+	<property name="libraries"		value="${lib.dir}/SwingOSC.jar"/>
+	<property name="version"		value="0.12"/>
+	<property name="debug"			value="true"/>
+
+	<target name="clean">
+		<delete dir="${build.dir}" />
+<!--		<delete dir="${dist.dir}" /> -->
+		<delete includeemptydirs="true">
+			<fileset dir="${lib.dir}" excludes="*.jar"/>
+		</delete>
+	</target>
+	<target name="compile">
+		<mkdir dir="${classes.dir}" />
+		<javac debug="${debug}" srcdir="${src.dir}" destdir="${classes.dir}" classpath="${libraries}" source="1.5" target="1.5"/>
+	</target>
+	<target name="jar" depends="compile">
+<!--		<mkdir dir="${jar.dir}" /> -->
+		<jar destfile="${jar.file}" basedir="${classes.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}" />
+			</manifest>
+		</jar>
+		<jar destfile="${jar.file}" basedir="${resources.dir}" update="true"/>
+		<unjar dest="${lib.dir}">
+			<fileset dir="${lib.dir}">
+				<include name="MRJAdapter.jar" />
+			</fileset>
+		</unjar>
+		<jar destfile="${jar.file}" basedir="${lib.dir}" excludes="*.jar" update="true" />
+		<delete includeemptydirs="true">
+			<fileset dir="${lib.dir}" excludes="*.jar" />
+		</delete>
+	</target>
+	<target name="main" depends="clean,jar" />
+	<target name="test" depends="jar">
+        <java jar="${jar.file}" fork="true">
+        	<!-- <arg value="..."/> -->
+    	</java>
+	</target>
+	<target name="dist" depends="clean,jar">
+		<!-- sucky zip task don't create separate folder -->
+		<dirname property="parent.dir" file="${basedir}"/>
+		<basename property="folder.name" file="${basedir}"/>
+		<mkdir dir="${dist.dir}"/>
+		<zip destfile="${dist.dir}/${ant.project.name}-${version}.zip" basedir="${parent.dir}" includes="${folder.name}/**" excludes="${folder.name}/${classes.dir}/**, ${folder.name}/${dist.dir}, **/.DS_Store"/>
+	</target>
+</project>

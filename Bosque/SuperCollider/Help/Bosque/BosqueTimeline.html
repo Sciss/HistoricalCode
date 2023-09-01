@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<title></title>
+<meta name="Generator" content="Cocoa HTML Writer">
+<meta name="CocoaVersion" content="824.48">
+<style type="text/css">
+p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 24.0px Helvetica Neue}
+p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 9.0px Monaco; min-height: 12.0px}
+p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue}
+p.p4 {margin: 0.0px 0.0px 0.0px 0.0px; font: 14.0px Helvetica Neue; min-height: 16.0px}
+p.p5 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco; color: #000000}
+p.p6 {margin: 0.0px 0.0px 0.0px 0.0px; font: 20.0px Helvetica Neue; min-height: 24.0px}
+p.p7 {margin: 0.0px 0.0px 0.0px 0.0px; font: 13.0px Monaco}
+p.p8 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue; min-height: 14.0px}
+p.p9 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica Neue}
+span.s1 {color: #0022f8}
+span.s2 {color: #0000bf}
+span.s3 {font: 13.0px Monaco; color: #0019ba}
+span.s4 {color: #0000ff}
+span.s5 {font: 13.0px Monaco; color: #000000}
+span.s6 {font: 13.0px Monaco; color: #007300}
+span.Apple-tab-span {white-space:pre}
+</style>
+</head>
+<body>
+<p class="p1">BosqueTimeline</p>
+<p class="p2"><br></p>
+<p class="p3">The timeline object represents the complete time span covered by a <a href="BosqueSession.html"><span class="s1">BosqueSession</span></a>. It is accessible via</p>
+<p class="p4"><br></p>
+<p class="p5"><span class="Apple-tab-span">	</span>~timeline = <span class="s2">Bosque</span>.default.session.timeline;</p>
+<p class="p6"><br></p>
+<p class="p3"><b>span</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the <span class="s3">Span</span> that the timeline covers, usually starting at frame <span class="s3">0</span>. Units are frames referring to the samplerate given by the <span class="s3">rate</span> field of the timeline. For example, to determine the duration of the session in seconds:</p>
+<p class="p4"><br></p>
+<p class="p7"><span class="Apple-tab-span">	</span>(~timeline.span.length / ~timeline.rate).asTimeString;</p>
+<p class="p4"><br></p>
+<p class="p3">When the timeline's span is modified using the <span class="s3">span_</span> setter method (you are advised to do this indirectly, e.g. using the <span class="s3">editInsertSpan</span> or <span class="s3">editRemoveSpan</span> methods of <a href="BosqueTimelineEditor.html"><span class="s4">BosqueTimelineEditor</span></a>), a notification <span class="s5">( </span><span class="s6">\span</span><span class="s5">, newSpan )</span> is delivered to registered observers.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>rate</b></p>
+<p class="p4"><br></p>
+<p class="p3">Returns the samplerate or time base used to express frame positions in the document. By default, a rate of 44100 is used. Note that this doesn't imply that the sound files used in the session need to have a samplerate of 44.1 kHz, nor does it mean that the scsynth server must run at 44.1 kHz. It merely defines the resolution in which timeline positions can be expressed.</p>
+<p class="p4"><br></p>
+<p class="p4"><br></p>
+<p class="p3"><b>rate_( &lt;(Float) newValue&gt; )</b></p>
+<p class="p4"><br></p>
+<p class="p3">Sets the timeline's time base to the given value in frames per second. There is currently no undo manager aware method to modify the rate. It is suggested that you adjust the session's rate immediately after clearing or opening the session in order not to conflict with the undo manager.</p>
+<p class="p4"><br></p>
+<p class="p3">When the rate is adjusted, a notification <span class="s5">( </span><span class="s6">\rate</span><span class="s5">, newValue )</span> is delivered to registered observers.</p>
+<p class="p4"><br></p>
+<p class="p8"><br></p>
+<p class="p9">__________</p>
+<p class="p9">this file last modified: 17-aug-08</p>
+</body>
+</html>
