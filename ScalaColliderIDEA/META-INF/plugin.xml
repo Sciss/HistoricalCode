@@ -1,0 +1,49 @@
+<idea-plugin version="2">
+  <name>ScalaCollider</name>
+  <description>Integration of ScalaCollider into IDEA</description>
+  <version>0.1</version>
+  <vendor>Sciss</vendor>
+  <idea-version since-build="8000"/>
+  <id>de.sciss.idea.scalacollider</id>
+
+  <depends>org.intellij.scala</depends>
+
+  <application-components>
+    <!-- Add your application components here -->
+      <component>
+          <implementation-class>de.sciss.idea.components.ScalaColliderAppComp</implementation-class>
+      </component>
+  </application-components>
+
+  <project-components>
+    <!-- Add your project components here -->
+  </project-components>
+
+  <actions>
+    <!-- Add your actions here -->
+     <!-- <action id="IDEATestPlugIn.TestAction" class="de.sciss.idea.TestAction" text="Testendorfer"
+              description="Zentralitaetszentrale">
+          <add-to-group group-id="ToolsMenu" anchor="first"/>
+      </action> -->
+    <action id="ScalaCollider.ExecuteInInterpreter" class="de.sciss.idea.actions.ExecuteInInterpreterAction"
+          text="Execute In Interpreter" description="Executes the selected text in the Scala interpreter">
+        <keyboard-shortcut first-keystroke="meta BACK_SLASH" keymap="$default"/>
+        <add-to-group group-id="GoToCodeGroup" anchor="last"/>
+      </action>
+
+      <!-- <action id="ScalaCollider.ExecuteREPL" class="ExecuteREPL" text="Execute Text in REPL"
+              description="Executes the selected text in the Scala REPL">
+          <add-to-group group-id="GoToCodeGroup" anchor="last"/>
+          <keyboard-shortcut keymap="$default" first-keystroke="meta BACK_SLASH"/>
+      </action> -->
+      <!-- <action id="ExecuteREPL" class="ExecuteREPL" text="FuckYouAction">
+          <add-to-group group-id="GoToCodeGroup" anchor="last"/>
+      </action> -->
+  </actions>
+
+  <extensions defaultExtensionNs="com.intellij">
+     <toolWindow id="ScalaCollider Online Status" anchor="bottom" factoryClass="de.sciss.idea.windows.OnlineWindowFactory">
+
+     </toolWindow>
+  </extensions>
+</idea-plugin>

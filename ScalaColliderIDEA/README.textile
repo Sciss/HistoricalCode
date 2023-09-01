@@ -1,0 +1,14 @@
+h2. ScalaCollider-IDEA
+
+h3. statement
+
+An experimental project to evaluate possibilities to integrate ScalaCollider with IDEA. It is (C)opyright 2011 by Hanns Holger Rutz. All rights reserved. ScalaCollider-IDEA is released under the "GNU General Public License":http://github.com/Sciss/ScalaColliderIDEA/blob/master/licenses/ScalaColliderIDEA-License.txt and comes with absolutely no warranties. To contact the author, send an email to @contact at sciss.de@
+
+h3. requirements / installation
+
+You can use @sbt update@ to install the ScalaCollider dependancy. currently compiles against Scala 2.8.1, and uses IDEA CE 10.0.2, and latest scala plugin.
+
+The following files are expected in lib. Here are my symlinks for reference:
+
+lrwxr-xr-x   1 hhrutz  757317411   85  5 Mar 19:00 scala-plugin.jar -> /Users/hhrutz/Library/Application Support/IntelliJIdea10CE/Scala/lib/scala-plugin.jar
+

@@ -1,0 +1,10 @@
+target/
+lib_managed/
+src_managed/
+project/boot/
+out/
+index.html
+style.css
+_creation/
+.idea/workspace.xml
+lib/
