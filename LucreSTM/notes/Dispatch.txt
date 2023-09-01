@@ -1,0 +1,494 @@
+::::::::::::::::::::::::::::
+
+object Region extends Keys {
+   case class Renamed( r: Region, ch: Change[ String ]) extends Key
+   case class Moved( r: Region, ch: Change[ Span ]) extends Key
+}
+trait Region[ S <: Sys[ S ]] extends Dispatch[ Region[ S ]] {
+   lazy val renamed = name_#.changed.map( Renamed( this, _ ))
+   lazy val moved   = span_#.changed.map( Moved(   this, _ ))
+   def changed      = renamed | moved
+//   def removed      = event[Removed]
+}
+
+the only difficult point is the deserialization of NodeSelector, i.e. Dispatch => Event according to an event key, which is needed as we don't want to persist for example the mapping function.
+
+::::::::::::::::::::::::::::
+
+- `name_#.changed.map[ A ](...)` must be able to access the key of `A`.
+
+- should not matter whether we use `lazy val` or `def` to define the event
+
+::::::::::::::::::::::::::::
+
+object Region extends Keys[ Region ] {
+   case class Renamed( r: Region, ch: Change[ String ]) extends Map( _.name_#.changed ) { ch =>
+      Renamed( ?, ch )
+   }
+}
+
+doesn't make sense
+
+- we cannot guarantee at compile time that no more than one event per key is defined
+
+::::::::::::::::::::::::::::
+
+- for a single key, we could just store the observation in reactionmap such that it will be possible to retrieve the event
+- but how about combining events, like (renamed | moved)?
+
+(should make no difference, given than equals / hashCode are properly implemented?)
+
+! doesn't help in the reactor propagation !
+
+::::::::::::::::::::::::::::
+
+since only the companion can faithfully keep track of the keys, the solution is to provide a pointer back to it, such that
+
+trait Dispatch {
+   protected def companion: DispatchCompanion
+}
+
+and thus
+
+
+trait Keys {
+   private var cnt = 0
+   private var keyMap = Map.empty[ Class[ _ ], Int ]
+//   private var idMap  = Map.empty[ Int, Key ]
+   
+   def id( clz: Class[ _ ]): Int = keyMap( clz )
+//   def key( id: Int ) : Key = idMap( id )
+
+   sealed trait Key {
+      private val id = cnt
+      cnt += 1      
+      keyMap += ((getClass, cnt))
+//      idMap += ((id, this))
+   }
+}
+
+trait Event[ A ] {
+   def dispatch: Dispatch[ _ ] // [ _ >: A ]
+   def key: Int
+   def pull( source: Event[ _ ], update: Any ) : Option[ A ]
+}
+
+trait Dispatch[ K <: Keys ] {
+   me =>
+   
+   // THIS ONE IS STILL PROBLEMATIC
+   final def select( id: Int ) : Event[ K#Key ] = sys.error( "TODO" ) // keys.key( id )
+   
+   protected def keys: K
+   protected def event[ A <: K#Key ]( implicit mf: ClassManifest[ A ]) : Event[ A ] = new Event[ A ] {
+      def key = keys.id( mf.erasure )
+      def pull( source: Event[ _ ], update: Any ) : Option[ A ] = 
+         if( source == this ) Some( update.asInstanceOf[ A ]) else None
+
+      def dispatch = me
+      
+      override def hashCode = key.hashCode
+      override def equals( that: Any ) = that.isInstanceOf[ Event[ _ ]] && {
+         val thatE = that.asInstanceOf[ Event[ _ ]]
+         (dispatch == thatE.dispatch) && (key == thatE.key)
+      }
+   }
+}
+
+object Region extends Keys {
+   case class Renamed( name: String ) extends Key
+   case class Moved( pos: Int ) extends Key
+}
+
+class Region extends Dispatch[ Region.type ] {
+    import Region._
+
+    protected def keys = Region
+    
+    def renamed = event[Renamed]
+    def moved   = event[Moved]
+}
+
+::::::::::::::::::::::::::::
+
+So can we do without `select`?
+
+note that we wouldn't have `Event:propagate`, but still `Node:propagate`, thus the crucial step is
+
+ObserverKey:propagate
+   -> tx.propagate( key, node, ... )
+
+and
+
+Event[ A, Repr ] {
+   def reader  // ok, no prob -- that in fact can be in dispatch.keys!
+
+   def recover: Repr => Event[ A ]
+
+   def react( fun: A => Unit ) : Observer[ A ] = {
+      tx.addReaction( key, reader, recover, fun )
+   }
+}
+
+so that tx.propagate becomes
+
+  map.get( observer.key ) match {
+     case Some( observation ) => 
+        val node  = observation.reader( ... )
+        val event = observation.recover( node )
+        val react = () => { val eval = event.pull( )
+           eval match {
+              case Some( result ) => () => observation.fun( result )
+              case None => () => ()
+           }
+        }
+        reaction :+ react
+     case None => reactions
+  }
+
+thus
+
+   protected def event[ A <: K#Key ]( implicit mf: ClassManifest[ A ]) : Event[ A, Repr ] = new Event[ A, Repr ] {
+      ...
+      def recover( n: Repr ) = ???
+
+Trapped in a loop....
+
+::::::::::::::::::::::::::::
+
+The easy solution of course would again involve the Dispatch implementation which is kind of ugly
+
+trait Region {
+   def pull( key: Region#Key ) : Event[ Region#Key ] = key match {
+      case ...
+
+- no this is bullshit, Keys `idMap` doesn't make sense, since we don't have objects but instances, so they will be continuously added when events are fired.
+
+::::::::::::::::::::::::::::
+
+the minimum effort on the implemention side will thus be like this:
+
+object Region extends Keys[ Region ] {
+   private object RenamedKey extends Key( _.renamed )
+   private object MovedKey extends Key( _.moved )
+
+   case class Renamed( name: String ) extends Value[ RenamedKey ]
+   case class Moved( pos: Int ) extends Value[ MovedKey ]
+}
+
+class Region extends Dispatch[ Region.type ] {
+    import Region._
+
+    protected def keys = Region
+    
+    def renamed = event[Renamed]
+    def moved   = event[Moved]
+}
+
+?
+
+
+::::::::::::::::::::::::::::
+
+more dynamic / less type-safe, but maybe more elegant from the user side:
+
+object Region extends Keys[ Region ] {
+   case class Renamed( name: String ) extends Value
+   case class Moved( pos: Int ) extends Value
+   
+   private val _renamed = defEvent[ Renamed ]( _.renamed )
+   private val _moved   = defEvent[ Moved ]( _.moved )
+}
+
+class Region extends Dispatch[ Region, Region.type ] {
+    import Region._
+
+    protected def keys = Region
+    
+    def renamed = _renamed()  // or _renamed( this ) ?
+    def moved   = _moved()
+    
+    protected def fireRenamed( n: String ) { renamed( n )}
+}
+
+::::::::::::::::::::::::::::
+
+better:
+
+object Region extends Keys[ Region ] {
+   case class Renamed( name: String ) extends Value
+   case class Moved( pos: Int ) extends Value
+   
+   defEvent[ Renamed ]( _.renamed )
+   defEvent[ Moved ]( _.moved )
+}
+
+class Region extends Dispatch[ Region, Region.type ] {
+    import Region._
+
+    protected def keys = Region
+    
+    def renamed = event[ Renamed ]
+    def moved   = event[ Moved ]
+    
+    protected def fireRenamed( n: String ) { renamed( n )}
+}
+
+::::::::::::::::::::::::::::
+
+like this
+
+trait Keys[ Repr ] {
+   private var cnt = 0
+   var keyMap = Map.empty[ Class[ _ ], Int ]
+   var idMap  = Map.empty[ Int, Key[ _ ]]
+   
+   def id( clz: Class[ _ ]): Int = keyMap( clz )
+   def key( id: Int ) : Key[ _ ] = idMap( id )
+
+   protected sealed trait Key[ A ] {
+      val id = cnt
+      cnt += 1      
+      
+      def recover( disp: Repr ) : Event[ A ]
+      
+//      def apply() : Event[ A ]
+   }
+
+   protected def defEvent[ V <: Value ]( fun: Repr => Event[ V ])( implicit mf: ClassManifest[ V ]) {
+      val key = new Key[ V ] {
+         def recover( r: Repr ) = fun( r )
+      }
+      keyMap += ((mf.erasure, cnt))
+      idMap += ((key.id, key))
+   }
+
+   sealed trait Value
+}
+
+trait Event[ A ] {
+   def dispatch: Dispatch[ _, _ ] // [ _ >: A ]
+   def key: Int
+   def pull( source: Event[ _ ], update: Any ) : Option[ A ]
+}
+
+trait Imperative[ A ] extends Event[ A ] {
+   def apply( v: A ) : Unit
+}
+
+trait Dispatch[ Repr, K <: Keys[ Repr ]] {
+   me: Repr =>
+   
+   final def select( id: Int ) : Event[ _ ] = keys.key( id ).recover( this )
+   
+   protected def keys: K
+   protected def event[ V <: K#Value ]( implicit mf: ClassManifest[ V ]) : Imperative[ V ] = new Imperative[ V ] {
+      def key = keys.id( mf.erasure )
+      def pull( source: Event[ _ ], update: Any ) : Option[ V ] = 
+         if( source == this ) Some( update.asInstanceOf[ V ]) else None
+
+      def dispatch = me
+      
+      override def hashCode = key.hashCode
+      override def equals( that: Any ) = that.isInstanceOf[ Event[ _ ]] && {
+         val thatE = that.asInstanceOf[ Event[ _ ]]
+         (dispatch == thatE.dispatch) && (key == thatE.key)
+      }
+      
+      def apply( value: V ) {}
+   }
+}
+
+// ...
+
+object Region extends Keys[ Region ] {
+   case class Renamed( name: String ) extends Value
+   case class Moved( pos: Int ) extends Value
+   
+   defEvent[ Renamed ]( _.renamed )
+   defEvent[ Moved ]( _.moved )
+}
+
+class Region extends Dispatch[ Region, Region.type ] {
+    import Region._
+
+    protected def keys = Region
+    
+    def renamed = event[ Renamed ]
+    def moved   = event[ Moved ]
+    
+    protected def fireRenamed( n: String ) { renamed( Region.Renamed( n ))}
+}
+
+val r = new Region
+Region
+
+r.select(1)
+r.select(0)
+
+r.moved.pull( r.moved, Region.Moved( 33 ))
+r.moved.pull( r.renamed, Region.Moved( 33 ))
+
+::::::::::::::::::::::::::::
+
+need to ensure this works with the observer
+
+::::::::::::::::::::::::::::
+
+howto define events on elements from a collection?
+
+collection[ EventRegion ]( _.changed ).map( ch => RegionList.ElementChanged( this, ch ))
+
+elements[ EventRegion ]( _.changed ).map( ch => RegionList.ElementChanged( this, ch ))
+
+forall[ EventRegion ]( _.changed ).map( ch => RegionList.ElementChanged( this, ch ))
+// disadvantage: pollutes namespace
+
+   private def collEvt = collection[ EventRegion ]( _.changed ).map( ch => RegionList.ElementChanged( this, ch ))
+
+   def add( r: Region ) {
+       ...
+       collEvt.add( r )    // or +=
+   }
+
+   def remove( r: Region ) {
+      collEvt.remove( r )  // or -=
+   }
+
+the alternative is to leave this tracking open to clients?
+
+   list.any( _.changed ).react { ... }
+
+or multiple
+
+   lazy val any = collection[ EventRegion ]( _.changed )
+   private lazy val elementChanged    = any.map( ch => RegionList.ElementChanged( this, ch ))
+   private lazy val collectionChanged = event[ AddedOrRemoved ]
+   lazy val changed = elemEvt | collEvt
+
+there is no urge to support `any` in this case, so it should be sufficient to do
+
+   lazy val elementChanged    = collection[ EventRegion ]( _.changed ).map( ch => RegionList.ElementChanged( this, ch ))
+   lazy val collectionChanged = event[ AddedOrRemoved ]
+   lazy val changed           = elemEvt | collEvt
+
+how about `collected`?
+
+   lazy val elementChanged    = collected[ EventRegion ]( _.changed ).map( ch => RegionList.ElementChanged( this, ch ))
+   lazy val collectionChanged = event[ AddedOrRemoved ]
+   lazy val changed           = elemEvt | collEvt
+
+?
+
+And how to deal with multiple additions?
+
+(the current implementation would allow multiple registrations; but the dispatch might actually filter them through visited?)
+
+::::::::::::::::::::::::::::
+
+there is a confusion currently:
+
+- Compound:pull assumes that 'key' is its event key
+- but currently Event += takes a reactor, and then calls select with _its_ key,
+  thus the Selector's id corresponds to 'outlet' not 'inlet'
+
+NodeSelector : propagate
+ --> adds it's own key in targets.propagate
+
+what targets.propagate needs to do:
+   children need to be either Map[ Int, IIdxSeq[ Selector ]]
+   or (probably better in most cases) IIdxSeq[ (Int, Selector) ]
+
+thus:
+   Event {
+      def +=( Selector )
+      def -=( Selector )
+   }
+
+::::::::::::::::::::::::::::
+
+now back to or'ed events.
+
+    lazy val changed = renamed | moved
+
+currently, the visiting filter is as follows:
+
+         val cid     = reactor.id
+         val bitset  = visited.getOrElse( cid, 0 )
+         if( (bitset & inlet) == 0 ) {
+            visited.+=( (cid, bitset | inlet) )
+            ...propagate
+         }
+
+the simplest approach would be to relax the observer a bit, so that it could be simply added to the underlying events (operands).
+
+    val key = tx.addEventReaction[ A, Repr ]( reader, fun )
+
+`fun` is already contravariant in its arguments, meaning that we can call the function with a subtype of A.
+
+in reaction-map
+
+    leaf.pull( selector, source, update )
+
+will thus result in Option[ A1 <: A ], and we can savely call into the observer function with A1
+
+hence, instead of 
+
+    sealed trait Observer[ S <: Sys[ S ], A, Repr ] extends Disposable[ S#Tx ] {
+       def add(    event: Event[ S, A, Repr ])( implicit tx: S#Tx ) : Unit
+       def remove( event: Event[ S, A, Repr ])( implicit tx: S#Tx ) : Unit
+    }
+
+we could have
+
+    sealed trait Observer[ S <: Sys[ S ], A, Repr ] extends Disposable[ S#Tx ] {
+       def add[ A1 <: A ](    event: Event[ S, A1, Repr ])( implicit tx: S#Tx ) : Unit
+       def remove[ A1 <: A ]( event: Event[ S, A1, Repr ])( implicit tx: S#Tx ) : Unit
+    }
+
+or (since we don't actually do anything with `A1` in those methods)
+
+    sealed trait Observer[ S <: Sys[ S ], A, Repr ] extends Disposable[ S#Tx ] {
+       def add(    event: Event[ S, _ <: A, Repr ])( implicit tx: S#Tx ) : Unit
+       def remove( event: Event[ S, _ <: A, Repr ])( implicit tx: S#Tx ) : Unit
+    }
+
+(also type `A` is not used for the reader! it is `event.Reader[ S, Repr, _ ]`, so we only need to ensure invariance in `Repr`)
+
+::::::::::::::::::::::::::::
+
+Repr <: Node[ S, A, Repr ]
+   Event[ S, A1, Repr ].map[ B ]( fun: A1 => B )
+             : Event[ S, B, Repr ]
+
+the problem is `react`, returning an `Observer[ S, B, Repr ]
+   -- if the event is a proxy, then it cannot construct such an observer
+   -- but if `react` returns an opaque object that can only be removed, we can create proxies
+   (this makes probably more sense, than relying on heavy compounds?)
+
+but does that compose -- how would the map context be deserialized? for instance:
+
+    val renamed  = name_#.changed.map( Renamed( this, _ ))
+
+obviously, for renamed.react { ... } to work, the txn-registered observer cannot be Expr[ String ], but
+must be EventRegion...
+
+something must fail here, but what? --> collections! :
+- in the heavy case, we would only have one observer attached to each element (therefore, only one entry in the reaction map)
+- in the proxy case, we ...
+
+  !! we can't forward ---> for observer-keys, simple as that
+
+   imagine
+
+val changed: Event[ B ] = a: Event[ A ].map[ B ]( ... )
+val o = Observer[ B ]
+o.add( changed )
+
+which is just a shortcut for changed ---> o.key
+; and that comes with the promise that the reaction map can use the observer's reader in the right moment
+(e.g. here when Event[ A ] is deserialized -- so there is a mismatch, as we find Reader[ B ])
+
+::::::::::::::::::::::::::::
+
+thus, a 'heavy' `or` relies on the fact that the result is Event[ S, A1 <: A, Repr ]; hence it can only be performed on events form the same compound.

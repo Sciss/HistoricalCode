@@ -1,0 +1,259 @@
+0 i 1
+4 i 1 
+8 b 1 selector cookie = mutating target
+9 i 1 selector outlet
+13 b 1  reactor cookie = mutating target
+14 i 4  id-id
+18 i 1  path-len
+22 i 0  path-elem
+26 i 5  children-var-id
+30 i 6  invalid-var-id
+34 begin of unsorted.write
+  --> targets.write; writeData
+  34 b 0
+  35 ... 47 id
+     35 i 0
+     39 i 1
+     43 i 0
+  47 ... children
+     47 i 1 = id
+  51 i 2 RegionList writeData
+  55 i 3
+  59 seq write
+    59 i 7 = id
+
+:::::::::
+
+Region<108 @ 0>
+   addTarget: 1 -> Node<0 @ 0>.select(2)
+
+Region<108 @ 0>.name_#
+   addTarget:  1 -> Region<108 @ 0>.select(1)
+
+-->> Targets<110 @ 0> add (was empty)
+-->> Region<108 @ 0>.name_# connect()
+   (Dummy)
+
+Region<108 @ 0>.name_#.map[Renamed] connect()
+Region<108 @ 0>.span_#.map[Moved] connect()
+
+-->> Targets<113 @ 0> add (1 -> Region<108 @ 0>.select(2))
+
+Region<108 @ 0>.span_# connect()
+
+::::::::::::::::::
+
+unsorted	= RegionList<0 @ 0>
+sorted		= Sorted<4 @ 0>
+element to add	= Region<108 @ 0> = r
+
+( LinkedList<116 @ 0> )
+
+RegionList<0 @ 0>.elementChanged += r  // fails
+  Region<108 @ 0>.name_#.map[Renamed] | Region<108 @ 0>.span_#.map[Moved] --> RegionList<0 @ 0>.collection[Element].select()  // fails
+                                                                          aka RegionList<0 @ 0>.select(2)
+  = or-map elems.foreach( --> ), thus:
+     Region<108 @ 0>.name_#.map[Renamed] --> RegionList<0 @ 0>.select(2)  // ok
+        Region<108 @ 0>.addTarget( 1, RegionList<0 @ 0>.select(2) )
+           old = childrenVar.get --> empty  ; childenVar = Var<109 @ 0>: Vector(0)
+           write : Vector((1,RegionList<0 @ 0>.select(2)))
+              0 i 1 = coll.size
+              4 i 1 = outlet
+              8 InvariantNodeSelector.write()
+                 8 b 0 = cookie
+                 9 writeData()
+                     9 i 2 = inlet
+                    13 reactor.write() = RegionList<0 @ 0>.write()
+                       13 targets.write()
+                         13 b 0 = cookie
+                         14 ... 26 = id (i 0, i 1, i 0)
+                         26 children.write() = Var<1 @ 0>: Vector(0)
+                            26 i 1 = id
+                       30 writeData()
+                         30 i 2 = sizeRef id = Var<2 @ 0>: Vector(0)
+                         34 i 3 = headRef id = Var<3 @ 0>: Vector(0)
+               38 EOF
+         ; old is empty? true
+          --> Region<108 @ 0>.connectNode() = decl.events( this ).foreach( _.connect() ) ; declared are renamed + moved
+               Region<108 @ 0>.name_# aka Targets<110 @ 0> with underlying ref Var<112 @ 0>: Vector(0)
+               addTarget( 1, Region<108 @ 0>.select(1) )
+                 old children = empty
+                 --> connectNode()
+                     ref.get.changed ---> this ; where ref = Var<112 @ 0>: Vector(0)
+                        = Const( "rx" ).changed = Dummy = no-op
+               Region<108 @ 0>.span_# aka Targets<113 @ 0> with underlying ref Var<115 @ 0>: Vector(0)
+                 old children = empty
+                 --> connectNode()
+                     ref.get.changed ---> this ; where ref = Var<115 @ 0>: Vector(0)
+                        = Const( Span(12345,67890) ).changed = Dummy = no-op
+
+     Region<108 @ 0>.span_#.map[Moved]   --> RegionList<0 @ 0>.select(2)  // fails
+        Region<108 @ 0>.addTarget( 2, RegionList<0 @ 0>.select(2) )
+           --> children.get fails in Invariant.Targets  // fails
+     
+len = 38 // OK
+    sz = 0 i -> 1 OK
+    outlet = 4 i -> 1 OK
+    selector-ser:
+       cookie = 8 b -> 0 OK
+       inlet = 9 i -> 2 OK
+       Invariant.Targets.readAndExpand
+          cookie =  13 b -> 0 OK
+          id = 14 ... 26 -> <0 @ 0> OK
+          children = read id = 26 i -> 1 OK
+
+          offset is now 30, in is de.sciss.lucre.DataInput@77dbc064
+
+          val observers  = targets.childrenVar.get.flatMap( _._2.toObserverKey )
+
+so there is one child which is (1, RegionList<0 @ 0>.select(2))
+     children binary has len 93
+        size = 2
+        first child: outlet = 1, selector = 
+           inlet=1 -> reactor = mutating (id = <4 @ 0>, children = Var<5 @ 0>: Vector(0), invalid = Var<6 @ 0>: Vector(0)
+	    now offset is 34 = begin of unsorted.write --> targets read OK
+               resolve target children
+                   size = 22
+                   num children = 2
+                   first child :  outlet = 1, selector cookie = 2 -> live observer (id = 0 --> ObserverKey(0))
+                   second child : outlet = 2, selector cookie = 2 -> live observer (id = 0 --> ObserverKey(0))
+                
+                tx.mapEventTargets( in, access, targets, observers )
+                observation head option = 
+                     EventObservation(de.sciss.lucre.expr.MutatingTest$Sorted$$anon$1@8fc095,<function1>), 
+                     
+                     read with Targets<4 @ 0>, offset is 34
+                             cookie = 34 b -> 128 ????
+
+
+RegionList<0 @ 0>.collectionChanged( Added( this, idx, r ))
+
+
+::::::
+
+both writings happen in Sorted.New -> connectNode
+
+first one comes from Collection, second from Element
+
+Collection:
+
+Targets<0 @ 0> add( 1, Sorted<4 @ 0>.select(1) )
+
+  Var<1 @ 0>: Vector(0)
+     set (1,Sorted<4 @ 0>.select(1))
+
+::::::::::::::::
+
+at offset 81
+Element:
+
+!
+Vector((1,Targets<4 @ 0>.select(1)), (2,Sorted<4 @ 0>.select(2)))
+
+the problem thus is that there is a non-resolved element in the children list, and that gets re-written, chopping off the actual data of the sorted (the writeData part).
+
+; so there is an indirection missing (putting only the id's in the children seq), or the targets when not resolved still need to store the whole binary representation
+
+::::::::::::::::::::::
+
+two solutions
+(1) children = IIdxSeq[ (Int, S#ID) ] instead
+(2) children = mutable linked list
+
+probably for the small typical size of children, variant (1) is more efficient both space and time wise. But it's more tricky as it needs to access low level things like getting the key part of the id.
+
+so let's evaluate (2) first.
+
+before we had S#Var[ IIdxSeq[ (Int, Selector[ S ])]]
+
+for zero children, it would require 4 bytes in the target write; and then in the value write (apart from the oracle structure) 4 bytes size
+
+for zero children in the LL variant: S#Var[ LL[ (Int, NodeSelector[ S ]) ]]
+    4 bytes for the target write; 1 byte for the value write
+
+one child: before: 4 bytes + selector (1 byte + 4 byte + id + children + data! --> at least in the order of 50 byets)
+one child: with LL: Cons cell = 1 byte + 4 byte next var + selector
+
+::::::::::::::::::
+
+The problem remains the same with LL, because in the removal we have pred.nextRef.set( succ ) and that will write the selector of succ again in the current implementation.
+
+We should thus go for (1), it just makes life easier in the end.
+
+::::::::::::::::::
+
+02-Mar-12
+
+The problem is that now pullUpdate being both in Event and NodeSelector gets nasty -- it means it's the event's responsibility to remove the mutating state from pull... terrible approach.
+
+In other words, the only clean solution is what we should have done before: Unify ReactorSelector and Event somehow........
+
+Things to solve in this...
+- (major!) Invariant versus Mutating nodes -- this shouldn't determine whether events are mutating or not mutating, as a node can perfectly host both mutating and non-mutating nodes
+- therefore, `select` should be removed from `Node` altogether; it's the event that needs to know whether it's mutating or not, resulting in the equivalent of `InvariantSelector` versus `MutatingSelector`.
+- we'd have another event operation describing the side effects. e.g. unsorted.elementChanged.mapEffect
+- then `Compound` could either add another event op for `mapEffect` with evidence argument that `Repr` is mutating. or there is simply `MutatingCompound`.
+
+A simpler first solution without the need to refactor Event/Selector could be to just go for the new `mapEffect` method.
+
+    collectionChanged = unsorted.collectionChanged.mapEffect[ Collection ] { implicit tx => ... }
+
+... still we need to figure out how to restrict the addMutating call to collectionChanged and not just any selector from the node ...
+
+:::::::::::::::::::::::
+
+refactoring strategy
+
+- invalid should be a bit mask instead of a boolean
+- then each event can be either invariant or mutating
+- would be good to make event generally extend from nodeselector
+- but what happens with standalone nodes? they would have conflicting write methods,
+  unless we say that selector doesn't extend writer but instead has a method writeSelector...
+
+event:
+def --->( r: ExpandedSelector[ S ])
+def -/->( r: ExpandedSelector[ S ])
+def react( fun: A => Unit )
+def reactTx( fun: S#Tx => A => Unit )
+def pullUpdate( pull: Pull[ S ])
+def select()
+def isSource( pull: Pull[ S ])
+def connect()
+def disconnect()
+
+selector:
+protected def cookie: Int
+def pushUpdate( parent: ReactorSelector[ S ], push: Push[ S ])
+def toObserverKey
+
+reactor-selector:
+def reactor: Reactor[ S ]
+def inlet: Int
+hash/equals
+
+expanded-selector
+writeValue
+
+node-selector
+def reactor: Node[ S, _ ]
+def pullUpdate( pull: Pull[ S ])
+
+stuff which would not be supported by Dummy
+- pullUpdate
+- pushUpdate
+- select
+
+so Expr.changed would be EventLike which is all that dummy supports
+
+and we'd have
+
+EventStub = TargetsSelector
+Event     = NodeSelector
+
+:::::::::::::::::::::::::
+
+in progress
+[OK]	- should remove extra invariant/mutating cookie from target serialization
+[OK]	- should re-ensure that reactor selector is sealed / cookies are safe
+- add dirty bit field to targets
+
