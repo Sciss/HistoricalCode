@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>NBodyJS</title>
+    <style>
+html, body {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background: #000000;
+    color: #666666;
+    line-height: 1.25em;
+}
+
+canvas {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    border: 1px solid #333333;
+    background: black;
+}
+
+a {
+    color: #00CBCB;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    color: #FFFFFF;
+}
+
+#outer {
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    width: 1px;
+    height: 1px;
+    overflow: visible;
+}
+
+#canvasContainer {
+    position: absolute;
+    width: 1000px;
+    height: 560px;
+    top: -240px;
+    left: -500px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#output {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 0.75em;
+    margin-top: 0px;
+    position: absolute;
+    top: -20px;
+    width: 98%;
+}
+
+#header {
+    font-family: Helvetica, Arial, sans-serif; /*Arial, Helvetica, sans-serif;*/
+    font-size: 20px;
+    margin-top: 0px;
+    position: absolute;
+    top: -45px;
+    width: 98%;
+    color: #B6B6B6;
+}
+
+#copy {
+    font-size: 10px;
+    font-family: Helvetica, Arial, sans-serif;
+    position: absolute;
+    bottom: -25px;
+    width: 98%;
+}
+
+#footer {
+    font-size: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+    position: absolute;
+    bottom: -45px;
+    width: 98%;
+}
+    </style>
+</head>
+<body>
+<div id="outer">
+    <div id="canvasContainer">
+        <div id="header">NBodyJS</div>
+        <canvas id="canvas" width="1000" height="560">
+            Sorry, your browser does not support HTML5 Canvas. May I suggest Google Chrome or Mozilla Firefox?
+        </canvas>
+        <div id="output">
+            Click and fling! Click, hold, and scroll (or press up/down) to increase/decrease mass.
+            Press <font color="silver">t</font> to toggle trails, <font color="silver">p</font> to
+            pause, <font color="silver">c</font> to clear, and <font color="silver">r</font> to
+            reset to initial conditions.
+        </div>
+        <div id="footer"><a href="https://github.com/Sciss/NBodyJS">View the code on GitHub!</a></div>
+        <div id="copy">&copy; 2017 C.J. Campo, &copy; 2018 H.H. Rutz</div>
+    </div>
+</div>
+<script type="text/javascript" src="./target/scala-2.12/nbodyjs-fastopt.js"></script>
+</body>
+</html>
