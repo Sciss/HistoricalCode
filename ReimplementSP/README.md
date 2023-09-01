@@ -15,4 +15,4 @@ Builds with sbt against Scala 2.12.
 
 ## context
 
-See [Research Catalogue](https://www.researchcatalogue.net/view/426429/530502).
+See [Research Catalogue](https://www.researchcatalogue.net/view/426429/530869).
