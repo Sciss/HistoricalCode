@@ -1,0 +1,66 @@
+---
+DelayUGens:
+  -
+    name: PlayBuf
+    rates: [ar, kr]
+    outputs:
+      arg: numChannels
+    properties: [readbuffer, sideeffect, doneflag]
+    args:
+      - name: numChannels
+        type: int
+        summary: the number of channels that the buffer will be
+        detail: >
+          Since this is a constant, a change in number of channels of the underlying bus must
+          be reflected by creating different SynthDefs. If a buffer identifier is used of a buffer
+          that has a different numChannels then specified in the PlayBuf, it will fail silently.
+
+      - name: {default: bufnum, scala: buf}
+        default: {default: 0, scala: ~}
+        summary: the identifier of the buffer to use
+        
+      - name: {default: rate, scala: speed}
+        default: 1.0
+        summary: relative speed of the playback
+        detail: >
+          `1.0` advances the play head by the server's sample rate each second,
+          so `2.0` means doubling speed (and pitch), and `0.5` means half speed (and half pitch).
+          Negative numbers can be used for backwards playback. If the underlying buffer
+          represents a sound at a different sample rate, the rate should be
+          multiplied by `BufRateScale.kr(bufID)` to obtain the correct speed.
+          
+      - name: {default: trigger, scala: trig}
+        default: 1
+        summary: a trigger which causes a jump to the given startPos
+        detail: >
+          A trigger occurs when a
+          signal changes from non-positive to positive (e.g. <= 0 to >0).
+            
+      - name: startPos
+        default: 0
+        summary: sample frame to start playback
+        detail: This is read when a trigger occurs.
+        
+      - name: loop
+        default: true
+        summary: whether to loop after the play head reaches the buffer end
+        detail: this can be modulated
+        
+      - name: {default: doneAction, clj: action}
+        default: doNothing
+        summary: what to do when the play head reaches the buffer end
+    
+    summary: A UGen to play back samples from a buffer in memory
+    detail: >
+      `PlayBuf` provides a kind of high-level interface to sample-playback, whereas `BufRd`
+      represents a kind of lower-level access. While `BufRd` has a random-access-pointer
+      in the form of a phase input, `PlayBuf` advances the phase automatically based on
+      a given playback speed. `PlayBuf` uses cubic interpolation.
+    links:
+      - ugen.BufRd
+      - ugen.DiskIn
+      - ugen.RecordBuf
+      - ugen.Done
+      - ugen.BufRateScale
+      - ugen.BufFrames
+      
