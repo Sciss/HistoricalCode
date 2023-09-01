@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/annotation.iml" filepath="$PROJECT_DIR$/.idea_modules/annotation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/examples.iml" filepath="$PROJECT_DIR$/.idea_modules/examples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/plugin.iml" filepath="$PROJECT_DIR$/.idea_modules/plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/project.iml" filepath="$PROJECT_DIR$/.idea_modules/project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/simpleExamples.iml" filepath="$PROJECT_DIR$/.idea_modules/simpleExamples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea_modules/transactional.iml" filepath="$PROJECT_DIR$/.idea_modules/transactional.iml" />
+    </modules>
+  </component>
+</project>
+
