@@ -1,0 +1,56 @@
+/*
+ *  Vertex.scala
+ *  (SphinxExperiments)
+ *
+ *  Copyright (c) 2016-2017 Hanns Holger Rutz. All rights reserved.
+ *
+ *  This software is published under the GNU General Public License v3+
+ *
+ *
+ *  For further information, please contact Hanns Holger Rutz at
+ *  contact@sciss.de
+ */
+
+package de.sciss.sphinxex
+package sikring
+
+import java.awt.Shape
+import java.awt.geom.Path2D
+
+import de.sciss.sphinxex.sikring.impl.VertexImpl
+
+import scala.collection.immutable.{IndexedSeq => Vec}
+import scala.concurrent.stm.InTxn
+
+object Vertex {
+  final val EmptyShape: Shape = new Path2D.Float
+
+  def apply(label: String, startTime: Int, phasePeriod: Int, seq: Vec[(Char, Shape)]): Vertex =
+    new VertexImpl(label = label, startTime = startTime, phasePeriod = phasePeriod, seq = seq)
+
+  def reverseShape(shp: Shape): Shape = VertexImpl.reverseShape(shp)
+
+  def shiftShape(name: String, shp: Shape, shift: Int): Shape = VertexImpl.shiftShape(name, shp, shift)
+
+  def changeShapeRule(shp: Shape, evenOdd: Boolean): Shape = VertexImpl.changeShapeRule(shp, evenOdd)
+
+  def difference(shp: Shape): Shape = VertexImpl.difference(shp)
+
+  def lines(shp: Shape, n: Int): Shape = VertexImpl.lines(shp, n)
+}
+trait Vertex {
+  def label: String
+
+  def tick(time: Int)(implicit tx: InTxn): Unit
+
+  /** Shape _not_ offset by `position`. */
+  def shape(implicit tx: InTxn): Shape
+
+  /** Bounds _not_ offset by `position`. */
+  def bounds(implicit tx: InTxn): DoubleRectangle2D
+
+  def position                    (implicit tx: InTxn): DoublePoint2D
+  def position_=(p: DoublePoint2D)(implicit tx: InTxn): Unit
+
+  def weight(implicit tx: InTxn): Double
+}
