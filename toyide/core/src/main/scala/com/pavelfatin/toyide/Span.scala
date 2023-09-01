@@ -1,0 +1,36 @@
+/*
+ * Copyright 2018 Pavel Fatin, https://pavelfatin.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.pavelfatin.toyide
+
+/** A text span combines a text substring with its interval within a parent text.
+  *
+  * @param source     the (entire) parent text
+  * @param interval   the interval to select a substring
+  */
+case class Span(source: CharSequence, interval: Interval) extends IntervalLike {
+  def begin : Int = interval.begin
+  def end   : Int = interval.end
+
+  /** The text denoted by `source.subSequence(begin, end)`. */
+  def text: String = source.subSequence(begin, end).toString
+
+  def leftEdge: Span = Span(source, begin, begin)
+}
+
+object Span {
+  def apply(source: CharSequence, begin: Int, end: Int): Span = Span(source, Interval(begin, end))
+}
