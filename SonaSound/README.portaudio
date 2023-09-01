@@ -1,0 +1,9 @@
+**SonaSound**
+
+If you're running Linux you shouldn't have problems compiling portaudio, though I recommend using the cvs-version
+V18-patch which contains some good features and fixes.
+
+On MacOsX it is a bit tricky to compile a dylib or static lib.
+The official recommendation is building portaudio into the program itself.
+Due to portability reasons I decided against that.
+Use my supplied makefile (src/portaudio) to produce a decent library.

@@ -1,0 +1,18 @@
+Needed:
+-DeveloperTools
+-fink (fink.sf.net)
+-X11 (www.apple.com/macosx/x11/)
+-PortAudio (use Version V18-patch (obtainable via cvs: www.portaudio.com or from SonaSound's Download-Site)
+
+Don't use XDarwin. it's unaccelerated, it won't work with SonaSound unless you have a dual 1.5GHz Mac...
+
+PortAudio-Notes:
+Portaudio on OsX is originally supposed to be used directly in the projects sources or at least statically linked.
+I don't like that very much, so here are instructions to use portaudio on OsX:
+- I have modified the Makefile to enable a clean compile of a dylib for use with SonaSound:
+- Download Portaudio from this site or check it out from cvs (see www.portaudio.com)
+- place my Makefile.OsX in portaudio's main directory and do a "make -f Makefile.OsX" there
+  _AFTER_ you had a close look at the Makefile, especially the PREFIX!
+	Please adjust the PREFIX, if your fink isn't in /sw
+	Or download the dylib or the static (*.a) and place it in SonaSound's src-directory
+	or Wherever you like (if you adjust your DYLD_LIBRARY_PATH environment-variable to include the directory)

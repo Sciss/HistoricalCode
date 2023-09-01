@@ -1,0 +1,271 @@
+SonaSound is a realtime Sound-Analysis and visualization program.
+
+A tutorial is a few pages down!
+
+QUICKINSTALL:
+cd SonaSound-X.Y.Z.A
+./configure
+make
+make install
+
+(Or in case of old autoconf:
+  ./configure
+  cd src
+  make
+  make install
+	)
+
+
+FEATURES:
+- Waveform-Display
+- short-time-spectrum
+- sonogram
+- spectrum-generation switchable between lpc and fft
+- Major kinds of windowing functions choosable
+  - Different kinds of windowing functions are directly comparable via live-switching
+	- Overlap of 50% can be switched on and off without stopping
+- Buffer-Size and FFT-Size freely adjustable
+- All Displays work from soundfile while playing or direct live-input from soundcard
+- Comparison of different spectrum-generation-mehtods via multiple instances fo SonaSound possible
+
+REQUIREMENTS:
+If your computer has got 500 MHz or more, go ahead, if less, forget it!
+
+SonaSound was succesfully tested on the following systems:
+- Athlon 700, SuSE-7.3
+- Athlon-XP 1600+ gentoo-1.4
+- Duron 900 debian sarge
+- Pentium III 800 debian woody
+- G3 500 (PowerBook) gentoo-1.4
+- G3 500 (PowerBook) MacOsX 10.2.[3-4]
+- G3 500 (iBook) debian woody
+- G4 933 (Quicksilver) MacOsX 10.2.[3-4]
+- G4 933 (Quicksilver) SuSE-7.3
+- 4 * Sparcv9 480 (Sun4u) Solaris-2.8
+
+It should run on any other UNIX as well, as long as you manage to get portaudio installed.
+
+
+
+Libraries needed:
+- fftw (www.fftw.org)
+- glib >= 1.2
+- gtk >= 1.2
+- gtkglarea
+- GL
+- GLU
+- portaudio (www.portaudio.com)
+- sndfile >= 1.0.1
+
+CC/Binutils:
+-Use gcc >=3.2
+-When using gcc-2.9* be prepared to get many, many warnings when compiling
+-use the newest Binutils
+
+CFLAGS:
+Try first without giving your own CFLAGS. My configure-script *should* detect good and sensible FLAGS.
+If you don't like my choice, run configure like this:
+# > CFLAGS="-whatever" ./configure
+
+generic:
+-O3 -ffast-math -pipe
+
+try:
+-fschedule-insns2 -fexpensive-optimizations -funsafe-math-optimizations
+
+intel/AMD:
+-march=<your-cpu> (eg athlon-xp)
+-mmmx (if you have MMX)
+-msse -mfpmath=sse (if you have SSE)
+-m3dnow (if you have 3DNow)
+
+PowerPC:
+
+look into /proc/cpuinfo to find out what CPU you're running:
+There must be a line like "cpu : 750"
+If this line contains the word altivec (most likely with a cpu greater than 7400), use the altivec-switch.
+
+-march=powerpc -mcpu={750,7400,7450} -mhard-float
+"-maltivec -mabi=altivec" on Linux "-faltivec" on OsX (autodetected)
+On G3: "-mmultiple" helps a bit
+try:
+"-mpowerpc-gpopt -mpowerpc-gfxopt -mstring"
+
+TODO:
+
+- Save sonogram-plot to bitmap-file (via glBitmap()-calls) for all our musicologist-friends
+- Put different kinds of grid over the sonogram (staff-lines, note-names, frequency-grid)
+- Let the user draw inside the sonogram/fft-view and resynthesize...
+- make it multiple-channel / multiple-settings on same channels
+- make it faster
+
+###############################################################################
+#                                    Tutorial                                 #
+###############################################################################
+
+                                     SonaSound
+
+
+- Switching from Soundfile to Soundcard Input:
+	+ Click "Close Devices" to activate the Togglebutton "Use Soundfile"
+	+ Click "Open Devices" to reactivate the transport controls
+
+-------------------------------------------------------------------------------
+
+- What it does:
+
+  * Check for OpenGL-support, set up windows, measure fastest FFT-method or 
+	  read it from wisdom-file
+  * start Audio-Engine in new thread and calculate FFT or LPC from the given
+	  Buffer-Size (Windows are applied to either the number of samples in one 
+		Buffer or to the number of samples corresponding to the number of 
+		FFT-points, whatever is smaller)
+  * Draw WaveForm, FFT-View and one Sonogram-strip every time a new audio-buffer
+	  arrives. Shift Sonogram one pixel to the left and discard the leftmost strip
+  * LPC: autoregressive calculation of the filter-coefficients followed by
+	  frequency response with half the number of FFT-points 
+
+-------------------------------------------------------------------------------
+
+- Caveats:
+
+  * LPC-calculation takes quite a long time, be careful on slow 
+	  (less than 700MHz) systems.
+  * memmove is slow on MacOsX: Don't choose too large a buffer.
+  * Textures under Linux are limited to sizes of powers of two, so making the 
+	  sonogram-view too large for your graphics card (typically larger than 
+		512 by 512 or 1024 by 1024) may give you a white window and lots of 
+		error-messages.
+ -> Solution: make the window smaller! This is an OpenGL-limitation 
+		(More exactly a MESA-limitation) and doesn't apply on MacOsX, 
+		because there I'm using a different way of Blitting
+  * Resizing the window when playing garbles the sonogram-view, 
+	  because there is no way of knowing what happens inside the graphics-card-memory.
+  * Large values (>=512) for the number of LPC-coefficients together 
+	  with large values for the number of FFT-points (>=4096) slows the display 
+		down to unusable.
+ -> Solution: choose a larger buffer (then the redrawing doesn't happen that often)
+		or a smaller number of FFT-points.
+  * The calculation of the waveform takes a long time, because of the large amount
+	  of data to be processed.
+ -> Solution: choose a smaller range of seconds to be displayed or a larger buffer.
+  * Switching from File-input to Soundcard-input requires closing the sounddevice
+ -> Solution: For performance reasons I have to reallocate lots of buffers.
+		so no soultion ATM.
+  * On PPC-computers stopping the playing results in an endless repeating of the
+	  last buffer.
+ -> Solution: This seems to be a portaudio version18-patch bug. 
+		Close the device or restart the playing.
+
+-------------------------------------------------------------------------------
+
+- What the Parameters mean:
+
+  In (brackets) are the command line pendants.
+	
+ +SamplingRate (-s) Set the Samplingrate to specified float in Hz
+  Only adjustable when the sound devices are closed.
+
+ +FFT Size (-f oder -a) Set the number (-a) of FFT-Points (integer) 
+  the toggle-button next to it means rounding the figure to the next
+	power of two (-f)
+
+ +Buffer Size (-p) Set the Audio-buffer size to specified integer
+  Only adjustable when the sound devices are closed.
+  the toggle-button next to it means rounding the figure to the next
+	power of two
+
+ +Window Type (-w) Choose the windowing function
+  On the commandline you have to specify the following digits:
+	
+  * 0:Hamming
+
+  * 1:Hanning (default)
+
+  * 2:Blackman
+
+  * 3:Bartlett
+
+  * 4:Kaiser
+
+  * 5:Rectangular
+
+ +Display Type (-d) Choose between linear (i) or logarithmic (g) frequency scaling
+
+ +Spectrum Type (-g) Switch between LPC (l) or FFT (f) for spectrum generation.
+
+ +LPC Size (-l) Number (integer) of LPC-coefficients to calculate
+
+ +Reference A (-b) Frequency in Hz for the reference-A used for displaying the 
+  staff-lines
+
+ +Waveform Range (-S) Maximum number of seconds to keep in Waveform-buffer.
+  this is not accessible via the GUi, because the implications on the program 
+	are too great to allow this while running (the value is clamped to the range
+	1-20 sec)
+
+ +AudioIn Device (-D) Choose Audio-device to be used for input (numbered from
+  0)
+  Only adjustable when the sound devices are closed.
+	
+ +AudioOut Device (-O) same as AudioIn for output
+  Only adjustable when the sound devices are closed.
+
+ +Analysis Presets Choice of several predefined Settings for certain kinds of
+  signals
+  Only adjustable when the sound devices are closed.
+	
+ +Overlap (-o) Switch overlapping (50%) of analysis-buffer on or off
+
+ +HighPass (-H) Switch the highpass-filter (1st order) on or off to clean the
+  spectral display
+	
+ +Draw Staff-Lines (-n) Switch Staff-lines on or off. 
+
+ +Use Soundfile (-F) Use a file for analysing instead of soundcard input
+  Only adjustable when the sound devices are closed.
+
+ +Help (-h) displays basic help for command-line-options
+
+-The Buttons
+
+ +The functions  not available are grayed out. Try stopping or closing devices
+  to access buttons you cannot reach.
+
+ +Draw:  Draw the current buffer once.
+
+ +Start:  Start the Audio-engine
+
+ +Stop:  Stop the Audio-engine
+
+ +Reset File:  Start playing the Sounfile from the beginning
+
+ +Start Drawing:  Start displaying the buffers in Sync to the audio
+
+ +Stop Drawing:  Stoppe displaying the buffers
+
+ +Start All:  Start audio and Drawing (KeypadEnter)
+
+ +Stop All:  Stop audio and Drawing (Keypad 0)
+
+ +Close Devices:  Close the audio-devices to allow for second instance of the
+ SonaSound or another program to use the device. Or for switching between different devices.
+
+ +Open Devices: Open chosen Audio-device. When using a Soundfile for input
+ only the output-channels will be openen and vv.
+ 
+ 
+-------------------------------------------------------------------------------
+
+-The (rudimentary) menu
+
+ +File->Open: Open Soundfile
+
+ +File->Quit: Quit SonaSound
+
+ +Help->About: Show info about SonaSound
+
+ +Help->Tutorial: Whre do you think you are?
+
+
+Copyright (C) 2002-2003 Niklas Werner <niklas@niklaswerner.de>

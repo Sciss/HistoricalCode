@@ -1,0 +1,32 @@
+******SONASOUND********* FFTW ****************
+
+SonaSound works best with DOUBLE precision FFTW!
+
+Beginning with version 1.1 SonaSound works with FFTW3 as well. All versions before that only use FFTW2. 
+
+The configure scripts honours any symlinks called librfftw.so, libfftw.so, fftw.h and rfftw.h
+and uses them first. So this is a way to force it to use a certain precision.
+
+Instructions to get fftw running
+
+- Did you use the same compiler-version for fftw and SonaSound?
+  If not, Do so!
+- Did you compile fftw with --enable-float ?
+	If so, and you didn't sepcify	--enable-type-prefix try 
+	recompiling without --enable-float or with --enable-type-prefix!
+- Did you compile with --enable-shared and over-optimized the code?
+	Try to build the static libraries, only. or switch off -fexpensive-optimizations in $CFLAGS
+- What Does config.log say?
+	Maybe something about unresolved symbols? Recompile fftw with above features and with the _same_ compiler you're trying to use now.
+	
+- Recommended configure options are:
+	--enable-type-prefix
+	--enable-threads
+	for the not-so-faint-hearted:
+	--enable-vec-recurse
+	on Intel-compatible:
+	--enable-i386-hacks
+
+If you're absolutely sure, your fftw is correctly installed and working and configure still fails,
+try symlinking your library of choice (libdfftw.so or libsrfftw.so, or whatever it is called) 
+to libfftw.so and rerun ldconfig and configure.
