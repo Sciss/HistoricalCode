@@ -1,0 +1,27 @@
+h2. CupolaVideoPlayer
+
+h3. statement
+
+A helper project for the Cupola project, providing synchronized video and OSC stream playback. It is (C)opyright 2011 by Hanns Holger Rutz. All rights reserved. CupolaVideoPlayer is released under the "GNU General Public License":http://github.com/Sciss/CupolaVideoPlayer/blob/master/licenses/CupolaVideoPlayer-License.txt and comes with absolutely no warranties. To contact the author, send an email to @contact at sciss.de@
+
+h3. requirements / installation
+
+Currently "Xuggler":http://xuggle.com/xuggler/ is used for playback. To prepare Xuggler, make sure the following environment variables are set (e.g. in @~/.bash_profile@):
+
+pre. export XUGGLE_HOME=???
+export DYLD_LIBRARY_PATH=$XUGGLE_HOME/lib:$DYLD_LIBRARY_PATH
+export PATH=$XUGGLE_HOME/bin:$PATH
+
+Make symlinks for the Xuggler libraries into the manually managed @lib@ folder. Here is how mine look:
+
+pre. commons-cli.jar -> ../../xuggler/share/java/jars/commons-cli.jar
+logback-classic.jar -> ../../xuggler/share/java/jars/logback-classic.jar
+logback-core.jar -> ../../xuggler/share/java/jars/logback-core.jar
+slf4j-api.jar -> ../../xuggler/share/java/jars/slf4j-api.jar
+xuggle-xuggler.jar -> ../../xuggler/share/java/jars/xuggle-xuggler.jar
+
+Run the project from the shell via @sbt run@.
+
+h3. useful resources
+
+* "Movie Caption Translator Blog":http://www.thomaslilogan.com/category/movie-caption-translator-blog/ -- deals with several Xuggler issues

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<list>
+  <entry name="Run-Through 1">
+    <video>
+      <file>/Users/hhrutz/Documents/Cupola/video_w_tracking/runthrough1.avi</file>
+    </video>
+    <osc>
+      <offset>-128.6</offset>
+      <file>/Users/hhrutz/Documents/Cupola/video_w_tracking/runthrough1.txt</file>
+    </osc>
+  </entry>
+  <entry name="Run-Through 2">
+    <video>
+      <file>/Users/hhrutz/Documents/Cupola/video_w_tracking/runthrough2.avi</file>
+    </video>
+    <osc>
+      <file>/Users/hhrutz/Documents/Cupola/video_w_tracking/runthrough2.txt</file>
+    </osc>
+  </entry>
+  <entry name="10-July-11">
+    <video>
+      <file>/Users/hhrutz/Documents/Cupola/video_w_tracking/VIS_SYSTEM1.avi</file>
+    </video>
+    <osc>
+      <offset>-11.23</offset>
+      <file>/Users/hhrutz/Documents/Cupola/video_w_tracking/SentMessagesLogVID1.txt</file>
+    </osc>
+  </entry>
+</list>
