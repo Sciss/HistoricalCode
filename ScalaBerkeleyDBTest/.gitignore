@@ -1,0 +1,12 @@
+target/
+lib_managed/
+src_managed/
+project/boot/
+out/
+index.html
+style.css
+_creation/
+db_base/
+db_dpl/
+db_stm/
+.idea/workspace.xml
