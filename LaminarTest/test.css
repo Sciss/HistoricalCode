@@ -1,0 +1,18 @@
+body {
+    background: #CCC;
+}
+
+.lucre-flow-panel {
+    position: relative;
+/*
+    padding: 4px;
+*/
+}
+
+.lucre-button {
+    margin: 2px;
+}
+
+.lucre-label {
+    margin: 2px;
+}
