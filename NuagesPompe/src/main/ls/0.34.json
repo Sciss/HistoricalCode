@@ -1,0 +1,26 @@
+
+{
+ "organization":"de.sciss",
+ "name":"NuagesPompe",
+ "version":"0.34",
+ "description":"Some common elements for building SoundProcesses and Wolkenpumpe based music applications",
+ "site":"https://github.com/Sciss/NuagesPompe",
+ "tags":["sound-synthesis","gui","sound","music","supercollider"],
+ "docs":"",
+ "licenses": [{
+   "name": "GPL v2+",
+   "url": "http://www.gnu.org/licenses/gpl-2.0.txt"
+  }],
+ "resolvers": ["http://scala-tools.org/repo-releases"],
+ "dependencies": [{
+   "organization":"de.sciss",
+   "name": "wolkenpumpe",
+   "version": "0.34"
+  },{
+   "organization":"de.sciss",
+   "name": "scalacolliderswing",
+   "version": "0.34"
+  }],
+ "scalas": ["2.9.2"],
+ "sbt": false
+}
