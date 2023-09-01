@@ -1,0 +1,110 @@
+::::: add a marked vertex :::::
+
+add(entry: (K, A))
+   -> mv        = wrap(entry)
+      prelist  add mv
+      postlist add mv
+      skip     add mv
+
+   def wrap:
+        iso = query(vertex)
+        new M {
+          store full vertex
+
+          if iso_preCmp <= 0
+            insert this_pre before iso_pre
+          else
+            insert this_pre after iso_pre
+        
+          if iso_postCmp <= 0
+            insert this_post before iso_post
+          else
+            insert this_post after iso_post
+
+    def query(v: K): IsoResult
+      val (pre, preCmp) = prelist.isomorphicQuery {
+        def compare(that: M) = v.pre compare that.fullVertex.pre
+      }
+      val (post, postCmp) = prelist.isomorphicQuery {
+        def compare(that: M) = v.pre compare that.fullVertex.pre
+      }
+
+
+IsoResult {
+   pre: Mark
+   preCmp: Int
+   post: Mark
+   postCmp: Int
+}
+
+    
+a Mark has the following stored information
+- fullVertex
+- pre
+- post
+- value
+
+::::::::::::::::::
+
+in scala'ish pseudo code
+
+Label:
+  compare(that: Label): Cmp
+  def prepend(): Label
+  def append(): Label
+  def tag: Int
+
+Cmp  = -1 | 0 | +1
+
+Rel  = (Label, Cmp)
+
+Vertex = (lb_pre: Label, lb_post: Label)
+
+Field[A]:
+  Mark = (v_full: Vertex, v_mark: Vertex, value: A)
+  Iso  = (rel_pre: Rel, rel_post: Rel)
+
+  val preList : Tree
+  val postList: Tree
+  val spatial : Spatial
+
+  Spatial:
+    def nearest(point: (Int, Int), direction): A
+    def insert(Mark)
+
+  Tree:
+    def nearest(test: Mark => Cmp): (Mark, Cmp)
+    def insert(Mark)
+
+  def query(v_full: Vertex): A =
+    translate(v_full) match
+      case m: Mark  => m.value
+      case iso: Iso =>
+        point_start = iso.rel_pre .label.tag + iso.rel_pre .cmp
+        point_stop  = iso.rel_post.label_tag + iso.rel_post.cmp
+        spatial.nearest((point_start, point_stop), north-west)
+
+  def update(v_full: Vertex, value: A) =
+    mark = wrap(v_full, value)
+    preList  insert mark
+    postList insert mark
+    spatial  insert mark
+  
+  def wrap(v_full: Vertex, value: A): Mark =
+    iso     = translate(v_full)
+    lb_pre  = label(iso.rel_pre )
+    lb_post = label(iso.rel_post)
+    v_mark  = (lb_pre, lb_post)
+    (v_full, v_mark, value)
+
+  def label(rel: Rel): Label =
+    if rel.cmp == -1 rel.label.prepend() else rel.label.append()
+
+  def translate(v_full: Vertex): Mark | Iso =
+    (m_pre, cmp_pre) = preList .nearest(m => v_full.lb_pre compare m.v_full.lb_pre)
+    if cmp_pre == 0 then m_pre
+    else
+      (m_post, cmp_post) = postList.nearest(m => v_full.lb_post compare m.v_full.lb_post)
+      rel_pre  = (m_pre .v_mark.lb_pre , cmp_pre )
+      rel_post = (m_post.v_mark.lb_post, cmp_post)
+      (rel_pre, rel_post)
