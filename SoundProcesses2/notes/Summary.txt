@@ -1,0 +1,13 @@
+In SoundProcesses2
+
+- Proc is parametrised in the system
+- mixes in a Model
+- mixes in Named
+- has switches and controllers
+- have Period and Interval
+- has KVar with kRange -> Traversable[ (VersionPath, T) ]
+  and PVar with pRange -> Traversable[ (Period, T) ]
+- has ProcGroup with add and remove pros
+- has the Cursor/Projection stuff we had in TemporalObjects
+- has momentary proc view, offline view and version graph view, group view
+
