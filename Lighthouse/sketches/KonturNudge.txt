@@ -1,0 +1,49 @@
+// in kontur
+
+def timelineFrame = {
+   val tlf = collection.JavaConversions.JIteratorWrapper( app.getWindowHandler.getWindows ).collect({ case tf: de.sciss.kontur.gui.TimelineFrame => tf }).find( _.document == doc ).get
+   tlf
+}
+
+def selectedAudioRegions : Map[ AudioTrail, IndexedSeq[ AudioRegion ]] = {
+   val tlf = timelineFrame
+   val tp = tlf.tracksPanel
+   val tpl = tp.toList
+   val tv  = tpl.map( _.trailView )
+   val t   = tv.map( _.trail )
+   val mapped = t zip tv
+   val sel = mapped.collect({ case (at: AudioTrail, tv) =>
+      val seq = tv.selectedStakes.toIndexedSeq
+      val seqa = seq.collect({ case ar: AudioRegion => ar })
+      at -> seqa
+   }).toMap.filter( _._2.nonEmpty )
+   sel
+}
+
+def adjustTimeSelectionToRegions {
+   val ars = selectedAudioRegions.values.flatten.toSeq
+   val span = ars.tail.foldLeft( ars.head.span )( _ union _.span )
+   val tlv = timelineFrame.timelineView
+   tlv.editor.foreach { ed =>
+      val ce = ed.editBegin( "Select" )
+      ed.editSelect( ce, span )
+      ed.editEnd( ce )
+   }
+}
+
+def selectionSpan = timelineFrame.timelineView.selection.span
+
+
+def place( path: String, start: Long ) {
+      val afe  = audioFile( new java.io.File( path ))
+      val span = new de.sciss.io.Span( start, start + afe.numFrames )
+      val at = getAllEmpty2( span, Set.empty )
+      val trail = at.trail
+      val ar = new AudioRegion( span, afe.name, afe )
+      val ce = trail.editBegin( "Add Regions" )
+      trail.editAdd( ce, ar )
+      trail.editEnd( ce )
+}
+
+// place( "/Users/hhrutz/Desktop/new_projects/Lighthouse/audio_work/ClaustroBounce.aif", selectionSpan.start )
+// place( "/Users/hhrutz/Desktop/new_projects/Lighthouse/audio_work/Lighthouse10CutWhite3Mix.aif", 2593080L )

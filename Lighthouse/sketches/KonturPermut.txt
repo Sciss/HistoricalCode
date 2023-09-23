@@ -1,0 +1,336 @@
+// in scalacollider-swing
+
+val rnd = new util.Random()
+
+val marks = Seq(89, 33293, 48713, 64425, 80260, 95480, 111210, 127533, 158268, 191872, 206668, 223243, 239335, 253611, 285831).sliding(2,1).map({
+   case Seq(start,stop) => new de.sciss.io.Span(start,stop)
+}).toIndexedSeq
+
+val fdt = 88
+
+val pathIn = "/Users/hhrutz/Desktop/new_projects/Lighthouse/audio_work/lighthouse6edCutLoop.aif"
+
+// diese hat einen interessanten fehler: es scheint als wenn ein
+// schlag verdoppelt wird und einer "rausfliegt"
+def permute( pathIn: String ) : String = {
+   val pathOut = {
+      val i = pathIn.lastIndexOf( "-perm" )
+      val j = pathIn.lastIndexOf( "." )
+      if( i >= 0 ) {
+         pathIn.substring( 0, i + 5 ) + (pathIn.substring( i + 5, j ).toInt + 1).toString + pathIn.substring( j )
+      } else {
+         pathIn.substring( 0, j ) + "-perm1" + pathIn.substring( j )
+      }
+   }
+   val afIn  = AudioFile.openRead(  pathIn )
+   val afOut = AudioFile.openWrite( pathOut, afIn.spec )
+   val (idx1, idx2) = {
+      val idx1  = rnd.nextInt(marks.size)
+      val idx2a = rnd.nextInt(marks.size - 1 )
+      val idx2  = if( idx2a < idx1 ) idx2a else idx2a + 1
+      if( idx2 > idx1 ) (idx1, idx2) else (idx2, idx1)
+   }
+   val bufSize = math.max( fdt, 8192 )
+   val buf  = afIn.frameBuffer( bufSize )
+   val fBuf = afIn.frameBuffer( fdt )
+   def copyFrames( off: Long, num: Long ) {
+      afIn.seekFrame( off )
+      var toCopy = num
+      while( toCopy > 0 ) {
+         val chunkLen = math.min( bufSize, toCopy ).toInt
+         afIn.readFrames( buf, 0, chunkLen )
+         afOut.writeFrames( buf, 0, chunkLen )
+         toCopy -= chunkLen
+      }
+   }
+   def line( buf: Array[Array[Float]], off: Int, len: Int, w1: Float, w2: Float ) {
+      buf.foreach { chan =>
+         for( j <- 0 until len ) {
+            val w = j.toDouble / len
+            val f = ((1.0 - w) * w1 + w * w2).toFloat
+            chan( j + off ) *= f
+         }
+      }
+   }
+   def add( bufA: Array[Array[Float]], offA: Int, bufB: Array[Array[Float]], offB: Int, len: Int ) {
+      val numCh = bufA.size
+      for( ch <- 0 until numCh ) {
+         for( i <- 0 until len ) {
+            bufB( ch )( i + offB ) += bufA( ch )( i + offA )
+         }
+      }
+   }
+   def fade( in: Long, out: Long ) {
+      afIn.seekFrame( in )
+      afIn.readFrames( buf, 0, fdt )
+      line( buf, 0, fdt, 0f, 1f )
+      afIn.seekFrame( out )
+      afIn.readFrames( fBuf, 0, fdt )
+      line( fBuf, 0, fdt, 1f, 0f )
+      add( fBuf, 0, buf, 0, fdt )
+      afOut.writeFrames( buf, 0, fdt )
+   }
+   val span1 = marks( idx1 )
+   val span2 = marks( idx2 )
+   copyFrames( 0L, span1.start - fdt )
+   fade( span2.start - fdt, span1.start - fdt )
+   val num1 = math.min( span2.start - span1.start, span2.getLength )
+   val num2 = num1 - fdt
+   copyFrames( span2.start, num2 )
+   fade( span1.start + num2, span2.start + num2 )
+//   val num3 = math.max( span1.getLength, span2.getLength )
+//   val num4 = num3 - num1
+   val num3 = span2.start - (span1.start + num1)
+   val num4 = num3 - fdt
+   copyFrames( span1.start + num1, num4 )
+   fade( span1.start - fdt, span2.start - fdt )
+   val num5 = math.min( afIn.numFrames - span2.start, span1.getLength )
+   val num6 = num5 - fdt
+   copyFrames( span1.start, num6 )
+   fade( span2.start + num6, span1.start + num6 )
+   val num7 = afIn.numFrames - afOut.numFrames   
+   copyFrames( afOut.numFrames, num7 )
+   afIn.close
+   afOut.close
+   pathOut
+}
+
+// (1 to 20).foldLeft( pathIn )( (p, _) => permute( p ))
+
+
+
+def permute( pathIn: String ) : String = {
+   val pathOut = {
+      val i = pathIn.lastIndexOf( "-perm" )
+      val j = pathIn.lastIndexOf( "." )
+      if( i >= 0 ) {
+         pathIn.substring( 0, i + 5 ) + (pathIn.substring( i + 5, j ).toInt + 1).toString + pathIn.substring( j )
+      } else {
+         pathIn.substring( 0, j ) + "-perm1" + pathIn.substring( j )
+      }
+   }
+   val afIn  = AudioFile.openRead(  pathIn )
+   val afOut = AudioFile.openWrite( pathOut, afIn.spec )
+   val (idx1, idx2) = {
+      val idx1  = rnd.nextInt(marks.size)
+      val idx2a = rnd.nextInt(marks.size - 1 )
+      val idx2  = if( idx2a < idx1 ) idx2a else idx2a + 1
+      if( idx2 > idx1 ) (idx1, idx2) else (idx2, idx1)
+   }
+   val bufSize = math.max( fdt, 8192 )
+   val buf  = afIn.frameBuffer( bufSize )
+   val fBuf = afIn.frameBuffer( fdt )
+   def copyFrames( off: Long, num: Long ) {
+      afIn.seekFrame( off )
+      var toCopy = num
+      while( toCopy > 0 ) {
+         val chunkLen = math.min( bufSize, toCopy ).toInt
+         afIn.readFrames( buf, 0, chunkLen )
+         afOut.writeFrames( buf, 0, chunkLen )
+         toCopy -= chunkLen
+      }
+   }
+   def line( buf: Array[Array[Float]], off: Int, len: Int, w1: Float, w2: Float ) {
+      buf.foreach { chan =>
+         for( j <- 0 until len ) {
+            val w = j.toDouble / len
+            val f = ((1.0 - w) * w1 + w * w2).toFloat
+            chan( j + off ) *= f
+         }
+      }
+   }
+   def add( bufA: Array[Array[Float]], offA: Int, bufB: Array[Array[Float]], offB: Int, len: Int ) {
+      val numCh = bufA.size
+      for( ch <- 0 until numCh ) {
+         for( i <- 0 until len ) {
+            bufB( ch )( i + offB ) += bufA( ch )( i + offA )
+         }
+      }
+   }
+   def fade( in: Long, out: Long ) {
+      afIn.seekFrame( in )
+      afIn.readFrames( buf, 0, fdt )
+      line( buf, 0, fdt, 0f, 1f )
+      afIn.seekFrame( out )
+      afIn.readFrames( fBuf, 0, fdt )
+      line( fBuf, 0, fdt, 1f, 0f )
+      add( fBuf, 0, buf, 0, fdt )
+      afOut.writeFrames( buf, 0, fdt )
+   }
+   val span1 = marks( idx1 )
+   val span2 = marks( idx2 )
+   copyFrames( 0L, span1.start - fdt )
+   fade( span2.start - fdt, span1.start - fdt )
+   val num1 = math.min( span2.start - span1.start, span2.getLength )
+   val num2 = num1 - fdt
+   copyFrames( span2.start, num2 )
+   fade( span1.start + num2, span2.start + num2 )
+//   val num3 = math.max( span1.getLength, span2.getLength )
+//   val num4 = num3 - num1
+   val num3 = span2.start - (span1.start + num1)
+   val num4 = num3 - fdt
+   copyFrames( span1.start + num1, num4 )
+   fade( span1.start - fdt, span2.start - fdt )
+   val num5 = math.min( afIn.numFrames - span2.start, span1.getLength )
+   val num6 = num5 - fdt
+   copyFrames( span1.start, num6 )
+   fade( span2.start + num6, span1.start + num6 )
+   val num7 = afIn.numFrames - afOut.numFrames   
+   copyFrames( afOut.numFrames, num7 )
+   afIn.close
+   afOut.close
+   pathOut
+}
+
+val p1 = permute( pathIn )
+
+(1 to 20).foldLeft( pathIn )( (p, _) => permute( p ))
+
+def permute2( pathIn: String, ext: String = "-permx" ) : String = {
+   val pathOut = {
+      val i = pathIn.lastIndexOf( ext )
+      val i0 = i + ext.size
+      val j = pathIn.lastIndexOf( "." )
+      if( i >= 0 ) {
+         pathIn.substring( 0, i0 ) + (pathIn.substring( i0, j ).toInt + 1).toString + pathIn.substring( j )
+      } else {
+         pathIn.substring( 0, j ) + ext + "1" + pathIn.substring( j )
+      }
+   }
+   val afIn  = AudioFile.openRead(  pathIn )
+   val afOut = AudioFile.openWrite( pathOut, afIn.spec )
+   val (idx1, idx2) = {
+      val idx1  = rnd.nextInt(marks.size)
+      val idx2a = rnd.nextInt(marks.size - 1 )
+      val idx2  = if( idx2a < idx1 ) idx2a else idx2a + 1
+      if( idx2 > idx1 ) (idx1, idx2) else (idx2, idx1)
+   }
+   val span1 = marks( idx1 )
+   val span2 = marks( idx2 )
+   println( "idx1 = " + idx1 + " (" + span1 + " - " + span1.getLength + ") idx2 = " + idx2 + " (" + span2 + " - " + span2.getLength + ")" )
+   val bufSize = math.max( fdt, 8192 )
+   val buf  = afIn.frameBuffer( bufSize )
+   val fBuf = afIn.frameBuffer( fdt )
+   def copyFrames( off: Long, num: Long ) {
+      println( "copy " + off + " " + num + " (" + (off + num) + ")" )
+      afIn.seekFrame( off )
+      var toCopy = num
+      while( toCopy > 0 ) {
+         val chunkLen = math.min( bufSize, toCopy ).toInt
+         afIn.readFrames( buf, 0, chunkLen )
+         afOut.writeFrames( buf, 0, chunkLen )
+         toCopy -= chunkLen
+      }
+   }
+   def line( buf: Array[Array[Float]], off: Int, len: Int, w1: Float, w2: Float ) {
+      buf.foreach { chan =>
+         for( j <- 0 until len ) {
+            val w = j.toDouble / len
+            val f = ((1.0 - w) * w1 + w * w2).toFloat
+            chan( j + off ) *= f
+         }
+      }
+   }
+   def linesqrt( buf: Array[Array[Float]], off: Int, len: Int, w1: Float, w2: Float ) {
+      buf.foreach { chan =>
+         for( j <- 0 until len ) {
+            val w = j.toDouble / len
+            val f = math.sqrt( (1.0 - w) * w1 + w * w2 ).toFloat
+            chan( j + off ) *= f
+         }
+      }
+   }
+   def add( bufA: Array[Array[Float]], offA: Int, bufB: Array[Array[Float]], offB: Int, len: Int ) {
+      val numCh = bufA.size
+      for( ch <- 0 until numCh ) {
+         for( i <- 0 until len ) {
+            bufB( ch )( i + offB ) += bufA( ch )( i + offA )
+         }
+      }
+   }
+   def fade( in: Long, out: Long ) {
+      println( "fade in " + in + " (" + (in + fdt) + ") out " + out + " (" + (out + fdt) + ")" )
+      afIn.seekFrame( in )
+      afIn.readFrames( buf, 0, fdt )
+      linesqrt( buf, 0, fdt, 0f, 1f )
+      afIn.seekFrame( out )
+      afIn.readFrames( fBuf, 0, fdt )
+      linesqrt( fBuf, 0, fdt, 1f, 0f )
+      add( fBuf, 0, buf, 0, fdt )
+      afOut.writeFrames( buf, 0, fdt )
+   }
+   copyFrames( 0L, span1.start - fdt )
+   fade( span2.start - fdt, span1.start - fdt )
+   val num1 = math.min( span1.getLength, span2.getLength )
+   val num2 = num1 - fdt
+   copyFrames( span2.start, num2 )
+   fade( span1.start + num2, span2.start + num2 )
+//   val num3 = math.max( span1.getLength, span2.getLength )
+//   val num4 = num3 - num1
+   val num3 = span2.start - (span1.start + num1)
+   val num4 = num3 - fdt
+   copyFrames( span1.start + num1, num4 )
+   fade( span1.start - fdt, span2.start - fdt )
+//   val num5 = math.min( afIn.numFrames - span2.start, span1.getLength )
+//   val num6 = num5 - fdt
+   copyFrames( span1.start, num2 )
+   fade( span2.start + num2, span1.start + num2 )
+   val num7 = afIn.numFrames - afOut.numFrames   
+   copyFrames( afOut.numFrames, num7 )
+   afIn.close
+   afOut.close
+   pathOut
+}
+
+// permute2( pathIn )
+// (1 to 20).foldLeft( pathIn )( (p, _) => permute2( p ))
+
+// --- in kontur
+
+def permLoop( start: Long, files: Seq[ java.io.File ]) {
+   val afes     = files.map( audioFile( _ ))
+   val loopLens = afes.map( _.numFrames )
+   val loopSpans= (loopLens.scanLeft( start )( (a, b) => a + b ).sliding( 2, 1 ).map { case Seq( start, stop ) => new de.sciss.io.Span( start, stop )}).toIndexedSeq
+   val cov2     = new de.sciss.io.Span( loopSpans.head.start, loopSpans.last.stop )
+   val at       = getAllEmpty( cov2 )
+   val trail    = at.trail
+   val ars      = afes.zip(loopSpans).map { case (afe, span) =>
+      new AudioRegion( span, afe.name, afe )
+   }
+   val ce = trail.editBegin( "Add Regions" )
+   trail.editAdd( ce, ars: _* )
+   trail.editEnd( ce )
+}
+
+/*
+val pre = "/Users/hhrutz/Desktop/new_projects/Lighthouse/audio_work/lighthouse6edCutLoop"
+val num = 20
+val files = (pre +: Seq.tabulate(20)( i => pre + "-permx" + (i+1) )).map( p => new java.io.File( p + ".aif" ))
+permLoop( 33 * 44100L, files )
+*/
+
+
+
+def permLoop2( start: Long, files: Seq[ java.io.File ], refs: Seq[ java.io.File ]) {
+   val afes     = files.map( audioFile( _ ))
+   val loopLens = refs.map( f => { val af = de.sciss.io.AudioFile.openAsRead( f ); af.close; af.getDescr.length })
+   val loopSpans= (loopLens.scanLeft( start )( (a, b) => a + b ).sliding( 2, 1 ).map { case Seq( start, stop ) => new de.sciss.io.Span( start, stop )}).toIndexedSeq
+//   val cov2     = new de.sciss.io.Span( loopSpans.head.start, loopSpans.last.stop )
+   afes.zip(loopSpans).foreach { case (afe, span0) =>
+      val span  = new de.sciss.io.Span( span0.start, span0.start + afe.numFrames )
+      val at    = getAllEmpty( span )
+      val trail = at.trail
+      val ce = trail.editBegin( "Add Regions" )
+      trail.editAdd( ce, new AudioRegion( span, afe.name, afe ))
+      trail.editEnd( ce )
+   }
+}
+
+
+/*
+val pre = "/Users/hhrutz/Desktop/new_projects/Lighthouse/audio_work/lighthouse6edCutLoop"
+val num = 20
+val refs  = (pre +: Seq.tabulate(num)( i => pre + "-permx" + (i+1) )).map( p => new java.io.File( p + ".aif" ))
+val files = (pre +: Seq.tabulate(num)( i => pre + "-permx" + (i+1) + "Rvb" )).map( p => new java.io.File( p + ".aif" ))
+permLoop2( 33 * 44100L, files, refs )
+*/

@@ -1,0 +1,8 @@
+7 half
+12 half ab zweiter haelfte
+13 half
+14 hpf normal speed
+17 half erste drei hits
+
+---
+1:28.800 (3916080) ... 1:54.800 (5062680)

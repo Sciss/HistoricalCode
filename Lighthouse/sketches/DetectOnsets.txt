@@ -1,0 +1,102 @@
+val id = 1
+
+val inPath  = "/Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse" + id + "ed.aif"
+val outPath = "/Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse-Marks" + id + ".aif"
+
+val spec = AudioFile.readSpec( inPath )
+val nrto = new ServerOptionsBuilder
+nrto.nrtInputPath    = Some( inPath )
+nrto.nrtOutputPath   = outPath
+nrto.nrtSampleFormat = SampleFormat.Int8 // since we just record the impulses
+val nrtFile = java.io.File.createTempFile( "tmp", ".osc" )
+nrto.nrtCommandPath = nrtFile.getAbsolutePath
+nrto.inputBusChannels = spec.numChannels
+nrto.sampleRate = spec.sampleRate.toInt
+nrto.outputBusChannels = 1
+
+val nrt = Server.dummy( "NRT", nrto )
+val df = SynthDef( "Ana" ) {
+   val buf      = "fftbuf".ir
+   val thresh   = "thresh".kr( 0.5 )
+   val algo     = "algo".ir( 3 )
+   val decay    = "decay".kr( 1 )
+   val floor    = "floor".kr( 0.1 )
+   val chanOff  = NumOutputBuses.ir
+   val sig      = In.ar( chanOff ) + In.ar( chanOff + 1 )
+   val fft      = FFT( buf, sig )
+   val det      = Onsets.kr( fft, thresh, algo, decay, floor )
+   Out.ar( 0, K2A.ar( det ))
+}
+val dur = spec.numFrames / spec.sampleRate
+val buf = Buffer( nrt )
+val synth = Synth( nrt )
+val bndl1 = OSCBundle.secs( 0.0,
+   df.recvMsg,
+   buf.allocMsg( 1024 ),
+   synth.newMsg( df.name, nrt.rootNode, Seq( "buf" -> buf.id ))
+)
+val bndl2 = OSCBundle.secs( dur, synth.freeMsg )
+
+val bb = java.nio.ByteBuffer.allocate( 8192 )
+val f = new java.io.RandomAccessFile( nrtFile, "rw" )
+val fch = f.getChannel
+val c = de.sciss.osc.OSCPacketCodec.default
+
+def writeBundle( bndl: OSCBundle ) {
+   bb.clear; bndl.encode( c, bb ); bb.flip
+   f.writeInt( bb.limit ); fch.write( bb )
+}
+
+writeBundle( bndl2 )
+f.close
+
+"--"
+
+def runNRT {
+    import java.io._
+    import actors._
+    import Actor._
+      lazy val p = {
+         val processArgs   = nrto.toNonRealtimeArgs
+         val directory     = new File( nrto.programPath ).getParentFile
+         val pb            = new ProcessBuilder( processArgs: _* )
+            .directory( directory )
+            .redirectErrorStream( true )
+         println( processArgs.mkString( " " ))
+         pb.start    // throws IOException if command not found or not executable
+      }
+
+      lazy val processThread = new Thread {
+         override def run = try {
+            p.waitFor()
+         } catch { case e: InterruptedException =>
+            p.destroy()
+         } finally {
+            println( "scsynth terminated (" + p.exitValue +")" )
+//            actor ! ServerConnection.Aborted
+         }
+      }
+
+      def start {
+         val inReader   = new BufferedReader( new InputStreamReader( p.getInputStream ))
+         val postActor  = new DaemonActor {
+            def act {
+               var isOpen = true
+               loopWhile( isOpen ) {
+                  val line = inReader.readLine
+                  isOpen = line != null
+                  if( isOpen ) println( line )
+               }
+            }
+         }
+
+         // ...and go
+         postActor.start
+         processThread.start
+//         actor.start
+      }
+      
+    start
+}
+
+// runNRT

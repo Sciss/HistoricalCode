@@ -1,0 +1,148 @@
+// in scalacollider-swing
+
+def markName( id: Int ) : String = "/Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse-Marks" + id + ".aif"
+def edName( id: Int ) : String = "/Users/hhrutz/Desktop/new_projects/Lighthouse/source_sounds/lighthouse" + id + "ed.aif"
+
+def render( id: Int )( done: => Unit ) {
+val numThresh = 6
+val threshs = Seq.tabulate( numThresh )( i => 0.5.pow( i * 0.5 ))
+
+val inPath  = edName( id )
+val outPath = markName( id )
+
+val spec = AudioFile.readSpec( inPath )
+val nrto = new ServerOptionsBuilder
+nrto.nrtInputPath    = Some( inPath )
+nrto.nrtOutputPath   = outPath
+nrto.nrtSampleFormat = SampleFormat.Int8 // since we just record the impulses
+val nrtFile = java.io.File.createTempFile( "tmp", ".osc" )
+nrto.nrtCommandPath = nrtFile.getAbsolutePath
+nrto.inputBusChannels = spec.numChannels
+nrto.sampleRate = spec.sampleRate.toInt
+nrto.outputBusChannels = numThresh
+nrto.blockSize = 1
+
+val nrt = Server.dummy( "NRT", nrto )
+val df = SynthDef( "Ana" ) {
+   val buf      = (0 until numThresh)
+   val thresh   = threshs // "thresh".kr( 0.5 )
+   val algo     = "algo".ir( 3 )
+   val decay    = "decay".kr( 1 )
+   val floor    = "floor".kr( 0.1 )
+   val chanOff  = NumOutputBuses.ir
+   val sig      = In.ar( chanOff ) + In.ar( chanOff + 1 )
+   val fft      = FFT( buf, sig )
+   val det0     = Onsets.kr( fft, thresh, algo, decay, floor )
+   val det      = 2 * HPZ1.kr( det0 ).max( 0 )
+   Out.ar( 0, K2A.ar( det ))
+}
+val dur = spec.numFrames / spec.sampleRate
+val bufs = Seq.tabulate( numThresh )( i => new Buffer( nrt, i ))
+val synth = Synth( nrt )
+val bndl1 = OSCBundle.secs( 0.0,
+   (df.recvMsg +: bufs.map( _.allocMsg( 1024 )) :+ synth.newMsg( df.name, nrt.rootNode )): _*
+)
+val bndl2 = OSCBundle.secs( dur, synth.freeMsg )
+
+val bb = java.nio.ByteBuffer.allocate( 8192 )
+val f = new java.io.RandomAccessFile( nrtFile, "rw" )
+val fch = f.getChannel
+val c = de.sciss.osc.OSCPacketCodec.default
+
+def writeBundle( bndl: OSCBundle ) {
+   bb.clear; bndl.encode( c, bb ); bb.flip
+   f.writeInt( bb.limit ); fch.write( bb )
+}
+
+writeBundle( bndl1 )
+writeBundle( bndl2 )
+f.close
+
+def runNRT {
+    import java.io._
+    import actors._
+    import Actor._
+      lazy val p = {
+         val processArgs   = nrto.toNonRealtimeArgs
+         val directory     = new File( nrto.programPath ).getParentFile
+         val pb            = new ProcessBuilder( processArgs: _* )
+            .directory( directory )
+            .redirectErrorStream( true )
+         println( processArgs.mkString( " " ))
+         pb.start    // throws IOException if command not found or not executable
+      }
+
+      lazy val processThread = new Thread {
+         override def run = try {
+            p.waitFor()
+         } catch { case e: InterruptedException =>
+            p.destroy()
+         } finally {
+            println( "scsynth terminated (" + p.exitValue +")" )
+//            actor ! ServerConnection.Aborted
+            defer( done )
+         }
+      }
+      
+      def defer( thunk: => Unit ) : Unit = java.awt.EventQueue.invokeLater( new Runnable { def run = thunk })
+
+      def start {
+         val inReader   = new BufferedReader( new InputStreamReader( p.getInputStream ))
+         val postActor  = new DaemonActor {
+            def act {
+               var isOpen = true
+               loopWhile( isOpen ) {
+                  val line = inReader.readLine
+                  isOpen = line != null
+                  if( isOpen ) println( line )
+               }
+            }
+         }
+
+         // ...and go
+         postActor.start
+         processThread.start
+//         actor.start
+      }
+      
+    start
+}
+
+runNRT
+}
+
+def postProcess( id: Int ) {
+   val inPath     = markName( id )
+   val af         = AudioFile.openRead( inPath )
+   val numFrames  = af.numFrames.toInt
+   val buf        = af.frameBuffer( numFrames ) // well...
+   af.readFrames( buf )
+   af.close
+   val tol        = (0.05 * af.sampleRate + 0.5).toInt // time jitter tolerance across thresholds (channels)
+   val minChan    = buf.last
+   val otherChans = buf.init.reverse
+   val offsets    = (512 until numFrames).filter( minChan( _ ) > 0 )
+   
+   def detectAndErase( i: Int, bch: Array[ Float ]) = {
+      val i0  = math.max( 0, i - tol )
+      val i1  = math.min( numFrames, i + tol )
+      val res = bch.view.slice( i0, i1 ).indexWhere( _ > 0 )
+      if( res >= 0 ) bch( res ) = 0f
+      res
+   }
+   
+   val res = offsets.map( i => i -> otherChans.map( detectAndErase( i, _ )).prefixLength( _ >= 0 ))
+   println( res )
+}
+
+val ids = ((1 to 4) ++ (6 to 20)).toList
+def renderLoop( ids: List[ Int ]) {
+   ids.headOption.foreach { id =>
+      println( "RENDERING : " + id )
+      render( id ) {
+         postProcess( id )
+         renderLoop( ids.tail )
+      }
+   }
+}
+renderLoop( ids )

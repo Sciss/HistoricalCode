@@ -1,0 +1,18 @@
+#Created by FScape; do not edit manually!
+#Mon May 02 22:51:52 CEST 2011
+Class=de.sciss.fscape.gui.VoocooderDlg
+DryMix=100.0,17
+LoFreq=200.0,3
+RollOff=12.0,547
+Gain=-0.2,785
+BandsPerOct=2.0,0
+OutputFile=/Users/hhrutz/Desktop/new_projects/Lighthouse/audio_work/Test1aVcdTest1b.aif
+HiFreq=2250.0,3
+Kombi=4
+OutputReso=1
+GainType=0
+WetMix=25.0,17
+FilterLen=0
+ModFile=/Users/hhrutz/Desktop/new_projects/Lighthouse/kontur/Test1b.aif
+OutputType=0
+InputFile=/Users/hhrutz/Desktop/new_projects/Lighthouse/kontur/Test1a.aif

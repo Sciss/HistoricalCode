@@ -1,0 +1,22 @@
+#Created by FScape; do not edit manually!
+#Tue May 03 11:53:26 CEST 2011
+MinChunkNum=3.0,0
+EntryPoint=2.5,2
+OutLength=30000.0,2
+OutputReso=1
+FltColor=1
+LenUpdate=true
+KriechEnv=0.0,10.0,0.01,18;0.0,100.0,0.01,16;0;0.0,0.0;10.0,100.0|0.0,100.0,0.01,18;0.0,100.0,0.01,16;0;0.0,0.0;6.93,15.75;26.41,48.82;50.65,77.95;76.19,90.55;100.0,100.0|0.0,10.0,0.01,18;0.0,100.0,0.01,16;0;0.0,100.0;10.0,0.0|false|true|false
+MaxChunkRep=1.0,0
+OutputFile=/Users/hhrutz/Desktop/new_projects/Lighthouse/audio_work/IGetReallyClaustrophobicIfILivedInHereFrz3.aif
+FltAmount=0.0,17
+InputFile=/Users/hhrutz/Desktop/new_projects/Lighthouse/audio_work/IGetReallyClaustrophobicIfILivedInHere.aif
+MinChunkLen=2.5,2
+CrossFade=20.0,18
+MaxChunkNum=3.0,0
+Gain=-0.2,785
+OutputType=0
+MinChunkRep=1.0,0
+Class=de.sciss.fscape.gui.KriechstromDlg
+GainType=0
+MaxChunkLen=5.0,2
