@@ -1,0 +1,18 @@
+Cursor {
+   def node: RootOrNode
+   def startIdx: Int
+   def stopIdx: Int
+}
+
+SnakeImpl {
+   body: Buffer
+   cursor: Cursor
+}
+
+::::::::::
+
+Cursor {
+   sourceNode : RootOrNode
+   startIdx: Int		// <- Edge
+   stopIdx: Int			// <- Edge
+   targetNode: NodeOrLeaf	// <- Edge
