@@ -1,0 +1,11 @@
+SwingOSC_TCP.sh					usr/bin
+SwingOSC_UDP.sh					usr/bin
+SwingOSC.jar					usr/share/SwingOSC
+README.md					usr/share/doc/swingosc
+CHANGES.md					usr/share/doc/swingosc
+SuperCollider/README.md				usr/share/doc/swingosc/SuperCollider
+SuperCollider/todo.txt				usr/share/doc/swingosc/SuperCollider
+SuperCollider/examples				usr/share/doc/swingosc/SuperCollider
+PureData/readme.html				usr/share/doc/swingosc/PureData
+PureData/examples				usr/lib/pd/doc/SwingOSC
+SuperCollider/SwingOSC				usr/share/SuperCollider/Extensions
