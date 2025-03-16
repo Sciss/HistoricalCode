@@ -174,7 +174,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
       def mkFolder(name: String): Folder[S] = {
         val res = Folder[S]()
         val obj = res // Obj(FolderElem(res))
-        obj.attr.name = name
+        obj.name = name
         folder.addLast(obj)
         res
       }
@@ -186,8 +186,8 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
 
       val locs = baseDirs.map(d => ArtifactLocation.newVar(ArtifactLocation.newConst(d)))
       locs.foreach { loc =>
-        val obj       = loc // Obj(ArtifactLocation.Elem(loc))
-        obj.attr.name = loc.directory.name
+        val obj   = loc // Obj(ArtifactLocation.Elem(loc))
+        obj.name  = loc.directory.name
         locsFolder.addLast(obj)
         log(s"Add artifact location '${loc.directory}'")
       }
@@ -202,7 +202,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
         val gain    = DoubleObj.newConst[S](1.0)
         val gr      = AudioCue.Obj(artifact = art, spec = spec, offset = offset, gain = gain)
         val obj     = gr // Obj(AudioGraphemeElem(gr))
-        obj.attr.name = afe.path.base
+        obj.name    = afe.path.base
         log(s"Add audio file '${afe.path.name}'")
         audioFilesFolder.addLast(obj)
         afe -> gr
@@ -254,9 +254,9 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
             |val mute = "mute".kr(0)
             |val amp  = gain * (1 - mute)
             |val in   = ScanIn("in") * amp
-            |val m    = Mix.tabulate(md.numInputChannels) { chIn =>
+            |val m    = Mix.tabulate(${md.numInputChannels}) { chIn =>
             |  val inc = in.out(chIn)
-            |  val sig0: GE = Vector.tabulate(md.numOutputChannels) { chOut =>
+            |  val sig0: GE = Vector.tabulate(${md.numOutputChannels}) { chOut =>
             |    val ampc = s"m$${chIn+1}>$${chOut+1}".kr(0)
             |    inc * ampc
             |  }
@@ -274,7 +274,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
     val code    = Code.Obj.newVar(Code.Obj.newConst[S](Code.SynthGraph(source)))
     val attr    = obj.attr
     attr.put(Proc.attrSource, code)
-    attr.name = md.name
+    obj.name = md.name
     (0 until md.numInputChannels).foreach { chIn =>
       (0 until md.numOutputChannels).foreach { chOut =>
         val v = md.matrix(row = chIn, col = chOut)
@@ -300,7 +300,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
         dOpt.foreach { d =>
           if (!diffAdded.contains(d)) {
             diffAdded += d
-            log(s"Include diffusion '${d.attr.name}'")
+            log(s"Include diffusion '${d.name}'")
             tl.add(SpanLikeObj.newConst(Span.All), d)
           }
         }
@@ -313,7 +313,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
             val gOffset   = audioToTL(ar.offset    )
             val span      = Span(start, stop)
             val (_, proc) = ProcActions.insertAudioRegion(tl, time = span, audioCue = af, gOffset = gOffset)
-            proc.attr.name = ar.name
+            proc.name     = ar.name
             if (ar.muted) {
               ProcActions.toggleMute(proc)
             }
@@ -362,7 +362,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
     }
 
     val tlObj = tl // Timeline(tl))
-    tlObj.attr.name = in.name
+    tlObj.name = in.name
     tlObj
   }
 }
