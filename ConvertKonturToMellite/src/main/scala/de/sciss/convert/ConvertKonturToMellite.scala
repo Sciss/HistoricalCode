@@ -21,8 +21,16 @@ object ConvertKonturToMellite {
   final val attrTrackIndex  = "track-index"
   final val attrTrackHeight = "track-height"
 
-  case class Config(in: File = file(""), out: File = file(""), trackFactor: Int = 4, skipErrors: Boolean = false,
-                    create: Boolean = false, noDiffusions: Boolean = false, verbose: Boolean = false)
+  case class Config(
+                     in: File = file(""),
+                     out: File = file(""),
+                     trackFactor: Int = 4,
+                     skipErrors: Boolean = false,
+                     create: Boolean = false,
+                     noDiffusions: Boolean = false,
+                     verbose: Boolean = false,
+                     mapAudio: Map[String, String] = Map.empty
+                   )
 
   def main(args: Array[String]): Unit = {
     val parser = new scopt.OptionParser[Config]("ConvertKonturToMellite") {
@@ -51,6 +59,9 @@ object ConvertKonturToMellite {
 
       arg[File]("<out-file>") .action { (x, c) =>
         c.copy(out = x) } .text("output Mellite file")
+
+      opt[Map[String,String]]("map").valueName("old1=new1,old2=new2...").action( (x, c) =>
+        c.copy(mapAudio = x) ).text("map old audio file paths to new paths")
     }
 
     parser.parse(args, Config()).fold(sys.exit(1)) { config =>
@@ -114,7 +125,11 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
 
   private def performSys1[S <: Sys[S]](in: Session, out: Workspace[S])(implicit cursor: stm.Cursor[S]): Unit = {
     val afs: List[(AudioFileElement, AudioFileSpec)] = in.audioFiles.toList.flatMap { afe =>
-      val t = Try(AudioFile.readSpec(afe.path))
+      val t = Try {
+        val p0 = afe.path.getPath
+        val p1 = config.mapAudio.getOrElse(p0, p0)
+        AudioFile.readSpec(p1)
+      }
       if (t.isFailure) {
         if (skipErrors) {
           Console.err.println(s"Error: could not read audio file ${afe.path}")

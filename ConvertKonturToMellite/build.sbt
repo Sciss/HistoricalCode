@@ -7,6 +7,6 @@ lazy val root = project.in(file("."))
     libraryDependencies ++= Seq(
       "de.sciss" %% "kontur"       % "1.3.0",
       "de.sciss" %% "mellite-core" % "0.9.0",
-      "com.github.scopt" %% "scopt" % "3.2.0"
+      "com.github.scopt" %% "scopt" % "4.1.0" // "3.2.0"
     )
   )
