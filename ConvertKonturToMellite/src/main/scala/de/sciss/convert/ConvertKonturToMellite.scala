@@ -141,11 +141,16 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
   }
 
   private def performSys1[S <: Sys[S]](in: Session, out: Workspace[S])(implicit cursor: stm.Cursor[S]): Unit = {
-    val afs: List[(AudioFileElement, AudioFileSpec)] = in.audioFiles.toList.flatMap { afe =>
+    val afs: List[(AudioFileElement, AudioFileElement, AudioFileSpec)] = in.audioFiles.toList.flatMap { afe0 =>
+      val afe = {
+        val p0 = afe0.path.getPath
+        config.mapAudio.get(p0) match {
+          case Some(p1) => afe0.copy(path = new File(p1))
+          case None     => afe0
+        }
+      }
       val t = Try {
-        val p0 = afe.path.getPath
-        val p1 = config.mapAudio.getOrElse(p0, p0)
-        AudioFile.readSpec(p1)
+        AudioFile.readSpec(afe.path)
       }
       if (t.isFailure) {
         if (skipErrors) {
@@ -154,9 +159,9 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
           t.get
         }
       }
-      t.toOption.map(afe -> _)
+      t.toOption.map(cue => (afe0, afe, cue))
     }
-    val baseDirs = collectBaseDirs(afs.map(_._1))
+    val baseDirs = collectBaseDirs(afs.map(_._2))
 
     //    if (noDiffusions) Nil else in.diffusions.toList.flatMap { d =>
     //      val mOpt = d match {
@@ -192,7 +197,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
         log(s"Add artifact location '${loc.directory}'")
       }
 
-      val afMap: Map[AudioFileElement, AudioCue.Obj[S]] = afs.map { case (afe, spec) =>
+      val afMap: Map[AudioFileElement, AudioCue.Obj[S]] = afs.map { case (afe0, afe, spec) =>
         // name, path, numFrames, numChannels, sampleRate
         val loc     = locs.find(loc => isParent(loc.directory, afe.path)).get
 //        val art     = loc.add(afe.path)
@@ -205,7 +210,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
         obj.name    = afe.path.base
         log(s"Add audio file '${afe.path.name}'")
         audioFilesFolder.addLast(obj)
-        afe -> gr
+        afe0 -> gr
       } (breakOut)
 
       val dMap: Map[Diffusion, Proc[S]] = if (noDiffusions) Map.empty else in.diffusions.toList.flatMap {
@@ -235,7 +240,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
       val gain = "gain".kr(1)
       val mute = "mute".kr(0)
       val amp  = gain * (1 - mute)
-      val in   = ScanIn("in") * amp
+      val in   = ScanInFix(2) * amp
       val m    = Mix.tabulate(md.numInputChannels) { chIn =>
         val inc = in.out(chIn)
         val sig0: GE = Vector.tabulate(md.numOutputChannels) { chOut =>
@@ -253,7 +258,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
       raw"""|val gain = "gain".kr(1)
             |val mute = "mute".kr(0)
             |val amp  = gain * (1 - mute)
-            |val in   = ScanIn("in") * amp
+            |val in   = ScanInFix(2) * amp
             |val m    = Mix.tabulate(${md.numInputChannels}) { chIn =>
             |  val inc = in.out(chIn)
             |  val sig0: GE = Vector.tabulate(${md.numOutputChannels}) { chOut =>
