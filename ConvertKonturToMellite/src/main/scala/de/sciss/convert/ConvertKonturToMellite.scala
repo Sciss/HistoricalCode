@@ -1,17 +1,19 @@
 package de.sciss.convert
 
 import de.sciss.file._
-import de.sciss.kontur.session.{Timeline => KTimeline, FadeSpec => KFadeSpec, Diffusion, MatrixDiffusion, AudioFileElement, AudioTrack, Session}
-import de.sciss.lucre.event.Sys
+import de.sciss.kontur.session.{AudioFileElement, AudioTrack, Diffusion, MatrixDiffusion, Session, FadeSpec => KFadeSpec, Timeline => KTimeline}
+import de.sciss.lucre.artifact.{Artifact, ArtifactLocation}
+import de.sciss.lucre.expr.{DoubleObj, IntObj, LongObj, SpanLikeObj}
 import de.sciss.lucre.stm
-import de.sciss.mellite.{Code, ProcActions, Workspace}
+import de.sciss.lucre.stm.store.BerkeleyDB
+import de.sciss.lucre.stm.{Cursor, Folder, Sys}
+import de.sciss.mellite.ProcActions
 import de.sciss.span.Span
 import de.sciss.synth
-import de.sciss.synth.io.{AudioFileSpec, AudioFile}
-import de.sciss.synth.proc.{DoubleElem, FolderElem, Folder, SynthGraphs, Proc, IntElem, ObjKeys, FadeSpec, Timeline, AudioGraphemeElem, Grapheme, Obj, ArtifactLocation, graph}
+import de.sciss.synth.io.{AudioFile, AudioFileSpec}
+import de.sciss.synth.proc
 import de.sciss.synth.proc.Implicits._
-import de.sciss.lucre.expr.{Long => LongEx, Double => DoubleEx, Int => IntEx}
-import de.sciss.lucre.bitemp.{SpanLike => SpanLikeEx}
+import de.sciss.synth.proc.{AudioCue, Code, FadeSpec, ObjKeys, Proc, SoundProcesses, TimeRef, Timeline, Workspace}
 
 import scala.annotation.tailrec
 import scala.collection.breakOut
@@ -22,14 +24,15 @@ object ConvertKonturToMellite {
   final val attrTrackHeight = "track-height"
 
   case class Config(
-                     in: File = file(""),
-                     out: File = file(""),
-                     trackFactor: Int = 4,
-                     skipErrors: Boolean = false,
-                     create: Boolean = false,
-                     noDiffusions: Boolean = false,
-                     verbose: Boolean = false,
-                     mapAudio: Map[String, String] = Map.empty
+                     in           : File = file(""),
+                     out          : File = file(""),
+                     trackFactor  : Int = 4,
+                     skipErrors   : Boolean = false,
+                     create       : Boolean = false,
+                     noDiffusions : Boolean = false,
+                     verbose      : Boolean = false,
+                     confluent    : Boolean = false,
+                     mapAudio     : Map[String, String] = Map.empty
                    )
 
   def main(args: Array[String]): Unit = {
@@ -54,6 +57,9 @@ object ConvertKonturToMellite {
       opt[Unit]('v', "verbose") .action { (_, c) =>
         c.copy(verbose = true) } .text("verbose is a flag")
 
+      opt[Unit]('l', "confluent") .action { (_, c) =>
+        c.copy(confluent = true) } .text("create confluent workspace")
+
       arg[File]("<in-file>") .action { (x, c) =>
         c.copy(in = x) } .text("input Kontur file")
 
@@ -72,24 +78,33 @@ object ConvertKonturToMellite {
 }
 
 class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
-  import config._
   import ConvertKonturToMellite.{attrTrackHeight, attrTrackIndex}
+  import config._
 
   def log(what: => String): Unit = if (verbose) println(s"[log] $what")
 
   def run(): Unit = {
+    SoundProcesses.init()
+
     log(s"Open Kontur session '${in.name}'")
     val kDoc  = Session.newFrom(in)
     log(s"Open Mellite session '${out.name}'")
+    import scala.language.existentials
     val mDoc  = if (create) {
       require (!out.exists(), s"Cannot overwrite existing workspace '$out'")
-      Workspace.Confluent.empty(out)
+      val ds = BerkeleyDB.factory(out, createIfNecessary = true)
+      if (config.confluent) {
+        Workspace.Confluent.empty(out, ds)
+      } else {
+        Workspace.Durable.empty(out, ds)
+      }
     } else {
-      Workspace.read(out)
+      val ds = BerkeleyDB.factory(out, createIfNecessary = false)
+      Workspace.read(out, ds)
     }
     mDoc match {
-      case eph: Workspace.Ephemeral => performSys(kDoc, eph)(eph.cursor)
-      case con: Workspace.Confluent => performSys(kDoc, con)(con.cursors.cursor)
+      case eph: Workspace.Durable   => performSys(kDoc, eph)(eph.cursor.asInstanceOf[Cursor[proc.Durable]])
+      case con: Workspace.Confluent => performSys(kDoc, con)(con.cursor.asInstanceOf[Cursor[proc.Confluent]])
     }
     log("Done.")
   }
@@ -120,7 +135,9 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
   private def performSys[S <: Sys[S]](in: Session, out: Workspace[S])(implicit cursor: stm.Cursor[S]): Unit = try {
     performSys1(in, out)
   } finally {
-    out.close()
+    out.cursor.step { implicit tx =>
+      out.dispose() // close()
+    }
   }
 
   private def performSys1[S <: Sys[S]](in: Session, out: Workspace[S])(implicit cursor: stm.Cursor[S]): Unit = {
@@ -152,11 +169,11 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
     //    }
 
     cursor.step { implicit tx =>
-      val folder = out.root()
+      val folder = out.root // ()
 
       def mkFolder(name: String): Folder[S] = {
-        val res = Folder[S]
-        val obj = Obj(FolderElem(res))
+        val res = Folder[S]()
+        val obj = res // Obj(FolderElem(res))
         obj.attr.name = name
         folder.addLast(obj)
         res
@@ -167,30 +184,31 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
       lazy val diffsFolder      = mkFolder("routing")
       lazy val timelinesFolder  = mkFolder("timelines")
 
-      val locs = baseDirs.map(ArtifactLocation(_))
+      val locs = baseDirs.map(d => ArtifactLocation.newVar(ArtifactLocation.newConst(d)))
       locs.foreach { loc =>
-        val obj       = Obj(ArtifactLocation.Elem(loc))
+        val obj       = loc // Obj(ArtifactLocation.Elem(loc))
         obj.attr.name = loc.directory.name
         locsFolder.addLast(obj)
         log(s"Add artifact location '${loc.directory}'")
       }
 
-      val afMap: Map[AudioFileElement, Grapheme.Expr.Audio[S]] = afs.map { case (afe, spec) =>
+      val afMap: Map[AudioFileElement, AudioCue.Obj[S]] = afs.map { case (afe, spec) =>
         // name, path, numFrames, numChannels, sampleRate
         val loc     = locs.find(loc => isParent(loc.directory, afe.path)).get
-        val art     = loc.add(afe.path)
+//        val art     = loc.add(afe.path)
+        val art     = Artifact(loc, afe.path)
         // val gr    = Grapheme.Value.Audio(artifact = art, spec = spec, offset = 0L, gain = 1.0)
-        val offset  = LongEx  .newConst[S](0L)
-        val gain    = DoubleEx.newConst[S](1.0)
-        val gr      = Grapheme.Expr.Audio(artifact = art, spec = spec, offset = offset, gain = gain)
-        val obj     = Obj(AudioGraphemeElem(gr))
+        val offset  = LongObj  .newConst[S](0L)
+        val gain    = DoubleObj.newConst[S](1.0)
+        val gr      = AudioCue.Obj(artifact = art, spec = spec, offset = offset, gain = gain)
+        val obj     = gr // Obj(AudioGraphemeElem(gr))
         obj.attr.name = afe.path.base
         log(s"Add audio file '${afe.path.name}'")
         audioFilesFolder.addLast(obj)
         afe -> gr
       } (breakOut)
 
-      val dMap: Map[Diffusion, Proc.Obj[S]] = if (noDiffusions) Map.empty else in.diffusions.toList.flatMap {
+      val dMap: Map[Diffusion, Proc[S]] = if (noDiffusions) Map.empty else in.diffusions.toList.flatMap {
         case md: MatrixDiffusion =>
           val obj = mkDiff(md)
           log(s"Add diffusion '${md.name}'")
@@ -207,73 +225,74 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
     }
   }
 
-  private def mkDiff[S <: Sys[S]](md: MatrixDiffusion)(implicit tx: S#Tx): Proc.Obj[S] = {
+  private def mkDiff[S <: Sys[S]](md: MatrixDiffusion)(implicit tx: S#Tx): Proc[S] = {
+    import de.sciss.synth.proc.graph.Ops._
+    import de.sciss.synth.proc.graph._
     import synth._
     import ugen._
 
     val g = SynthGraph {
-      import graph._
-      val gain = attribute("gain").kr(1)
-      val mute = attribute("mute").kr(0)
+      val gain = "gain".kr(1)
+      val mute = "mute".kr(0)
       val amp  = gain * (1 - mute)
-      val in   = scan.In("in") * amp
+      val in   = ScanIn("in") * amp
       val m    = Mix.tabulate(md.numInputChannels) { chIn =>
-        val inc = in \ chIn
+        val inc = in.out(chIn)
         val sig0: GE = Vector.tabulate(md.numOutputChannels) { chOut =>
-          // val ampc = md.matrix(row = chIn, col = chOut)
-          val ampc = attribute(s"m${chIn+1}>${chOut+1}").kr(0)
+          val ampc = s"m${chIn+1}>${chOut+1}".kr(0)
           inc * ampc
         }
         sig0
       }
-      val bus = attribute("bus").kr(0)
+      val bus = "bus".kr(0)
       Out.ar(bus, m)
     }
 
     // val sourceM = md.matrix.toSeq.map(row => row.mkString("Vector(", ",", ")")).mkString("Vector(", ",", ")")
     val source =
-      raw"""|val gain = attribute("gain").kr(1)
-            |val mute = attribute("mute").kr(0)
+      raw"""|val gain = "gain".kr(1)
+            |val mute = "mute".kr(0)
             |val amp  = gain * (1 - mute)
-            |val in   = scan.In("in") * amp
-            |val m    = Mix.tabulate(${md.numInputChannels}) { chIn =>
-            |  val inc = in \ chIn
-            |  val sig0: GE = Vector.tabulate(${md.numOutputChannels}) { chOut =>
-            |    val ampc = attribute(s"m$${chIn+1}>$${chOut+1}").kr(0)
+            |val in   = ScanIn("in") * amp
+            |val m    = Mix.tabulate(md.numInputChannels) { chIn =>
+            |  val inc = in.out(chIn)
+            |  val sig0: GE = Vector.tabulate(md.numOutputChannels) { chOut =>
+            |    val ampc = s"m$${chIn+1}>$${chOut+1}".kr(0)
             |    inc * ampc
             |  }
             |  sig0
             |}
-            |val bus = attribute("bus").kr(0)
+            |val bus = "bus".kr(0)
             |Out.ar(bus, m)
             |""".stripMargin
 
-    val p       = Proc[S]
-    p.graph()   = SynthGraphs.newVar(SynthGraphs.newConst[S](g))
-    p.scans.add("in")
-    val obj     = Obj(Proc.Elem(p))
-    val code    = Obj(Code.Elem(Code.Expr.newVar(Code.Expr.newConst[S](Code.SynthGraph(source)))))
+    val p       = Proc[S]()
+    p.graph()   = g // SynthGraphs.newVar(SynthGraphs.newConst[S](g))
+//    p.scans.add("in")
+    p.attr.put("in", Folder[S]())
+    val obj     = p // Obj(Proc.Elem(p))
+    val code    = Code.Obj.newVar(Code.Obj.newConst[S](Code.SynthGraph(source)))
     val attr    = obj.attr
-    attr.put(Proc.Obj.attrSource, code)
+    attr.put(Proc.attrSource, code)
     attr.name = md.name
     (0 until md.numInputChannels).foreach { chIn =>
       (0 until md.numOutputChannels).foreach { chOut =>
         val v = md.matrix(row = chIn, col = chOut)
-        attr.put(s"m${chIn+1}>${chOut+1}", Obj(DoubleElem(DoubleEx.newVar(DoubleEx.newConst[S](v)))))
+        attr.put(s"m${chIn+1}>${chOut+1}", DoubleObj.newVar(DoubleObj.newConst[S](v)))
       }
     }
     obj
   }
 
-  private def performTL[S <: Sys[S]](in: KTimeline, afMap: Map[AudioFileElement, Grapheme.Expr.Audio[S]],
-                                     dMap: Map[Diffusion, Proc.Obj[S]])
-                                    (implicit tx: S#Tx): Timeline.Obj[S] = {
-    val tl    = Timeline[S]
-    val ratio = Timeline.SampleRate / in.rate
+  private def performTL[S <: Sys[S]](in: KTimeline, afMap: Map[AudioFileElement, AudioCue.Obj[S]],
+                                     dMap: Map[Diffusion, Proc[S]])
+                                    (implicit tx: S#Tx): Timeline[S] = {
+    val tl    = Timeline[S]()
+    val ratio = TimeRef.SampleRate / in.rate
 
     def audioToTL(in: Long): Long = (in * ratio + 0.5).toLong
 
-    var diffAdded = Set.empty[Proc.Obj[S]]
+    var diffAdded = Set.empty[Proc[S]]
 
     in.tracks.toList.zipWithIndex.foreach {
       case (at: AudioTrack, trkIdxIn) =>
@@ -282,18 +301,18 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
           if (!diffAdded.contains(d)) {
             diffAdded += d
             log(s"Include diffusion '${d.attr.name}'")
-            tl.add(SpanLikeEx.newConst(Span.All), d)
+            tl.add(SpanLikeObj.newConst(Span.All), d)
           }
         }
 
         at.trail.getAll().foreach { ar =>
           // name, span, audioFile, offset, gain, muted, fadeIn, fadeOut
-          def mkAudioRegion(af: Grapheme.Expr.Audio[S]): Unit = {
+          def mkAudioRegion(af: AudioCue.Obj[S]): Unit = {
             val start     = audioToTL(ar.span.start)
             val stop      = audioToTL(ar.span.stop )
             val gOffset   = audioToTL(ar.offset    )
             val span      = Span(start, stop)
-            val (_, proc) = ProcActions.insertAudioRegion(tl, time = span, grapheme = af, gOffset = gOffset, bus = None)
+            val (_, proc) = ProcActions.insertAudioRegion(tl, time = span, audioCue = af, gOffset = gOffset)
             proc.attr.name = ar.name
             if (ar.muted) {
               ProcActions.toggleMute(proc)
@@ -306,7 +325,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
               case fsIn: KFadeSpec if fsIn.numFrames > 0L =>
                 val numFrames = audioToTL(fsIn.numFrames)
                 val fsOut     = FadeSpec(numFrames, fsIn.shape, fsIn.floor)
-                val fsObj     = Obj(FadeSpec.Elem(FadeSpec.Expr.newVar(FadeSpec.Expr.newConst[S](fsOut))))
+                val fsObj     = FadeSpec.Obj.newVar(FadeSpec.Obj.newConst[S](fsOut))
                 proc.attr.put(key, fsObj)
 
               case _ =>
@@ -317,14 +336,15 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
 
             val trkIdxOut = trkIdxIn * trackFactor
             val trkHOut = trackFactor
-            proc.attr.put(attrTrackIndex , Obj(IntElem(IntEx.newVar(IntEx.newConst(trkIdxOut)))))
-            proc.attr.put(attrTrackHeight, Obj(IntElem(IntEx.newVar(IntEx.newConst(trkHOut  )))))
+            proc.attr.put(attrTrackIndex , IntObj.newVar(IntObj.newConst(trkIdxOut)))
+            proc.attr.put(attrTrackHeight, IntObj.newVar(IntObj.newConst(trkHOut  )))
 
             dOpt.foreach { d =>
-              val scanIn  = d   .elem.peer.scans.get("in" ).get
-              val scanOut = proc.elem.peer.scans.add("out")
-              scanOut addSink   scanIn
-              scanIn  addSource scanOut
+              val scanIn  = d.attr.$[Folder]("in" ).get
+              val scanOut = proc.outputs.add("out")
+//              scanOut addSink   scanIn
+//              scanIn  addSource scanOut
+              scanIn.addLast(scanOut)
             }
           }
 
@@ -341,7 +361,7 @@ class ConvertKonturToMellite(config: ConvertKonturToMellite.Config) {
       case _ =>
     }
 
-    val tlObj = Obj(Timeline.Elem(tl))
+    val tlObj = tl // Timeline(tl))
     tlObj.attr.name = in.name
     tlObj
   }
